@@ -1,6 +1,7 @@
-Forward Functions
-==================
+stable_pretraining.forward_functions
+=====================================
 
+.. module:: stable_pretraining.forward_functions
 .. currentmodule:: stable_pretraining.forward_functions
 
 Forward functions define the core training logic for different self-supervised learning methods. They are called during the forward pass of the :class:`~stable_pretraining.Module` and handle how data flows through the model, compute losses, and return outputs.
