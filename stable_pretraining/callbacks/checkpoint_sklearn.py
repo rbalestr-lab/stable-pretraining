@@ -110,7 +110,7 @@ class WandbCheckpoint(Callback):
         if isinstance(trainer.logger, WandbLogger):
             checkpoint["wandb"] = {"id": trainer.logger.version}
             # checkpoint["wandb_checkpoint_name"] = trainer.logger._checkpoint_name
-            logging.info(f"Saving Wandb params {checkpoint['wandb_init']}")
+            logging.info(f"Saving Wandb params {checkpoint['wandb']}")
 
     def on_load_checkpoint(self, trainer, pl_module, checkpoint):
         logging.info("Checking for Wandb init params... 🔧")
