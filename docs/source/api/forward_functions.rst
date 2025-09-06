@@ -245,9 +245,40 @@ You can create custom forward functions for new SSL methods:
 **Requirements for Custom Functions:**
 
 1. **Signature**: Must accept ``(self, batch, stage)``
-2. **Return**: Dictionary with ``"loss"`` key during training
-3. **Embeddings**: Should populate ``out["embedding"]`` for evaluation
-4. **Training Mode**: Check ``self.training`` or ``stage == "train"``
+2. **Return**: Dictionary with ``"loss"`` key during training (this is the only hardcoded requirement)
+3. **Training Mode**: Check ``self.training`` or ``stage == "train"``
+4. **Outputs**: You can return any other keys you want (embeddings, projections, logits, etc.) with any names you choose
+
+**Important Note on Output Keys:**
+
+The keys you use in the output dictionary (like ``"embedding"``, ``"logits"``, etc.) are not hardcoded requirements, but they serve as references for callbacks. For example:
+
+- If you return ``out["embedding"]``, callbacks can access it via ``outputs["embedding"]``
+- If you return ``out["features"]``, callbacks would access ``outputs["features"]``
+- The OnlineProbe callback expects its ``input`` parameter to match one of your output keys
+
+This allows flexible integration between your forward function and various callbacks.
+
+**Example: Connecting Forward Outputs to Callbacks**
+
+.. code-block:: yaml
+
+    module:
+      forward: my_custom_forward
+      # Forward function returns: {"loss": ..., "my_features": ..., "my_projection": ...}
+
+    callbacks:
+      - _target_: stable_pretraining.callbacks.OnlineProbe
+        name: probe1
+        input: my_features  # References the "my_features" key from forward output
+        target: label
+
+      - _target_: stable_pretraining.callbacks.OnlineKNN
+        name: knn1
+        input: my_projection  # References the "my_projection" key from forward output
+        target: label
+
+The callback's ``input`` parameter must match the key name you chose in your forward function
 
 Integration with Module
 -----------------------
@@ -273,9 +304,11 @@ Best Practices
 
 1. **Always detach targets**: When using target networks, detach gradients to prevent backprop
 2. **Check training mode**: Only compute loss during training to save computation
-3. **Return embeddings**: Always populate ``out["embedding"]`` for downstream evaluation
+3. **Loss is required**: The only hardcoded requirement is returning ``out["loss"]`` during training
 4. **Handle multi-view data**: Use ``spt.data.fold_views`` to properly handle augmented views
 5. **Validate inputs**: Ensure required attributes exist on the module
+6. **Consistent naming**: Choose meaningful key names for your outputs as callbacks will reference them by these names
+7. **Document your outputs**: Clearly document what keys your forward function returns so callbacks can be configured correctly
 
 See Also
 --------

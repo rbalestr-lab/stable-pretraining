@@ -46,9 +46,8 @@ def simclr_forward(self, batch, stage):
             - 'embedding': Feature representations from backbone
             - 'loss': NT-Xent contrastive loss (during training only)
 
-    References:
-        Chen et al., "A Simple Framework for Contrastive Learning of Visual
-        Representations", ICML 2020.
+    Note:
+        Introduced in the SimCLR paper :cite:`chen2020simple`.
     """
     out = {}
     out["embedding"] = self.backbone(batch["image"])
@@ -84,9 +83,8 @@ def byol_forward(self, batch, stage):
             - 'embedding': Feature representations from online backbone
             - 'loss': MSE loss between predictions and targets (during training)
 
-    References:
-        Grill et al., "Bootstrap Your Own Latent: A New Approach to
-        Self-Supervised Learning", NeurIPS 2020.
+    Note:
+        Introduced in the BYOL paper :cite:`grill2020bootstrap`.
     """
     out = {}
     out["embedding"] = self.backbone(batch["image"])
@@ -131,9 +129,8 @@ def vicreg_forward(self, batch, stage):
             - 'embedding': Feature representations from backbone
             - 'loss': Combined VICReg loss (during training only)
 
-    References:
-        Bardes et al., "VICReg: Variance-Invariance-Covariance Regularization
-        for Self-Supervised Learning", ICLR 2022.
+    Note:
+        Introduced in the VICReg paper :cite:`bardes2022vicreg`.
     """
     out = {}
     out["embedding"] = self.backbone(batch["image"])
@@ -168,9 +165,8 @@ def barlow_twins_forward(self, batch, stage):
             - 'embedding': Feature representations from backbone
             - 'loss': Barlow Twins loss (during training only)
 
-    References:
-        Zbontar et al., "Barlow Twins: Self-Supervised Learning via Redundancy
-        Reduction", ICML 2021.
+    Note:
+        Introduced in the Barlow Twins paper :cite:`zbontar2021barlow`.
     """
     out = {}
     out["embedding"] = self.backbone(batch["image"])

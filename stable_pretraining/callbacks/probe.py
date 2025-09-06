@@ -133,11 +133,6 @@ class OnlineProbe(TrainableCallback):
                 "attaching a `_callbacks_metrics` to your LightningModule for callbacks"
             )
             pl_module._callbacks_metrics = {}
-
-        # Debug logging
-        logging.info(f"{self.name}: metrics_config type: {type(self.metrics_config)}")
-        logging.info(f"{self.name}: metrics_config: {self.metrics_config}")
-
         pl_module._callbacks_metrics[self.name] = format_metrics_as_dict(
             self.metrics_config
         )
@@ -145,7 +140,6 @@ class OnlineProbe(TrainableCallback):
         self._train_metrics = pl_module._callbacks_metrics[self.name]["_train"]
         self._val_metrics = pl_module._callbacks_metrics[self.name]["_val"]
         pl_module.register_forward_hook(self.forward_hook_fn)
-        logging.info(f"Main module forward hooks: {pl_module._forward_hooks}")
 
     def forward_hook_fn(self, pl_module, args, outputs) -> None:
         """Perform probe training step."""
