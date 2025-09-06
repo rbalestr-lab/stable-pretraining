@@ -9,14 +9,14 @@ Example:
 
         module:
           _target_: stable_pretraining.Module
-          forward: stable_pretraining.forward_functions.simclr_forward
+          forward: stable_pretraining.forward.simclr_forward
           backbone: ...
           projector: ...
 
     Using in Python code::
 
         from stable_pretraining import Module
-        from stable_pretraining.forward_functions import simclr_forward
+        from stable_pretraining.forward import simclr_forward
 
         module = Module(forward=simclr_forward, backbone=backbone, projector=projector)
 """

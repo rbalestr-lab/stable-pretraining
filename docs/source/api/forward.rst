@@ -1,8 +1,8 @@
-stable_pretraining.forward_functions
-=====================================
+stable_pretraining.forward
+===========================
 
-.. module:: stable_pretraining.forward_functions
-.. currentmodule:: stable_pretraining.forward_functions
+.. module:: stable_pretraining.forward
+.. currentmodule:: stable_pretraining.forward
 
 Forward functions define the core training logic for different self-supervised learning methods. They are called during the forward pass of the :class:`~stable_pretraining.Module` and handle how data flows through the model, compute losses, and return outputs.
 
@@ -27,7 +27,7 @@ Forward functions can be specified in YAML configs as string references:
 
     module:
       _target_: stable_pretraining.Module
-      forward: stable_pretraining.forward_functions.simclr_forward
+      forward: stable_pretraining.forward.simclr_forward
       backbone: ...
       projector: ...
       simclr_loss: ...
@@ -37,7 +37,7 @@ Or in Python code:
 .. code-block:: python
 
     from stable_pretraining import Module
-    from stable_pretraining.forward_functions import simclr_forward
+    from stable_pretraining.forward import simclr_forward
 
     module = Module(
         forward=simclr_forward,
@@ -65,7 +65,7 @@ SimCLR
 .. code-block:: yaml
 
     module:
-      forward: stable_pretraining.forward_functions.simclr_forward
+      forward: stable_pretraining.forward.simclr_forward
       backbone:
         _target_: stable_pretraining.backbone.from_torchvision
         model_name: resnet50
@@ -107,7 +107,7 @@ BYOL
 .. code-block:: yaml
 
     module:
-      forward: stable_pretraining.forward_functions.byol_forward
+      forward: stable_pretraining.forward.byol_forward
       backbone: ...
       projector: ...
       predictor:
@@ -145,7 +145,7 @@ VICReg
 .. code-block:: yaml
 
     module:
-      forward: stable_pretraining.forward_functions.vicreg_forward
+      forward: stable_pretraining.forward.vicreg_forward
       backbone: ...
       projector: ...
       vicreg_loss:
@@ -176,7 +176,7 @@ Barlow Twins
 .. code-block:: yaml
 
     module:
-      forward: stable_pretraining.forward_functions.barlow_twins_forward
+      forward: stable_pretraining.forward.barlow_twins_forward
       backbone: ...
       projector: ...
       barlow_loss:
@@ -204,7 +204,7 @@ Supervised
 .. code-block:: yaml
 
     module:
-      forward: stable_pretraining.forward_functions.supervised_forward
+      forward: stable_pretraining.forward.supervised_forward
       backbone: ...
       classifier:
         _target_: torch.nn.Linear
