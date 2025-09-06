@@ -144,7 +144,7 @@ docs/source/gen_modules/
 
 outputs/
 multirun/
-./data/
+data/
 examples/data/
 wandb/
 
