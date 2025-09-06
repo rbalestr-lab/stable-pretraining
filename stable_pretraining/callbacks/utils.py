@@ -10,7 +10,7 @@ from ..optim.utils import create_optimizer, create_scheduler
 from ..optim import LARS
 
 
-class OptimizedCallback(Callback):
+class TrainableCallback(Callback):
     """Base callback class with optimizer and scheduler management.
 
     This base class handles the common logic for callbacks that need their own
@@ -218,9 +218,7 @@ class OptimizedCallback(Callback):
         if (batch_idx + 1) % self.accumulate_grad_batches == 0:
             self.optimizer.step()
             self.optimizer.zero_grad(set_to_none=True)
-
-            if trainer.global_step % trainer.accumulate_grad_batches == 0:
-                self.scheduler.step()
+            self.scheduler.step()
 
     @property
     def module(self):

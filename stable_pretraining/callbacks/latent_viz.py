@@ -17,10 +17,10 @@ from torch import Tensor
 from ..utils.distance_metrics import compute_pairwise_distances_chunked
 
 from .queue import find_or_create_queue_callback
-from .utils import OptimizedCallback
+from .utils import TrainableCallback
 
 
-class LatentViz(OptimizedCallback):
+class LatentViz(TrainableCallback):
     """Online latent visualization callback with neighborhood-preserving dimensionality reduction.
 
     This callback learns a 2D projection that preserves neighborhood structure from

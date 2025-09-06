@@ -108,27 +108,28 @@ class WandbCheckpoint(Callback):
     def on_save_checkpoint(self, trainer, pl_module, checkpoint):
         logging.info("Checking for Wandb params to save... 🔧")
         if isinstance(trainer.logger, WandbLogger):
-            checkpoint["wandb_init"] = trainer.logger._wandb_init
-            checkpoint["wandb_checkpoint_name"] = trainer.logger._checkpoint_name
-            logging.info("Saving Wandb params 🔧")
+            checkpoint["wandb"] = {"id": trainer.logger.version}
+            # checkpoint["wandb_checkpoint_name"] = trainer.logger._checkpoint_name
+            logging.info(f"Saving Wandb params {checkpoint['wandb_init']}")
 
     def on_load_checkpoint(self, trainer, pl_module, checkpoint):
         logging.info("Checking for Wandb init params... 🔧")
-        if "wandb_init" in checkpoint:
+        if "wandb" in checkpoint:
             assert isinstance(trainer.logger, WandbLogger)
             import wandb
 
             wandb.finish()
             trainer.logger._experiment = None
-            wandb_init = checkpoint["wandb_init"]
-            trainer.logger._wandb_init = wandb_init
-            trainer.logger._project = trainer.logger._wandb_init.get("project")
-            trainer.logger._save_dir = trainer.logger._wandb_init.get("dir")
-            trainer.logger._name = trainer.logger._wandb_init.get("name")
-            trainer.logger._id = trainer.logger._wandb_init.get("id")
-            trainer.logger._checkpoint_name = checkpoint["wandb_checkpoint_name"]
+            wandb_id = checkpoint["wandb"]["id"]
+            # trainer.logger._wandb_init = wandb_init
+            # trainer.logger._project = trainer.logger._wandb_init.get("project")
+            # trainer.logger._save_dir = trainer.logger._wandb_init.get("dir")
+            # trainer.logger._name = trainer.logger._wandb_init.get("name")
+            trainer.logger._wandb_init["id"] = wandb_id
+            trainer.logger._id = wandb_id
+            # trainer.logger._checkpoint_name = checkpoint["wandb_checkpoint_name"]
             logging.info("Updated Wandb parameters: ")
-            logging.info(f"\t- project={trainer.logger._project}")
-            logging.info(f"\t- _save_dir={trainer.logger.__save_dir}")
-            logging.info(f"\t- name={trainer.logger._name}")
-            logging.info(f"\t- id={trainer.logger._id}")
+            # logging.info(f"\t- project={trainer.logger._project}")
+            # logging.info(f"\t- _save_dir={trainer.logger._save_dir}")
+            # logging.info(f"\t- name={trainer.logger._name}")
+            # logging.info(f"\t- id={trainer.logger._id}")

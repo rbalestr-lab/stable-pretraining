@@ -9,10 +9,10 @@ from loguru import logger as logging
 
 from ..utils import get_data_from_batch_or_outputs
 
-from .utils import EarlyStopping, OptimizedCallback, format_metrics_as_dict
+from .utils import EarlyStopping, TrainableCallback, format_metrics_as_dict
 
 
-class OnlineProbe(OptimizedCallback):
+class OnlineProbe(TrainableCallback):
     """Online probe for evaluating learned representations during self-supervised training.
 
     This callback implements the standard linear evaluation protocol by training a probe
@@ -129,6 +129,9 @@ class OnlineProbe(OptimizedCallback):
         # Setup metrics
         logging.info(f"{self.name}: Setting up metrics")
         if not hasattr(pl_module, "_callbacks_metrics"):
+            logging.info(
+                "attaching a `_callbacks_metrics` to your LightningModule for callbacks"
+            )
             pl_module._callbacks_metrics = {}
         pl_module._callbacks_metrics[self.name] = format_metrics_as_dict(
             self.metrics_config
@@ -136,15 +139,10 @@ class OnlineProbe(OptimizedCallback):
 
         self._train_metrics = pl_module._callbacks_metrics[self.name]["_train"]
         self._val_metrics = pl_module._callbacks_metrics[self.name]["_val"]
+        pl_module.register_forward_hook(self.forward_hook_fn)
+        logging.info(f"Main module forward hooks: {pl_module._forward_hooks}")
 
-    def on_train_batch_end(
-        self,
-        trainer: Trainer,
-        pl_module: LightningModule,
-        outputs: Dict,
-        batch: Dict,
-        batch_idx: int,
-    ) -> None:
+    def forward_hook_fn(self, pl_module, batch, outputs) -> None:
         """Perform probe training step."""
         x = get_data_from_batch_or_outputs(
             self.input, batch, outputs, caller_name=self.name
@@ -154,6 +152,7 @@ class OnlineProbe(OptimizedCallback):
         )
 
         if x is None or y is None:
+            logging.warning(f"Callback {self.name} missing x or y")
             return
 
         self.module.train()
@@ -166,26 +165,40 @@ class OnlineProbe(OptimizedCallback):
                 x = x.to(probe_dtype)
 
             preds = self.module(x)
+            if pl_module.trainer.training:
+                loss = self.loss_fn(preds, y)
 
-            loss = self.loss_fn(preds, y)
+                loss = loss / self.accumulate_grad_batches
 
-            loss = loss / self.accumulate_grad_batches
-
-            loss.backward()
+                outputs["loss"] += loss
+                logs = {
+                    f"train/{self.name}_loss": loss.item()
+                    * self.accumulate_grad_batches
+                }
+            else:
+                logs = {}
 
         prediction_key = f"{self.name}_preds"
         if prediction_key not in batch:
-            batch[prediction_key] = preds.detach()
+            outputs[prediction_key] = preds.detach()
 
-        logs = {f"train/{self.name}_loss": loss.item() * self.accumulate_grad_batches}
         for metric_name, metric in pl_module._callbacks_metrics[self.name][
             "_train"
         ].items():
             metric(preds.detach(), y)
             logs[f"train/{self.name}_{metric_name}"] = metric
 
-        pl_module.log_dict(logs, on_step=True, on_epoch=True)
+        pl_module.log_dict(logs, on_step=True, on_epoch=True, sync_dist=True)
+        return outputs
 
+    def on_train_batch_end(
+        self,
+        trainer: Trainer,
+        pl_module: LightningModule,
+        outputs: Dict,
+        batch: Dict,
+        batch_idx: int,
+    ) -> None:
         # Optimizer step using parent class method
         self.optimizer_step(batch_idx, trainer)
 
@@ -208,13 +221,16 @@ class OnlineProbe(OptimizedCallback):
         )
 
         if x is None or y is None:
+            logging.warning(
+                "OnlineProbe callback doesn't have access to its `x` or `y` tensor!"
+            )
             return
 
         # Ensure probe is in eval mode
         self.module.eval()
 
         # Forward pass without gradients
-        with torch.no_grad():
+        with torch.inference_mode():
             # Ensure input has same dtype as probe module
             # This handles mixed precision training where features might be float16
             probe_dtype = next(self.module.parameters()).dtype
@@ -236,7 +252,7 @@ class OnlineProbe(OptimizedCallback):
             metric(preds, y)
             logs[f"eval/{self.name}_{metric_name}"] = metric
 
-        pl_module.log_dict(logs, on_step=False, on_epoch=True)
+        pl_module.log_dict(logs, on_step=False, on_epoch=True, sync_dist=True)
 
     def on_validation_epoch_end(
         self, trainer: Trainer, pl_module: LightningModule
@@ -244,7 +260,7 @@ class OnlineProbe(OptimizedCallback):
         """Handle early stopping if configured."""
         if self.early_stopping is None:
             return
-
+        logging.info(f"{self.name} checking for early stopping condition")
         # Get the metric value for early stopping
         metric_name = f"eval/{self.name}_{self.early_stopping.monitor}"
         if metric_name not in trainer.callback_metrics:
@@ -260,7 +276,7 @@ class OnlineProbe(OptimizedCallback):
 
         if should_stop:
             logging.info(
-                f"{self.name}: Early stopping triggered at epoch {trainer.current_epoch}"
+                f"{self.name}: Early stopping triggered at epoch {trainer.current_epoch} by {self.name}"
             )
             trainer.should_stop = True
 

@@ -147,7 +147,7 @@ class Module(pl.LightningModule):
         When multiple optimizers are configured, the same loss is used for all of them.
         Each optimizer updates its assigned parameters based on gradients from this joint loss.
         """
-        state = self.forward(batch, stage="fit")
+        state = self(batch, stage="fit")
 
         # Early exit if optimization disabled
         if getattr(self, "optim", None) is None or self.optim is False:
