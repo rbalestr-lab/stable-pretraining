@@ -1,7 +1,24 @@
-"""Common forward functions for use with config-based training.
+"""Forward functions for self-supervised learning methods.
 
-This module provides pre-defined forward functions that can be used
-directly in YAML configs via the _target_ field.
+This module provides pre-defined forward functions for various SSL methods
+that can be used with the Module class. These functions define the training
+logic for each method and can be specified in YAML configs or Python code.
+
+Example:
+    Using in a YAML config::
+
+        module:
+          _target_: stable_pretraining.Module
+          forward: stable_pretraining.forward_functions.simclr_forward
+          backbone: ...
+          projector: ...
+
+    Using in Python code::
+
+        from stable_pretraining import Module
+        from stable_pretraining.forward_functions import simclr_forward
+
+        module = Module(forward=simclr_forward, backbone=backbone, projector=projector)
 """
 
 import torch
@@ -9,63 +26,82 @@ import stable_pretraining as spt
 
 
 def simclr_forward(self, batch, stage):
-    """Forward function for SimCLR training.
+    """Forward function for SimCLR (Simple Contrastive Learning of Representations).
+
+    SimCLR learns representations by maximizing agreement between differently
+    augmented views of the same image via a contrastive loss in the latent space.
 
     Args:
-        self: Module instance (automatically bound)
-        batch: Input batch dictionary
-        stage: Training stage (train/val/test)
+        self: Module instance (automatically bound) with required attributes:
+            - backbone: Feature extraction network
+            - projector: Projection head mapping features to latent space
+            - simclr_loss: NT-Xent contrastive loss function
+        batch: Input batch dictionary containing:
+            - 'image': Tensor of augmented images [N*views, C, H, W]
+            - 'sample_idx': Indices to identify views of same image
+        stage: Training stage ('train', 'val', or 'test')
 
     Returns:
-        Dictionary with loss and embeddings
+        Dictionary containing:
+            - 'embedding': Feature representations from backbone
+            - 'loss': NT-Xent contrastive loss (during training only)
+
+    References:
+        Chen et al., "A Simple Framework for Contrastive Learning of Visual
+        Representations", ICML 2020.
     """
     out = {}
     out["embedding"] = self.backbone(batch["image"])
 
     if self.training:
-        # Project embeddings for contrastive loss
         proj = self.projector(out["embedding"])
-
-        # Fold views for contrastive learning
         views = spt.data.fold_views(proj, batch["sample_idx"])
-
-        # Compute SimCLR loss
         out["loss"] = self.simclr_loss(views[0], views[1])
 
     return out
 
 
 def byol_forward(self, batch, stage):
-    """Forward function for BYOL training.
+    """Forward function for BYOL (Bootstrap Your Own Latent).
+
+    BYOL learns representations without negative pairs by using a momentum-based
+    target network and predicting target projections from online projections.
 
     Args:
-        self: Module instance (automatically bound)
-        batch: Input batch dictionary
-        stage: Training stage (train/val/test)
+        self: Module instance (automatically bound) with required attributes:
+            - backbone: Online network feature extractor
+            - projector: Online network projection head
+            - predictor: Online network predictor
+            - target_backbone: Target network backbone (momentum encoder)
+            - target_projector: Target network projection head
+        batch: Input batch dictionary containing:
+            - 'image': Tensor of augmented images [N*views, C, H, W]
+            - 'sample_idx': Indices to identify views of same image
+        stage: Training stage ('train', 'val', or 'test')
 
     Returns:
-        Dictionary with loss and embeddings
+        Dictionary containing:
+            - 'embedding': Feature representations from online backbone
+            - 'loss': MSE loss between predictions and targets (during training)
+
+    References:
+        Grill et al., "Bootstrap Your Own Latent: A New Approach to
+        Self-Supervised Learning", NeurIPS 2020.
     """
     out = {}
-
-    # Get embeddings from online network
     out["embedding"] = self.backbone(batch["image"])
 
     if self.training:
-        # Online projections
         online_proj = self.projector(out["embedding"])
         online_pred = self.predictor(online_proj)
 
-        # Target projections (with momentum encoder)
         with torch.no_grad():
             target_embedding = self.target_backbone(batch["image"])
             target_proj = self.target_projector(target_embedding)
 
-        # Fold views
         online_views = spt.data.fold_views(online_pred, batch["sample_idx"])
         target_views = spt.data.fold_views(target_proj, batch["sample_idx"])
 
-        # BYOL loss (MSE between predictions and targets)
         loss1 = torch.nn.functional.mse_loss(online_views[0], target_views[1].detach())
         loss2 = torch.nn.functional.mse_loss(online_views[1], target_views[0].detach())
         out["loss"] = (loss1 + loss2) / 2
@@ -74,78 +110,109 @@ def byol_forward(self, batch, stage):
 
 
 def vicreg_forward(self, batch, stage):
-    """Forward function for VICReg training.
+    """Forward function for VICReg (Variance-Invariance-Covariance Regularization).
+
+    VICReg learns representations using three criteria: variance (maintaining
+    information), invariance (to augmentations), and covariance (decorrelating
+    features).
 
     Args:
-        self: Module instance (automatically bound)
-        batch: Input batch dictionary
-        stage: Training stage (train/val/test)
+        self: Module instance (automatically bound) with required attributes:
+            - backbone: Feature extraction network
+            - projector: Projection head for embedding transformation
+            - vicreg_loss: VICReg loss with variance, invariance, covariance terms
+        batch: Input batch dictionary containing:
+            - 'image': Tensor of augmented images [N*views, C, H, W]
+            - 'sample_idx': Indices to identify views of same image
+        stage: Training stage ('train', 'val', or 'test')
 
     Returns:
-        Dictionary with loss and embeddings
+        Dictionary containing:
+            - 'embedding': Feature representations from backbone
+            - 'loss': Combined VICReg loss (during training only)
+
+    References:
+        Bardes et al., "VICReg: Variance-Invariance-Covariance Regularization
+        for Self-Supervised Learning", ICLR 2022.
     """
     out = {}
     out["embedding"] = self.backbone(batch["image"])
 
     if self.training:
-        # Project embeddings
         proj = self.projector(out["embedding"])
-
-        # Fold views for VICReg loss
         views = spt.data.fold_views(proj, batch["sample_idx"])
-
-        # Compute VICReg loss (variance + invariance + covariance)
         out["loss"] = self.vicreg_loss(views[0], views[1])
 
     return out
 
 
 def barlow_twins_forward(self, batch, stage):
-    """Forward function for Barlow Twins training.
+    """Forward function for Barlow Twins.
+
+    Barlow Twins learns representations by making the cross-correlation matrix
+    between embeddings of augmented views as close to the identity matrix as
+    possible, reducing redundancy while maintaining invariance.
 
     Args:
-        self: Module instance (automatically bound)
-        batch: Input batch dictionary
-        stage: Training stage (train/val/test)
+        self: Module instance (automatically bound) with required attributes:
+            - backbone: Feature extraction network
+            - projector: Projection head (typically with BN and high dimension)
+            - barlow_loss: Barlow Twins loss function
+        batch: Input batch dictionary containing:
+            - 'image': Tensor of augmented images [N*views, C, H, W]
+            - 'sample_idx': Indices to identify views of same image
+        stage: Training stage ('train', 'val', or 'test')
 
     Returns:
-        Dictionary with loss and embeddings
+        Dictionary containing:
+            - 'embedding': Feature representations from backbone
+            - 'loss': Barlow Twins loss (during training only)
+
+    References:
+        Zbontar et al., "Barlow Twins: Self-Supervised Learning via Redundancy
+        Reduction", ICML 2021.
     """
     out = {}
     out["embedding"] = self.backbone(batch["image"])
 
     if self.training:
-        # Project embeddings
         proj = self.projector(out["embedding"])
-
-        # Fold views
         views = spt.data.fold_views(proj, batch["sample_idx"])
-
-        # Compute Barlow Twins loss
         out["loss"] = self.barlow_loss(views[0], views[1])
 
     return out
 
 
 def supervised_forward(self, batch, stage):
-    """Forward function for supervised training.
+    """Forward function for standard supervised training.
+
+    This function implements traditional supervised learning with labels,
+    useful for baseline comparisons and fine-tuning pre-trained models.
 
     Args:
-        self: Module instance (automatically bound)
-        batch: Input batch dictionary
-        stage: Training stage (train/val/test)
+        self: Module instance (automatically bound) with required attributes:
+            - backbone: Feature extraction network
+            - classifier: Classification head (e.g., Linear layer)
+        batch: Input batch dictionary containing:
+            - 'image': Tensor of images [N, C, H, W]
+            - 'label': Ground truth labels [N] (optional, for loss computation)
+        stage: Training stage ('train', 'val', or 'test')
 
     Returns:
-        Dictionary with loss and predictions
+        Dictionary containing:
+            - 'embedding': Feature representations from backbone
+            - 'logits': Classification predictions
+            - 'loss': Cross-entropy loss (if labels provided)
+
+    Note:
+        Unlike SSL methods, this function uses actual labels for training
+        and is primarily used for evaluation or supervised baselines.
     """
     out = {}
-
-    # Get embeddings and predictions
     out["embedding"] = self.backbone(batch["image"])
     out["logits"] = self.classifier(out["embedding"])
 
     if "label" in batch:
-        # Compute cross-entropy loss
         out["loss"] = torch.nn.functional.cross_entropy(out["logits"], batch["label"])
 
     return out
