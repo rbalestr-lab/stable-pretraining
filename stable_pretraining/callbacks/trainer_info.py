@@ -3,7 +3,7 @@ import torch
 from lightning.pytorch import Callback
 from loguru import logger as logging
 from prettytable import PrettyTable
-from pytorch_lightning.utilities import rank_zero_only
+from lightning.pytorch.utilities import rank_zero_only
 import os
 from ..data.module import DataModule
 

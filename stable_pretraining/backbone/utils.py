@@ -207,6 +207,30 @@ def from_torchvision(model_name, low_resolution=False, **kwargs):
         else:
             logging.warning(f"Cannot adapt resolution for model: {model_name}.")
 
+    # Handle num_classes parameter as documented
+    num_classes = kwargs.get("num_classes", None)
+    if num_classes is not None:
+        # Replace the last layer with a linear layer of the specified size
+        if hasattr(model, "fc"):
+            in_features = model.fc.in_features
+            model.fc = nn.Linear(in_features, num_classes)
+        elif hasattr(model, "classifier"):
+            if isinstance(model.classifier, (nn.ModuleList, nn.Sequential)):
+                in_features = model.classifier[-1].in_features
+                model.classifier[-1] = nn.Linear(in_features, num_classes)
+            else:
+                in_features = model.classifier.in_features
+                model.classifier = nn.Linear(in_features, num_classes)
+    else:
+        # Replace the last layer with an identity layer for feature extraction
+        if hasattr(model, "fc"):
+            model.fc = nn.Identity()
+        elif hasattr(model, "classifier"):
+            if isinstance(model.classifier, (nn.ModuleList, nn.Sequential)):
+                model.classifier[-1] = nn.Identity()
+            else:
+                model.classifier = nn.Identity()
+
     return model
 
 

@@ -140,7 +140,6 @@ class OnlineProbe(TrainableCallback):
         self._train_metrics = pl_module._callbacks_metrics[self.name]["_train"]
         self._val_metrics = pl_module._callbacks_metrics[self.name]["_val"]
         pl_module.register_forward_hook(self.forward_hook_fn)
-        logging.info(f"Main module forward hooks: {pl_module._forward_hooks}")
 
     def forward_hook_fn(self, pl_module, args, outputs) -> None:
         """Perform probe training step."""

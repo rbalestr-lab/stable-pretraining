@@ -1,3 +1,12 @@
+"""
+Supervised Learning Example
+============================
+
+This example demonstrates how to train models using supervised learning
+with stable-pretraining, including support for various datasets like
+ImageNet-10, ImageNet-100, and ImageNet-1k.
+"""
+
 import hydra
 
 
