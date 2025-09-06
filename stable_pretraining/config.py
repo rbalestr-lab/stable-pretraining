@@ -99,9 +99,15 @@ def recursive_instantiate(
                             module_cfg, _recursive_=True
                         )
                     else:
-                        instantiated[key] = hydra.utils.instantiate(
-                            cfg[key], _recursive_=True
-                        )
+                        # Don't use recursive for DataModule as it handles its own instantiation
+                        if key == "data":
+                            instantiated[key] = hydra.utils.instantiate(
+                                cfg[key], _recursive_=False
+                            )
+                        else:
+                            instantiated[key] = hydra.utils.instantiate(
+                                cfg[key], _recursive_=True
+                            )
                 else:
                     instantiated[key] = cfg[key]
             except Exception as e:

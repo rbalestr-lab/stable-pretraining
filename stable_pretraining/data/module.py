@@ -102,23 +102,26 @@ class DataModule(pl.LightningDataModule):
             raise ValueError(f"Invalid stage {stage}")
         d = None
         if stage == "fit" and not isinstance(self.train, DataLoader):
+            logging.info("About to instantiate train dataset")
+            logging.info(f"Train dataset config type: {type(self.train.dataset)}")
+            logging.info(f"Train dataset config: {self.train.dataset}")
             self.train_dataset = d = hydra.utils.instantiate(
-                self.train.dataset, _convert_="object"
+                self.train.dataset, _convert_="object", _recursive_=True
             )
             self.val_dataset = hydra.utils.instantiate(
-                self.val.dataset, _convert_="object"
+                self.val.dataset, _convert_="object", _recursive_=True
             )
         elif stage == "test" and not isinstance(self.test, DataLoader):
             self.test_dataset = d = hydra.utils.instantiate(
-                self.test.dataset, _convert_="object"
+                self.test.dataset, _convert_="object", _recursive_=True
             )
         elif stage == "validate" and not isinstance(self.val, DataLoader):
             self.val_dataset = d = hydra.utils.instantiate(
-                self.val.dataset, _convert_="object"
+                self.val.dataset, _convert_="object", _recursive_=True
             )
         elif stage == "predict" and not isinstance(self.predict, DataLoader):
             self.predict_dataset = d = hydra.utils.instantiate(
-                self.predict.dataset, _convert_="object"
+                self.predict.dataset, _convert_="object", _recursive_=True
             )
         logging.info(f"dataset for {stage} loaded!  ✅")
         if d is not None:

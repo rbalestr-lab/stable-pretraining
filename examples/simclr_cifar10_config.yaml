@@ -114,8 +114,8 @@ module:
     scheduler:
       _target_: stable_pretraining.optim.lr_scheduler.LinearWarmupCosineAnnealingLR
       _partial_: true
-      warmup_epochs: 10
-      max_epochs: 1000  # Should match trainer.max_epochs
+      warmup_steps: 1960  # 10 epochs * 196 steps/epoch (50000/256)
+      max_steps: 196000  # 1000 epochs * 196 steps/epoch
     interval: epoch
 
 # Data module configuration

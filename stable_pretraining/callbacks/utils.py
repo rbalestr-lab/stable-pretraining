@@ -326,6 +326,14 @@ def format_metrics_as_dict(metrics):
     Raises:
         ValueError: If metrics format is invalid or contains non-torchmetric objects.
     """
+    # Handle OmegaConf types
+    from omegaconf import ListConfig, DictConfig
+
+    if isinstance(metrics, (ListConfig, DictConfig)):
+        import omegaconf
+
+        metrics = omegaconf.OmegaConf.to_container(metrics, resolve=True)
+
     if metrics is None:
         train = {}
         eval = {}
@@ -348,7 +356,7 @@ def format_metrics_as_dict(metrics):
                     raise ValueError(f"metric {m} is no a torchmetric")
                 eval[m.__class__.__name__] = m
         else:
-            eval = metrics["eval"]
+            eval = metrics["val"]
     elif type(metrics) is dict:
         train = {}
         for k, v in metrics.items():
@@ -357,10 +365,11 @@ def format_metrics_as_dict(metrics):
         eval = metrics
     elif type(metrics) in [list, tuple]:
         train = {}
+        eval = {}
         for m in metrics:
             if not isinstance(m, torchmetrics.Metric):
                 raise ValueError(f"metric {m} is no a torchmetric")
-        eval = {m.__class__.__name__: m for m in metrics}
+            eval[m.__class__.__name__] = m
     else:
         raise ValueError(
             "metrics can only be a torchmetric of list/tuple of torchmetrics"

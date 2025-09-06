@@ -133,6 +133,11 @@ class OnlineProbe(TrainableCallback):
                 "attaching a `_callbacks_metrics` to your LightningModule for callbacks"
             )
             pl_module._callbacks_metrics = {}
+
+        # Debug logging
+        logging.info(f"{self.name}: metrics_config type: {type(self.metrics_config)}")
+        logging.info(f"{self.name}: metrics_config: {self.metrics_config}")
+
         pl_module._callbacks_metrics[self.name] = format_metrics_as_dict(
             self.metrics_config
         )
