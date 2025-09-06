@@ -52,9 +52,9 @@ autosummary_generate = True
 copybutton_exclude = ".linenos, .gp"
 
 intersphinx_mapping = {
-    "numpy": ("http://docs.scipy.org/doc/numpy/", None),
-    "torch": ("https://docs.pytorch.org/2.0/", None),
-    "python": ("https://docs.python.org/3.4", None),
+    "numpy": ("https://numpy.org/doc/stable/", None),
+    "torch": ("https://pytorch.org/docs/stable/", None),
+    "python": ("https://docs.python.org/3/", None),
 }
 
 templates_path = ["_templates"]

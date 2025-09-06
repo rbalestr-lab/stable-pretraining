@@ -299,17 +299,6 @@ The forward function becomes the ``forward`` method of the Module:
 
 This design allows maximum flexibility while keeping the implementation clean and modular.
 
-Best Practices
---------------
-
-1. **Always detach targets**: When using target networks, detach gradients to prevent backprop
-2. **Check training mode**: Only compute loss during training to save computation
-3. **Loss is required**: The only hardcoded requirement is returning ``out["loss"]`` during training
-4. **Handle multi-view data**: Use ``spt.data.fold_views`` to properly handle augmented views
-5. **Validate inputs**: Ensure required attributes exist on the module
-6. **Consistent naming**: Choose meaningful key names for your outputs as callbacks will reference them by these names
-7. **Document your outputs**: Clearly document what keys your forward function returns so callbacks can be configured correctly
-
 See Also
 --------
 
