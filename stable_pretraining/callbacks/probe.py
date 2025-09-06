@@ -142,8 +142,14 @@ class OnlineProbe(TrainableCallback):
         pl_module.register_forward_hook(self.forward_hook_fn)
         logging.info(f"Main module forward hooks: {pl_module._forward_hooks}")
 
-    def forward_hook_fn(self, pl_module, batch, outputs) -> None:
+    def forward_hook_fn(self, pl_module, args, outputs) -> None:
         """Perform probe training step."""
+        # Extract batch from args tuple (it's the first argument to forward)
+        if isinstance(args, tuple) and len(args) > 0:
+            batch = args[0]
+        else:
+            batch = args if not isinstance(args, tuple) else {}
+
         x = get_data_from_batch_or_outputs(
             self.input, batch, outputs, caller_name=self.name
         )

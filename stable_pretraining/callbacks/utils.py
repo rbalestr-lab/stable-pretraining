@@ -199,16 +199,9 @@ class TrainableCallback(Callback):
         if stage != "fit":
             return
 
-        # Store reference to pl_module
         self._pl_module = pl_module
-
-        # Setup module
         self.setup_module(trainer, pl_module)
-
-        # Setup optimizer
         self.setup_optimizer(trainer, pl_module)
-
-        # Setup scheduler
         self.setup_scheduler(trainer, pl_module)
 
         logging.info(f"{self.name}: Setup complete")
