@@ -31,8 +31,8 @@ dependencies = [
 
 dynamic = ["version"]
 
-# [project.entry-points."console_scripts"]
-# stable-pretraining = "stable_pretraining.cli:entry"
+[project.entry-points."console_scripts"]
+spt = "stable_pretraining.cli:main"
 
 [project.entry-points."lightning.pytorch.callbacks_factory"]
 stablepretraining_callbacks = "stable_pretraining.callbacks.factories:default"

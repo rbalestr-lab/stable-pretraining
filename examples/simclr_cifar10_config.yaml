@@ -2,10 +2,10 @@
 # This example shows how to configure all components via Hydra
 #
 # Usage:
-#   python -m stable_pretraining.train --config-path ../examples --config-name simclr_cifar10_fixed
+#   python -m stable_pretraining.run --config-path ../examples --config-name simclr_cifar10_config
 #
 # With overrides:
-#   python -m stable_pretraining.train --config-path ../examples --config-name simclr_cifar10_fixed \
+#   python -m stable_pretraining.run --config-path ../examples --config-name simclr_cifar10_config \
 #       module.optim.optimizer.lr=0.01 \
 #       trainer.max_epochs=200
 
