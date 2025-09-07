@@ -20,6 +20,7 @@
 
     api/backbone
     api/data
+    api/forward
     api/losses
     api/manager
     api/module

@@ -1,0 +1,221 @@
+# Complete SimCLR training configuration for CIFAR-10 (Fixed version)
+# This example shows how to configure all components via Hydra
+#
+# Usage:
+#   python -m stable_pretraining.train --config-path ../examples --config-name simclr_cifar10_fixed
+#
+# With overrides:
+#   python -m stable_pretraining.train --config-path ../examples --config-name simclr_cifar10_fixed \
+#       module.optim.optimizer.lr=0.01 \
+#       trainer.max_epochs=200
+
+# Random seed for reproducibility
+seed: 42
+
+# PyTorch Lightning Trainer configuration
+trainer:
+  _target_: lightning.Trainer
+  max_epochs: 1000
+  accelerator: gpu
+  devices: 1
+  precision: 16-mixed
+  num_sanity_val_steps: 0
+  enable_checkpointing: false
+
+  # Callbacks configuration - showing various callback examples
+  callbacks:
+    # Online linear probe for evaluation during training
+    - _target_: stable_pretraining.callbacks.OnlineProbe
+      name: linear_probe
+      input: embedding
+      target: label
+      probe:
+        _target_: torch.nn.Linear
+        in_features: 512
+        out_features: 10
+      loss_fn:
+        _target_: torch.nn.CrossEntropyLoss
+      metrics:
+        # Metrics as a list instead of dict
+        - _target_: torchmetrics.classification.MulticlassAccuracy
+          num_classes: 10
+        - _target_: torchmetrics.classification.MulticlassAccuracy
+          num_classes: 10
+          top_k: 5
+
+    # KNN probe for non-parametric evaluation
+    - _target_: stable_pretraining.callbacks.OnlineKNN
+      name: knn_probe
+      input: embedding
+      target: label
+      queue_length: 20000
+      input_dim: 512
+      k: 10
+      metrics:
+        # Single metric in a list
+        - _target_: torchmetrics.classification.MulticlassAccuracy
+          num_classes: 10
+
+  # Logger configuration (optional - can use WandB, TensorBoard, etc.)
+  logger:
+    _target_: lightning.pytorch.loggers.WandbLogger
+    entity: stable-ssl
+    project: cifar10-simclr
+    log_model: false
+    name: simclr-resnet18
+
+# Module configuration - the main training module
+module:
+  _target_: stable_pretraining.Module
+
+  # Forward function - string reference handled by config.py
+  forward: stable_pretraining.forward.simclr_forward
+
+  # Backbone network
+  backbone:
+    _target_: stable_pretraining.backbone.from_torchvision
+    model_name: resnet18
+    low_resolution: true
+
+  # Projection head for SSL
+  projector:
+    _target_: torch.nn.Sequential
+    _args_:
+      - _target_: torch.nn.Linear
+        in_features: 512
+        out_features: 2048
+      - _target_: torch.nn.BatchNorm1d
+        num_features: 2048
+      - _target_: torch.nn.ReLU
+        inplace: true
+      - _target_: torch.nn.Linear
+        in_features: 2048
+        out_features: 2048
+      - _target_: torch.nn.BatchNorm1d
+        num_features: 2048
+      - _target_: torch.nn.ReLU
+        inplace: true
+      - _target_: torch.nn.Linear
+        in_features: 2048
+        out_features: 128
+
+  # Loss function
+  simclr_loss:
+    _target_: stable_pretraining.losses.NTXEntLoss
+    temperature: 0.5
+
+  # Optimizer configuration
+  optim:
+    optimizer:
+      _target_: stable_pretraining.optim.lars.LARS
+      _partial_: true  # Make it a partial function
+      lr: 5.0
+      weight_decay: 1e-6
+    scheduler:
+      _target_: stable_pretraining.optim.lr_scheduler.LinearWarmupCosineAnnealingLR
+      _partial_: true
+      warmup_steps: 1960  # 10 epochs * 196 steps/epoch (50000/256)
+      max_steps: 196000  # 1000 epochs * 196 steps/epoch
+    interval: epoch
+
+# Data module configuration
+data:
+  _target_: stable_pretraining.data.DataModule
+
+  # Training dataloader
+  train:
+    # DataLoader kwargs - no _target_ needed as DataLoader is constructed manually
+    batch_size: 256
+    num_workers: 8
+    drop_last: true
+    sampler:
+      _target_: stable_pretraining.data.sampler.RepeatedRandomSampler
+      _partial_: true  # Make it partial so it receives dataset later
+      _recursive_: false  # IMPORTANT: Don't recursively instantiate nested configs
+      n_views: 2
+    dataset:
+      _target_: stable_pretraining.data.datasets.FromTorchDataset
+      names: ["image", "label"]
+      dataset:
+        _target_: torchvision.datasets.CIFAR10
+        root: ~/data
+        train: true
+        download: true
+      transform:
+        _target_: stable_pretraining.data.transforms.MultiViewTransform
+        transforms:
+          # First augmentation view - using _args_ for Compose
+          - _target_: stable_pretraining.data.transforms.Compose
+            _args_:
+              - _target_: stable_pretraining.data.transforms.RGB
+              - _target_: stable_pretraining.data.transforms.RandomResizedCrop
+                size: [32, 32]
+                scale: [0.2, 1.0]
+              - _target_: stable_pretraining.data.transforms.RandomHorizontalFlip
+                p: 0.5
+              - _target_: stable_pretraining.data.transforms.ColorJitter
+                brightness: 0.4
+                contrast: 0.4
+                saturation: 0.2
+                hue: 0.1
+                p: 0.8
+              - _target_: stable_pretraining.data.transforms.RandomGrayscale
+                p: 0.2
+              - _target_: stable_pretraining.data.transforms.ToImage
+                mean: [0.485, 0.456, 0.406]
+                std: [0.229, 0.224, 0.225]
+          # Second augmentation view (slightly different) - using _args_ for Compose
+          - _target_: stable_pretraining.data.transforms.Compose
+            _args_:
+              - _target_: stable_pretraining.data.transforms.RGB
+              - _target_: stable_pretraining.data.transforms.RandomResizedCrop
+                size: [32, 32]
+                scale: [0.08, 1.0]
+              - _target_: stable_pretraining.data.transforms.RandomHorizontalFlip
+                p: 0.5
+              - _target_: stable_pretraining.data.transforms.ColorJitter
+                brightness: 0.4
+                contrast: 0.4
+                saturation: 0.2
+                hue: 0.1
+                p: 0.8
+              - _target_: stable_pretraining.data.transforms.RandomGrayscale
+                p: 0.2
+              - _target_: stable_pretraining.data.transforms.RandomSolarize
+                threshold: 0.5
+                p: 0.2
+              - _target_: stable_pretraining.data.transforms.ToImage
+                mean: [0.485, 0.456, 0.406]
+                std: [0.229, 0.224, 0.225]
+
+  # Validation dataloader
+  val:
+    # Validation DataLoader kwargs
+    batch_size: 256
+    num_workers: 10
+    dataset:
+      _target_: stable_pretraining.data.datasets.FromTorchDataset
+      names: ["image", "label"]
+      dataset:
+        _target_: torchvision.datasets.CIFAR10
+        root: ~/data
+        train: false
+        download: true
+      transform:
+        _target_: stable_pretraining.data.transforms.Compose
+        _args_:
+          - _target_: stable_pretraining.data.transforms.RGB
+          - _target_: stable_pretraining.data.transforms.Resize
+            size: [32, 32]
+          - _target_: stable_pretraining.data.transforms.ToImage
+            mean: [0.485, 0.456, 0.406]
+            std: [0.229, 0.224, 0.225]
+
+# Hydra configuration (optional)
+hydra:
+  run:
+    dir: outputs/${now:%Y-%m-%d}/${now:%H-%M-%S}
+  sweep:
+    dir: multirun/${now:%Y-%m-%d}/${now:%H-%M-%S}
+  job:
+    chdir: false

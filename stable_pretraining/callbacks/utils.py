@@ -10,7 +10,7 @@ from ..optim.utils import create_optimizer, create_scheduler
 from ..optim import LARS
 
 
-class OptimizedCallback(Callback):
+class TrainableCallback(Callback):
     """Base callback class with optimizer and scheduler management.
 
     This base class handles the common logic for callbacks that need their own
@@ -199,16 +199,9 @@ class OptimizedCallback(Callback):
         if stage != "fit":
             return
 
-        # Store reference to pl_module
         self._pl_module = pl_module
-
-        # Setup module
         self.setup_module(trainer, pl_module)
-
-        # Setup optimizer
         self.setup_optimizer(trainer, pl_module)
-
-        # Setup scheduler
         self.setup_scheduler(trainer, pl_module)
 
         logging.info(f"{self.name}: Setup complete")
@@ -218,9 +211,7 @@ class OptimizedCallback(Callback):
         if (batch_idx + 1) % self.accumulate_grad_batches == 0:
             self.optimizer.step()
             self.optimizer.zero_grad(set_to_none=True)
-
-            if trainer.global_step % trainer.accumulate_grad_batches == 0:
-                self.scheduler.step()
+            self.scheduler.step()
 
     @property
     def module(self):
@@ -335,6 +326,14 @@ def format_metrics_as_dict(metrics):
     Raises:
         ValueError: If metrics format is invalid or contains non-torchmetric objects.
     """
+    # Handle OmegaConf types
+    from omegaconf import ListConfig, DictConfig
+
+    if isinstance(metrics, (ListConfig, DictConfig)):
+        import omegaconf
+
+        metrics = omegaconf.OmegaConf.to_container(metrics, resolve=True)
+
     if metrics is None:
         train = {}
         eval = {}
@@ -357,7 +356,7 @@ def format_metrics_as_dict(metrics):
                     raise ValueError(f"metric {m} is no a torchmetric")
                 eval[m.__class__.__name__] = m
         else:
-            eval = metrics["eval"]
+            eval = metrics["val"]
     elif type(metrics) is dict:
         train = {}
         for k, v in metrics.items():
@@ -366,10 +365,11 @@ def format_metrics_as_dict(metrics):
         eval = metrics
     elif type(metrics) in [list, tuple]:
         train = {}
+        eval = {}
         for m in metrics:
             if not isinstance(m, torchmetrics.Metric):
                 raise ValueError(f"metric {m} is no a torchmetric")
-        eval = {m.__class__.__name__: m for m in metrics}
+            eval[m.__class__.__name__] = m
     else:
         raise ValueError(
             "metrics can only be a torchmetric of list/tuple of torchmetrics"

@@ -1,9 +1,12 @@
 # This source code is licensed under the license found in the
 # LICENSE file in the root directory of this source tree.
 
+import os
+
+os.environ["LOGURU_LEVEL"] = os.environ.get("LOGURU_LEVEL", "INFO")
+
 import logging
 import sys
-
 from . import backbone, callbacks, data, losses, module, optim, static, utils
 from .__about__ import (
     __author__,

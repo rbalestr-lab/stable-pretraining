@@ -1,15 +1,10 @@
 """Configuration classes specifying default parameters for stable-SSL."""
 
 import logging
-import lzma
-import pickle
-from dataclasses import dataclass, field
-from pathlib import Path
-from typing import Optional, Union
+from typing import Any, Union
 
 import hydra
 import omegaconf
-from hydra.core.hydra_config import HydraConfig
 
 
 def collapse_nested_dict(
@@ -59,134 +54,119 @@ def collapse_nested_dict(
     return _flat_cfg
 
 
-def instanciate_config(cfg=None, debug_hash=None) -> object:
-    """Instantiate the config and debug hash."""
-    if debug_hash is None:
-        assert cfg is not None
-        print("Your debugging hash:", lzma.compress(pickle.dumps(cfg)))
-    else:
-        print("Using debugging hash")
-        cfg = pickle.loads(lzma.decompress(debug_hash))
-    trainer = hydra.utils.instantiate(
-        cfg.trainer, _convert_="object", _recursive_=False
-    )
+def recursive_instantiate(
+    cfg: Union[dict, omegaconf.DictConfig], parent_objects: dict = None
+) -> dict:
+    """Recursively instantiate all components in config with dependency resolution.
+
+    Args:
+        cfg: Configuration dictionary or DictConfig with _target_ fields
+        parent_objects: Optional dict of already instantiated objects for dependencies
+
+    Returns:
+        Dictionary of instantiated components
+    """
+    if cfg is None:
+        return {}
+
+    instantiated = {}
+    parent_objects = parent_objects or {}
+
+    # Define instantiation order for proper dependency resolution
+    # Later items can depend on earlier ones
+    priority_order = ["data", "module", "loss", "callbacks", "logger", "trainer"]
+
+    # First pass: instantiate components in priority order
+    for key in priority_order:
+        if key in cfg:
+            try:
+                if (
+                    isinstance(cfg[key], (dict, omegaconf.DictConfig))
+                    and "_target_" in cfg[key]
+                ):
+                    # Special handling for Module to resolve forward function
+                    if key == "module" and "forward" in cfg[key]:
+                        module_cfg = dict(cfg[key])
+                        # Import the forward function if it's a string reference
+                        if isinstance(module_cfg["forward"], str):
+                            parts = module_cfg["forward"].rsplit(".", 1)
+                            if len(parts) == 2:
+                                import importlib
+
+                                module = importlib.import_module(parts[0])
+                                module_cfg["forward"] = getattr(module, parts[1])
+                        instantiated[key] = hydra.utils.instantiate(
+                            module_cfg, _recursive_=True
+                        )
+                    else:
+                        # Don't use recursive for DataModule as it handles its own instantiation
+                        if key == "data":
+                            instantiated[key] = hydra.utils.instantiate(
+                                cfg[key], _recursive_=False
+                            )
+                        else:
+                            instantiated[key] = hydra.utils.instantiate(
+                                cfg[key], _recursive_=True
+                            )
+                else:
+                    instantiated[key] = cfg[key]
+            except Exception as e:
+                logging.warning(f"Could not instantiate {key}: {e}")
+                instantiated[key] = cfg[key]
+
+    # Second pass: instantiate remaining components
     for key, value in cfg.items():
-        if key == "trainer":
-            continue
-        logging.info(f"\t=> Adding user arg {key} to Trainer")
-        if hasattr(trainer, key):
-            raise ValueError(f"User arg {key} already exists in the Trainer {trainer}")
-        setattr(trainer, key, value)
-    return trainer
+        if key not in instantiated:
+            try:
+                if (
+                    isinstance(value, (dict, omegaconf.DictConfig))
+                    and "_target_" in value
+                ):
+                    instantiated[key] = hydra.utils.instantiate(value, _recursive_=True)
+                else:
+                    instantiated[key] = value
+            except Exception as e:
+                logging.warning(f"Could not instantiate {key}: {e}")
+                instantiated[key] = value
+
+    return instantiated
 
 
-@dataclass
-class HardwareConfig:
-    """Configuration for the hardware parameters.
+def instantiate_from_config(cfg: Union[dict, omegaconf.DictConfig]) -> Any:
+    """Main entry point for config-based training.
 
-    Args:
-        seed (int, optional): Random seed for reproducibility. Default is None.
-        float16 (bool, optional): Whether to use mixed precision (float16) for training.
-            Default is False.
-        world_size (int, optional): Number of processes participating in distributed training.
-            Default is 1.
-        device (str, optional): The device to use for training. Default is "cuda" if available, else "cpu".
-    """
-
-    seed: Optional[int] = None
-    float16: bool = False
-    world_size: int = 1
-    device: str = "cuda"
-
-
-@dataclass
-class LoggerConfig:
-    """Configuration for logging and checkpointing during training or evaluation.
+    This function handles the complete instantiation of a training setup from config:
+    - Recursively instantiates all components
+    - Creates Manager if trainer/module/data are present
+    - Returns appropriate object based on config structure
 
     Args:
-        level (int, optional): The logging level. Determines the threshold for what gets logged. Default is 20.
-        metric (dict, optional): A dictionary to store and log various metrics. Default is an empty dict.
-        monitor (dict, optional): A dictionary to store and log various monitoring statistics.
-            Default is an empty dict
-        save_final_model (str or bool, optional): Specifies whether to save the final trained model.
-            If a name is provided, the final model will be saved with that name.
-            Default is False.
-        eval_every_epoch (int, optional): The frequency (in epochs) at which the model will be evaluated.
-            For example, if set to 1, evaluation occurs every epoch. Default is 1.
-        log_every_step (int, optional): The frequency (in training steps) at which to log intermediate metrics.
-            For example, if set to 1, logs occur every step. Default is 1.
-        checkpoint_frequency (int, optional): The frequency (in epochs) at which model checkpoints are saved.
-            For example, if set to 10, a checkpoint is saved every 10 epochs.
-            Default is None.
-        checkpoint_model_only (bool, optional): Whether to save only the model weights (True) or save additional training state
-            (False) during checkpointing. Default is True.
-        dump_path (pathlib.Path, optional): The path where output is dumped. Defaults to Hydra's runtime output directory.
-        wandb (bool or dict or None, optional): Configuration for Weights & Biases logging.
-            If `True`, it will be converted to an empty dictionary and default keys will be
-            filled in if `rank == 0`. Default is None.
-            See :mod:`stable_pretraining.config.WandbConfig`
-            for the full list of parameters and their defaults.
+        cfg: Complete configuration dictionary or DictConfig
+
+    Returns:
+        Manager instance if config contains trainer/module/data,
+        otherwise returns instantiated config dict
     """
+    from stable_pretraining.manager import Manager
 
-    level: int = 20
-    metric: dict = field(default_factory=dict)
-    monitor: dict = field(default_factory=dict)
-    save_final_model: Union[str, bool] = False
-    eval_every_epoch: int = 1
-    log_every_step: int = 1
-    checkpoint_frequency: Optional[int] = None
-    checkpoint_model_only: bool = True
-    dump_path: Path = field(
-        default_factory=lambda: Path(HydraConfig.get().runtime.output_dir)
-    )
-    wandb: Union[bool, dict, None] = None
+    # Convert to DictConfig if needed
+    if isinstance(cfg, dict):
+        cfg = omegaconf.OmegaConf.create(cfg)
 
+    # Instantiate all components
+    components = recursive_instantiate(cfg)
 
-@dataclass
-class WandbConfig:
-    """Configuration for the Weights & Biases logging.
+    # Check if this is a Manager-based config (has trainer, module, data)
+    if all(k in components for k in ["trainer", "module", "data"]):
+        # Create Manager for training
+        manager = Manager(
+            trainer=components["trainer"],
+            module=components["module"],
+            data=components["data"],
+            seed=components.get("seed", None),
+            ckpt_path=components.get("ckpt_path", None),
+        )
+        return manager
 
-    Args:
-        dir (pathlib.Path, optional): The path where output is dumped. Defaults to Hydra's runtime output directory.
-        entity (str, optional): Name of the (Weights & Biases) entity. Default is None.
-        project (str, optional): Name of the (Weights & Biases) project. Default is None.
-        name (str, optional): Name of the Weights & Biases run. Default is None.
-        id (str, optional): ID of the Weights & Biases run. Default is None.
-        tags (list, optional): List of tags for the Weights & Biases run. Default is None.
-        group (str, optional): Group for the Weights & Biases run. Default is None.
-    """
-
-    dir: str = field(
-        default_factory=lambda: str(Path(HydraConfig.get().runtime.output_dir))
-    )
-    entity: Optional[str] = None
-    project: Optional[str] = None
-    name: Optional[str] = None
-    id: Optional[str] = None
-    tags: Optional[list] = None
-    group: Optional[str] = None
-
-
-@dataclass
-class OptimConfig:
-    """Configuration for the optimization parameters.
-
-    Args:
-        optimizer (dict): Configuration for the optimizer.
-        scheduler (dict): Configuration for the learning rate scheduler.
-        epochs (int, optional): Number of epochs to train the model. Default is 1000.
-        max_steps (int, optional): Maximum number of steps to train the model. Default is -1.
-            If negative, the models trains on the full dataset.
-            If it is between 0 and 1, it represents the fraction of the dataset to train on.
-        accumulation_steps (int, optional): Number of steps to accumulate gradients before updating the model.
-            Default is 1.
-        grad_max_norm (float, optional): Maximum norm of the gradients. If None, no clipping is applied.
-            Default is None.
-    """
-
-    optimizer: dict
-    scheduler: dict
-    epochs: int = 1000
-    max_steps: int = -1
-    accumulation_steps: int = 1
-    grad_max_norm: Optional[float] = None
+    # Otherwise return the instantiated components
+    return components

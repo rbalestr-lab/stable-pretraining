@@ -13,3 +13,4 @@ Version 0.1
 - Functionalities to read the loggings and easily export the results.
 - RankMe, LiDAR metrics to monitor training.
 - Examples of extracting run data from WandB and utilizing it to create figures.
+- Fixed a bug in the logging functionality.

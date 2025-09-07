@@ -14,6 +14,7 @@ AI is moving beyond labels. Today's models learn through **self-supervision** an
 
 `stable-pretraining` is a PyTorch framework built on top of Lightning for this new paradigm. What sets us apart is **real-time visibility into training quality** through extensive logging and monitoring. Our callback ecosystem (`OnlineProbe`, `OnlineKNN`, `RankMe`, and many more) provides insights into feature collapse, training dynamics, and downstream performance. Data flow as dictionaries through model components, metrics, and callbacks, making any intermediate value accessible and debuggable. With `stable-pretraining`: track everything, debug faster, iterate sooner.
 
+Join our Discord: [https://discord.gg/8M6hT39X](https://discord.gg/adzpqWKM25)
 
 ## How?
 
