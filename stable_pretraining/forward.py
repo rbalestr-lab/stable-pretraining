@@ -34,6 +34,7 @@ def _find_nearest_neighbors(query, support_set):
     _, indices = similarity.max(dim=1)
     return support_set[indices]
 
+
 def nnclr_forward(self, batch, stage):
     """Forward function for NNCLR (Nearest-Neighbor Contrastive Learning).
 
@@ -290,4 +291,3 @@ def supervised_forward(self, batch, stage):
         out["loss"] = torch.nn.functional.cross_entropy(out["logits"], batch["label"])
 
     return out
-

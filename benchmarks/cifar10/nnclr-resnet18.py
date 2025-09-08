@@ -82,10 +82,7 @@ val_dataloader = torch.utils.data.DataLoader(
 
 data = spt.data.DataModule(train=train_dataloader, val=val_dataloader)
 
-backbone = spt.backbone.from_torchvision(
-    "resnet18",
-    low_resolution=True
-)
+backbone = spt.backbone.from_torchvision("resnet18", low_resolution=True)
 
 backbone.fc = torch.nn.Identity()
 
@@ -93,7 +90,7 @@ projector = nn.Sequential(
     nn.Linear(512, 2048),
     nn.BatchNorm1d(2048),
     nn.ReLU(inplace=True),
-    nn.Linear(2048, 2048), 
+    nn.Linear(2048, 2048),
     nn.BatchNorm1d(2048),
     nn.ReLU(inplace=True),
     nn.Linear(2048, 256),
@@ -115,20 +112,14 @@ module = spt.Module(
     forward=forward.nnclr_forward,
     nnclr_loss=spt.losses.NTXEntLoss(temperature=0.5),
     optim={
-        "optimizer": {
-            "type": "LARS",
-            "lr": 5,
-            "weight_decay": 1e-6
-        },
-        "scheduler": {
-            "type": "LinearWarmupCosineAnnealing"
-        },
+        "optimizer": {"type": "LARS", "lr": 5, "weight_decay": 1e-6},
+        "scheduler": {"type": "LinearWarmupCosineAnnealing"},
         "interval": "epoch",
     },
     hparams={
         "support_set_size": 6000,
         "projection_dim": 256,
-    }
+    },
 )
 
 linear_probe = spt.callbacks.OnlineProbe(
@@ -156,7 +147,7 @@ knn_probe = spt.callbacks.OnlineKNN(
 support_queue = OnlineQueue(
     key="nnclr_support_set",
     queue_length=module.hparams.support_set_size,
-    dim=module.hparams.projection_dim
+    dim=module.hparams.projection_dim,
 )
 
 

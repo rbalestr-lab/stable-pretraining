@@ -128,7 +128,7 @@ module = spt.Module(
     hparams={
         "support_set_size": 16384,
         "projection_dim": 256,
-    }
+    },
 )
 
 linear_probe = spt.callbacks.OnlineProbe(
@@ -156,7 +156,7 @@ knn_probe = spt.callbacks.OnlineKNN(
 support_queue = OnlineQueue(
     key="nnclr_support_set",
     queue_length=module.hparams.support_set_size,
-    dim=module.hparams.projection_dim
+    dim=module.hparams.projection_dim,
 )
 
 wandb_logger = WandbLogger(
