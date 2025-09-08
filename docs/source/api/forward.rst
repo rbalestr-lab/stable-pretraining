@@ -83,6 +83,70 @@ SimCLR
         _target_: stable_pretraining.losses.NTXEntLoss
         temperature: 0.5
 
+NNCLR
+~~~~~
+
+.. autofunction:: nnclr_forward
+
+**Required Module Attributes:**
+
+- ``backbone``: Feature extraction network
+- ``projector``: Projection head for embedding transformation
+- ``predictor``: Prediction head for the online network
+- ``nnclr_loss``: NTXent contrastive loss function
+
+**Key Features:**
+
+- Uses a support set of past embeddings to find nearest-neighbor positives.
+- Encourages semantic similarity, going beyond instance-level discrimination.
+- Requires an ``OnlineQueue`` callback with a matching ``key``.
+
+**Example Config:**
+
+.. code-block:: yaml
+
+    module:
+      forward: stable_pretraining.forward.nnclr_forward
+      backbone:
+        _target_: stable_pretraining.backbone.from_torchvision
+        model_name: resnet18
+      projector:
+        _target_: torch.nn.Sequential
+        _args_:
+          - _target_: torch.nn.Linear
+            in_features: 512
+            out_features: 2048
+          - _target_: torch.nn.BatchNorm1d
+            num_features: 2048
+          - _target_: torch.nn.ReLU
+          - _target_: torch.nn.Linear
+            in_features: 2048
+            out_features: 256
+      predictor:
+        _target_: torch.nn.Sequential
+        _args_:
+          - _target_: torch.nn.Linear
+            in_features: 256
+            out_features: 4096
+          - _target_: torch.nn.BatchNorm1d
+            num_features: 4096
+          - _target_: torch.nn.ReLU
+          - _target_: torch.nn.Linear
+            in_features: 4096
+            out_features: 256
+      nnclr_loss:
+        _target_: stable_pretraining.losses.NTXEntLoss
+        temperature: 0.5
+      hparams:
+        support_set_size: 16384
+        projection_dim: 256
+
+    callbacks:
+      - _target_: stable_pretraining.callbacks.OnlineQueue
+        key: nnclr_support_set
+        queue_length: ${module.hparams.support_set_size}
+        dim: ${module.hparams.projection_dim}
+
 BYOL
 ~~~~
 

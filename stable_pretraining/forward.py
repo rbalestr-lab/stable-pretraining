@@ -23,6 +23,84 @@ Example:
 
 import torch
 import stable_pretraining as spt
+from .callbacks.queue import find_or_create_queue_callback, OnlineQueue
+
+
+def _find_nearest_neighbors(query, support_set):
+    """Find the nearest neighbor for each query embedding in the support set."""
+    query_norm = torch.nn.functional.normalize(query, dim=1)
+    support_norm = torch.nn.functional.normalize(support_set, dim=1)
+    similarity = torch.mm(query_norm, support_norm.t())
+    _, indices = similarity.max(dim=1)
+    return support_set[indices]
+
+def nnclr_forward(self, batch, stage):
+    """Forward function for NNCLR (Nearest-Neighbor Contrastive Learning).
+
+    NNCLR learns representations by using the nearest neighbor of an augmented
+    view from a support set of past embeddings as a positive pair. This encourages
+    the model to learn representations that are similar for semantically similar
+    instances, not just for different augmentations of the same instance.
+
+    Args:
+        self: Module instance (automatically bound) with required attributes:
+            - backbone: Feature extraction network
+            - projector: Projection head for embedding transformation
+            - predictor: Prediction head used for the online view
+            - nnclr_loss: NTXent contrastive loss function
+        batch: Input batch dictionary containing:
+            - 'image': Tensor of augmented images [N*views, C, H, W]
+            - 'sample_idx': Indices to identify views of same image
+        stage: Training stage ('train', 'val', or 'test')
+
+    Returns:
+        Dictionary containing:
+            - 'embedding': Feature representations from backbone
+            - 'loss': NTXent contrastive loss (during training only)
+            - 'nnclr_support_set': Projections to be added to the support set queue
+
+    Note:
+        Introduced in the NNCLR paper :cite:`dwibedi2021little`.
+    """
+    out = {}
+    out["embedding"] = self.backbone(batch["image"])
+
+    if self.training:
+        if not hasattr(self, "_nnclr_queue_callback"):
+            self._nnclr_queue_callback = find_or_create_queue_callback(
+                self.trainer,
+                key="nnclr_support_set",
+                queue_length=self.hparams.support_set_size,
+                dim=self.hparams.projection_dim,
+            )
+        queue_callback = self._nnclr_queue_callback
+
+        proj = self.projector(out["embedding"])
+        views = spt.data.fold_views(proj, batch["sample_idx"])
+
+        proj_q, proj_k = views[0], views[1]
+
+        support_set = OnlineQueue._shared_queues.get(queue_callback.key).get()
+
+        if support_set is not None and len(support_set) > 0:
+            pred_q = self.predictor(proj_q)
+            pred_k = self.predictor(proj_k)
+
+            nn_k = _find_nearest_neighbors(proj_k, support_set).detach()
+            nn_q = _find_nearest_neighbors(proj_q, support_set).detach()
+
+            loss_a = self.nnclr_loss(pred_q, nn_k)
+            loss_b = self.nnclr_loss(pred_k, nn_q)
+            out["loss"] = (loss_a + loss_b) / 2.0
+
+        else:
+            # Fallback to SimCLR style loss if queue is empty
+            out["loss"] = self.nnclr_loss(proj_q, proj_k)
+
+        # The key here must match the `key` argument of the `OnlineQueue` callback
+        out["nnclr_support_set"] = torch.cat(views)
+
+    return out
 
 
 def simclr_forward(self, batch, stage):
@@ -212,3 +290,4 @@ def supervised_forward(self, batch, stage):
         out["loss"] = torch.nn.functional.cross_entropy(out["logits"], batch["label"])
 
     return out
+

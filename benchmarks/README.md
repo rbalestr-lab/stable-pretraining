@@ -42,6 +42,9 @@ python benchmarks/cifar10/vicreg-resnet18.py
 
 # Barlow Twins
 python benchmarks/cifar10/barlow-resnet18.py
+
+# NNCLR
+python benchmarks/cifar10/nnclr-resnet18.py
 ```
 
 ## Notes
