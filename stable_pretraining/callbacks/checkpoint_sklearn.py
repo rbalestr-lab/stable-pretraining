@@ -115,20 +115,33 @@ class WandbCheckpoint(Callback):
     def on_load_checkpoint(self, trainer, pl_module, checkpoint):
         logging.info("Checking for Wandb init params... 🔧")
         if "wandb" in checkpoint:
+            logging.info("Wandb info in checkpoint!!! Restoring same run... 🔧")
             assert isinstance(trainer.logger, WandbLogger)
             import wandb
 
+            logging.info(
+                f"Deleting current run {wandb.run.entity}/{wandb.run.project}/{wandb.run.id}... 🔧"
+            )
+            api = wandb.Api()
+            run = api.run(f"{wandb.run.entity}/{wandb.run.project}/{wandb.run.id}")
             wandb.finish()
+            run.delete()
             trainer.logger._experiment = None
             wandb_id = checkpoint["wandb"]["id"]
+            trainer.logger._wandb_init["id"] = wandb_id
+            trainer.logger._id = wandb_id
+            # to reset the run
+            trainer.logger.experiment
+            logging.info(
+                f"New run {wandb.run.entity}/{wandb.run.project}/{wandb.run.id}... 🔧"
+            )
+
             # trainer.logger._wandb_init = wandb_init
             # trainer.logger._project = trainer.logger._wandb_init.get("project")
             # trainer.logger._save_dir = trainer.logger._wandb_init.get("dir")
             # trainer.logger._name = trainer.logger._wandb_init.get("name")
-            trainer.logger._wandb_init["id"] = wandb_id
-            trainer.logger._id = wandb_id
             # trainer.logger._checkpoint_name = checkpoint["wandb_checkpoint_name"]
-            logging.info("Updated Wandb parameters: ")
+            # logging.info("Updated Wandb parameters: ")
             # logging.info(f"\t- project={trainer.logger._project}")
             # logging.info(f"\t- _save_dir={trainer.logger._save_dir}")
             # logging.info(f"\t- name={trainer.logger._name}")

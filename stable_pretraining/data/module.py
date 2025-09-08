@@ -52,14 +52,14 @@ class DataModule(pl.LightningDataModule):
             raise ValueError("They can't all be none")
         logging.info("Setting up DataModule")
         if train is None:
-            logging.warning(
+            logging.warninging(
                 "⚠️⚠️⚠️ train was not passed to DataModule, it is required"
                 "unless you only validate ⚠️⚠️⚠️"
             )
         self.train = self._format_data_conf(train, "train")
         self.test = self._format_data_conf(test, "test")
         if val is None:
-            logging.warning(
+            logging.warninging(
                 "⚠️⚠️⚠️ val was not passed to DataModule, it is required"
                 "unless you set `num_sanity_val_steps=0` and `val_check_interval=0` ⚠️⚠️⚠️"
             )
@@ -146,7 +146,10 @@ class DataModule(pl.LightningDataModule):
         else:
             kwargs = self._get_loader_kwargs(self.train, self.train_dataset)
             loader = DataLoader(dataset=self.train_dataset, **kwargs)
-        loader.dataset.set_pl_trainer(self._trainer)
+        if hasattr(loader.dataset, "set_pl_trainer"):
+            loader.dataset.set_pl_trainer(self._trainer)
+        else:
+            logging.warning("could not set pl_trainer to train dataset")
         if (
             self.trainer is not None
             and self.trainer.world_size > 1
@@ -178,26 +181,45 @@ class DataModule(pl.LightningDataModule):
 
     def val_dataloader(self):
         if isinstance(self.val, DataLoader):
-            self.val.dataset.set_pl_trainer(self._trainer)
+            if hasattr(self.val.dataset, "set_pl_trainer"):
+                self.val.dataset.set_pl_trainer(self._trainer)
+            else:
+                logging.warning("could not set pl_trainer to train dataset")
             return self.val
         kwargs = self._get_loader_kwargs(self.val, self.val_dataset)
-        self.val_dataset.set_pl_trainer(self._trainer)
+        if hasattr(self.val_dataset, "set_pl_trainer"):
+            self.val_dataset.set_pl_trainer(self._trainer)
+        else:
+            logging.warning("could not set pl_trainer to train dataset")
         return DataLoader(dataset=self.val_dataset, **kwargs)
 
     def test_dataloader(self):
         if isinstance(self.test, DataLoader):
-            self.test.dataset.set_pl_trainer(self._trainer)
+            if hasattr(self.test.dataset, "set_pl_trainer"):
+                self.test.dataset.set_pl_trainer(self._trainer)
+            else:
+                logging.warning("could not set pl_trainer to train dataset")
             return self.test
         kwargs = self._get_loader_kwargs(self.test, self.test_dataset)
-        self.test_dataset.set_pl_trainer(self._trainer)
+        if hasattr(self.test_dataset, "set_pl_trainer"):
+            self.test_dataset.set_pl_trainer(self._trainer)
+        else:
+            logging.warning("could not set pl_trainer to train dataset")
         return DataLoader(dataset=self.test_dataset, **kwargs)
 
     def predict_dataloader(self):
         if isinstance(self.predict, DataLoader):
-            self.predict.dataset.set_pl_trainer(self._trainer)
+            if hasattr(self.predict.dataset, "set_pl_trainer"):
+                self.predict.dataset.set_pl_trainer(self._trainer)
+            else:
+                logging.warning("could not set pl_trainer to train dataset")
             return self.predict
         kwargs = self._get_loader_kwargs(self.predict, self.predict_dataset)
-        self.predict_dataset.set_pl_trainer(self._trainer)
+
+        if hasattr(self.predict_dataset, "set_pl_trainer"):
+            self.predict_dataset.set_pl_trainer(self._trainer)
+        else:
+            logging.warning("could not set pl_trainer to train dataset")
         return DataLoader(dataset=self.predict_dataset, **kwargs)
 
     def teardown(self, stage: str):
@@ -210,5 +232,4 @@ class DataModule(pl.LightningDataModule):
         return
 
     def set_pl_trainer(self, trainer: pl.Trainer):
-        print(trainer)
         self._trainer = trainer
