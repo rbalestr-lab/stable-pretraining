@@ -1,0 +1,31 @@
+defaults:
+  - _self_
+  - override hydra/hydra_logging: disabled
+  - override hydra/job_logging: disabled
+  - override hydra/launcher: submitit_slurm
+
+hydra:
+  output_subdir: null
+  mode: MULTIRUN
+  launcher:
+    max_num_timeout: 999
+    gpus_per_node: 2
+    tasks_per_node: ${hydra.launcher.gpus_per_node}
+    cpus_per_task: 6
+    mem_gb: 32
+    timeout_min: 900
+    partition: long
+    signal_delay_s: 120
+  run:
+    dir: .
+
+model: DINOv2         # choices: MODEL_ZOO keys
+epochs: 100
+batch_size: 256
+num_workers: 6
+
+use_wandb: true      # set true to enable Weights & Biases logging
+project: stable-pretraining
+seed: 42
+
+# python examples/multi_layer_probe.py --multirun hydra/launcher=submitit_slurm model=DINOv2,DINOv3,MetaCLIP,IJEPA-1k,IJEPA-22k
