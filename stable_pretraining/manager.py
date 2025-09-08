@@ -275,7 +275,7 @@ class Manager(submitit.helpers.Checkpointable):
         #         signal.__dict__[self.slurm_requeue_signal], self.checkpoint_and_requeue
         #     )
         logging.info(f"🌱🌱🌱 SEEDING EVERYTHING with {self.seed=} 🌱🌱🌱")
-        pl.seed_everything(self.seed, workers=True, verbose=False)
+        pl.seed_everything(self.seed, workers=True)
         if isinstance(self.trainer, pl.Trainer):
             self._trainer = self.trainer
         else:
