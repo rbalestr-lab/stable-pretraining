@@ -71,7 +71,7 @@ def _contains_sklearn_module(item):
 
 def _get_sklearn_modules(module):
     modules = dict()
-    for name in dir(module):
+    for name, item in vars(module).items():
         if name[0] == "_":
             continue
         item = getattr(module, name)
