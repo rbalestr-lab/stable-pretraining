@@ -52,14 +52,14 @@ class DataModule(pl.LightningDataModule):
             raise ValueError("They can't all be none")
         logging.info("Setting up DataModule")
         if train is None:
-            logging.warninging(
+            logging.warning(
                 "⚠️⚠️⚠️ train was not passed to DataModule, it is required"
                 "unless you only validate ⚠️⚠️⚠️"
             )
         self.train = self._format_data_conf(train, "train")
         self.test = self._format_data_conf(test, "test")
         if val is None:
-            logging.warninging(
+            logging.warning(
                 "⚠️⚠️⚠️ val was not passed to DataModule, it is required"
                 "unless you set `num_sanity_val_steps=0` and `val_check_interval=0` ⚠️⚠️⚠️"
             )
