@@ -122,7 +122,15 @@ class TrainerInfo(Callback):
         if not isinstance(trainer.datamodule, DataModule):
             logging.warning("Using a custom DataModule, won't have extra info!")
             return
-        trainer.datamodule.set_pl_trainer(trainer)
+        try:
+            trainer.datamodule.set_pl_trainer(trainer)
+        except AttributeError as e:
+            logging.error(
+                "trainer's datamodule is of type"
+                "stable_pretraining.data.DataModule but does"
+                "not have a method `set_pl_trainer`..."
+            )
+            raise (e)
         return super().setup(trainer, pl_module, stage)
 
 

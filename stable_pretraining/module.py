@@ -445,6 +445,8 @@ class Module(pl.LightningModule):
                 "Using default optimization setup: AdamW optimizer with CosineAnnealingLR scheduler."
             )
             self.optim = dict(optimizer=partial(torch.optim.AdamW))
+        elif isinstance(self.optim, partial):
+            self.optim = dict(optimizer=self.optim)
 
         # Single optimizer case
         optimizer_cfg = self.optim.get("optimizer")
@@ -457,7 +459,10 @@ class Module(pl.LightningModule):
             opt = create_optimizer(params, optimizer_cfg or "AdamW")
 
             # Create scheduler
-            sched_config = self.optim.get("scheduler", "CosineAnnealingLR")
+            default = dict(
+                type="CosineAnnealingLR", T_max=self.trainer.estimated_stepping_batches
+            )
+            sched_config = self.optim.get("scheduler", default)
             sched = create_scheduler(opt, sched_config, module=self)
             sched_name = self._get_scheduler_name(sched_config, sched)
 
