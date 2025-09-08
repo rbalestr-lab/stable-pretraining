@@ -1,6 +1,5 @@
 """Unit tests for checkpointing functionality."""
 
-import pytest
 import torch
 from torch.utils.data import Dataset
 from pathlib import Path
@@ -19,8 +18,7 @@ class MockDataset(Dataset):
         return {"index": idx, "data": torch.randn(3)}
 
 
-@pytest.mark.unit
-def test_callback():
+def main():
     import lightning as pl
     import torch
     from lightning.pytorch.loggers import WandbLogger
@@ -89,3 +87,7 @@ def test_callback():
     Path("test.ckpt").unlink()
 
     print("Training completed!")
+
+
+if __name__ == "__main__":
+    main()
