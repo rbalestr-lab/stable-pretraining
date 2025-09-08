@@ -324,6 +324,13 @@ class OrderedQueue(torch.nn.Module):
 
         return True
 
+    def load_state_dict(self, state_dict, strict=True, assign=False):
+        print(self.out.shape)
+        self.out.resize_(state_dict["out"].shape)
+        print(self.out.shape)
+        print(state_dict["out"].shape)
+        super().load_state_dict(state_dict, strict, assign)
+
 
 class EMA(torch.nn.Module):
     """Exponential Moving Average module.

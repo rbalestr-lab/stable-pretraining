@@ -27,6 +27,7 @@ dependencies = [
     "requests-cache[all]",
     "richuru",
     "minari[hdf5]>=0.5.3",
+    "pillow>=11.3.0",
 ]
 
 dynamic = ["version"]
