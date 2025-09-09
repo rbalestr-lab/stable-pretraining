@@ -127,7 +127,8 @@ try:
     import datasets
 
     datasets.logging.set_verbosity_info()
-except ModuleNotFoundError:
+except (ModuleNotFoundError, AttributeError):
+    # AttributeError can occur with pyarrow version incompatibilities
     pass
 
 # Apply Lightning patch for manual optimization parameter support
