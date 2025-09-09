@@ -5,9 +5,21 @@ from typing import Optional, Union
 import torch
 import torchvision
 from loguru import logger as logging
-from timm.layers.classifier import ClassifierHead
 from torch import nn
-from transformers import TimmWrapperModel
+
+# Try to import optional dependencies
+try:
+    from timm.layers.classifier import ClassifierHead
+
+    _TIMM_AVAILABLE = True
+except ImportError:
+    ClassifierHead = None
+    _TIMM_AVAILABLE = False
+
+try:
+    from transformers import TimmWrapperModel
+except ImportError:
+    TimmWrapperModel = None
 
 
 class EvalOnly(nn.Module):
@@ -289,7 +301,9 @@ def set_embedding_dim(
         in_features = module.heads.head.in_features
         module.heads.head = embedder(in_features)
     # For modules like Swin Transformer.
-    elif hasattr(module, "head") and not isinstance(module.head, ClassifierHead):
+    elif hasattr(module, "head") and (
+        ClassifierHead is None or not isinstance(module.head, ClassifierHead)
+    ):
         in_features = module.head.in_features
         module.head = embedder(in_features)
     else:
