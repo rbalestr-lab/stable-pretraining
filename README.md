@@ -312,12 +312,20 @@ The library is not yet available on PyPI. You can install it from the source cod
   </details>
 
 2. Pytorch and our library (we recommend using `uv` for quicker package management):
-    ```
+    ```bash
     pip3 install uv
     uv pip install torch torchvision torchaudio
-    uv pip install -e .
+    uv pip install -e .  # Core dependencies only
     ```
-    if you do not want to use uv, simply remove it from the above commands.
+
+    For optional features (vision models, experiment tracking, cluster support, etc.):
+    ```bash
+    uv pip install -e ".[vision,tracking]"  # Example: add vision models and wandb
+    uv pip install -e ".[all]"  # Or install all optional dependencies
+    ```
+    See `pyproject.toml` for available dependency groups (`vision`, `tracking`, `cluster`, `visualization`, `datasets`, `extras`, `dev`, `doc`).
+
+    If you do not want to use uv, simply remove it from the above commands.
 
 3. API login (optional)
     ```

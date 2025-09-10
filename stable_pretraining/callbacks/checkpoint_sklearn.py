@@ -3,9 +3,16 @@ from typing import Optional
 import numpy as np
 from lightning.pytorch import Callback, LightningModule, Trainer
 from loguru import logger as logging
-from sklearn.base import ClassifierMixin, RegressorMixin
 from tabulate import tabulate
 from lightning.pytorch.loggers import WandbLogger
+
+from .. import SKLEARN_AVAILABLE
+
+if SKLEARN_AVAILABLE:
+    from sklearn.base import ClassifierMixin, RegressorMixin
+else:
+    ClassifierMixin = None
+    RegressorMixin = None
 
 
 class SklearnCheckpoint(Callback):
@@ -53,6 +60,8 @@ class SklearnCheckpoint(Callback):
 
     def on_load_checkpoint(self, trainer, pl_module, checkpoint):
         logging.info("Checking for non PyTorch modules to load... 🔧")
+        if not SKLEARN_AVAILABLE:
+            return
         for name, item in checkpoint.items():
             if isinstance(item, RegressorMixin) or isinstance(item, ClassifierMixin):
                 setattr(pl_module, name, item)
@@ -60,6 +69,8 @@ class SklearnCheckpoint(Callback):
 
 
 def _contains_sklearn_module(item):
+    if not SKLEARN_AVAILABLE:
+        return False
     if isinstance(item, RegressorMixin) or isinstance(item, ClassifierMixin):
         return True
     if isinstance(item, list):

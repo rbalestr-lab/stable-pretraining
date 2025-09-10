@@ -7,6 +7,24 @@ os.environ["LOGURU_LEVEL"] = os.environ.get("LOGURU_LEVEL", "INFO")
 
 import logging
 import sys
+
+from loguru import logger
+
+# Handle optional dependencies early
+try:
+    import sklearn.base  # noqa: F401
+
+    SKLEARN_AVAILABLE = True
+except ImportError:
+    SKLEARN_AVAILABLE = False
+
+try:
+    import wandb  # noqa: F401
+
+    WANDB_AVAILABLE = True
+except ImportError:
+    WANDB_AVAILABLE = False
+
 from . import backbone, callbacks, data, losses, module, optim, static, utils
 from .__about__ import (
     __author__,
@@ -16,7 +34,6 @@ from .__about__ import (
     __url__,
     __version__,
 )
-from .utils.lightning_patch import apply_manual_optimization_patch
 from .backbone.utils import TeacherStudentWrapper
 from .callbacks import (
     EarlyStopping,
@@ -28,48 +45,59 @@ from .callbacks import (
     OnlineProbe,
     OnlineWriter,
     RankMe,
-    SklearnCheckpoint,
     TeacherStudentCallback,
     TrainerInfo,
 )
 from .manager import Manager
 from .module import Module
+from .utils.lightning_patch import apply_manual_optimization_patch
+
+# Conditionally import callbacks that depend on optional packages
+if SKLEARN_AVAILABLE:
+    from .callbacks import SklearnCheckpoint
+else:
+    SklearnCheckpoint = None
 
 __all__ = [
-    OnlineProbe,
-    SklearnCheckpoint,
-    OnlineKNN,
-    TrainerInfo,
-    LoggingCallback,
-    ModuleSummary,
-    EarlyStopping,
-    OnlineWriter,
-    RankMe,
-    LiDAR,
-    ImageRetrieval,
-    TeacherStudentCallback,
-    utils,
-    data,
-    module,
-    static,
-    utils,
-    optim,
-    losses,
-    callbacks,
-    Manager,
-    backbone,
-    Module,
-    TeacherStudentWrapper,
-    __author__,
-    __license__,
-    __summary__,
-    __title__,
-    __url__,
-    __version__,
+    # Availability flags
+    "SKLEARN_AVAILABLE",
+    "WANDB_AVAILABLE",
+    # Callbacks
+    "OnlineProbe",
+    "SklearnCheckpoint",
+    "OnlineKNN",
+    "TrainerInfo",
+    "LoggingCallback",
+    "ModuleSummary",
+    "EarlyStopping",
+    "OnlineWriter",
+    "RankMe",
+    "LiDAR",
+    "ImageRetrieval",
+    "TeacherStudentCallback",
+    # Modules
+    "utils",
+    "data",
+    "module",
+    "static",
+    "optim",
+    "losses",
+    "callbacks",
+    "backbone",
+    # Classes
+    "Manager",
+    "Module",
+    "TeacherStudentWrapper",
+    # Package info
+    "__author__",
+    "__license__",
+    "__summary__",
+    "__title__",
+    "__url__",
+    "__version__",
 ]
 
 # Setup logging
-from loguru import logger
 
 # Try to install richuru for better formatting if available
 try:
@@ -127,7 +155,8 @@ try:
     import datasets
 
     datasets.logging.set_verbosity_info()
-except ModuleNotFoundError:
+except (ModuleNotFoundError, AttributeError):
+    # AttributeError can occur with pyarrow version incompatibilities
     pass
 
 # Apply Lightning patch for manual optimization parameter support
