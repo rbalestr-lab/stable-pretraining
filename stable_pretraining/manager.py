@@ -14,7 +14,12 @@ from lightning.pytorch.utilities.rank_zero import rank_zero_only
 from loguru import logger as logging
 from omegaconf import DictConfig, OmegaConf, open_dict
 
-import wandb
+from . import WANDB_AVAILABLE
+
+if WANDB_AVAILABLE:
+    import wandb
+else:
+    wandb = None
 
 from .utils import get_required_fn_parameters
 
@@ -175,7 +180,7 @@ class Manager(submitit.helpers.Checkpointable):
             # at most last_config has an extra `ckpt_path`
             exp.config.update(last_config)
             logging.info("\t\treloaded!")
-        elif len(wandb.config.keys()):
+        elif WANDB_AVAILABLE and wandb.run and len(wandb.config.keys()):
             logging.info("\t\ta Wandb™ config is provided, not uploading Hydra's:")
             # TODO: make Wandb parameters the trainer one
             # for key, value in wandb.config.items():
@@ -228,7 +233,8 @@ class Manager(submitit.helpers.Checkpointable):
                 if valid:
                     break
             logging.info(f"\tFinal Hydra's config has {len(config)} items) 📤")
-            wandb.config.update(config)
+            if WANDB_AVAILABLE and wandb.run:
+                wandb.config.update(config)
             # TODO: should we updated the config to the DictConfig too for next run to check?
             # with open_dict(self.logger):
             #     self.trainer.logger.config = config
@@ -441,7 +447,7 @@ class Manager(submitit.helpers.Checkpointable):
 
     @rank_zero_only
     def _dump_wandb_data(self):
-        if wandb.run is None or not wandb.run.offline:
+        if not WANDB_AVAILABLE or wandb.run is None or not wandb.run.offline:
             return
 
         # Print the summary
@@ -462,6 +468,8 @@ class Manager(submitit.helpers.Checkpointable):
         logging.info(f"\t● Saved config at {fname} ✅")
 
     def _wandb_previous_dir(self):
+        if not WANDB_AVAILABLE or not wandb.run:
+            return None
         # to remove the /files
         path = Path(wandb.run.dir).parent
         logging.info(f"\t\t● fetching previous Wandb runs from {path.parent} ✅")
@@ -503,7 +511,7 @@ class Manager(submitit.helpers.Checkpointable):
         #     ckpt_path = Path(wandb.run.dir) / "checkpoint.ckpt"
         #     print(f"\t● `ckpt_path` set to {ckpt_path}!", flush=True)
 
-        if not wandb.run.offline:
+        if WANDB_AVAILABLE and wandb.run and not wandb.run.offline:
             print("\t● Wandb used and online:", flush=True)
             artifact = wandb.Artifact("requeue_checkpoint", "model")
             artifact.add_file(str(ckpt_path))
@@ -515,7 +523,8 @@ class Manager(submitit.helpers.Checkpointable):
             print("\t\t● local checkpoint deleted ✅", flush=True)
         else:
             print("\t● Wandb used and offline:", flush=True)
-            wandb.run.config.update({"ckpt_path": str(ckpt_path.resolve())})
+            if WANDB_AVAILABLE and wandb.run:
+                wandb.run.config.update({"ckpt_path": str(ckpt_path.resolve())})
             print("\t● `ckpt_path` added to Wandb config ✅", flush=True)
         # for offline case
         self._dump_wandb_data()

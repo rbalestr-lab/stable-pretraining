@@ -12,6 +12,7 @@ dependencies = [
     # Core dependencies - minimal required for basic SSL training
     "torch",
     "torchvision",
+    "torchmetrics",
     "lightning",
     "hydra-core",
     "loguru",
