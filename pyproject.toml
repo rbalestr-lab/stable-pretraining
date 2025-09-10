@@ -16,6 +16,7 @@ dependencies = [
     "lightning",
     "hydra-core",
     "loguru",
+    "tabulate",
 ]
 
 dynamic = ["version"]
@@ -55,7 +56,6 @@ cluster = [
 visualization = [
     "matplotlib",
     "prettytable",
-    "tabulate",
 ]
 
 # Extra dataset support
