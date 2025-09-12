@@ -428,5 +428,5 @@ The library is not yet available on PyPI. You can install it from the source cod
 Core contributors (in order of joining the project):
 - [Randall Balestriero](https://github.com/RandallBalestriero)
 - [Hugues Van Assel](https://github.com/huguesva)
-- [Sami Bou Ghanem](https://github.com/sami-bg)
+- [Sami BuGhanem](https://github.com/sami-bg)
 - [Lucas Maes](https://github.com/lucas-maes)
