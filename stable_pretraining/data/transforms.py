@@ -127,6 +127,19 @@ class RandomGrayscale(Transform, v2.RandomGrayscale):
         return x
 
 
+class Lambda(Transform, v2.Lambda):
+    """Applies a lambda callable to target key and store it in source."""
+
+    def __init__(self, lambd, source: str = "image", target: str = "image"):
+        super().__init__(lambd)
+        self.source = source
+        self.target = target
+
+    def __call__(self, x) -> Any:
+        self.nested_set(x, super().__call__(x), self.target)
+        return x
+
+
 class RandomSolarize(Transform, v2.RandomSolarize):
     """Randomly solarize image by inverting pixel values above threshold."""
 
