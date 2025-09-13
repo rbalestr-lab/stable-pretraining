@@ -1,4 +1,5 @@
 import lightning as pl
+from loguru import logger as logging
 
 
 class EmbeddingCache(pl.pytorch.Callback):
@@ -11,11 +12,15 @@ class EmbeddingCache(pl.pytorch.Callback):
 
     def __init__(self, module_names: list, add_to_forward_output: bool = True):
         super().__init__()
+        logging.info("Init of EmbeddingCache callback with")
+        logging.info(f"\t - {len(module_names)} module names")
+        logging.info(f"\t - {add_to_forward_output}")
         self.module_names = module_names
         self.add_to_forward_output = add_to_forward_output
         self.hooks = []
 
     def setup(self, trainer, pl_module, stage=None):
+        logging.info("Setup of EmbeddingCache")
         if hasattr(pl_module, "embedding_cache"):
             raise RuntimeError("A embedding_cache is already present")
         pl_module.embedding_cache = {}
@@ -25,6 +30,8 @@ class EmbeddingCache(pl.pytorch.Callback):
                 raise ValueError(f"Module '{name}' not found in LightningModule.")
             hook = module.register_forward_hook(self._make_hook(name, pl_module))
             self.hooks.append(hook)
+        logging.info("\t - adding forward hook")
+        pl_module.register_forward_hook(self.forward_hook_fn)
 
     def teardown(self, trainer, pl_module, stage=None):
         for hook in self.hooks:
