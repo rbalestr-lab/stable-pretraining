@@ -41,6 +41,53 @@ class EvalOnly(nn.Module):
         return self.backbone.forward(*args, **kwargs)
 
 
+class ReturnEmbedding(nn.Module):
+    """Cache embedding from a module given their names.
+
+    Example:
+    stable_pretraining.backbone.utils.ReturnEmbedding(
+        torchvision.models.swin_v2_s(),
+        stable_pretraining.static.EMBEDDINGS["swin_v2_s"]
+        )
+
+    Args:
+    module_names (list of str): List of module names to hook (e.g., ['layer1', 'encoder.block1']).
+    add_to_forward_output (bool): If True, enables merging cached outputs into the dict returned by forward.
+    """
+
+    def __init__(self, backbone: nn.Module, module_names: list[str]):
+        super().__init__()
+        logging.info("Init of ReturnEmbedding module")
+        logging.info(f"\t - {len(module_names)} module names")
+        self.backbone = backbone
+        self.module_names = module_names
+        self.hooks = []
+        self.embedding_cache = {}
+        for name in self.module_names:
+            module = self._get_module_by_name(backbone, name)
+            if module is None:
+                raise ValueError(f"Module '{name}' not found in backbone.")
+            hook = module.register_forward_hook(self._make_hook(name, backbone))
+            self.hooks.append(hook)
+
+    def forward(self, *args, **kwargs):
+        return self.backbone(*args, **kwargs), self.embedding_cache
+
+    def _make_hook(self, name, pl_module):
+        def hook(module, input, output):
+            self.embedding_cache[name] = output
+
+        return hook
+
+    def _get_module_by_name(self, pl_module, name):
+        module = pl_module
+        for attr in name.split("."):
+            if not hasattr(module, attr):
+                return None
+            module = getattr(module, attr)
+        return module
+
+
 class TeacherStudentWrapper(nn.Module):
     """Backbone wrapper that implements teacher-student distillation via EMA.
 
