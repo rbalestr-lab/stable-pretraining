@@ -258,6 +258,73 @@ def barlow_twins_forward(self, batch, stage):
     return out
 
 
+def swav_forward(self, batch, stage):
+    """Forward function for SwAV (Swapping Assignments between Views).
+
+    SwAV learns representations by predicting the cluster assignment (code) of one
+    view from the representation of another view. For small-batch training, this function
+    manages a feature queue to stabilize the training process.
+
+    Args:
+        self: Module instance (automatically bound) with required attributes:
+            - backbone: Feature extraction network.
+            - projector: Projection head mapping features to latent space.
+            - prototypes: The prototype vectors (cluster centers) as a Linear layer.
+            - swav_loss: The SwAVLoss object, which handles the core algorithm.
+            - use_queue (bool, optional): Whether to use the feature queue.
+            - queue_length (int, optional): The maximum size of the feature queue.
+            - start_queue_at_epoch (int, optional): Epoch to start using the queue.
+            - projection_dim (int, optional): The dimension of the projector's output.
+        batch: Input batch dictionary containing:
+            - 'image': Tensor of augmented images [N*views, C, H, W].
+            - 'sample_idx': Indices to identify views of the same image.
+        stage: Training stage ('train', 'val', or 'test').
+
+    Returns:
+        Dictionary containing:
+            - 'embedding': Feature representations from the backbone.
+            - 'loss': SwAV loss (during training only).
+            - 'swav_queue': Raw projections to be added to the queue (if used).
+
+    Note:
+        Introduced in the SwAV paper :cite:`caron2020unsupervised`.
+    """
+    out = {}
+    out["embedding"] = self.backbone(batch["image"])
+
+    if not self.training:
+        return out
+
+    proj = self.projector(out["embedding"])
+    proj1, proj2 = spt.data.fold_views(proj, batch["sample_idx"])
+
+    queue_feats = None
+    use_queue_logic = hasattr(self, "use_queue") and self.use_queue
+
+    if use_queue_logic:
+        if not hasattr(self, "_swav_queue_callback"):
+            self._swav_queue_callback = find_or_create_queue_callback(
+                self.trainer,
+                key="swav_queue",
+                queue_length=self.queue_length,
+                dim=self.projection_dim,
+            )
+        queue = OnlineQueue._shared_queues.get(self._swav_queue_callback.key)
+
+        if (
+            queue is not None
+            and len(queue.get()) > 0
+            and self.trainer.current_epoch >= self.start_queue_at_epoch
+        ):
+            queue_feats = queue.get().clone().detach().to(proj1.device)
+
+        out["swav_queue"] = torch.cat([proj1, proj2]).detach()
+
+    out["loss"] = self.swav_loss(proj1, proj2, self.prototypes, queue_feats)
+
+    return out
+
+
 def supervised_forward(self, batch, stage):
     """Forward function for standard supervised training.
 
