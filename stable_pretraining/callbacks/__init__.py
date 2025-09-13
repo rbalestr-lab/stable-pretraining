@@ -9,6 +9,7 @@ from .teacher_student import TeacherStudentCallback
 from .trainer_info import LoggingCallback, ModuleSummary, TrainerInfo, SLURMInfo
 from .utils import EarlyStopping
 from .writer import OnlineWriter
+from .embedding_cache import EmbeddingCache
 
 __all__ = [
     OnlineProbe,
@@ -26,4 +27,5 @@ __all__ = [
     LiDAR,
     ImageRetrieval,
     TeacherStudentCallback,
+    EmbeddingCache,
 ]
