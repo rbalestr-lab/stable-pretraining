@@ -10,6 +10,7 @@ from .trainer_info import LoggingCallback, ModuleSummary, TrainerInfo, SLURMInfo
 from .utils import EarlyStopping
 from .writer import OnlineWriter
 from .embedding_cache import EmbeddingCache
+from .earlystop import EpochMilestones
 
 __all__ = [
     OnlineProbe,
@@ -28,4 +29,5 @@ __all__ = [
     ImageRetrieval,
     TeacherStudentCallback,
     EmbeddingCache,
+    EpochMilestones,
 ]
