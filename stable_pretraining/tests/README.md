@@ -1,4 +1,4 @@
-# stable-ssl Test Suite
+# stable-pretraining Test Suite
 
 ## Structure
 
@@ -87,20 +87,20 @@ python -m pytest --cov=stable_pretraining -m unit
 ```python
 import pytest
 import torch
-import stable_pretraining as ossl
+import stable_pretraining as spt
 
 
 @pytest.mark.unit
 class TestMyComponent:
     def test_initialization(self):
         # Test without GPU or data
-        component = ossl.MyComponent(param=10)
+        component = spt.MyComponent(param=10)
         assert component.param == 10
 
     def test_forward_mock(self):
         # Use mock data
         mock_input = torch.randn(4, 3, 32, 32)
-        component = ossl.MyComponent()
+        component = spt.MyComponent()
         output = component(mock_input)
         assert output.shape == (4, 10)
 ```
@@ -108,7 +108,7 @@ class TestMyComponent:
 ### Integration Test Example
 ```python
 import pytest
-import stable_pretraining as ossl
+import stable_pretraining as spt
 
 
 @pytest.mark.integration
@@ -116,7 +116,7 @@ import stable_pretraining as ossl
 @pytest.mark.download
 def test_full_training():
     # Test with real data and GPU
-    dataset = ossl.data.HFDataset(
+    dataset = spt.data.HFDataset(
         path="frgfm/imagenette",
         split="train",
         transform=transform
