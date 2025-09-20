@@ -1,0 +1,36 @@
+name: Release
+
+on:
+  push:
+    tags:
+      # Publish on any tag starting with a `v`, e.g., v1.2.3
+      - v*
+
+jobs:
+  pypi:
+    name: Publish to PyPI
+    runs-on: ubuntu-latest
+    # Environment and permissions trusted publishing.
+    environment:
+      # Create this environment in the GitHub repository under Settings -> Environments
+      name: release
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+      - name: Install uv
+        uses: astral-sh/setup-uv@v6
+      - name: Install Python 3.10
+        run: uv python install 3.10
+      - name: Build
+        run: uv build
+      # Optional smoke tests.
+      # Check that basic features work and we didn't miss to include crucial files
+      # - name: Smoke test (wheel)
+      #   run: uv run --isolated --no-project --with dist/*.whl tests/smoke_test.py
+      # - name: Smoke test (source distribution)
+      #   run: uv run --isolated --no-project --with dist/*.tar.gz tests/smoke_test.py
+      - name: Publish
+        run: uv publish
