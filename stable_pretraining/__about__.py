@@ -21,4 +21,4 @@ except Exception:
 
         __version__ = _pkg_version("stable-pretraining")
     except Exception:
-        __version__ = "0.0.0"
+        raise ImportError("Could not determine stable-pretraining version")
