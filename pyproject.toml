@@ -17,6 +17,11 @@ dependencies = [
     "hydra-core",
     "loguru",
     "tabulate",
+    "pandas",
+    "rich",
+    "requests-cache",
+    "prettytable",
+    "submitit",
 ]
 
 dynamic = ["version"]
@@ -51,13 +56,11 @@ tracking = [
 # Cluster/SLURM execution support
 cluster = [
     "hydra-submitit-launcher",
-    "submitit",
 ]
 
 # Visualization and reporting tools
 visualization = [
     "matplotlib",
-    "prettytable",
 ]
 
 # Extra dataset support
@@ -70,7 +73,6 @@ datasets = [
 # Additional utilities
 extras = [
     "scikit-learn>=1.7.0",  # sklearn model checkpointing
-    "requests-cache[all]",  # Caching for API requests
     "richuru",  # Enhanced logging formatting
 ]
 
