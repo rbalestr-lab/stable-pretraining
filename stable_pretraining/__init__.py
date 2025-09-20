@@ -119,7 +119,7 @@ def rank_zero_only_filter(record):
 
 logger.remove()
 logger.add(
-    sys.stderr,
+    sys.stdout,
     format="<green>{time:HH:mm:ss.SSS}</green> | <level>{level: <7}</level> (<cyan>{process}, {name}</cyan>) | <level>{message}</level>",
     filter=rank_zero_only_filter,
     level="INFO",

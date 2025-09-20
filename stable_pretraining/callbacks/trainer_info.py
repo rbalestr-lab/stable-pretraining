@@ -154,6 +154,7 @@ class SLURMInfo(Callback):
     def setup(self, trainer, pl_module, stage):
         logging.info("---- SLURM INFO ---- 🔧")
         logging.info(f"Job ID: {self._get_env_var('SLURM_JOB_ID')}")
+        logging.info(f"Task ID: {self._get_env_var('SLURM_ARRAY_TASK_ID')}")
         logging.info(f"Job Name: {self._get_env_var('SLURM_JOB_NAME')}")
         logging.info(f"Nodes: {self._get_env_var('SLURM_JOB_NUM_NODES')}")
         logging.info(f"Tasks: {self._get_env_var('SLURM_NTASKS')}")
