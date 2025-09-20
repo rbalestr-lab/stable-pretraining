@@ -159,3 +159,5 @@ wandb/
 *.err
 *.out
 CLAUDE.md
+
+._version.py
