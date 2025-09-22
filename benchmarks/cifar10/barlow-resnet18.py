@@ -8,6 +8,7 @@ import torchvision
 from lightning.pytorch.loggers import WandbLogger
 
 import stable_pretraining as spt
+from stable_pretraining import forward
 from stable_pretraining.data import transforms
 import sys
 from pathlib import Path
@@ -81,17 +82,6 @@ val_dataloader = torch.utils.data.DataLoader(
 
 data = spt.data.DataModule(train=train_dataloader, val=val_dataloader)
 
-
-def forward(self, batch, stage):
-    out = {}
-    out["embedding"] = self.backbone(batch["image"])
-    if self.training:
-        proj = self.projector(out["embedding"])
-        views = spt.data.fold_views(proj, batch["sample_idx"])
-        out["loss"] = self.barlow_loss(views[0], views[1])
-    return out
-
-
 backbone = spt.backbone.from_torchvision(
     "resnet18",
     low_resolution=True,
@@ -111,7 +101,7 @@ projector = nn.Sequential(
 module = spt.Module(
     backbone=backbone,
     projector=projector,
-    forward=forward,
+    forward=forward.barlow_twins_forward,
     barlow_loss=spt.losses.BarlowTwinsLoss(lambd=0.1),
     optim={
         "optimizer": {

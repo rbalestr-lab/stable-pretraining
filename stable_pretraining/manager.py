@@ -313,6 +313,28 @@ class Manager(submitit.helpers.Checkpointable):
             if not isinstance(self._trainer, pl.Trainer):
                 raise ValueError("`trainer` should be a Trainer")
             logging.info("\t● trainer instantiated ✅")
+
+        # Auto-detect TeacherStudentWrapper and add callback if needed
+        # This runs AFTER trainer is set up, regardless of how it was created
+        from .callbacks.teacher_student import TeacherStudentCallback
+
+        needs_teacher_student = False
+        for module in self.instantiated_module.modules():
+            if hasattr(module, "update_teacher") and hasattr(module, "teacher"):
+                needs_teacher_student = True
+                break
+
+        if needs_teacher_student:
+            # Check if TeacherStudentCallback is already in the list
+            has_ts_callback = any(
+                isinstance(cb, TeacherStudentCallback) for cb in self._trainer.callbacks
+            )
+            if not has_ts_callback:
+                logging.info(
+                    "\t● Auto-detected TeacherStudentWrapper, adding TeacherStudentCallback ✅"
+                )
+                self._trainer.callbacks.append(TeacherStudentCallback())
+
         self.init_and_sync_wandb()
         logging.info("\t● logger updated accordingly ✅")
 

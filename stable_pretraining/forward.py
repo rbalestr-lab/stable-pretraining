@@ -146,12 +146,11 @@ def byol_forward(self, batch, stage):
     target network and predicting target projections from online projections.
 
     Args:
-        self: Module instance (automatically bound) with required attributes:
-            - backbone: Online network feature extractor
-            - projector: Online network projection head
+        self: Module instance with required attributes:
+            - backbone: TeacherStudentWrapper for feature extraction
+            - projector: TeacherStudentWrapper for projection head
             - predictor: Online network predictor
-            - target_backbone: Target network backbone (momentum encoder)
-            - target_projector: Target network projection head
+            - byol_loss: BYOL loss function (optional, uses MSE if not provided)
         batch: Input batch dictionary containing:
             - 'image': Tensor of augmented images [N*views, C, H, W]
             - 'sample_idx': Indices to identify views of same image
@@ -159,31 +158,48 @@ def byol_forward(self, batch, stage):
 
     Returns:
         Dictionary containing:
-            - 'embedding': Feature representations from online backbone
-            - 'loss': MSE loss between predictions and targets (during training)
+            - 'embedding': Feature representations from teacher backbone (EMA target)
+            - 'loss': BYOL loss between predictions and targets (during training)
 
     Note:
         Introduced in the BYOL paper :cite:`grill2020bootstrap`.
     """
-    out = {}
-    out["embedding"] = self.backbone(batch["image"])
+    images = batch["image"]
 
-    if self.training:
-        online_proj = self.projector(out["embedding"])
-        online_pred = self.predictor(online_proj)
+    # Get online embeddings
+    online_features = self.backbone.forward_student(images)
 
+    # Return early if not training: expose teacher features for evaluation
+    if not self.training:
         with torch.no_grad():
-            target_embedding = self.target_backbone(batch["image"])
-            target_proj = self.target_projector(target_embedding)
+            target_only_features = self.backbone.forward_teacher(images)
+        return {"embedding": target_only_features.detach()}
 
-        online_views = spt.data.fold_views(online_pred, batch["sample_idx"])
-        target_views = spt.data.fold_views(target_proj, batch["sample_idx"])
+    # Process online network
+    online_proj = self.projector.forward_student(online_features)
+    online_pred = self.predictor(online_proj)
 
-        loss1 = torch.nn.functional.mse_loss(online_views[0], target_views[1].detach())
-        loss2 = torch.nn.functional.mse_loss(online_views[1], target_views[0].detach())
-        out["loss"] = (loss1 + loss2) / 2
+    # Process target network
+    with torch.no_grad():
+        target_features = self.backbone.forward_teacher(images)
+        target_proj = self.projector.forward_teacher(target_features)
 
-    return out
+    # Compute loss
+    online_views = spt.data.fold_views(online_pred, batch["sample_idx"])
+    target_views = spt.data.fold_views(target_proj, batch["sample_idx"])
+
+    if not hasattr(self, "byol_loss"):
+        raise ValueError(
+            "byol_forward requires 'byol_loss' to be provided (e.g., spt.losses.BYOLLoss()). "
+            "Pass it when constructing the Module: Module(..., byol_loss=spt.losses.BYOLLoss(), ...)"
+        )
+
+    loss = (
+        self.byol_loss(online_views[0], target_views[1])
+        + self.byol_loss(online_views[1], target_views[0])
+    ) / 2
+
+    return {"embedding": target_features.detach(), "loss": loss}
 
 
 def vicreg_forward(self, batch, stage):
