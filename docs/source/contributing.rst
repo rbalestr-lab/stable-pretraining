@@ -71,6 +71,7 @@ When creating a pull request (PR), use the appropriate prefix to indicate its st
 - ``[Feature]``: For new features or enhancements
 - ``[Example]``: For adding or updating examples
 - ``[Benchmark]``: For benchmark-related changes
+- ``[Doc]``: For documentation updates
 
 A ``[WIP]`` PR can serve multiple purposes:
 1- Indicate that you are actively working on something to prevent duplicated efforts by others.
