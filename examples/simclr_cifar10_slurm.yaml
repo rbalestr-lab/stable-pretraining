@@ -1,0 +1,25 @@
+# SimCLR training configuration for CIFAR-10 with SLURM settings
+# Usage: spt examples/simclr_cifar10_slurm.yaml -m
+
+defaults:
+  - simclr_cifar10_config
+  - override hydra/launcher: submitit_slurm
+
+# Hydra configuration for SLURM job submission
+hydra:
+  sweep:
+    dir: outputs/${now:%Y-%m-%d}/${now:%H-%M-%S}
+    subdir: ${hydra.job.num}
+
+  launcher:
+    partition: YOUR_PARTITION  # TODO: Replace with your cluster's partition name
+    qos: YOUR_QOS  # TODO: Replace with your QOS (e.g., normal, high, gpu, preempt)
+    timeout_min: 1440  # Job time limit in minutes (24 hours)
+    cpus_per_task: 8  # Number of CPUs per task
+    mem_gb: 100  # Memory allocation in GB
+    gpus_per_node: 1  # Number of GPUs per node
+    comment: "SimCLR CIFAR10 Training"
+
+# Override trainer settings for SLURM
+trainer:
+  max_epochs: 100  # Adjust based on your needs

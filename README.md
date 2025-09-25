@@ -293,6 +293,45 @@ manager()
 </details>
 
 
+## 🚀 Quick Start with `spt` CLI
+
+The `spt` command launches training from YAML configuration files using Hydra.
+
+**Note:** `spt` requires YAML configs. If you have Python-based configs, you can:
+- Convert them to YAML format where each component uses `_target_` to specify the importable class/function
+- See `examples/simclr_cifar10_config.yaml` for the structure and syntax
+
+### Local Training
+
+```bash
+# Run with a config file
+spt examples/simclr_cifar10_config.yaml
+
+# With parameter overrides
+spt examples/simclr_cifar10_config.yaml trainer.max_epochs=50 module.optim.lr=0.01
+
+# Run from any directory - supports absolute and relative paths
+spt ../configs/my_config.yaml
+spt /path/to/config.yaml
+```
+
+### SLURM Cluster Training
+
+For distributed training on SLURM clusters, use the `-m` flag to enable multirun mode:
+
+```bash
+# Use the provided SLURM template (customize partition/QOS in the file)
+spt examples/simclr_cifar10_slurm.yaml -m
+
+# Override SLURM parameters via command line
+spt examples/simclr_cifar10_slurm.yaml -m \
+    hydra.launcher.partition=gpu \
+    hydra.launcher.qos=normal \
+    hydra.launcher.timeout_min=720
+```
+
+The SLURM template (`examples/simclr_cifar10_slurm.yaml`) includes placeholders for cluster-specific settings. Either modify the file directly or override values via command line.
+
 ## Installation
 
 The library is not yet available on PyPI. You can install it from the source code, as follows.
