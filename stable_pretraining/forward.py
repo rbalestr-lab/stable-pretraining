@@ -307,3 +307,102 @@ def supervised_forward(self, batch, stage):
         out["loss"] = torch.nn.functional.cross_entropy(out["logits"], batch["label"])
 
     return out
+
+
+def dino_forward(self, batch, stage):
+    """Forward function for DINO (self-DIstillation with NO labels).
+
+    DINO learns representations through self-distillation where a student network
+    is trained to match the output of a teacher network (EMA of student) on
+    different augmented views. Global views are processed by both networks while
+    local views are only processed by the student.
+
+    Args:
+        self: Module instance (automatically bound) with required attributes:
+            - backbone: TeacherStudentWrapper for feature extraction
+            - projector: TeacherStudentWrapper for projection head
+            - dino_loss: DINOLoss instance (required, pass spt.losses.DINOLoss())
+            - warmup_temperature_teacher (float): Starting teacher temperature
+            - temperature_teacher (float): Final teacher temperature
+            - warmup_epochs_temperature_teacher (int): Epochs to warm up temperature
+        batch: Input batch dictionary containing:
+            - 'image': Tensor of augmented images [N*views, C, H, W]
+              First 2 views should be global crops, rest are local crops
+            - 'sample_idx': Indices to identify views of same image
+        stage: Training stage ('train', 'val', or 'test')
+
+    Returns:
+        Dictionary containing:
+            - 'embedding': Feature representations from teacher backbone
+            - 'loss': DINO distillation loss (during training only)
+
+    Note:
+        Introduced in the DINO paper :cite:`caron2021emerging`.
+        Requires TeacherStudentWrapper for both backbone and projector,
+        and assumes first 2 views in batch are global views.
+    """
+    images = batch["image"]
+
+    # Get embeddings from teacher for evaluation
+    if not self.training:
+        with torch.no_grad():
+            teacher_features = self.backbone.forward_teacher(images)
+        return {"embedding": teacher_features.detach()}
+
+    # Split global and local views
+    # Assuming first 2 views are global, rest are local
+    views = spt.data.fold_views(images, batch["sample_idx"])
+    n_global = 2
+    global_views = torch.cat(views[:n_global])
+    all_views = torch.cat(views)
+
+    # Student processes all views
+    student_features = self.backbone.forward_student(all_views)
+    student_logits = self.projector.forward_student(student_features)
+
+    # Teacher processes only global views
+    with torch.no_grad():
+        teacher_features = self.backbone.forward_teacher(global_views)
+        teacher_logits = self.projector.forward_teacher(teacher_features)
+
+    # Reshape to [n_views, batch_size, dim]
+    batch_size = len(batch["sample_idx"].unique())
+    student_logits = student_logits.view(len(views), batch_size, -1)
+    teacher_logits = teacher_logits.view(n_global, batch_size, -1)
+
+    # Check if dino_loss is provided
+    if not hasattr(self, "dino_loss"):
+        raise ValueError(
+            "dino_forward requires 'dino_loss' to be provided (e.g., spt.losses.DINOLoss()). "
+            "Pass it when constructing the Module: Module(..., dino_loss=spt.losses.DINOLoss(), ...)"
+        )
+
+    # Temperature scheduling for teacher
+    # Note: self.current_epoch is provided by PyTorch Lightning's LightningModule base class
+    # It returns self.trainer.current_epoch if trainer exists, otherwise 0
+    if (
+        hasattr(self, "warmup_epochs_temperature_teacher")
+        and hasattr(self, "warmup_temperature_teacher")
+        and hasattr(self, "temperature_teacher")
+    ):
+        if self.current_epoch < self.warmup_epochs_temperature_teacher:
+            # Linear warmup from warmup_temperature_teacher to temperature_teacher
+            progress = self.current_epoch / self.warmup_epochs_temperature_teacher
+            temperature_teacher = self.warmup_temperature_teacher + progress * (
+                self.temperature_teacher - self.warmup_temperature_teacher
+            )
+        else:
+            temperature_teacher = self.temperature_teacher
+    else:
+        # Default temperature if attributes not set
+        temperature_teacher = getattr(self, "temperature_teacher", 0.07)
+
+    # Compute DINO loss
+    loss = self.dino_loss(
+        student_logits,
+        teacher_logits,
+        temperature_teacher=temperature_teacher,
+        update_center=self.training,
+    )
+
+    return {"embedding": teacher_features.detach(), "loss": loss}
