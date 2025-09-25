@@ -85,11 +85,12 @@ backbone.fc = nn.Identity()
 wrapped_backbone = spt.TeacherStudentWrapper(
     backbone,
     warm_init=True,
-    base_ema_coefficient=0.996,
+    base_ema_coefficient=0.99,  # Faster updates for CIFAR-10
     final_ema_coefficient=1.0,
 )
 
 # Create projector with teacher-student wrapper
+# DINO uses 3-layer MLP with specific architecture
 projector = nn.Sequential(
     nn.Linear(512, 2048),
     nn.BatchNorm1d(2048),
@@ -97,13 +98,13 @@ projector = nn.Sequential(
     nn.Linear(2048, 2048),
     nn.BatchNorm1d(2048),
     nn.ReLU(inplace=True),
-    nn.Linear(2048, 256),
+    nn.Linear(2048, 2048),  # Bottleneck to 256 dim
 )
 
 wrapped_projector = spt.TeacherStudentWrapper(
     projector,
     warm_init=True,
-    base_ema_coefficient=0.996,
+    base_ema_coefficient=0.99,  # Faster updates for CIFAR-10
     final_ema_coefficient=1.0,
 )
 
@@ -115,10 +116,21 @@ module = spt.Module(
         temperature_student=0.1,
         center_momentum=0.9,
     ),
-    # DINO-specific temperature parameters
     warmup_temperature_teacher=0.04,
     temperature_teacher=0.07,
     warmup_epochs_temperature_teacher=30,
+    # optim={
+    #     "optimizer": {
+    #         "type": "SGD",
+    #         "lr": 0.03,  # Lower learning rate
+    #         "momentum": 0.9,
+    #         "weight_decay": 1e-4,  # Lower weight decay
+    #     },
+    #     "scheduler": {
+    #         "type": "LinearWarmupCosineAnnealing",
+    #     },
+    #     "interval": "epoch",
+    # },
     optim={
         "optimizer": {
             "type": "LARS",

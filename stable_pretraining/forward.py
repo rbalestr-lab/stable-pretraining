@@ -353,6 +353,10 @@ def dino_forward(self, batch, stage):
     # Assuming first 2 views are global, rest are local
     views = spt.data.fold_views(images, batch["sample_idx"])
     n_global = 2
+    n_views = len(views)
+    batch_size = views[0].shape[0]  # More efficient than unique()
+
+    # Concatenate views for batch processing
     global_views = torch.cat(views[:n_global])
     all_views = torch.cat(views)
 
@@ -365,9 +369,9 @@ def dino_forward(self, batch, stage):
         teacher_features = self.backbone.forward_teacher(global_views)
         teacher_logits = self.projector.forward_teacher(teacher_features)
 
-    # Reshape to [n_views, batch_size, dim]
-    batch_size = len(batch["sample_idx"].unique())
-    student_logits = student_logits.view(len(views), batch_size, -1)
+    # Reshape to [n_views, batch_size, dim] for DINOLoss
+    # DINOLoss needs this shape to compute cross-entropy between views
+    student_logits = student_logits.view(n_views, batch_size, -1)
     teacher_logits = teacher_logits.view(n_global, batch_size, -1)
 
     # Check if dino_loss is provided

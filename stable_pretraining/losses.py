@@ -409,10 +409,14 @@ class DINOLoss(torch.nn.Module):
                 if self.center is None:
                     self.center = batch_center
                 else:
-                    # Use gather for distributed training
-                    batch_center = torch.cat(all_gather(batch_center), dim=0).mean(
-                        dim=0
-                    )
+                    # For distributed training, gather from all GPUs
+                    if (
+                        torch.distributed.is_available()
+                        and torch.distributed.is_initialized()
+                    ):
+                        batch_center = torch.cat(all_gather(batch_center), dim=0).mean(
+                            dim=0
+                        )
                     self.center = self.center * self.center_momentum + batch_center * (
                         1 - self.center_momentum
                     )
