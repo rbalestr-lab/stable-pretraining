@@ -26,7 +26,6 @@ barlow_transform = transforms.MultiViewTransform(
                 brightness=0.4, contrast=0.4, saturation=0.2, hue=0.1, p=0.8
             ),
             transforms.RandomGrayscale(p=0.2),
-            transforms.RandomSolarize(threshold=0.5, p=0.0),
             transforms.ToImage(**spt.data.static.CIFAR10),
         ),
         transforms.Compose(
@@ -37,7 +36,6 @@ barlow_transform = transforms.MultiViewTransform(
                 brightness=0.4, contrast=0.4, saturation=0.2, hue=0.1, p=0.8
             ),
             transforms.RandomGrayscale(p=0.2),
-            transforms.RandomSolarize(threshold=0.5, p=0.2),
             transforms.ToImage(**spt.data.static.CIFAR10),
         ),
     ]

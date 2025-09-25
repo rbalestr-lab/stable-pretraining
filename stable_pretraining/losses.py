@@ -324,3 +324,97 @@ class SymmetricContrastiveLoss(ContrastiveLoss):
         )
 
         return 0.5 * (loss_i + loss_j)
+
+
+class DINOLoss(torch.nn.Module):
+    """DINO loss for self-distillation with cross-entropy :cite:`caron2021emerging`.
+
+    This loss computes the cross-entropy between teacher and student predictions
+    using a sharpening temperature for the student and a separate temperature for
+    the teacher. The teacher predictions are centered to prevent mode collapse.
+
+    Args:
+        temperature_student (float, optional): Temperature for student softmax. Default is 0.1.
+        center_momentum (float, optional): Momentum for center update. Default is 0.9.
+    """
+
+    def __init__(
+        self,
+        temperature_student: float = 0.1,
+        center_momentum: float = 0.9,
+    ):
+        super().__init__()
+        self.temperature_student = temperature_student
+        self.center_momentum = center_momentum
+        self.register_buffer("center", None)
+
+    def forward(
+        self,
+        student_logits: torch.Tensor,
+        teacher_logits: torch.Tensor,
+        temperature_teacher: float = 0.04,
+        update_center: bool = True,
+    ) -> torch.Tensor:
+        """Compute DINO loss.
+
+        Args:
+            student_logits: Student network output logits [N_views, batch_size, dim].
+            teacher_logits: Teacher network output logits [N_views, batch_size, dim].
+            temperature_teacher: Temperature for teacher softmax.
+            update_center: Whether to update the center (should be True during training).
+
+        Returns:
+            torch.Tensor: Scalar DINO loss value.
+        """
+        # Compute teacher probabilities with centering
+        if self.center is not None:
+            teacher_probs = F.softmax(
+                (teacher_logits - self.center) / temperature_teacher,
+                dim=-1,
+            )
+        else:
+            teacher_probs = F.softmax(teacher_logits / temperature_teacher, dim=-1)
+
+        # Compute student log probabilities
+        student_log_probs = F.log_softmax(
+            student_logits / self.temperature_student, dim=-1
+        )
+
+        # Compute cross-entropy loss following the original DINO implementation
+        # Flatten batch and feature dimensions together: [n_views, batch_size * dim]
+        teacher_probs_flat = teacher_probs.flatten(start_dim=1)
+        student_log_probs_flat = student_log_probs.flatten(start_dim=1)
+
+        # Compute cross-entropy matrix: [n_teacher_views, n_student_views]
+        # Each element represents the total cross-entropy across all batch items and features
+        loss_matrix = -teacher_probs_flat @ student_log_probs_flat.T
+
+        # Zero out the diagonal (same view comparisons)
+        loss_matrix.fill_diagonal_(0)
+
+        # Normalize the loss
+        # Total number of valid terms: all pairs minus diagonal
+        n_terms = loss_matrix.numel() - loss_matrix.diagonal().numel()
+        batch_size = student_logits.shape[1]
+
+        # Average over valid terms and batch size
+        loss = loss_matrix.sum() / (n_terms * batch_size)
+
+        # Update center with EMA
+        if update_center and self.training:
+            with torch.no_grad():
+                # Compute batch center from teacher logits
+                batch_center = torch.mean(teacher_logits, dim=(0, 1))
+
+                if self.center is None:
+                    self.center = batch_center
+                else:
+                    # Use gather for distributed training
+                    batch_center = torch.cat(all_gather(batch_center), dim=0).mean(
+                        dim=0
+                    )
+                    self.center = self.center * self.center_momentum + batch_center * (
+                        1 - self.center_momentum
+                    )
+
+        return loss
