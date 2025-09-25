@@ -317,7 +317,7 @@ spt /path/to/config.yaml
 
 ### SLURM Cluster Training
 
-For distributed training on SLURM clusters, use the `-m` flag to enable multirun mode:
+For training on SLURM clusters, use the `-m` flag to enable multirun mode:
 
 ```bash
 # Use the provided SLURM template (customize partition/QOS in the file)
