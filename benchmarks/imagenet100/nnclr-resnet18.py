@@ -5,8 +5,8 @@ from lightning.pytorch.loggers import WandbLogger
 from torch import nn
 
 import stable_pretraining as spt
+from stable_pretraining import forward
 from stable_pretraining.data import transforms
-from stable_pretraining.forward import nnclr_forward
 from stable_pretraining.callbacks.queue import OnlineQueue
 import sys
 from pathlib import Path
@@ -69,11 +69,11 @@ world_size = 1
 total_batch_size = batch_size * world_size
 train_dataloader = torch.utils.data.DataLoader(
     dataset=train_dataset,
-    sampler=spt.data.sampler.RepeatedRandomSampler(train_dataset, n_views=2),
     batch_size=batch_size,
     num_workers=4,
     drop_last=True,
     persistent_workers=True,
+    shuffle=True,
 )
 val_dataloader = torch.utils.data.DataLoader(
     dataset=val_dataset,
@@ -109,7 +109,7 @@ module = spt.Module(
     backbone=backbone,
     projector=projector,
     predictor=predictor,
-    forward=nnclr_forward,
+    forward=forward.nnclr_forward,
     nnclr_loss=spt.losses.NTXEntLoss(temperature=0.1),
     optim={
         "optimizer": {

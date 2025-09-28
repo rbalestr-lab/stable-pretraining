@@ -94,7 +94,7 @@ val_dataset = spt.data.FromTorchDataset(
 
 train_dataloader = torch.utils.data.DataLoader(
     dataset=train_dataset,
-    batch_size=128,  # 128 unique images (same as original with batch_size=256, n_views=2)
+    batch_size=256,
     num_workers=8,
     drop_last=True,
     shuffle=True,
