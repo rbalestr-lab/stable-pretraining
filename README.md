@@ -55,14 +55,36 @@ To reach flexibility, scalability and stability, we rely on battle-tested third 
 2. **module**: The key differentiator from PyTorch Lightning - **you only define the `forward` function**, not `training_step`! This unified approach computes losses and generates useful quantities that can be retrieved for monitoring and analysis:
 
     ```python
+    # Use the pre-built forward functions from stable_pretraining
+    from stable_pretraining import forward
+
+    # Simply use the appropriate forward for your method
+    module = spt.Module(
+        backbone=backbone,
+        projector=projector,
+        forward=forward.simclr_forward,  # Or byol_forward, vicreg_forward, etc.
+        simclr_loss=spt.losses.NTXEntLoss(temperature=0.5),
+        # ... other components
+    )
+    ```
+
+    Or define your own custom forward:
+    ```python
     def forward(self, batch, stage):
         out = {}
-        out["embedding"] = self.backbone(batch["image"])
-        if self.training:
-            # Define your loss directly in forward
-            proj = self.projector(out["embedding"])
-            views = spt.data.fold_views(proj, batch["sample_idx"])
-            out["loss"] = self.simclr_loss(views[0], views[1])
+
+        if isinstance(batch, list):
+            # Multi-view training - batch is a list of view dicts
+            embeddings = [self.backbone(view["image"]) for view in batch]
+            out["embedding"] = torch.cat(embeddings, dim=0)
+
+            if self.training:
+                projections = [self.projector(emb) for emb in embeddings]
+                out["loss"] = self.simclr_loss(projections[0], projections[1])
+        else:
+            # Single-view validation
+            out["embedding"] = self.backbone(batch["image"])
+
         return out
     ```
 
@@ -200,13 +222,13 @@ val_dataset = spt.data.FromTorchDataset(
     ),
 )
 
-# Create dataloaders with view sampling for contrastive learning
+# Create dataloaders - MultiViewTransform handles the view creation
 train_dataloader = torch.utils.data.DataLoader(
     dataset=train_dataset,
-    sampler=spt.data.sampler.RepeatedRandomSampler(train_dataset, n_views=2),
     batch_size=256,
     num_workers=8,
     drop_last=True,
+    shuffle=True,  # Simple shuffle, no RepeatedRandomSampler needed
 )
 
 val_dataloader = torch.utils.data.DataLoader(
@@ -217,16 +239,8 @@ val_dataloader = torch.utils.data.DataLoader(
 
 data = spt.data.DataModule(train=train_dataloader, val=val_dataloader)
 
-# Define the forward function (replaces training_step in PyTorch Lightning)
-def forward(self, batch, stage):
-    out = {}
-    out["embedding"] = self.backbone(batch["image"])
-    if self.training:
-        # Project embeddings and compute contrastive loss
-        proj = self.projector(out["embedding"])
-        views = spt.data.fold_views(proj, batch["sample_idx"])
-        out["loss"] = self.simclr_loss(views[0], views[1])
-    return out
+# Import forward functions
+from stable_pretraining import forward
 
 # Build model components
 backbone = spt.backbone.from_torchvision("resnet18", low_resolution=True)
@@ -242,11 +256,11 @@ projector = nn.Sequential(
     nn.Linear(2048, 256),
 )
 
-# Create the module with all components
+# Create the module using the built-in SimCLR forward function
 module = spt.Module(
     backbone=backbone,
     projector=projector,
-    forward=forward,
+    forward=forward.simclr_forward,  # Use the built-in forward function
     simclr_loss=spt.losses.NTXEntLoss(temperature=0.5),
     optim={
         "optimizer": {"type": "LARS", "lr": 5, "weight_decay": 1e-6},
