@@ -702,38 +702,61 @@ class MultiViewTransform(v2.Transform):
           each other. Always use non-in-place operations in custom transforms.
 
     Args:
-        transforms: List of transforms, one per view to create.
+        transforms: Either a list or dict of transforms.
+                   - List: Returns a list of views in the same order
+                   - Dict: Returns a dict of views with the same keys
 
     Returns:
-        List[dict]: A list of transformed sample dicts, one per view.
-                   Each dict contains NEW tensors, not references to the original.
+        Union[List[dict], Dict[str, dict]]:
+            - If transforms is a list: Returns a list of transformed sample dicts
+            - If transforms is a dict: Returns a dict of transformed sample dicts with same keys
+            Each dict contains NEW tensors, not references to the original.
 
     Example:
+        # List input - returns list of views
         transform = MultiViewTransform([
             strong_augmentation,  # Creates first view with strong aug
             weak_augmentation,    # Creates second view with weak aug
         ])
         # Input: {"image": img, "label": 0}
         # Output: [{"image": img_strong, "label": 0}, {"image": img_weak, "label": 0}]
-        # Note: img_strong and img_weak are NEW tensors, original img is unchanged
+
+        # Dict input - returns dict of named views
+        transform = MultiViewTransform({
+            "student": strong_augmentation,
+            "teacher": weak_augmentation,
+        })
+        # Input: {"image": img, "label": 0}
+        # Output: {"student": {"image": img_strong, "label": 0},
+        #          "teacher": {"image": img_weak, "label": 0}}
     """
 
     def __init__(self, transforms):
         super().__init__()
         self.transforms = transforms
+        self.return_dict = isinstance(transforms, dict)
 
     def __call__(self, sample):
         """Create multiple views by applying different transforms to the sample."""
-        views = []
+        if self.return_dict:
+            # Dict input - return dict of views
+            views = {}
+            for key, transform in self.transforms.items():
+                # Copy to avoid transforms modifying the original
+                sample_copy = sample.copy()
+                # Apply transform to entire dict
+                transformed = transform(sample_copy)
+                views[key] = transformed
+        else:
+            # List input - return list of views
+            views = []
+            for transform in self.transforms:
+                # Copy to avoid transforms modifying the original
+                sample_copy = sample.copy()
+                # Apply transform to entire dict
+                transformed = transform(sample_copy)
+                views.append(transformed)
 
-        for transform in self.transforms:
-            # Copy to avoid transforms modifying the original
-            sample_copy = sample.copy()
-            # Apply transform to entire dict
-            transformed = transform(sample_copy)
-            views.append(transformed)
-
-        # Return list of complete dicts
         return views
 
 

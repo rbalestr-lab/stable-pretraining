@@ -25,6 +25,19 @@ import torch
 from .callbacks.queue import find_or_create_queue_callback, OnlineQueue
 
 
+def _get_views_list(batch):
+    """Convert multi-view batch to list of views, whether it's a list or dict."""
+    if isinstance(batch, dict) and "image" not in batch:
+        # Dict of named views - convert to list
+        return list(batch.values())
+    elif isinstance(batch, list):
+        # Already a list
+        return batch
+    else:
+        # Single view
+        return None
+
+
 def supervised_forward(self, batch, stage):
     """Forward function for standard supervised training.
 
@@ -92,14 +105,21 @@ def simclr_forward(self, batch, stage):
     """
     out = {}
 
-    if isinstance(batch, list):
-        # Multi-view training - batch is a list of view dicts
-        embeddings = [self.backbone(view["image"]) for view in batch]
+    views = _get_views_list(batch)
+    if views is not None:
+        # Multi-view training - SimCLR requires exactly 2 views
+        if len(views) != 2:
+            raise ValueError(
+                f"SimCLR requires exactly 2 views, got {len(views)}. "
+                "For other configurations, please implement a custom forward function."
+            )
+
+        embeddings = [self.backbone(view["image"]) for view in views]
         out["embedding"] = torch.cat(embeddings, dim=0)
 
         # Concatenate labels for callbacks (probes need this)
-        if "label" in batch[0]:
-            out["label"] = torch.cat([view["label"] for view in batch], dim=0)
+        if "label" in views[0]:
+            out["label"] = torch.cat([view["label"] for view in views], dim=0)
 
         if self.training:
             projections = [self.projector(emb) for emb in embeddings]
@@ -140,13 +160,20 @@ def byol_forward(self, batch, stage):
     """
     out = {}
 
-    if isinstance(batch, list):
-        # Multi-view training - batch is a list of view dicts
-        images = [view["image"] for view in batch]
+    views = _get_views_list(batch)
+    if views is not None:
+        # Multi-view training - BYOL requires exactly 2 views
+        if len(views) != 2:
+            raise ValueError(
+                f"BYOL requires exactly 2 views, got {len(views)}. "
+                "For other configurations, please implement a custom forward function."
+            )
+
+        images = [view["image"] for view in views]
 
         # Concatenate labels for callbacks
-        if "label" in batch[0]:
-            out["label"] = torch.cat([view["label"] for view in batch], dim=0)
+        if "label" in views[0]:
+            out["label"] = torch.cat([view["label"] for view in views], dim=0)
 
         # Get online embeddings for both views
         online_features = [self.backbone.forward_student(img) for img in images]
@@ -226,14 +253,21 @@ def vicreg_forward(self, batch, stage):
     """
     out = {}
 
-    if isinstance(batch, list):
-        # Multi-view training - batch is a list of view dicts
-        embeddings = [self.backbone(view["image"]) for view in batch]
+    views = _get_views_list(batch)
+    if views is not None:
+        # Multi-view training - VICReg requires exactly 2 views
+        if len(views) != 2:
+            raise ValueError(
+                f"VICReg requires exactly 2 views, got {len(views)}. "
+                "For other configurations, please implement a custom forward function."
+            )
+
+        embeddings = [self.backbone(view["image"]) for view in views]
         out["embedding"] = torch.cat(embeddings, dim=0)
 
         # Concatenate labels for callbacks
-        if "label" in batch[0]:
-            out["label"] = torch.cat([view["label"] for view in batch], dim=0)
+        if "label" in views[0]:
+            out["label"] = torch.cat([view["label"] for view in views], dim=0)
 
         if self.training:
             projections = [self.projector(emb) for emb in embeddings]
@@ -274,14 +308,21 @@ def barlow_twins_forward(self, batch, stage):
     """
     out = {}
 
-    if isinstance(batch, list):
-        # Multi-view training - batch is a list of view dicts
-        embeddings = [self.backbone(view["image"]) for view in batch]
+    views = _get_views_list(batch)
+    if views is not None:
+        # Multi-view training - Barlow Twins requires exactly 2 views
+        if len(views) != 2:
+            raise ValueError(
+                f"Barlow Twins requires exactly 2 views, got {len(views)}. "
+                "For other configurations, please implement a custom forward function."
+            )
+
+        embeddings = [self.backbone(view["image"]) for view in views]
         out["embedding"] = torch.cat(embeddings, dim=0)
 
         # Concatenate labels for callbacks
-        if "label" in batch[0]:
-            out["label"] = torch.cat([view["label"] for view in batch], dim=0)
+        if "label" in views[0]:
+            out["label"] = torch.cat([view["label"] for view in views], dim=0)
 
         if self.training:
             projections = [self.projector(emb) for emb in embeddings]
@@ -334,14 +375,21 @@ def nnclr_forward(self, batch, stage):
     """
     out = {}
 
-    if isinstance(batch, list):
-        # Multi-view training - batch is a list of view dicts
-        embeddings = [self.backbone(view["image"]) for view in batch]
+    views = _get_views_list(batch)
+    if views is not None:
+        # Multi-view training - NNCLR requires exactly 2 views
+        if len(views) != 2:
+            raise ValueError(
+                f"NNCLR requires exactly 2 views, got {len(views)}. "
+                "For other configurations, please implement a custom forward function."
+            )
+
+        embeddings = [self.backbone(view["image"]) for view in views]
         out["embedding"] = torch.cat(embeddings, dim=0)
 
         # Concatenate labels for callbacks
-        if "label" in batch[0]:
-            out["label"] = torch.cat([view["label"] for view in batch], dim=0)
+        if "label" in views[0]:
+            out["label"] = torch.cat([view["label"] for view in views], dim=0)
 
         if self.training:
             if not hasattr(self, "_nnclr_queue_callback"):
