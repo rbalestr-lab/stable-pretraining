@@ -161,7 +161,10 @@ class OnlineProbe(TrainableCallback):
             return
 
         with pl_module.trainer.precision_plugin.forward_context():
-            x = x.detach()
+            if type(x) is list:
+                x = [i.detach() for i in x]
+            else:
+                x = x.detach()
             preds = self.module(x)
             if pl_module.trainer.training:
                 loss = self.loss_fn(preds, y)

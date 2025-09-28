@@ -66,11 +66,11 @@ val_dataset = spt.data.HFDataset(
 batch_size = 256
 train_dataloader = torch.utils.data.DataLoader(
     dataset=train_dataset,
-    sampler=spt.data.sampler.RepeatedRandomSampler(train_dataset, n_views=2),
     batch_size=batch_size,
     num_workers=8,
     drop_last=True,
     persistent_workers=True,
+    shuffle=True,
 )
 val_dataloader = torch.utils.data.DataLoader(
     dataset=val_dataset,
@@ -152,7 +152,7 @@ wandb_logger = WandbLogger(
 )
 
 trainer = pl.Trainer(
-    max_epochs=200,
+    max_epochs=400,
     num_sanity_val_steps=0,
     callbacks=[knn_probe, linear_probe],
     precision="16-mixed",

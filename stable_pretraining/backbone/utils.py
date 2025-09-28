@@ -49,11 +49,17 @@ class FeaturesConcat(nn.Module):
             if not given then we aggregate everything from dict/list
     """
 
-    def __init__(self, names=None):
+    def __init__(self, names=None, agg: callable = torch.mean):
         super().__init__()
         if type(names) is str:
             names = [names]
         self.names = names
+        if agg is None:
+
+            def agg(x, dim):
+                return x
+
+        self.agg = agg
 
     def forward(self, inputs: Union[dict, Iterable]):
         if type(inputs) is dict:
@@ -66,11 +72,11 @@ class FeaturesConcat(nn.Module):
             if t.ndim == 4:
                 # assume conv2d type of output
                 # Aggregate over spatial dimensions (H, W)
-                t = t.mean(dim=(2, 3))
+                t = self.agg(t, dim=(2, 3))
             elif t.ndim == 3:
                 # assume ViT type of output
                 # Aggregate over token dimension
-                t = t.mean(dim=1)
+                t = self.agg(t, dim=1)
             elif t.ndim == 2:
                 # No aggregation needed
                 pass
@@ -81,29 +87,24 @@ class FeaturesConcat(nn.Module):
         return concat
 
     @staticmethod
-    def get_concatenated_shape(shapes):
+    def get_output_shape(shapes, agg=torch.mean):
         """Given a list of shapes (tuples), returns the expected concatenated shape.
 
         Assumes all shapes have the same batch size (shapes[0][0]).
 
         Args:
             shapes (List[Tuple[int]]): List of shapes after aggregation.
+            agg (callable): How to aggregate, can be None.
 
         Returns:
             Tuple[int]: The concatenated shape.
         """
         if not shapes:
             raise ValueError("Shape list is empty.")
-        batch_size = shapes[0][0]
-        feature_dims = 0
-        for s in shapes:
-            if len(s) == 4 or len(s) == 2:
-                feature_dims += s[1]
-            elif len(s) == 3:
-                feature_dims += s[2]
-            else:
-                raise NotImplementedError
-        return (batch_size, feature_dims)
+        x = [torch.empty(shape, device="meta") for shape in shapes]
+        obj = FeaturesConcat(None, agg)
+        out = obj(x)
+        return out.shape
 
 
 class ReturnEmbedding(nn.Module):

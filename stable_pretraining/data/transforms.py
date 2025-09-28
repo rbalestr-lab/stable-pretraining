@@ -634,21 +634,35 @@ class Compose(v2.Transform):
         return sample
 
 
-class MultiViewTransform(v2.Transform):
-    """Apply different transforms to different views of the same sample.
+class RoundRobinMultiViewTransform(v2.Transform):
+    """Round-robin multi-view transform that cycles through transforms using a counter.
 
-    When using RepeatedRandomSampler with n_views=2, this allows you to apply
-    different augmentations to each view. It alternates between transforms
-    based on a simple counter.
+    IMPORTANT: This transform is designed to work with RepeatedRandomSampler, where
+    each image index appears multiple times consecutively in the batch. It uses an
+    internal counter to apply different augmentations to each repeated occurrence.
+
+    BATCH SIZE NOTE: When using this with RepeatedRandomSampler, the batch_size
+    parameter refers to the total number of augmented samples, NOT the number of
+    unique images. For example, with batch_size=256 and n_views=2, you get 128
+    unique images, each appearing twice with different augmentations.
+
+    How it works:
+    1. RepeatedRandomSampler produces indices like [0,0,1,1,2,2,...] (for n_views=2)
+    2. DataLoader loads the same image multiple times
+    3. This transform applies a different augmentation each time using round-robin
 
     Args:
-        transforms: List of transforms, one for each view
+        transforms: List of transforms, one for each view. The counter cycles
+                   through these transforms in order.
 
     Example:
-        transform = MultiViewTransform([
-            strong_augmentation,  # Applied to first view
-            weak_augmentation,    # Applied to second view
+        # With RepeatedRandomSampler(dataset, n_views=2)
+        transform = RoundRobinMultiViewTransform([
+            strong_augmentation,  # Applied to 1st occurrence of each image
+            weak_augmentation,    # Applied to 2nd occurrence of each image
         ])
+
+    Warning: The internal counter makes this transform stateful and not thread-safe.
     """
 
     def __init__(self, transforms):
@@ -662,6 +676,88 @@ class MultiViewTransform(v2.Transform):
         transform_idx = self.counter % self.n_transforms
         self.counter += 1
         return self.transforms[transform_idx](sample)
+
+
+class MultiViewTransform(v2.Transform):
+    """Creates multiple views from one sample by applying different transforms.
+
+    Takes a single sample and applies different transforms to create multiple
+    views, returning a list of complete sample dicts. Preserves all modifications
+    each transform makes (masks, augmentation params, metadata, etc.).
+
+    Implementation Note:
+        This transform uses shallow copy (dict.copy()) for the input sample before
+        applying each transform. This is efficient and safe because:
+        - The shallow copy shares references to the original tensors/objects
+        - Standard transforms create NEW tensors (e.g., through mul(), resize(),
+          crop()) rather than modifying inputs in-place
+        - The original sample remains unchanged
+
+    Consequences of shallow copy:
+        - Memory efficient: Original tensors are not duplicated unnecessarily
+        - Safe with torchvision transforms: All torchvision transforms and our
+          custom transforms follow the pattern of creating new tensors
+        - Caution: If using custom transforms that modify tensors in-place (using
+          operations like mul_(), add_() with underscore), views may interfere with
+          each other. Always use non-in-place operations in custom transforms.
+
+    Args:
+        transforms: Either a list or dict of transforms.
+                   - List: Returns a list of views in the same order
+                   - Dict: Returns a dict of views with the same keys
+
+    Returns:
+        Union[List[dict], Dict[str, dict]]:
+            - If transforms is a list: Returns a list of transformed sample dicts
+            - If transforms is a dict: Returns a dict of transformed sample dicts with same keys
+            Each dict contains NEW tensors, not references to the original.
+
+    Example:
+        # List input - returns list of views
+        transform = MultiViewTransform([
+            strong_augmentation,  # Creates first view with strong aug
+            weak_augmentation,    # Creates second view with weak aug
+        ])
+        # Input: {"image": img, "label": 0}
+        # Output: [{"image": img_strong, "label": 0}, {"image": img_weak, "label": 0}]
+
+        # Dict input - returns dict of named views
+        transform = MultiViewTransform({
+            "student": strong_augmentation,
+            "teacher": weak_augmentation,
+        })
+        # Input: {"image": img, "label": 0}
+        # Output: {"student": {"image": img_strong, "label": 0},
+        #          "teacher": {"image": img_weak, "label": 0}}
+    """
+
+    def __init__(self, transforms):
+        super().__init__()
+        self.transforms = transforms
+        self.return_dict = isinstance(transforms, dict)
+
+    def __call__(self, sample):
+        """Create multiple views by applying different transforms to the sample."""
+        if self.return_dict:
+            # Dict input - return dict of views
+            views = {}
+            for key, transform in self.transforms.items():
+                # Copy to avoid transforms modifying the original
+                sample_copy = sample.copy()
+                # Apply transform to entire dict
+                transformed = transform(sample_copy)
+                views[key] = transformed
+        else:
+            # List input - return list of views
+            views = []
+            for transform in self.transforms:
+                # Copy to avoid transforms modifying the original
+                sample_copy = sample.copy()
+                # Apply transform to entire dict
+                transformed = transform(sample_copy)
+                views.append(transformed)
+
+        return views
 
 
 class ContextTargetsMultiBlockMask(Transform):

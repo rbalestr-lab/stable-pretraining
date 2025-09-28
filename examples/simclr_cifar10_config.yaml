@@ -128,11 +128,7 @@ data:
     batch_size: 256
     num_workers: 8
     drop_last: true
-    sampler:
-      _target_: stable_pretraining.data.sampler.RepeatedRandomSampler
-      _partial_: true  # Make it partial so it receives dataset later
-      _recursive_: false  # IMPORTANT: Don't recursively instantiate nested configs
-      n_views: 2
+    shuffle: true  # Simple shuffle, no RepeatedRandomSampler needed
     dataset:
       _target_: stable_pretraining.data.datasets.FromTorchDataset
       names: ["image", "label"]

@@ -1,12 +1,12 @@
 """Utility functions for handling batch and outputs dictionaries in callbacks."""
 
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Optional, Union, Iterable
 
 from loguru import logger as logging
 
 
 def get_data_from_batch_or_outputs(
-    key: str,
+    key: Union[Iterable[str], str],
     batch: Dict[str, Any],
     outputs: Optional[Dict[str, Any]] = None,
     caller_name: str = "Callback",
@@ -19,7 +19,7 @@ def get_data_from_batch_or_outputs(
     a copy for outputs, we need to check both.
 
     Args:
-        key: The key to look for in the dictionaries
+        key: The key(s) to look for in the dictionaries
         batch: The original batch dictionary
         outputs: The outputs dictionary from training/validation step
         caller_name: Name of the calling function/class for logging
@@ -27,15 +27,25 @@ def get_data_from_batch_or_outputs(
     Returns:
         The data associated with the key, or None if not found
     """
-    # First check outputs (which contains the forward pass results)
-    if outputs is not None and key in outputs:
-        return outputs[key]
-    elif key in batch:
-        return batch[key]
-    else:
-        logging.warning(
-            f"{caller_name}: Key '{key}' not found in batch or outputs. "
-            f"Available batch keys: {list(batch.keys())}, "
-            f"Available output keys: {list(outputs.keys()) if outputs else 'None'}"
-        )
-        return None
+    output_as_list = True
+    if type(key) is str:
+        key = [key]
+        output_as_list = False
+    out = []
+    for k in key:
+        # First check outputs (which contains the forward pass results)
+        if outputs is not None and k in outputs:
+            out.append(outputs[k])
+        elif k in batch:
+            out.append(batch[k])
+        else:
+            msg = (
+                f"{caller_name}: Key '{k}' not found in batch or outputs. "
+                f"Available batch keys: {list(batch.keys())}, "
+                f"Available output keys: {list(outputs.keys()) if outputs else 'None'}"
+            )
+            logging.warning(msg)
+            raise ValueError(msg)
+    if output_as_list:
+        return out
+    return out[0]

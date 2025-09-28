@@ -4,6 +4,22 @@ _EMBEDDING_DIMENSION = {
     "hf_hub:edadaltocg/resnet50_cifar10": 2048,
 }
 
+TIMM_EMBEDDINGS = {
+    "vit_small_patch8_224": [
+        "blocks.0",
+        "blocks.1",
+        "blocks.2",
+        "blocks.3",
+        "blocks.4",
+        "blocks.5",
+        "blocks.6",
+        "blocks.7",
+        "blocks.8",
+        "blocks.9",
+        "blocks.10",
+        "blocks.11",
+    ]
+}
 TORCHVISION_EMBEDDINGS = {
     "vit_b_16": [
         "encoder.layers.encoder_layer_0",
@@ -326,6 +342,7 @@ TORCHVISION_EMBEDDINGS = {
         "features.7.2",
     ],
 }
+TIMM_EMBEDDINGS["vit_base_patch8_224"] = TIMM_EMBEDDINGS["vit_small_patch8_224"]
 TORCHVISION_EMBEDDINGS["convnext_base"] = TORCHVISION_EMBEDDINGS["convnext_large"]
 TORCHVISION_EMBEDDINGS["swin_v2_s"] = TORCHVISION_EMBEDDINGS["swin_v2_b"]
 TORCHVISION_EMBEDDINGS["vit_b_32"] = TORCHVISION_EMBEDDINGS["vit_b_16"]

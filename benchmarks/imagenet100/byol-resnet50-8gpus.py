@@ -6,6 +6,7 @@ from lightning.pytorch.loggers import WandbLogger
 
 import stable_pretraining as spt
 from stable_pretraining.data import transforms
+from stable_pretraining import forward
 import sys
 from pathlib import Path
 
@@ -65,11 +66,11 @@ val_dataset = spt.data.HFDataset(
 batch_size = 512  # Per GPU batch size (4096 / 8 GPUs)
 train_dataloader = torch.utils.data.DataLoader(
     dataset=train_dataset,
-    sampler=spt.data.sampler.RepeatedRandomSampler(train_dataset, n_views=2),
     batch_size=batch_size,
     num_workers=8,
     drop_last=True,
     persistent_workers=True,
+    shuffle=True,
 )
 val_dataloader = torch.utils.data.DataLoader(
     dataset=val_dataset,
@@ -79,34 +80,6 @@ val_dataloader = torch.utils.data.DataLoader(
 )
 
 data = spt.data.DataModule(train=train_dataloader, val=val_dataloader)
-
-
-def forward(self, batch, stage):
-    if self.training:
-        images = batch["image"]
-        sample_idx = batch["sample_idx"]
-
-        online_features = self.backbone.forward_student(images)
-        online_proj = self.projector.forward_student(online_features)
-        online_pred = self.predictor(online_proj)
-
-        with torch.no_grad():
-            target_features = self.backbone.forward_teacher(images)
-            target_proj = self.projector.forward_teacher(target_features)
-
-        online_pred_views = spt.data.fold_views(online_pred, sample_idx)
-        target_proj_views = spt.data.fold_views(target_proj, sample_idx)
-
-        loss_1 = self.byol_loss(online_pred_views[0], target_proj_views[1])
-        loss_2 = self.byol_loss(online_pred_views[1], target_proj_views[0])
-        batch["loss"] = (loss_1 + loss_2) / 2
-
-        batch["embedding"] = online_features.detach()
-    else:
-        batch["embedding"] = self.backbone.forward_student(batch["image"])
-
-    return batch
-
 
 backbone = spt.backbone.from_torchvision("resnet50", low_resolution=False, weights=None)
 backbone.fc = nn.Identity()
@@ -142,7 +115,7 @@ module = spt.Module(
     backbone=wrapped_backbone,
     projector=wrapped_projector,
     predictor=predictor,
-    forward=forward,
+    forward=forward.byol_forward,
     byol_loss=spt.losses.BYOLLoss(),
     optim={
         "optimizer": {

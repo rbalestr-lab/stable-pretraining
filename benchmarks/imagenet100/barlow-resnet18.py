@@ -5,6 +5,7 @@ import torchmetrics
 from lightning.pytorch.loggers import WandbLogger
 
 import stable_pretraining as spt
+from stable_pretraining import forward
 from stable_pretraining.data import transforms
 import sys
 from pathlib import Path
@@ -65,11 +66,11 @@ val_dataset = spt.data.HFDataset(
 batch_size = 256
 train_dataloader = torch.utils.data.DataLoader(
     dataset=train_dataset,
-    sampler=spt.data.sampler.RepeatedRandomSampler(train_dataset, n_views=2),
     batch_size=batch_size,
     num_workers=4,
     drop_last=True,
     persistent_workers=True,
+    shuffle=True,
 )
 val_dataloader = torch.utils.data.DataLoader(
     dataset=val_dataset,
@@ -79,17 +80,6 @@ val_dataloader = torch.utils.data.DataLoader(
 )
 
 data = spt.data.DataModule(train=train_dataloader, val=val_dataloader)
-
-
-def forward(self, batch, stage):
-    out = {}
-    out["embedding"] = self.backbone(batch["image"])
-    if self.training:
-        proj = self.projector(out["embedding"])
-        views = spt.data.fold_views(proj, batch["sample_idx"])
-        out["loss"] = 0.1 * self.barlow_loss(views[0], views[1])  # scale_loss: 0.1
-    return out
-
 
 backbone = spt.backbone.from_torchvision(
     "resnet18",
@@ -110,8 +100,8 @@ projector = nn.Sequential(
 module = spt.Module(
     backbone=backbone,
     projector=projector,
-    forward=forward,
-    barlow_loss=spt.losses.BarlowTwinsLoss(lambd=0.005),  # scale_loss: 0.1
+    forward=forward.barlow_twins_forward,
+    barlow_loss=spt.losses.BarlowTwinsLoss(lambd=0.005),
     optim={
         "optimizer": {
             "type": "LARS",

@@ -7,16 +7,31 @@ import torch.distributed as dist
 
 
 class RepeatedRandomSampler(torch.utils.data.DistributedSampler):
-    r"""Samples elements randomly. If without replacement, then sample from a shuffled dataset.
+    """Sampler that repeats each dataset index consecutively for multi-view learning.
 
-    If with replacement, then user can specify :attr:`num_samples` to draw.
+    IMPORTANT: This sampler repeats each index n_views times in a row, creating
+    sequences like [0,0,0,0, 1,1,1,1, 2,2,2,2, ...] for n_views=4. This means:
+    - The DataLoader will load the SAME image multiple times consecutively
+    - Each repeated index goes through the transform pipeline separately
+    - BATCH SIZE: The batch_size in DataLoader refers to total augmented samples.
+      For example: batch_size=128 with n_views=8 means only 16 unique images,
+      each appearing 8 times with different augmentations
+
+    Designed to work with RoundRobinMultiViewTransform which uses a counter to apply different
+    augmentations to each repeated occurrence of the same image.
+
+    Example behavior with n_views=3:
+        Dataset indices: [0, 1, 2, 3, 4]
+        Sampler output:  [0,0,0, 1,1,1, 2,2,2, 3,3,3, 4,4,4]
 
     Args:
         data_source (Dataset): dataset to sample from
-        n_views (int): number of views to repeat each sample, default=1
+        n_views (int): number of times to repeat each index consecutively, default=1
         replacement (bool): samples are drawn on-demand with replacement if ``True``, default=``False``
-        num_samples (int): number of samples to draw, default=`len(dataset)`.
-        generator (Generator): Generator used in sampling.
+        seed (int): random seed for shuffling
+
+    Note: For an alternative approach that loads each image once, consider using
+    MultiViewTransform with a standard sampler.
     """
 
     def __init__(
