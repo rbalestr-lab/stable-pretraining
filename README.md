@@ -24,7 +24,8 @@ To reach flexibility, scalability and stability, we rely on battle-tested third 
 
 `stable-pretraining` simplifies complex ML workflows into 4 intuitive components:
 
-1. **data**: Your dataset must follow a dictionary-structured format where each sample is a dictionary with named fields (e.g., `{"image": ..., "label": ...}`). This ensures consistent behavior across all components. You have multiple options for creating datasets:
+### Data
+Your dataset must follow a dictionary-structured format where each sample is a dictionary with named fields (e.g., `{"image": ..., "label": ...}`). This ensures consistent behavior across all components. You have multiple options for creating datasets:
 
     - **HuggingFace datasets** (if available on the Hub):
     ```python
@@ -48,11 +49,12 @@ To reach flexibility, scalability and stability, we rely on battle-tested third 
 
     - **Custom datasets**: Any dataset that returns dictionaries
 
-    Once created, wrap your dataloaders in our `DataModule` for precise logging:
     ```python
     datamodule = spt.data.DataModule(train=train_dataloader, val=val_dataloader)
     ```
-2. **module**: The key differentiator from PyTorch Lightning - **you only define the `forward` function**, not `training_step`! This unified approach computes losses and generates useful quantities that can be retrieved for monitoring and analysis:
+
+### Module
+The key differentiator from PyTorch Lightning - **you only define the `forward` function**, not `training_step`! This unified approach computes losses and generates useful quantities that can be retrieved for monitoring and analysis:
 
     ```python
     # Use the pre-built forward functions from stable_pretraining
@@ -98,7 +100,8 @@ To reach flexibility, scalability and stability, we rely on battle-tested third 
     - Return a dictionary with a `"loss"` key for training
     - All model components are passed as kwargs to `spt.Module`
 
-3. **callbacks**: Monitor and evaluate your models in real-time during training. Callbacks are key ingredients of `stable-pretraining`, providing rich insights without interrupting your training flow:
+### Callbacks
+Monitor and evaluate your models in real-time during training. Callbacks are key ingredients of `stable-pretraining`, providing rich insights without interrupting your training flow:
 
     ```python
     # Monitor SSL representations with a linear probe
@@ -128,8 +131,10 @@ To reach flexibility, scalability and stability, we rely on battle-tested third 
 
     **Why callbacks matter:** Get real-time feedback on representation quality, catch issues like collapse early, and track multiple metrics simultaneously for deeper insights.
 
-4. **trainer**: Orchestrate everything together with PyTorch Lightning's `Trainer`:
-    ```
+### Trainer
+Orchestrate everything together with PyTorch Lightning's `Trainer`:
+
+    ```python
     trainer = pl.Trainer(
             max_epochs=10,
             num_sanity_val_steps=1,
