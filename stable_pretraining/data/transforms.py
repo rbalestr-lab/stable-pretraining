@@ -685,11 +685,28 @@ class MultiViewTransform(v2.Transform):
     views, returning a list of complete sample dicts. Preserves all modifications
     each transform makes (masks, augmentation params, metadata, etc.).
 
+    Implementation Note:
+        This transform uses shallow copy (dict.copy()) for the input sample before
+        applying each transform. This is efficient and safe because:
+        - The shallow copy shares references to the original tensors/objects
+        - Standard transforms create NEW tensors (e.g., through mul(), resize(),
+          crop()) rather than modifying inputs in-place
+        - The original sample remains unchanged
+
+    Consequences of shallow copy:
+        - Memory efficient: Original tensors are not duplicated unnecessarily
+        - Safe with torchvision transforms: All torchvision transforms and our
+          custom transforms follow the pattern of creating new tensors
+        - Caution: If using custom transforms that modify tensors in-place (using
+          operations like mul_(), add_() with underscore), views may interfere with
+          each other. Always use non-in-place operations in custom transforms.
+
     Args:
         transforms: List of transforms, one per view to create.
 
     Returns:
         List[dict]: A list of transformed sample dicts, one per view.
+                   Each dict contains NEW tensors, not references to the original.
 
     Example:
         transform = MultiViewTransform([
@@ -698,6 +715,7 @@ class MultiViewTransform(v2.Transform):
         ])
         # Input: {"image": img, "label": 0}
         # Output: [{"image": img_strong, "label": 0}, {"image": img_weak, "label": 0}]
+        # Note: img_strong and img_weak are NEW tensors, original img is unchanged
     """
 
     def __init__(self, transforms):
