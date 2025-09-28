@@ -24,7 +24,7 @@ To reach flexibility, scalability and stability, we rely on battle-tested third 
 
 `stable-pretraining` simplifies complex ML workflows into 4 intuitive components:
 
-### Data
+### 1 - Data
 Your dataset must follow a dictionary-structured format where each sample is a dictionary with named fields (e.g., `{"image": ..., "label": ...}`). This ensures consistent behavior across all components. You have multiple options for creating datasets:
 
 - **HuggingFace datasets** (if available on the Hub):
@@ -53,7 +53,7 @@ train_dataset = spt.data.FromTorchDataset(
 datamodule = spt.data.DataModule(train=train_dataloader, val=val_dataloader)
 ```
 
-### Module
+### 2 - Module
 The key differentiator from PyTorch Lightning - **you only define the `forward` function**, not `training_step`! This unified approach computes losses and generates useful quantities that can be retrieved for monitoring and analysis:
 
 ```python
@@ -100,7 +100,7 @@ def forward(self, batch, stage):
 - Return a dictionary with a `"loss"` key for training
 - All model components are passed as kwargs to `spt.Module`
 
-### Callbacks
+### 3 - Callbacks
 Monitor and evaluate your models in real-time during training. Callbacks are key ingredients of `stable-pretraining`, providing rich insights without interrupting your training flow:
 
 ```python
@@ -131,7 +131,7 @@ Callbacks are powered by an intelligent queue management system that automatical
 
 **Why callbacks matter:** Get real-time feedback on representation quality, catch issues like collapse early, and track multiple metrics simultaneously for deeper insights.
 
-### Trainer
+### 4 - Trainer
 Orchestrate everything together with PyTorch Lightning's `Trainer`:
 
 ```python
