@@ -353,28 +353,42 @@ def dino_forward(self, batch, stage):
     # Assuming first 2 views are global, rest are local
     views = spt.data.fold_views(images, batch["sample_idx"])
     n_global = 2
-    n_views = len(views)
-    batch_size = views[0].shape[0]  # More efficient than unique()
+    n_local = len(views) - n_global
+    batch_size = views[0].shape[0]
 
-    # Concatenate views for batch processing
-    global_views = torch.cat(views[:n_global])
-    all_views = torch.cat(views)
-
-    # Student processes all views
-    student_features = self.backbone.forward_student(all_views)
-    student_logits = self.projector.forward_student(student_features)
+    # Process views by size groups (no concatenation needed)
+    global_views = views[:n_global]
+    local_views = views[n_global:] if n_local > 0 else []
 
     # Teacher processes only global views
     with torch.no_grad():
-        teacher_features = self.backbone.forward_teacher(global_views)
+        # Stack global views and
+        global_batch = torch.stack(global_views)
+        teacher_features = self.backbone.forward_teacher(global_batch)
         teacher_logits = self.projector.forward_teacher(teacher_features)
+        teacher_logits = teacher_logits.view(n_global, batch_size, -1)
 
-    # Reshape to [n_views, batch_size, dim] for DINOLoss
-    # DINOLoss needs this shape to compute cross-entropy between views
-    student_logits = student_logits.view(n_views, batch_size, -1)
-    teacher_logits = teacher_logits.view(n_global, batch_size, -1)
+    # Student processes all views
+    student_logits_list = []
 
-    # Check if dino_loss is provided
+    # Process global views through student
+    global_batch = torch.stack(global_views)
+    student_features = self.backbone.forward_student(global_batch)
+    student_global_logits = self.projector.forward_student(student_features)
+    student_global_logits = student_global_logits.view(n_global, batch_size, -1)
+    student_logits_list.append(student_global_logits)
+
+    # Process local views through student (if any)
+    if local_views:
+        local_batch = torch.stack(local_views)
+        student_features = self.backbone.forward_student(local_batch)
+        student_local_logits = self.projector.forward_student(student_features)
+        student_local_logits = student_local_logits.view(n_local, batch_size, -1)
+        student_logits_list.append(student_local_logits)
+
+    # Concatenate student logits along the view dimension
+    student_logits = torch.cat(student_logits_list, dim=0)  # [n_views, batch_size, dim]
+
     if not hasattr(self, "dino_loss"):
         raise ValueError(
             "dino_forward requires 'dino_loss' to be provided (e.g., spt.losses.DINOLoss()). "
@@ -382,8 +396,6 @@ def dino_forward(self, batch, stage):
         )
 
     # Temperature scheduling for teacher
-    # Note: self.current_epoch is provided by PyTorch Lightning's LightningModule base class
-    # It returns self.trainer.current_epoch if trainer exists, otherwise 0
     if (
         hasattr(self, "warmup_epochs_temperature_teacher")
         and hasattr(self, "warmup_temperature_teacher")

@@ -85,7 +85,7 @@ backbone.fc = nn.Identity()
 wrapped_backbone = spt.TeacherStudentWrapper(
     backbone,
     warm_init=True,
-    base_ema_coefficient=0.99,  # Faster updates for CIFAR-10
+    base_ema_coefficient=0.996,
     final_ema_coefficient=1.0,
 )
 
@@ -98,13 +98,13 @@ projector = nn.Sequential(
     nn.Linear(2048, 2048),
     nn.BatchNorm1d(2048),
     nn.ReLU(inplace=True),
-    nn.Linear(2048, 2048),  # Bottleneck to 256 dim
+    nn.Linear(2048, 2048),
 )
 
 wrapped_projector = spt.TeacherStudentWrapper(
     projector,
     warm_init=True,
-    base_ema_coefficient=0.99,  # Faster updates for CIFAR-10
+    base_ema_coefficient=0.996,
     final_ema_coefficient=1.0,
 )
 
