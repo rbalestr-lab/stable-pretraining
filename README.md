@@ -165,6 +165,7 @@ from torch import nn
 from lightning.pytorch.loggers import WandbLogger
 
 import stable_pretraining as spt
+from stable_pretraining import forward
 from stable_pretraining.data import transforms
 
 # Define augmentations for SimCLR (creates 2 views of each image)
@@ -227,9 +228,6 @@ val_dataloader = torch.utils.data.DataLoader(
 )
 
 data = spt.data.DataModule(train=train_dataloader, val=val_dataloader)
-
-# Import forward functions
-from stable_pretraining import forward
 
 # Build model components
 backbone = spt.backbone.from_torchvision("resnet18", low_resolution=True)
