@@ -16,10 +16,10 @@ sys.path.append(str(Path(__file__).parent.parent))
 from utils import get_data_dir
 
 # DINO multi-crop transform: 2 global + 6 local crops for ImageNet
+# Using dict structure for clear identification of view types
 dino_transform = transforms.MultiViewTransform(
-    [
-        # First global crop (224x224)
-        transforms.Compose(
+    {
+        "global_1": transforms.Compose(
             transforms.RGB(),
             transforms.RandomResizedCrop((224, 224), scale=(0.4, 1.0)),
             transforms.ColorJitter(
@@ -30,8 +30,7 @@ dino_transform = transforms.MultiViewTransform(
             transforms.RandomHorizontalFlip(p=0.5),
             transforms.ToImage(**spt.data.static.ImageNet),
         ),
-        # Second global crop (224x224)
-        transforms.Compose(
+        "global_2": transforms.Compose(
             transforms.RGB(),
             transforms.RandomResizedCrop((224, 224), scale=(0.4, 1.0)),
             transforms.ColorJitter(
@@ -43,8 +42,7 @@ dino_transform = transforms.MultiViewTransform(
             transforms.RandomHorizontalFlip(p=0.5),
             transforms.ToImage(**spt.data.static.ImageNet),
         ),
-        # Local crops (96x96) - 6 of them
-        transforms.Compose(
+        "local_1": transforms.Compose(
             transforms.RGB(),
             transforms.RandomResizedCrop((96, 96), scale=(0.05, 0.4)),
             transforms.ColorJitter(
@@ -55,7 +53,7 @@ dino_transform = transforms.MultiViewTransform(
             transforms.RandomHorizontalFlip(p=0.5),
             transforms.ToImage(**spt.data.static.ImageNet),
         ),
-        transforms.Compose(
+        "local_2": transforms.Compose(
             transforms.RGB(),
             transforms.RandomResizedCrop((96, 96), scale=(0.05, 0.4)),
             transforms.ColorJitter(
@@ -66,7 +64,7 @@ dino_transform = transforms.MultiViewTransform(
             transforms.RandomHorizontalFlip(p=0.5),
             transforms.ToImage(**spt.data.static.ImageNet),
         ),
-        transforms.Compose(
+        "local_3": transforms.Compose(
             transforms.RGB(),
             transforms.RandomResizedCrop((96, 96), scale=(0.05, 0.4)),
             transforms.ColorJitter(
@@ -77,7 +75,7 @@ dino_transform = transforms.MultiViewTransform(
             transforms.RandomHorizontalFlip(p=0.5),
             transforms.ToImage(**spt.data.static.ImageNet),
         ),
-        transforms.Compose(
+        "local_4": transforms.Compose(
             transforms.RGB(),
             transforms.RandomResizedCrop((96, 96), scale=(0.05, 0.4)),
             transforms.ColorJitter(
@@ -88,7 +86,7 @@ dino_transform = transforms.MultiViewTransform(
             transforms.RandomHorizontalFlip(p=0.5),
             transforms.ToImage(**spt.data.static.ImageNet),
         ),
-        transforms.Compose(
+        "local_5": transforms.Compose(
             transforms.RGB(),
             transforms.RandomResizedCrop((96, 96), scale=(0.05, 0.4)),
             transforms.ColorJitter(
@@ -99,7 +97,7 @@ dino_transform = transforms.MultiViewTransform(
             transforms.RandomHorizontalFlip(p=0.5),
             transforms.ToImage(**spt.data.static.ImageNet),
         ),
-        transforms.Compose(
+        "local_6": transforms.Compose(
             transforms.RGB(),
             transforms.RandomResizedCrop((96, 96), scale=(0.05, 0.4)),
             transforms.ColorJitter(
@@ -110,7 +108,7 @@ dino_transform = transforms.MultiViewTransform(
             transforms.RandomHorizontalFlip(p=0.5),
             transforms.ToImage(**spt.data.static.ImageNet),
         ),
-    ]
+    }
 )
 
 val_transform = transforms.Compose(
@@ -136,19 +134,19 @@ val_dataset = spt.data.HFDataset(
 )
 
 # Per-GPU batch size for 8 GPUs
-# DINO typically uses smaller batch size due to multi-crop (8 views per sample)
-# Total effective batch size: 64 * 8 GPUs * 8 views = 4096 images
+# With MultiViewTransform, batch_size refers to unique images
+# Each image produces 8 views (2 global + 6 local)
 batch_size = 64
 world_size = 8
 total_batch_size = batch_size * world_size
 
 train_dataloader = torch.utils.data.DataLoader(
     dataset=train_dataset,
-    sampler=spt.data.sampler.RepeatedRandomSampler(train_dataset, n_views=8),
     batch_size=batch_size,
     num_workers=8,
     drop_last=True,
     persistent_workers=True,
+    shuffle=True,
 )
 val_dataloader = torch.utils.data.DataLoader(
     dataset=val_dataset,

@@ -466,53 +466,81 @@ def dino_forward(self, batch, stage):
     """
     out = {}
 
-    views = _get_views_list(batch)
-    if views is not None:
-        # Multi-view training
-        n_views = len(views)
-        n_global = min(2, n_views)  # First 2 views are global (or all if less than 2)
-        n_local = n_views - n_global
+    # Check if batch is dict of named views
+    if isinstance(batch, dict) and "image" not in batch:
+        # Dict of named views - separate by "global" or "local" in key
+        global_views = []
+        local_views = []
 
-        # Concatenate labels for callbacks
-        if "label" in views[0]:
-            out["label"] = torch.cat([view["label"] for view in views], dim=0)
+        for key, view in batch.items():
+            if "global" in key:
+                global_views.append(view)
+            elif "local" in key:
+                local_views.append(view)
 
-        if not self.training:
-            # During validation, just process all views through teacher
-            all_images = torch.cat([view["image"] for view in views], dim=0)
-            with torch.no_grad():
-                teacher_features = self.backbone.forward_teacher(all_images)
-            out["embedding"] = teacher_features.detach()
-            return out
+        n_global = len(global_views)
+        n_local = len(local_views)
+        all_views = global_views + local_views
 
-        # Training: separate global and local views
-        global_images = torch.cat([views[i]["image"] for i in range(n_global)], dim=0)
-        batch_size = views[0]["image"].shape[0]
+    elif isinstance(batch, list):
+        # List of views - assume first 2 are global
+        all_views = batch
+        n_global = min(2, len(all_views))
+        n_local = len(all_views) - n_global
+        global_views = all_views[:n_global]
+        local_views = all_views[n_global:] if n_local > 0 else []
 
-        # Teacher processes only global views
+    else:
+        # Single view validation
+        images = batch["image"]
+        if "label" in batch:
+            out["label"] = batch["label"]
+
         with torch.no_grad():
-            teacher_features = self.backbone.forward_teacher(global_images)
-            teacher_logits = self.projector.forward_teacher(teacher_features)
-            teacher_logits = teacher_logits.view(n_global, batch_size, -1)
+            teacher_features = self.backbone.forward_teacher(images)
+        out["embedding"] = teacher_features.detach()
+        return out
 
-        # Student processes all views
-        student_logits_list = []
+    # Multi-view processing
+    batch_size = all_views[0]["image"].shape[0]
 
-        # Process global views through student
-        student_features = self.backbone.forward_student(global_images)
-        student_global_logits = self.projector.forward_student(student_features)
-        student_global_logits = student_global_logits.view(n_global, batch_size, -1)
-        student_logits_list.append(student_global_logits)
+    # Concatenate labels for callbacks
+    if "label" in all_views[0]:
+        out["label"] = torch.cat([view["label"] for view in all_views], dim=0)
 
-        # Process local views through student (if any)
-        if n_local > 0:
-            local_images = torch.cat(
-                [views[i]["image"] for i in range(n_global, n_views)], dim=0
-            )
-            student_features = self.backbone.forward_student(local_images)
-            student_local_logits = self.projector.forward_student(student_features)
-            student_local_logits = student_local_logits.view(n_local, batch_size, -1)
-            student_logits_list.append(student_local_logits)
+    if not self.training:
+        # During validation, just process all views through teacher
+        all_images = torch.cat([view["image"] for view in all_views], dim=0)
+        with torch.no_grad():
+            teacher_features = self.backbone.forward_teacher(all_images)
+        out["embedding"] = teacher_features.detach()
+        return out
+
+    # Training: separate processing for global and local views
+    global_images = torch.cat([view["image"] for view in global_views], dim=0)
+
+    # Teacher processes only global views
+    with torch.no_grad():
+        teacher_features = self.backbone.forward_teacher(global_images)
+        teacher_logits = self.projector.forward_teacher(teacher_features)
+        teacher_logits = teacher_logits.view(n_global, batch_size, -1)
+
+    # Student processes all views
+    student_logits_list = []
+
+    # Process global views through student
+    student_features = self.backbone.forward_student(global_images)
+    student_global_logits = self.projector.forward_student(student_features)
+    student_global_logits = student_global_logits.view(n_global, batch_size, -1)
+    student_logits_list.append(student_global_logits)
+
+    # Process local views through student (if any)
+    if n_local > 0:
+        local_images = torch.cat([view["image"] for view in local_views], dim=0)
+        student_features = self.backbone.forward_student(local_images)
+        student_local_logits = self.projector.forward_student(student_features)
+        student_local_logits = student_local_logits.view(n_local, batch_size, -1)
+        student_logits_list.append(student_local_logits)
 
         # Concatenate student logits along the view dimension
         student_logits = torch.cat(
