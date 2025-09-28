@@ -64,7 +64,11 @@ To reach flexibility, scalability and stability, we rely on battle-tested third 
         projector=projector,
         forward=forward.simclr_forward,  # Or byol_forward, vicreg_forward, etc.
         simclr_loss=spt.losses.NTXEntLoss(temperature=0.5),
-        # ... other components
+        optim={
+            "optimizer": {"type": "Adam", "lr": 0.001},
+            "scheduler": {"type": "CosineAnnealing"},
+            "interval": "epoch"
+        }
     )
     ```
 
@@ -92,25 +96,7 @@ To reach flexibility, scalability and stability, we rely on battle-tested third 
     - The `forward` method defines both the loss and any quantities to monitor
     - No need to override `training_step`, `validation_step`, etc.
     - Return a dictionary with a `"loss"` key for training
-    - All model components are passed as kwargs to `spt.Module`:
-
-    ```python
-    # First define your model components
-    backbone = spt.backbone.from_torchvision("resnet18")
-    projector = torch.nn.Linear(512, 128)
-
-    # Then create the module with all components
-    module = spt.Module(
-        backbone=backbone,
-        projector=projector,
-        forward=forward,  # The forward function defined above
-        simclr_loss=spt.losses.NTXEntLoss(temperature=0.5),
-        optim={
-            "optimizer": {"type": "Adam", "lr": 0.001},
-            "scheduler": {"type": "CosineAnnealing"}
-        }
-    )
-    ```
+    - All model components are passed as kwargs to `spt.Module`
 
 3. **callbacks**: Monitor and evaluate your models in real-time during training. Callbacks are key ingredients of `stable-pretraining`, providing rich insights without interrupting your training flow:
 
@@ -140,10 +126,7 @@ To reach flexibility, scalability and stability, we rely on battle-tested third 
 
     Callbacks are powered by an intelligent queue management system that automatically shares memory between callbacks monitoring the same data thus eliminating redundant computations.
 
-    **Why callbacks matter:**
-    - **Real-time feedback**: Know if your SSL method is learning useful representations.
-    - **Debugging made easy**: Catch issues like representation collapse early.
-    - **Research insights**: Track multiple metrics simultaneously for deeper understanding.
+    **Why callbacks matter:** Get real-time feedback on representation quality, catch issues like collapse early, and track multiple metrics simultaneously for deeper insights.
 
 4. **trainer**: Orchestrate everything together with PyTorch Lightning's `Trainer`:
     ```
