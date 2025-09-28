@@ -641,6 +641,11 @@ class RoundRobinMultiViewTransform(v2.Transform):
     each image index appears multiple times consecutively in the batch. It uses an
     internal counter to apply different augmentations to each repeated occurrence.
 
+    BATCH SIZE NOTE: When using this with RepeatedRandomSampler, the batch_size
+    parameter refers to the total number of augmented samples, NOT the number of
+    unique images. For example, with batch_size=256 and n_views=2, you get 128
+    unique images, each appearing twice with different augmentations.
+
     How it works:
     1. RepeatedRandomSampler produces indices like [0,0,1,1,2,2,...] (for n_views=2)
     2. DataLoader loads the same image multiple times
