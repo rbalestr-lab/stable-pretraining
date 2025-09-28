@@ -142,7 +142,7 @@ data:
         train: true
         download: true
       transform:
-        _target_: stable_pretraining.data.transforms.MultiViewTransform
+        _target_: stable_pretraining.data.transforms.RoundRobinMultiViewTransform
         transforms:
           # First augmentation view - using _args_ for Compose
           - _target_: stable_pretraining.data.transforms.Compose

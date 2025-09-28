@@ -1,4 +1,4 @@
-"""SimCLR training on CIFAR10."""
+"""SimCLR training on CIFAR10 using efficient multi-view approach."""
 
 import lightning as pl
 import torch
@@ -9,15 +9,40 @@ from lightning.pytorch.callbacks import LearningRateMonitor
 from torch import nn
 
 import stable_pretraining as spt
-from stable_pretraining import forward
 from stable_pretraining.data import transforms
+from stable_pretraining.data.transforms import MultiViewTransform
 import sys
 from pathlib import Path
 
 sys.path.append(str(Path(__file__).parent.parent))
 from utils import get_data_dir
 
-simclr_transform = transforms.MultiViewTransform(
+
+def simclr_forward_efficient(self, batch, stage):
+    """SimCLR forward for multi-view data."""
+    out = {}
+
+    if isinstance(batch, list):
+        # Multi-view training - batch is a list of view dicts
+        embeddings = [self.backbone(view["image"]) for view in batch]
+        out["embedding"] = torch.cat(embeddings, dim=0)
+
+        # Concatenate labels for callbacks (probes need this)
+        out["label"] = torch.cat([view["label"] for view in batch], dim=0)
+
+        if self.training:
+            projections = [self.projector(emb) for emb in embeddings]
+            out["loss"] = self.simclr_loss(projections[0], projections[1])
+    else:
+        # Single-view validation
+        out["embedding"] = self.backbone(batch["image"])
+        if "label" in batch:
+            out["label"] = batch["label"]
+
+    return out
+
+
+simclr_transform = MultiViewTransform(
     [
         transforms.Compose(
             transforms.RGB(),
@@ -69,10 +94,10 @@ val_dataset = spt.data.FromTorchDataset(
 
 train_dataloader = torch.utils.data.DataLoader(
     dataset=train_dataset,
-    sampler=spt.data.sampler.RepeatedRandomSampler(train_dataset, n_views=2),
-    batch_size=256,
+    batch_size=128,  # 128 unique images (same as original with batch_size=256, n_views=2)
     num_workers=8,
     drop_last=True,
+    shuffle=True,
 )
 val_dataloader = torch.utils.data.DataLoader(
     dataset=val_dataset,
@@ -101,7 +126,7 @@ projector = nn.Sequential(
 module = spt.Module(
     backbone=backbone,
     projector=projector,
-    forward=forward.simclr_forward,
+    forward=simclr_forward_efficient,
     simclr_loss=spt.losses.NTXEntLoss(temperature=0.5),
     optim={
         "optimizer": {
@@ -140,7 +165,7 @@ knn_probe = spt.callbacks.OnlineKNN(
 
 wandb_logger = WandbLogger(
     entity="stable-ssl",
-    project="cifar10-simclr",
+    project="cifar10-simclr-efficient",
     log_model=False,
 )
 
