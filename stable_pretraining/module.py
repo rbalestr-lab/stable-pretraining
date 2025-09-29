@@ -61,7 +61,7 @@ class Module(pl.LightningModule):
     - Returns the `state` dict from `forward` unchanged for logging/inspection.
     """
 
-    def __init__(self, *args, forward: callable, hparams: dict = None, **kwargs):
+    def __init__(self, *args, forward: callable = None, hparams: dict = None, **kwargs):
         super().__init__()
         logging.info("Initializing Module configuration...")
 
@@ -85,7 +85,17 @@ class Module(pl.LightningModule):
             self.save_hyperparameters(hparams)
 
         logging.info("Setting custom forward method.")
-        setattr(self, "forward", types.MethodType(forward, self))
+        if forward is None:
+            logging.warning(
+                "You didn't pass a forward method"
+                "This will fail unless you implemented your own Module class"
+            )
+        elif not callable(forward):
+            msg = "You passed a `forward' object that is not callable!"
+            logging.warning(msg)
+            raise ValueError(msg)
+        else:
+            setattr(self, "forward", types.MethodType(forward, self))
 
         for key, value in kwargs.items():
             logging.info(f"Setting attribute: self.{key} = {type(value)}")
