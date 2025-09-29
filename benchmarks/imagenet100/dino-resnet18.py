@@ -1,5 +1,3 @@
-"""DINO training on ImageNet-100."""
-
 import lightning as pl
 import torch
 import torchmetrics
@@ -15,11 +13,9 @@ from pathlib import Path
 sys.path.append(str(Path(__file__).parent.parent))
 from utils import get_data_dir
 
-# DINO multi-crop transform: 2 global + 6 local crops for ImageNet
 dino_transform = transforms.MultiViewTransform(
-    [
-        # First global crop (224x224)
-        transforms.Compose(
+    {
+        "global_1": transforms.Compose(
             transforms.RGB(),
             transforms.RandomResizedCrop((224, 224), scale=(0.4, 1.0)),
             transforms.ColorJitter(
@@ -30,8 +26,7 @@ dino_transform = transforms.MultiViewTransform(
             transforms.RandomHorizontalFlip(p=0.5),
             transforms.ToImage(**spt.data.static.ImageNet),
         ),
-        # Second global crop (224x224)
-        transforms.Compose(
+        "global_2": transforms.Compose(
             transforms.RGB(),
             transforms.RandomResizedCrop((224, 224), scale=(0.4, 1.0)),
             transforms.ColorJitter(
@@ -43,8 +38,7 @@ dino_transform = transforms.MultiViewTransform(
             transforms.RandomHorizontalFlip(p=0.5),
             transforms.ToImage(**spt.data.static.ImageNet),
         ),
-        # Local crops (96x96) - 6 of them
-        transforms.Compose(
+        "local_1": transforms.Compose(
             transforms.RGB(),
             transforms.RandomResizedCrop((96, 96), scale=(0.05, 0.4)),
             transforms.ColorJitter(
@@ -55,7 +49,7 @@ dino_transform = transforms.MultiViewTransform(
             transforms.RandomHorizontalFlip(p=0.5),
             transforms.ToImage(**spt.data.static.ImageNet),
         ),
-        transforms.Compose(
+        "local_2": transforms.Compose(
             transforms.RGB(),
             transforms.RandomResizedCrop((96, 96), scale=(0.05, 0.4)),
             transforms.ColorJitter(
@@ -66,7 +60,7 @@ dino_transform = transforms.MultiViewTransform(
             transforms.RandomHorizontalFlip(p=0.5),
             transforms.ToImage(**spt.data.static.ImageNet),
         ),
-        transforms.Compose(
+        "local_3": transforms.Compose(
             transforms.RGB(),
             transforms.RandomResizedCrop((96, 96), scale=(0.05, 0.4)),
             transforms.ColorJitter(
@@ -77,7 +71,7 @@ dino_transform = transforms.MultiViewTransform(
             transforms.RandomHorizontalFlip(p=0.5),
             transforms.ToImage(**spt.data.static.ImageNet),
         ),
-        transforms.Compose(
+        "local_4": transforms.Compose(
             transforms.RGB(),
             transforms.RandomResizedCrop((96, 96), scale=(0.05, 0.4)),
             transforms.ColorJitter(
@@ -88,7 +82,7 @@ dino_transform = transforms.MultiViewTransform(
             transforms.RandomHorizontalFlip(p=0.5),
             transforms.ToImage(**spt.data.static.ImageNet),
         ),
-        transforms.Compose(
+        "local_5": transforms.Compose(
             transforms.RGB(),
             transforms.RandomResizedCrop((96, 96), scale=(0.05, 0.4)),
             transforms.ColorJitter(
@@ -99,7 +93,7 @@ dino_transform = transforms.MultiViewTransform(
             transforms.RandomHorizontalFlip(p=0.5),
             transforms.ToImage(**spt.data.static.ImageNet),
         ),
-        transforms.Compose(
+        "local_6": transforms.Compose(
             transforms.RGB(),
             transforms.RandomResizedCrop((96, 96), scale=(0.05, 0.4)),
             transforms.ColorJitter(
@@ -110,7 +104,7 @@ dino_transform = transforms.MultiViewTransform(
             transforms.RandomHorizontalFlip(p=0.5),
             transforms.ToImage(**spt.data.static.ImageNet),
         ),
-    ]
+    }
 )
 
 val_transform = transforms.Compose(
@@ -135,44 +129,35 @@ val_dataset = spt.data.HFDataset(
     transform=val_transform,
 )
 
-# Smaller batch size due to multi-crop (8 views per sample)
-batch_size = 64  # 64 * 8 views = 512 effective images
-world_size = 1
-total_batch_size = batch_size * world_size
+batch_size = 256
 
 train_dataloader = torch.utils.data.DataLoader(
     dataset=train_dataset,
-    sampler=spt.data.sampler.RepeatedRandomSampler(train_dataset, n_views=8),
     batch_size=batch_size,
     num_workers=4,
     drop_last=True,
     persistent_workers=True,
+    shuffle=True,
 )
 val_dataloader = torch.utils.data.DataLoader(
     dataset=val_dataset,
-    batch_size=256,
+    batch_size=batch_size,
     num_workers=4,
     persistent_workers=True,
 )
 
 data = spt.data.DataModule(train=train_dataloader, val=val_dataloader)
 
-# Create backbone with teacher-student wrapper
-backbone = spt.backbone.from_torchvision(
-    "resnet18",
-    low_resolution=False,
-)
-backbone.fc = torch.nn.Identity()
+backbone = spt.backbone.from_torchvision("resnet18", low_resolution=False, weights=None)
+backbone.fc = nn.Identity()
 
 wrapped_backbone = spt.TeacherStudentWrapper(
     backbone,
     warm_init=True,
-    base_ema_coefficient=0.996,
+    base_ema_coefficient=0.9995,
     final_ema_coefficient=1.0,
 )
 
-# Create projector with teacher-student wrapper
-# DINO uses 3-layer MLP with larger dimensions for ImageNet
 projector = nn.Sequential(
     nn.Linear(512, 2048),
     nn.BatchNorm1d(2048),
@@ -180,47 +165,44 @@ projector = nn.Sequential(
     nn.Linear(2048, 2048),
     nn.BatchNorm1d(2048),
     nn.GELU(),
-    nn.Linear(2048, 65536),  # Large output dimension for ImageNet
+    nn.Linear(2048, 256),
 )
 
 wrapped_projector = spt.TeacherStudentWrapper(
     projector,
     warm_init=True,
-    base_ema_coefficient=0.996,
+    base_ema_coefficient=0.9995,
     final_ema_coefficient=1.0,
 )
-
-# Learning rate scaled by batch size: base_lr * (batch_size / 256)
-lr = 0.0005 * (total_batch_size / 256)
 
 module = spt.Module(
     backbone=wrapped_backbone,
     projector=wrapped_projector,
     forward=dino_forward,
     dino_loss=spt.losses.DINOLoss(
+        out_dim=4096,
         temperature_student=0.1,
         center_momentum=0.9,
     ),
-    # DINO-specific temperature parameters
     warmup_temperature_teacher=0.04,
-    temperature_teacher=0.04,  # No warmup for smaller dataset
-    warmup_epochs_temperature_teacher=10,
+    temperature_teacher=0.07,
+    warmup_epochs_temperature_teacher=50,
     optim={
         "optimizer": {
-            "type": "AdamW",
-            "lr": lr,
-            "weight_decay": 0.04,
-            "betas": [0.9, 0.95],
+            "type": "LARS",
+            "lr": 0.3,
+            "weight_decay": 1e-6,
+            "clip_lr": True,
+            "eta": 0.02,
+            "exclude_bias_n_norm": True,
         },
         "scheduler": {
             "type": "LinearWarmupCosineAnnealing",
-            "warmup_steps": 10,
         },
         "interval": "epoch",
     },
 )
 
-# Teacher-Student callback for EMA updates
 teacher_student_callback = spt.callbacks.TeacherStudentCallback(
     update_frequency=1,
     update_after_backward=False,
@@ -251,16 +233,19 @@ knn_probe = spt.callbacks.OnlineKNN(
 wandb_logger = WandbLogger(
     entity="stable-ssl",
     project="imagenet100-dino",
-    name="dino-resnet18",
+    name="dino-resnet18-solo",
     log_model=False,
 )
 
 trainer = pl.Trainer(
-    max_epochs=100,
+    max_epochs=400,
     num_sanity_val_steps=0,
     callbacks=[teacher_student_callback, linear_probe, knn_probe],
     precision="16-mixed",
     logger=wandb_logger,
+    devices=1,
+    sync_batchnorm=True,
+    accelerator="gpu",
 )
 
 manager = spt.Manager(trainer=trainer, module=module, data=data)

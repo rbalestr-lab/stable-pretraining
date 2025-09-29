@@ -120,7 +120,7 @@ module = spt.Module(
     optim={
         "optimizer": {
             "type": "LARS",
-            "lr": 0.5 * 4096 / 256,  # Scale LR for global batch size of 4096
+            "lr": 5 * 4096 / 256,  # Scale LR for global batch size of 4096
             "weight_decay": 1e-6,
             "clip_lr": True,
             "eta": 0.02,

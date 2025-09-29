@@ -1,5 +1,3 @@
-"""DINO training on ImageNet-100 with 8 GPUs."""
-
 import lightning as pl
 import torch
 import torchmetrics
@@ -15,8 +13,6 @@ from pathlib import Path
 sys.path.append(str(Path(__file__).parent.parent))
 from utils import get_data_dir
 
-# DINO multi-crop transform: 2 global + 6 local crops for ImageNet
-# Using dict structure for clear identification of view types
 dino_transform = transforms.MultiViewTransform(
     {
         "global_1": transforms.Compose(
@@ -133,95 +129,81 @@ val_dataset = spt.data.HFDataset(
     transform=val_transform,
 )
 
-# Per-GPU batch size for 8 GPUs
-# With MultiViewTransform, batch_size refers to unique images
-# Each image produces 8 views (2 global + 6 local)
-batch_size = 64
-world_size = 8
-total_batch_size = batch_size * world_size
-
+batch_size = 256
 train_dataloader = torch.utils.data.DataLoader(
     dataset=train_dataset,
     batch_size=batch_size,
-    num_workers=8,
+    num_workers=4,
     drop_last=True,
     persistent_workers=True,
     shuffle=True,
 )
 val_dataloader = torch.utils.data.DataLoader(
     dataset=val_dataset,
-    batch_size=256,
-    num_workers=8,
+    batch_size=batch_size,
+    num_workers=4,
     persistent_workers=True,
 )
 
 data = spt.data.DataModule(train=train_dataloader, val=val_dataloader)
 
-# Create backbone with teacher-student wrapper
 backbone = spt.backbone.from_timm(
-    "vit_small_patch16_224",
+    "vit_tiny_patch16_224",
     pretrained=False,
-    num_classes=0,  # Remove classification head
+    num_classes=0,
+    dynamic_img_size=True,
 )
 
 wrapped_backbone = spt.TeacherStudentWrapper(
     backbone,
     warm_init=True,
-    base_ema_coefficient=0.996,
+    base_ema_coefficient=0.9995,
     final_ema_coefficient=1.0,
 )
 
-# Create projector with teacher-student wrapper
-# DINO uses 3-layer MLP with larger dimensions for ImageNet
+
 projector = nn.Sequential(
-    nn.Linear(384, 2048),
+    nn.Linear(192, 2048),
     nn.BatchNorm1d(2048),
     nn.GELU(),
     nn.Linear(2048, 2048),
     nn.BatchNorm1d(2048),
     nn.GELU(),
-    nn.Linear(2048, 65536),  # Large output dimension for ImageNet
+    nn.Linear(2048, 256),
 )
 
 wrapped_projector = spt.TeacherStudentWrapper(
     projector,
     warm_init=True,
-    base_ema_coefficient=0.996,
+    base_ema_coefficient=0.9995,
     final_ema_coefficient=1.0,
 )
-
-# Learning rate scaled by batch size: base_lr * (batch_size / 256)
-# With 8 GPUs and batch_size=64: total_batch_size=512
-lr = 0.0005 * (total_batch_size / 256)
 
 module = spt.Module(
     backbone=wrapped_backbone,
     projector=wrapped_projector,
     forward=dino_forward,
     dino_loss=spt.losses.DINOLoss(
+        out_dim=65536,
         temperature_student=0.1,
         center_momentum=0.9,
     ),
-    # DINO-specific temperature parameters
     warmup_temperature_teacher=0.04,
-    temperature_teacher=0.04,  # No warmup for smaller dataset
-    warmup_epochs_temperature_teacher=10,
+    temperature_teacher=0.07,
+    warmup_epochs_temperature_teacher=50,
     optim={
         "optimizer": {
             "type": "AdamW",
-            "lr": lr,
-            "weight_decay": 0.04,
-            "betas": [0.9, 0.95],
+            "lr": 0.005,
+            "weight_decay": 1e-4,
         },
         "scheduler": {
             "type": "LinearWarmupCosineAnnealing",
-            "warmup_steps": 10,
         },
         "interval": "epoch",
     },
 )
 
-# Teacher-Student callback for EMA updates
 teacher_student_callback = spt.callbacks.TeacherStudentCallback(
     update_frequency=1,
     update_after_backward=False,
@@ -231,11 +213,16 @@ linear_probe = spt.callbacks.OnlineProbe(
     name="linear_probe",
     input="embedding",
     target="label",
-    probe=nn.Linear(384, 100),
+    probe=nn.Linear(192, 100),
     loss_fn=nn.CrossEntropyLoss(),
     metrics={
         "top1": torchmetrics.classification.MulticlassAccuracy(100),
         "top5": torchmetrics.classification.MulticlassAccuracy(100, top_k=5),
+    },
+    optimizer={
+        "type": "AdamW",
+        "lr": 3e-3,
+        "weight_decay": 1e-4,
     },
 )
 
@@ -245,25 +232,26 @@ knn_probe = spt.callbacks.OnlineKNN(
     target="label",
     queue_length=20000,
     metrics={"accuracy": torchmetrics.classification.MulticlassAccuracy(100)},
-    input_dim=384,
+    input_dim=192,
     k=20,
 )
 
 wandb_logger = WandbLogger(
     entity="stable-ssl",
     project="imagenet100-dino",
-    name="dino-resnet18-8gpus",
+    name="dino-vit-tiny-solo-params",
     log_model=False,
 )
 
 trainer = pl.Trainer(
-    max_epochs=100,
+    max_epochs=400,
     num_sanity_val_steps=0,
     callbacks=[teacher_student_callback, linear_probe, knn_probe],
     precision="16-mixed",
     logger=wandb_logger,
-    devices=8,  # Use 8 GPUs
-    strategy="ddp_find_unused_parameters_true",  # DDP with unused parameters detection
+    devices=1,
+    sync_batchnorm=True,
+    accelerator="gpu",
 )
 
 manager = spt.Manager(trainer=trainer, module=module, data=data)

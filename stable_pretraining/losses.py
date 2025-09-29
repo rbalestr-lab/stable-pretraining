@@ -2,6 +2,7 @@
 
 from typing import Optional
 import torch
+import torch.nn as nn
 import torch.nn.functional as F
 from loguru import logger as logging
 
@@ -334,38 +335,56 @@ class DINOLoss(torch.nn.Module):
     the teacher. The teacher predictions are centered to prevent mode collapse.
 
     Args:
+        out_dim (int): Dimensionality of the DINO head output (number of prototypes). Default is 65536.
         temperature_student (float, optional): Temperature for student softmax. Default is 0.1.
         center_momentum (float, optional): Momentum for center update. Default is 0.9.
     """
 
     def __init__(
         self,
+        out_dim: int = 65536,
         temperature_student: float = 0.1,
         center_momentum: float = 0.9,
     ):
         super().__init__()
+        self.out_dim = out_dim
         self.temperature_student = temperature_student
         self.center_momentum = center_momentum
         self.register_buffer("center", None)
+        self.prototypes_layer = None  # Will be created on first forward pass
 
     def forward(
         self,
-        student_logits: torch.Tensor,
-        teacher_logits: torch.Tensor,
+        student_embeddings: torch.Tensor,
+        teacher_embeddings: torch.Tensor,
         temperature_teacher: float = 0.04,
         update_center: bool = True,
     ) -> torch.Tensor:
         """Compute DINO loss.
 
         Args:
-            student_logits: Student network output logits [N_views, batch_size, dim].
-            teacher_logits: Teacher network output logits [N_views, batch_size, dim].
+            student_embeddings: Student network output embeddings [N_views, batch_size, embed_dim].
+            teacher_embeddings: Teacher network output embeddings [N_views, batch_size, embed_dim].
             temperature_teacher: Temperature for teacher softmax.
             update_center: Whether to update the center (should be True during training).
 
         Returns:
             torch.Tensor: Scalar DINO loss value.
         """
+        # Initialize prototypes layer if needed
+        if self.prototypes_layer is None:
+            embed_dim = student_embeddings.shape[-1]
+            self.prototypes_layer = nn.Linear(embed_dim, self.out_dim, bias=False).to(
+                student_embeddings.device
+            )
+
+        # L2 normalize embeddings
+        student_embeddings = F.normalize(student_embeddings, dim=-1, p=2)
+        teacher_embeddings = F.normalize(teacher_embeddings, dim=-1, p=2)
+
+        # Apply prototypes layer to get logits
+        student_logits = self.prototypes_layer(student_embeddings)
+        teacher_logits = self.prototypes_layer(teacher_embeddings)
         # Compute teacher probabilities with centering
         if self.center is not None:
             teacher_probs = F.softmax(
