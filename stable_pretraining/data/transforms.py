@@ -141,6 +141,18 @@ class Lambda(Transform):
         return x
 
 
+class RoutingTransform(Transform):
+    """Applies a routing callable to conditionally apply a transform from many candidates."""
+
+    def __init__(self, router: callable, transforms: Union[list, tuple, dict]):
+        self.router = router
+        self.transforms = transforms
+
+    def __call__(self, x) -> Any:
+        route = self.router(x)
+        return self.transforms[route]
+
+
 class WrapTorchTransform(Transform, v2.Lambda):
     """Applies a lambda callable to target key and store it in source."""
 
