@@ -7,18 +7,30 @@ except ImportError:
     mae = None
     _MAE_AVAILABLE = False
 
-# Try to import dinov2 enhancements
+# Try to import DINO enhancements
 try:
-    from .dinov2_vit import DINOv2EnhancedViT, from_timm_dinov2
-    from .dinov2_attention import MemEffAttention, create_mem_eff_attention
+    from .dino import (
+        DINOEnhancedViT,
+        MemEffAttention,
+        clear_attn_bias_cache,
+        create_mem_eff_attention,
+        from_timm_dino,
+        get_attn_bias_and_cat,
+        pack_sequences,
+        unpack_sequences,
+    )
 
-    _DINOV2_AVAILABLE = True
+    _DINO_AVAILABLE = True
 except ImportError:
-    from_timm_dinov2 = None
-    DINOv2EnhancedViT = None
+    from_timm_dino = None
+    DINOEnhancedViT = None
     MemEffAttention = None
     create_mem_eff_attention = None
-    _DINOV2_AVAILABLE = False
+    get_attn_bias_and_cat = None
+    unpack_sequences = None
+    pack_sequences = None
+    clear_attn_bias_cache = None
+    _DINO_AVAILABLE = False
 
 from .convmixer import ConvMixer
 from .mlp import MLP
@@ -47,12 +59,16 @@ __all__ = [
 if _MAE_AVAILABLE:
     __all__.append("mae")
 
-if _DINOV2_AVAILABLE:
+if _DINO_AVAILABLE:
     __all__.extend(
         [
-            "from_timm_dinov2",
-            "DINOv2EnhancedViT",
+            "from_timm_dino",
+            "DINOEnhancedViT",
             "MemEffAttention",
             "create_mem_eff_attention",
+            "get_attn_bias_and_cat",
+            "unpack_sequences",
+            "pack_sequences",
+            "clear_attn_bias_cache",
         ]
     )
