@@ -223,7 +223,12 @@ class TeacherStudentWrapper(nn.Module):
             self.register_buffer("ema_coefficient", self.base_ema_coefficient.clone())
         else:
             # Create a teacher network with the same architecture as the student.
-            self.teacher = copy.deepcopy(student)
+            if isinstance(student, ReturnEmbedding):
+                self.teacher = ReturnEmbedding(
+                    copy.deepcopy(student.backbone), student.module_names
+                )
+            else:
+                self.teacher = copy.deepcopy(student)
             self.teacher.requires_grad_(False)  # Teacher should not require gradients.
 
             if warm_init:  # Initialization step to match the student's parameters.
