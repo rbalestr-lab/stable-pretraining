@@ -32,28 +32,9 @@ except ImportError:
     TIMM_AVAILABLE = False
     logging.warning("timm not available - from_timm_dino will not work")
 
-try:
-    from xformers.ops import fmha  # noqa: F401 - Will be used in forward_nested
-
-    XFORMERS_AVAILABLE = True
-except ImportError:
-    XFORMERS_AVAILABLE = False
-    logging.warning(
-        "⚡ xFormers not available - sequence packing disabled! "
-        "Install xFormers for faster multi-crop training: pip install xformers"
-    )
-
 # Import our DINO components
-try:
-    from .attention import MemEffAttention
-    from .packing import get_attn_bias_and_cat, unpack_sequences
-
-    _DINO_COMPONENTS_AVAILABLE = True
-except ImportError:
-    MemEffAttention = None
-    get_attn_bias_and_cat = None
-    unpack_sequences = None
-    _DINO_COMPONENTS_AVAILABLE = False
+from .attention import MemEffAttention
+from .packing import get_attn_bias_and_cat, unpack_sequences
 
 
 class DINOEnhancedViT(nn.Module):
@@ -85,9 +66,8 @@ class DINOEnhancedViT(nn.Module):
         >>> # Single view (standard)
         >>> output = enhanced_vit(images)
         >>>
-        >>> # Multi-view with sequence packing (3-4x faster!)
-        >>> if enhanced_vit.sequence_packing_available:
-        ...     output = enhanced_vit.forward_nested([view1, view2, ...])
+        >>> # Multi-view with sequence packing (faster with xFormers!)
+        >>> output = enhanced_vit.forward_nested([view1, view2, ...])
     """
 
     def __init__(
@@ -116,37 +96,21 @@ class DINOEnhancedViT(nn.Module):
         else:
             self.mask_token = None
 
-        # Create MemEffAttention for sequence packing (if available)
-        self.mem_eff_attn = None
-        if XFORMERS_AVAILABLE and _DINO_COMPONENTS_AVAILABLE:
-            # Match configuration from timm's first block
-            first_block = self.vit.blocks[0]
-            self.mem_eff_attn = MemEffAttention(
-                dim=self.embed_dim,
-                num_heads=first_block.attn.num_heads,
-                qkv_bias=first_block.attn.qkv.bias is not None,
-                proj_bias=first_block.attn.proj.bias is not None,
-            )
-            logging.info(
-                "DINOEnhancedViT: Created MemEffAttention for sequence packing"
-            )
-
-        # Store whether sequence packing is available
-        self.sequence_packing_available = (
-            XFORMERS_AVAILABLE and self.mem_eff_attn is not None
+        # Create MemEffAttention for sequence packing
+        # (has built-in fallback to PyTorch SDPA when xFormers unavailable)
+        first_block = self.vit.blocks[0]
+        self.mem_eff_attn = MemEffAttention(
+            dim=self.embed_dim,
+            num_heads=first_block.attn.num_heads,
+            qkv_bias=first_block.attn.qkv.bias is not None,
+            proj_bias=first_block.attn.proj.bias is not None,
         )
-
-        if not self.sequence_packing_available:
-            logging.info(
-                "DINOEnhancedViT: Sequence packing not available. "
-                "Multi-view processing will use fallback (slower but functional)."
-            )
+        logging.info("DINOEnhancedViT: Created MemEffAttention for sequence packing")
 
         logging.info(
             f"DINOEnhancedViT initialized: "
             f"embed_dim={self.embed_dim}, patch_size={self.patch_size}, "
-            f"mask_tokens={enable_mask_tokens}, interpolate_offset={interpolate_offset}, "
-            f"sequence_packing={self.sequence_packing_available}"
+            f"mask_tokens={enable_mask_tokens}, interpolate_offset={interpolate_offset}"
         )
 
     def interpolate_pos_encoding(self, x: torch.Tensor, w: int, h: int) -> torch.Tensor:
@@ -301,19 +265,20 @@ class DINOEnhancedViT(nn.Module):
             If xFormers is not available, falls back to processing views
             separately (slower but functionally equivalent).
         """
-        if not self.sequence_packing_available:
-            # Fallback: process each view separately
-            logging.warning(
-                "forward_nested called but sequence packing not available. "
-                "Falling back to separate processing (slower)."
-            )
-            return [self.forward(x) for x in x_list]
-
         # Step 1: Prepare tokens for each view
         tokens_list = [self.prepare_tokens_with_masks(x) for x in x_list]
 
         # Step 2: Pack sequences and create block-diagonal mask
-        attn_bias, x_packed = get_attn_bias_and_cat(tokens_list)
+        # Note: get_attn_bias_and_cat will raise ImportError if xFormers unavailable
+        try:
+            attn_bias, x_packed = get_attn_bias_and_cat(tokens_list)
+        except ImportError:
+            # Fallback: process each view separately
+            logging.warning(
+                "⚡ xFormers not available - falling back to separate forward passes. "
+                "Install xFormers for faster multi-crop training: pip install xformers"
+            )
+            return [self.forward(x) for x in x_list]
 
         # Extract batch size and sequence lengths for unpacking
         batch_size = tokens_list[0].shape[0]
@@ -405,9 +370,7 @@ def from_timm_dino(
     )
 
     logging.info(
-        f"Created DINO-enhanced ViT: {model_name} "
-        f"(mask_tokens={enable_mask_tokens}, "
-        f"sequence_packing={XFORMERS_AVAILABLE})"
+        f"Created DINO-enhanced ViT: {model_name} (mask_tokens={enable_mask_tokens})"
     )
 
     return enhanced_vit
