@@ -9,12 +9,15 @@ except ImportError:
 
 # Try to import dinov2 enhancements
 try:
-    from .dinov2_vit import from_timm_dinov2, DINOv2EnhancedViT
+    from .dinov2_vit import DINOv2EnhancedViT, from_timm_dinov2
+    from .dinov2_attention import MemEffAttention, create_mem_eff_attention
 
     _DINOV2_AVAILABLE = True
 except ImportError:
     from_timm_dinov2 = None
     DINOv2EnhancedViT = None
+    MemEffAttention = None
+    create_mem_eff_attention = None
     _DINOV2_AVAILABLE = False
 
 from .convmixer import ConvMixer
@@ -45,4 +48,11 @@ if _MAE_AVAILABLE:
     __all__.append("mae")
 
 if _DINOV2_AVAILABLE:
-    __all__.extend(["from_timm_dinov2", "DINOv2EnhancedViT"])
+    __all__.extend(
+        [
+            "from_timm_dinov2",
+            "DINOv2EnhancedViT",
+            "MemEffAttention",
+            "create_mem_eff_attention",
+        ]
+    )
