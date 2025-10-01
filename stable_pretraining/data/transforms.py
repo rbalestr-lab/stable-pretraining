@@ -150,7 +150,7 @@ class RoutingTransform(Transform):
 
     def __call__(self, x) -> Any:
         route = self.router(x)
-        return self.transforms[route]
+        return self.transforms[route](x)
 
 
 class WrapTorchTransform(Transform, v2.Lambda):
