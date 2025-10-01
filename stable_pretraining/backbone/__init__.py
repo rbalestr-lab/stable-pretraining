@@ -7,6 +7,16 @@ except ImportError:
     mae = None
     _MAE_AVAILABLE = False
 
+# Try to import dinov2 enhancements
+try:
+    from .dinov2_vit import from_timm_dinov2, DINOv2EnhancedViT
+
+    _DINOV2_AVAILABLE = True
+except ImportError:
+    from_timm_dinov2 = None
+    DINOv2EnhancedViT = None
+    _DINOV2_AVAILABLE = False
+
 from .convmixer import ConvMixer
 from .mlp import MLP
 from .resnet9 import Resnet9
@@ -33,3 +43,6 @@ __all__ = [
 
 if _MAE_AVAILABLE:
     __all__.append("mae")
+
+if _DINOV2_AVAILABLE:
+    __all__.extend(["from_timm_dinov2", "DINOv2EnhancedViT"])
