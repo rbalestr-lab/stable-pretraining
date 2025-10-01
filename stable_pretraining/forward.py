@@ -590,3 +590,158 @@ def dino_forward(self, batch, stage):
     out["loss"] = loss
 
     return out
+
+
+def dino_forward_efficient(self, batch, stage):
+    """Forward function for DINO with efficient sequence packing (DINOv2 optimization).
+
+    This is an optimized version of dino_forward that uses sequence packing to process
+    multiple views in a single forward pass, providing 3-4x speedup for multi-crop training.
+    Requires backbone to be DINOEnhancedViT (or wrapped in TeacherStudentWrapper).
+
+    Args:
+        self: Module instance (automatically bound) with required attributes:
+            - backbone: TeacherStudentWrapper wrapping DINOEnhancedViT, or DINOEnhancedViT directly
+            - projector: TeacherStudentWrapper for projection head, or direct projector
+            - dino_loss: DINOLoss instance (required)
+            - warmup_temperature_teacher (float): Starting teacher temperature
+            - temperature_teacher (float): Final teacher temperature
+            - warmup_epochs_temperature_teacher (int): Epochs to warm up temperature
+        batch: Either a list of view dicts (from MultiViewTransform) or
+            a single dict (for validation/single-view).
+            For multi-crop: First 2 views should be global crops, rest are local crops
+        stage: Training stage ('train', 'val', or 'test')
+
+    Returns:
+        Dictionary containing:
+            - 'embedding': Feature representations from teacher backbone
+            - 'loss': DINO distillation loss (during training only)
+            - 'label': Labels if present (for probes/callbacks)
+
+    Note:
+        This function uses forward_nested() for efficient sequence packing.
+        Falls back to separate processing if xFormers is unavailable.
+        For benchmarking against dino_forward() to measure speedup.
+    """
+    out = {}
+
+    # Check if batch is dict of named views
+    if isinstance(batch, dict) and "image" not in batch:
+        # Dict of named views - separate by "global" or "local" in key
+        global_views = []
+        local_views = []
+
+        for key, view in batch.items():
+            if "global" in key:
+                global_views.append(view)
+            elif "local" in key:
+                local_views.append(view)
+
+        n_global = len(global_views)
+        n_local = len(local_views)
+        all_views = global_views + local_views
+
+    elif isinstance(batch, list):
+        # List of views - assume first 2 are global
+        all_views = batch
+        n_global = min(2, len(all_views))
+        n_local = len(all_views) - n_global
+        global_views = all_views[:n_global]
+        local_views = all_views[n_global:] if n_local > 0 else []
+
+    else:
+        # Single view validation
+        images = batch["image"]
+        if "label" in batch:
+            out["label"] = batch["label"]
+
+        with torch.no_grad():
+            teacher_features = self.backbone.forward_teacher(images)
+        out["embedding"] = teacher_features.detach()
+        return out
+
+    # Multi-view processing
+    # Concatenate labels for callbacks - only from global views for probes
+    if "label" in all_views[0]:
+        if self.training:
+            out["label"] = torch.cat([view["label"] for view in global_views], dim=0)
+        else:
+            out["label"] = torch.cat([view["label"] for view in all_views], dim=0)
+
+    if not self.training:
+        # During validation, just process all views through teacher
+        all_images = torch.cat([view["image"] for view in all_views], dim=0)
+        with torch.no_grad():
+            teacher_features = self.backbone.forward_teacher(all_images)
+        out["embedding"] = teacher_features.detach()
+        return out
+
+    # Training: Use sequence packing for efficient multi-view processing
+    # Extract images from views
+    global_images_list = [view["image"] for view in global_views]
+    all_images_list = global_images_list + [view["image"] for view in local_views]
+
+    # Teacher processes only global views with sequence packing
+    with torch.no_grad():
+        teacher_features_list = self.backbone.teacher.forward_nested(global_images_list)
+
+        # Project teacher features (extract CLS token)
+        teacher_embeddings_list = []
+        for feat in teacher_features_list:
+            cls_feat = feat[:, 0]  # [batch_size, embed_dim]
+            proj = self.projector.forward_teacher(cls_feat)
+            teacher_embeddings_list.append(proj)
+        teacher_embeddings = torch.stack(
+            teacher_embeddings_list, dim=0
+        )  # [n_global, batch_size, dim]
+
+    # Student processes all views with sequence packing
+    student_features_list = self.backbone.student.forward_nested(all_images_list)
+
+    # Project student features (extract CLS token)
+    student_embeddings_list = []
+    for feat in student_features_list:
+        cls_feat = feat[:, 0]  # [batch_size, embed_dim]
+        proj = self.projector.forward_student(cls_feat)
+        student_embeddings_list.append(proj)
+    student_embeddings = torch.stack(
+        student_embeddings_list, dim=0
+    )  # [n_views, batch_size, dim]
+
+    if not hasattr(self, "dino_loss"):
+        raise ValueError(
+            "dino_forward_efficient requires 'dino_loss' to be provided (e.g., spt.losses.DINOLoss()). "
+            "Pass it when constructing the Module: Module(..., dino_loss=spt.losses.DINOLoss(), ...)"
+        )
+
+    # Temperature scheduling for teacher
+    if (
+        hasattr(self, "warmup_epochs_temperature_teacher")
+        and hasattr(self, "warmup_temperature_teacher")
+        and hasattr(self, "temperature_teacher")
+    ):
+        if self.current_epoch < self.warmup_epochs_temperature_teacher:
+            # Linear warmup from warmup_temperature_teacher to temperature_teacher
+            progress = self.current_epoch / self.warmup_epochs_temperature_teacher
+            temperature_teacher = self.warmup_temperature_teacher + progress * (
+                self.temperature_teacher - self.warmup_temperature_teacher
+            )
+        else:
+            temperature_teacher = self.temperature_teacher
+    else:
+        # Default temperature if attributes not set
+        temperature_teacher = getattr(self, "temperature_teacher", 0.07)
+
+    # Compute DINO loss
+    loss = self.dino_loss(
+        student_embeddings,
+        teacher_embeddings,
+        temperature_teacher=temperature_teacher,
+        update_center=self.training,
+    )
+
+    # Return teacher features from first global view for embedding
+    out["embedding"] = teacher_features_list[0][:, 0].detach()
+    out["loss"] = loss
+
+    return out
