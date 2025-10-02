@@ -209,14 +209,14 @@ class TestiBOTPatchLoss:
 
         loss_fn = iBOTPatchLoss(patch_out_dim=dim, center_momentum=momentum)
 
-        # First batch
-        teacher_logits1 = torch.randn(1, n_samples, dim)
+        # First batch - iBOT takes 2D input [n_masked, dim]
+        teacher_logits1 = torch.randn(n_samples, dim)
         loss_fn.update_center(teacher_logits1)
         loss_fn.apply_center_update()
         center1 = loss_fn.center.clone()
 
         # Second batch
-        teacher_logits2 = torch.randn(1, n_samples, dim)
+        teacher_logits2 = torch.randn(n_samples, dim)
         loss_fn.update_center(teacher_logits2)
         loss_fn.apply_center_update()
         center2 = loss_fn.center.clone()
@@ -225,8 +225,8 @@ class TestiBOTPatchLoss:
         assert not torch.allclose(center1, center2)
 
         # Verify EMA formula: new = old * momentum + batch * (1 - momentum)
-        # teacher_logits2 is (1, n_samples, dim), mean over (0, 1) gives (1, dim)
-        batch_mean = teacher_logits2.mean((0, 1), keepdim=True)
+        # teacher_logits2 is (n_samples, dim), mean over dim 0 with keepdim gives (1, dim)
+        batch_mean = teacher_logits2.mean(dim=0, keepdim=True)
         expected_center2 = center1 * momentum + batch_mean * (1 - momentum)
         assert torch.allclose(center2, expected_center2, atol=1e-5)
 
