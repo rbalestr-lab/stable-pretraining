@@ -306,12 +306,12 @@ class iBOTPatchLoss(torch.nn.Module):
 
     def __init__(
         self,
-        patch_out_dim: int,
+        patch_out_dim: int = None,
         student_temp: float = 0.1,
         center_momentum: float = 0.9,
     ):
         super().__init__()
-        self.patch_out_dim = patch_out_dim
+        self.patch_out_dim = patch_out_dim  # Can be None, will be inferred from logits
         self.student_temp = student_temp
         self.center_momentum = center_momentum
         self.center = None
@@ -400,7 +400,7 @@ class iBOTPatchLoss(torch.nn.Module):
         self,
         teacher_patch_tokens,
         teacher_temp,
-        n_masked_patches_tensor,
+        num_samples=None,
         n_iterations=3,
     ):
         """Apply Sinkhorn-Knopp optimal transport normalization to teacher patch logits.
@@ -417,7 +417,8 @@ class iBOTPatchLoss(torch.nn.Module):
         Args:
             teacher_patch_tokens: Teacher patch logits [n_masked, patch_out_dim]
             teacher_temp: Temperature for softmax
-            n_masked_patches_tensor: Total number of masked patches across all GPUs (int or tensor)
+            num_samples: Total number of masked patches across all GPUs (int or tensor).
+                        If None, inferred from shape.
             n_iterations: Number of Sinkhorn iterations (default: 3)
 
         Returns:
@@ -426,7 +427,7 @@ class iBOTPatchLoss(torch.nn.Module):
         return sinkhorn_knopp(
             teacher_output=teacher_patch_tokens,
             teacher_temp=teacher_temp,
-            num_samples=n_masked_patches_tensor,
+            num_samples=num_samples,
             n_iterations=n_iterations,
         )
 
@@ -524,3 +525,73 @@ class iBOTPatchLoss(torch.nn.Module):
                 )
 
             self.updated = True
+
+
+class DINOv2Loss(torch.nn.Module):
+    """DINOv2 loss combining CLS token and masked patch losses.
+
+    DINOv2 combines two losses:
+    - DINOv1Loss: CLS token distillation (global views)
+    - iBOTPatchLoss: Masked patch prediction
+
+    Both losses use Sinkhorn-Knopp normalization in DINOv2.
+
+    Args:
+        dino_loss_weight (float): Weight for CLS token loss. Default is 1.0.
+        ibot_loss_weight (float): Weight for iBOT patch loss. Default is 1.0.
+        temperature_student (float): Temperature for student softmax in DINO. Default is 0.1.
+        center_momentum (float): EMA momentum for centering. Default is 0.9.
+        patch_out_dim (int): Output dimension of patch projector. Required for iBOT loss.
+        student_temp (float): Temperature for student softmax in iBOT. Default is 0.1.
+    """
+
+    def __init__(
+        self,
+        dino_loss_weight: float = 1.0,
+        ibot_loss_weight: float = 1.0,
+        temperature_student: float = 0.1,
+        center_momentum: float = 0.9,
+        patch_out_dim: int = None,
+        student_temp: float = 0.1,
+    ):
+        super().__init__()
+        self.dino_loss_weight = dino_loss_weight
+        self.ibot_loss_weight = ibot_loss_weight
+
+        # DINO loss for CLS tokens
+        self.dino_loss = DINOv1Loss(
+            temperature_student=temperature_student,
+            center_momentum=center_momentum,
+        )
+
+        # iBOT loss for patches (infer patch_out_dim if not provided)
+        self.ibot_loss = iBOTPatchLoss(
+            patch_out_dim=patch_out_dim,  # Will be set dynamically on first forward
+            student_temp=student_temp,
+            center_momentum=center_momentum,
+        )
+
+    def forward(
+        self,
+        student_cls_logits: torch.Tensor,
+        teacher_cls_probs: torch.Tensor,
+        student_patch_logits: torch.Tensor,
+        teacher_patch_probs: torch.Tensor,
+        masks: torch.Tensor,
+    ) -> torch.Tensor:
+        """Compute combined DINOv2 loss.
+
+        Args:
+            student_cls_logits: Student CLS logits [n_views, batch, out_dim]
+            teacher_cls_probs: Teacher CLS probs [n_views, batch, out_dim]
+            student_patch_logits: Student patch logits [batch, n_patches, patch_out_dim]
+            teacher_patch_probs: Teacher patch probs [batch, n_patches, patch_out_dim]
+            masks: Binary masks [batch, n_patches]
+
+        Returns:
+            Combined weighted loss
+        """
+        dino_loss = self.dino_loss(student_cls_logits, teacher_cls_probs)
+        ibot_loss = self.ibot_loss(student_patch_logits, teacher_patch_probs, masks)
+
+        return self.dino_loss_weight * dino_loss + self.ibot_loss_weight * ibot_loss

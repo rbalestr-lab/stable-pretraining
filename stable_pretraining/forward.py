@@ -22,6 +22,8 @@ Example:
 """
 
 import torch
+from loguru import logger as logging
+
 from .callbacks.queue import find_or_create_queue_callback, OnlineQueue
 
 
@@ -593,6 +595,278 @@ def dino_forward(self, batch, stage):
     self.dino_loss.update_center(teacher_logits)
 
     out["embedding"] = teacher_features.detach()
+    out["loss"] = loss
+
+    return out
+
+
+def dinov2_forward(self, batch, stage):
+    """Forward function for DINOv2 with iBOT.
+
+    DINOv2 combines two self-supervised losses:
+    - DINO: CLS token distillation between global views
+    - iBOT: Masked patch prediction
+
+    Both losses use Sinkhorn-Knopp normalization for optimal transport.
+
+    Args:
+        self: Module instance (automatically bound) with required attributes:
+            - backbone: TeacherStudentWrapper for feature extraction (ViT)
+            - projector: TeacherStudentWrapper for CLS token projection head
+            - patch_projector: TeacherStudentWrapper for patch projection head
+            - dinov2_loss: DINOv2Loss instance combining DINO + iBOT
+            - warmup_temperature_teacher (float): Starting teacher temperature
+            - temperature_teacher (float): Final teacher temperature
+            - warmup_epochs_temperature_teacher (int): Epochs to warm up temperature
+            - mask_ratio (float): Ratio of patches to mask for iBOT (default: 0.3)
+        batch: Either a list of view dicts (from MultiViewTransform) or
+            a single dict (for validation/single-view).
+            For multi-crop: First 2 views should be global crops, rest are local crops
+        stage: Training stage ('train', 'val', or 'test')
+
+    Returns:
+        Dictionary containing:
+            - 'embedding': Feature representations from teacher backbone
+            - 'loss': Combined DINOv2 loss (DINO + iBOT)
+            - 'label': Labels if present (for probes/callbacks)
+
+    Note:
+        Introduced in the DINOv2 paper.
+        Requires TeacherStudentWrapper for backbone, projector, and patch_projector.
+        Assumes first 2 views in batch are global views.
+    """
+    out = {}
+
+    # Check if batch is dict of named views
+    if isinstance(batch, dict) and "image" not in batch:
+        # Dict of named views - separate by "global" or "local" in key
+        global_views = []
+        local_views = []
+
+        for key, view in batch.items():
+            if "global" in key:
+                global_views.append(view)
+            elif "local" in key:
+                local_views.append(view)
+
+        n_global = len(global_views)
+        n_local = len(local_views)
+        all_views = global_views + local_views
+
+    elif isinstance(batch, list):
+        # List of views - assume first 2 are global
+        all_views = batch
+        n_global = min(2, len(all_views))
+        n_local = len(all_views) - n_global
+        global_views = all_views[:n_global]
+        local_views = all_views[n_global:] if n_local > 0 else []
+
+    else:
+        # Single view validation
+        images = batch["image"]
+        if "label" in batch:
+            out["label"] = batch["label"]
+
+        with torch.no_grad():
+            teacher_features = self.backbone.forward_teacher(images)
+        out["embedding"] = teacher_features.detach()
+        return out
+
+    # Multi-view processing
+    batch_size = all_views[0]["image"].shape[0]
+
+    # Concatenate labels for callbacks - only from global views for probes
+    if "label" in all_views[0]:
+        if self.training:
+            out["label"] = torch.cat([view["label"] for view in global_views], dim=0)
+        else:
+            out["label"] = torch.cat([view["label"] for view in all_views], dim=0)
+
+    if not self.training:
+        # During validation, just process all views through teacher
+        all_images = torch.cat([view["image"] for view in all_views], dim=0)
+        with torch.no_grad():
+            teacher_features = self.backbone.forward_teacher(all_images)
+        out["embedding"] = teacher_features.detach()
+        return out
+
+    # Training: separate processing for global and local views
+    global_images = torch.cat([view["image"] for view in global_views], dim=0)
+
+    # Temperature scheduling for teacher
+    if (
+        hasattr(self, "warmup_epochs_temperature_teacher")
+        and hasattr(self, "warmup_temperature_teacher")
+        and hasattr(self, "temperature_teacher")
+    ):
+        if self.current_epoch < self.warmup_epochs_temperature_teacher:
+            progress = self.current_epoch / self.warmup_epochs_temperature_teacher
+            temperature_teacher = self.warmup_temperature_teacher + progress * (
+                self.temperature_teacher - self.warmup_temperature_teacher
+            )
+        else:
+            temperature_teacher = self.temperature_teacher
+    else:
+        temperature_teacher = getattr(self, "temperature_teacher", 0.04)
+
+    # ===== CLS Token Processing (DINO) =====
+
+    # Teacher processes only global views for CLS tokens
+    with torch.no_grad():
+        # For timm ViT: forward_features returns only CLS token when num_classes=0
+        teacher_cls_features = self.backbone.forward_teacher(global_images)
+
+        # CLS token projection
+        teacher_cls_logits = self.projector.forward_teacher(teacher_cls_features)
+        teacher_cls_logits = teacher_cls_logits.view(n_global, batch_size, -1)
+
+        # Apply Sinkhorn-Knopp to CLS tokens
+        flat_cls_logits = teacher_cls_logits.view(-1, teacher_cls_logits.shape[-1])
+        teacher_cls_probs = self.dinov2_loss.dino_loss.sinkhorn_knopp_teacher(
+            flat_cls_logits,
+            teacher_temp=temperature_teacher,
+            num_samples=n_global * batch_size,
+        )
+        teacher_cls_probs = teacher_cls_probs.view(n_global, batch_size, -1)
+
+    # Student processes all views for CLS tokens
+    student_logits_list = []
+
+    # Process global views through student
+    student_cls_features = self.backbone.forward_student(global_images)
+    student_global_cls_logits = self.projector.forward_student(student_cls_features)
+    student_global_cls_logits = student_global_cls_logits.view(n_global, batch_size, -1)
+    student_logits_list.append(student_global_cls_logits)
+
+    # Process local views through student (if any)
+    if n_local > 0:
+        local_images = torch.cat([view["image"] for view in local_views], dim=0)
+        student_local_cls_features = self.backbone.forward_student(local_images)
+        student_local_cls_logits = self.projector.forward_student(
+            student_local_cls_features
+        )
+        student_local_cls_logits = student_local_cls_logits.view(
+            n_local, batch_size, -1
+        )
+        student_logits_list.append(student_local_cls_logits)
+
+    # Concatenate student CLS logits along the view dimension
+    student_cls_logits = torch.cat(student_logits_list, dim=0)
+
+    # ===== Patch Processing (iBOT) =====
+
+    # Check if we can extract patches from the backbone
+    if hasattr(self, "patch_projector"):
+        # Get mask ratio
+        mask_ratio = getattr(self, "mask_ratio", 0.3)
+
+        # Extract patch tokens using timm's forward_features
+        # This assumes backbone is a timm ViT with forward_features method
+        try:
+            # Process first global view only for iBOT
+            first_view = global_images[:batch_size]
+
+            # Get the underlying backbone (handle TeacherStudentWrapper)
+            if hasattr(self.backbone, "teacher"):
+                teacher_backbone = self.backbone.teacher
+                student_backbone = self.backbone.student
+            else:
+                teacher_backbone = self.backbone
+                student_backbone = self.backbone
+
+            with torch.no_grad():
+                # Teacher forward_features returns all tokens [batch, num_prefix + n_patches, dim]
+                teacher_all_tokens = teacher_backbone.forward_features(first_view)
+
+                # Get number of prefix tokens (usually 1 for CLS)
+                num_prefix_tokens = getattr(teacher_backbone, "num_prefix_tokens", 1)
+
+                # Extract patch tokens (skip CLS token)
+                teacher_patches = teacher_all_tokens[:, num_prefix_tokens:]
+
+                # Shape: [batch_size, n_patches, dim]
+                n_patches = teacher_patches.shape[1]
+                n_masked = int(n_patches * mask_ratio)
+
+                # Create random mask: 1 = masked, 0 = visible
+                masks = torch.zeros(
+                    batch_size,
+                    n_patches,
+                    dtype=torch.bool,
+                    device=teacher_patches.device,
+                )
+                for i in range(batch_size):
+                    mask_indices = torch.randperm(
+                        n_patches, device=teacher_patches.device
+                    )[:n_masked]
+                    masks[i, mask_indices] = True
+
+                # Extract masked patches from teacher
+                teacher_masked_patches = teacher_patches[masks]
+                teacher_patch_logits = self.patch_projector.forward_teacher(
+                    teacher_masked_patches
+                )
+
+                # Apply Sinkhorn-Knopp to masked patches
+                n_masked_total = teacher_masked_patches.shape[0]
+                teacher_patch_probs = self.dinov2_loss.ibot_loss.sinkhorn_knopp_teacher(
+                    teacher_patch_logits,
+                    teacher_temp=temperature_teacher,
+                    num_samples=n_masked_total,
+                )
+
+            # Student forward_features
+            student_all_tokens = student_backbone.forward_features(first_view)
+            student_patches = student_all_tokens[:, num_prefix_tokens:]
+
+            # Extract masked patches from student (using same mask as teacher)
+            student_masked_patches = student_patches[masks]
+            student_patch_logits = self.patch_projector.forward_student(
+                student_masked_patches
+            )
+
+            # Compute DINOv2 loss (DINO + iBOT)
+            if not hasattr(self, "dinov2_loss"):
+                raise ValueError(
+                    "dinov2_forward requires 'dinov2_loss' to be provided (e.g., spt.losses.DINOv2Loss()). "
+                    "Pass it when constructing the Module: Module(..., dinov2_loss=spt.losses.DINOv2Loss(), ...)"
+                )
+
+            # Masks for loss: all ones since we already selected masked patches
+            flat_mask = torch.ones(
+                n_masked_total, dtype=torch.bool, device=student_patch_logits.device
+            )
+
+            loss = self.dinov2_loss(
+                student_cls_logits=student_cls_logits,
+                teacher_cls_probs=teacher_cls_probs,
+                student_patch_logits=student_patch_logits,
+                teacher_patch_probs=teacher_patch_probs,
+                masks=flat_mask,
+            )
+
+        except (TypeError, AttributeError) as e:
+            # Backbone doesn't support forward_features, use DINO only
+            if "forward_features" in str(e) or "has no attribute" in str(e):
+                logging.warning(
+                    f"Backbone doesn't have forward_features method (not a timm ViT). "
+                    f"Falling back to DINO-only loss. Error: {e}"
+                )
+                loss = self.dinov2_loss.dino_loss(student_cls_logits, teacher_cls_probs)
+            else:
+                raise
+    else:
+        # No patch_projector provided, use DINO only
+        if not hasattr(self, "dinov2_loss"):
+            if not hasattr(self, "dino_loss"):
+                raise ValueError(
+                    "dinov2_forward requires either 'dinov2_loss' or 'dino_loss' to be provided."
+                )
+            loss = self.dino_loss(student_cls_logits, teacher_cls_probs)
+        else:
+            loss = self.dinov2_loss.dino_loss(student_cls_logits, teacher_cls_probs)
+
+    out["embedding"] = teacher_cls_features.detach()
     out["loss"] = loss
 
     return out
