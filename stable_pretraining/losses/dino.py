@@ -78,29 +78,52 @@ class DINOv1Loss(torch.nn.Module):
         self.len_teacher_output = None
         self.async_batch_center = None
 
-    @torch.no_grad()
-    def softmax_center_teacher(self, teacher_logits, teacher_temp, update_centers=True):
-        """Apply classical centering and sharpening to teacher logits.
+    def forward(
+        self,
+        student_logits: torch.Tensor,
+        teacher_probs: torch.Tensor,
+    ) -> torch.Tensor:
+        """Compute DINO cross-entropy loss.
 
-        **FOR CLASSICAL CENTERING APPROACH ONLY.**
-
-        This method subtracts the center (EMA of batch means) from teacher logits before
-        applying softmax. This prevents mode collapse by ensuring balanced prototype usage.
+        This is a pure loss computation with no side effects (no centering, no updates).
+        Teacher probabilities should be pre-processed with softmax_center_teacher() or
+        sinkhorn_knopp_teacher(). Center updates should be done separately with update_center().
 
         Args:
-            teacher_logits: Teacher logits [*, out_dim]
-            teacher_temp: Temperature for teacher softmax
-            update_centers: Whether to apply queued center update before centering
+            student_logits: Student predictions [n_views, batch_size, out_dim]
+            teacher_probs: Teacher probabilities (already normalized) [n_views, batch_size, out_dim]
 
         Returns:
-            Teacher probabilities after centering [*, out_dim]
+            Scalar DINO loss value (cross-entropy averaged over view pairs, excluding diagonal)
+
+        Shape:
+            - student_logits: (S, B, K) where S = student views, B = batch size, K = out_dim
+            - teacher_probs: (T, B, K) where T = teacher views
+            - output: scalar
         """
-        if update_centers:
-            self.apply_center_update()
-        if self.center is not None:
-            return F.softmax((teacher_logits - self.center) / teacher_temp, dim=-1)
-        else:
-            return F.softmax(teacher_logits / teacher_temp, dim=-1)
+        student_log_probs = F.log_softmax(
+            student_logits.float() / self.temperature_student, dim=-1
+        )
+
+        # Compute cross-entropy: -sum over dim K of (teacher_probs * log(student_probs))
+        # Using einsum : sum over batch B and prototypes K, keep view dims S, T
+        loss_matrix = -torch.einsum(
+            "s b k, t b k -> s t", student_log_probs, teacher_probs.float()
+        )
+
+        # Exclude diagonal (same view comparisons)
+        min_views = min(student_logits.shape[0], teacher_probs.shape[0])
+        loss_matrix = torch.diagonal_scatter(
+            loss_matrix, loss_matrix.new_zeros(min_views)
+        )
+
+        # Average over all valid pairs
+        batch_size = student_logits.shape[1]
+        n_student_views = student_logits.shape[0]
+        n_teacher_views = teacher_probs.shape[0]
+        n_pairs = n_student_views * n_teacher_views - min_views
+
+        return loss_matrix.sum() / (batch_size * n_pairs)
 
     @torch.no_grad()
     def sinkhorn_knopp_teacher(
@@ -153,52 +176,29 @@ class DINOv1Loss(torch.nn.Module):
         # Reshape back to original shape
         return result.view(original_shape)
 
-    def forward(
-        self,
-        student_logits: torch.Tensor,
-        teacher_probs: torch.Tensor,
-    ) -> torch.Tensor:
-        """Compute DINO cross-entropy loss.
+    @torch.no_grad()
+    def softmax_center_teacher(self, teacher_logits, teacher_temp, update_centers=True):
+        """Apply classical centering and sharpening to teacher logits.
 
-        This is a pure loss computation with no side effects (no centering, no updates).
-        Teacher probabilities should be pre-processed with softmax_center_teacher() or
-        sinkhorn_knopp_teacher(). Center updates should be done separately with update_center().
+        **FOR CLASSICAL CENTERING APPROACH ONLY.**
+
+        This method subtracts the center (EMA of batch means) from teacher logits before
+        applying softmax. This prevents mode collapse by ensuring balanced prototype usage.
 
         Args:
-            student_logits: Student predictions [n_views, batch_size, out_dim]
-            teacher_probs: Teacher probabilities (already normalized) [n_views, batch_size, out_dim]
+            teacher_logits: Teacher logits [*, out_dim]
+            teacher_temp: Temperature for teacher softmax
+            update_centers: Whether to apply queued center update before centering
 
         Returns:
-            Scalar DINO loss value (cross-entropy averaged over view pairs, excluding diagonal)
-
-        Shape:
-            - student_logits: (S, B, K) where S = student views, B = batch size, K = out_dim
-            - teacher_probs: (T, B, K) where T = teacher views
-            - output: scalar
+            Teacher probabilities after centering [*, out_dim]
         """
-        student_log_probs = F.log_softmax(
-            student_logits.float() / self.temperature_student, dim=-1
-        )
-
-        # Compute cross-entropy: -sum over dim K of (teacher_probs * log(student_probs))
-        # Using einsum : sum over batch B and prototypes K, keep view dims S, T
-        loss_matrix = -torch.einsum(
-            "s b k, t b k -> s t", student_log_probs, teacher_probs.float()
-        )
-
-        # Exclude diagonal (same view comparisons)
-        min_views = min(student_logits.shape[0], teacher_probs.shape[0])
-        loss_matrix = torch.diagonal_scatter(
-            loss_matrix, loss_matrix.new_zeros(min_views)
-        )
-
-        # Average over all valid pairs
-        batch_size = student_logits.shape[1]
-        n_student_views = student_logits.shape[0]
-        n_teacher_views = teacher_probs.shape[0]
-        n_pairs = n_student_views * n_teacher_views - min_views
-
-        return loss_matrix.sum() / (batch_size * n_pairs)
+        if update_centers:
+            self.apply_center_update()
+        if self.center is not None:
+            return F.softmax((teacher_logits - self.center) / teacher_temp, dim=-1)
+        else:
+            return F.softmax(teacher_logits / teacher_temp, dim=-1)
 
     @torch.no_grad()
     def update_center(self, teacher_output):
@@ -320,69 +320,6 @@ class iBOTPatchLoss(torch.nn.Module):
         self.len_teacher_patch_tokens = None
         self.async_batch_center = None
 
-    @torch.no_grad()
-    def softmax_center_teacher(
-        self, teacher_patch_tokens, teacher_temp, update_centers=True
-    ):
-        """Apply classical centering and sharpening to teacher patch logits.
-
-        **FOR CLASSICAL CENTERING APPROACH ONLY.**
-
-        This method subtracts the center (EMA of batch means) from teacher logits before
-        applying softmax. This prevents mode collapse by ensuring balanced prototype usage.
-
-        Args:
-            teacher_patch_tokens: Teacher patch logits [n_masked, patch_out_dim]
-            teacher_temp: Temperature for teacher softmax
-            update_centers: Whether to apply queued center update before centering
-
-        Returns:
-            Teacher probabilities after centering [n_masked, patch_out_dim]
-        """
-        if update_centers:
-            self.apply_center_update()
-        if self.center is not None:
-            return F.softmax(
-                (teacher_patch_tokens - self.center) / teacher_temp, dim=-1
-            )
-        else:
-            return F.softmax(teacher_patch_tokens / teacher_temp, dim=-1)
-
-    @torch.no_grad()
-    def sinkhorn_knopp_teacher(
-        self,
-        teacher_patch_tokens,
-        teacher_temp,
-        n_masked_patches_tensor,
-        n_iterations=3,
-    ):
-        """Apply Sinkhorn-Knopp optimal transport normalization to teacher patch logits.
-
-        **FOR SINKHORN-KNOPP APPROACH ONLY. DOES NOT USE CENTER.**
-
-        This method applies optimal transport to enforce exact uniform distribution across
-        prototypes without using centering. More principled than centering but more expensive.
-        Used in SwAV and DINOv3 for better theoretical guarantees.
-
-        Note: When using Sinkhorn-Knopp, you do NOT need to call update_center() since
-        centering is not used.
-
-        Args:
-            teacher_patch_tokens: Teacher patch logits [n_masked, patch_out_dim]
-            teacher_temp: Temperature for softmax
-            n_masked_patches_tensor: Total number of masked patches across all GPUs (int or tensor)
-            n_iterations: Number of Sinkhorn iterations (default: 3)
-
-        Returns:
-            Teacher probabilities [n_masked, patch_out_dim] with uniform prototype distribution
-        """
-        return sinkhorn_knopp(
-            teacher_output=teacher_patch_tokens,
-            teacher_temp=teacher_temp,
-            num_samples=n_masked_patches_tensor,
-            n_iterations=n_iterations,
-        )
-
     def forward(self, student_patch_logits, teacher_patch_probs, student_masks_flat):
         """Compute iBOT cross-entropy loss for all patches.
 
@@ -457,6 +394,69 @@ class iBOTPatchLoss(torch.nn.Module):
 
         loss = loss * masks_weight
         return loss.sum() / student_masks_flat.shape[0]
+
+    @torch.no_grad()
+    def sinkhorn_knopp_teacher(
+        self,
+        teacher_patch_tokens,
+        teacher_temp,
+        n_masked_patches_tensor,
+        n_iterations=3,
+    ):
+        """Apply Sinkhorn-Knopp optimal transport normalization to teacher patch logits.
+
+        **FOR SINKHORN-KNOPP APPROACH ONLY. DOES NOT USE CENTER.**
+
+        This method applies optimal transport to enforce exact uniform distribution across
+        prototypes without using centering. More principled than centering but more expensive.
+        Used in SwAV and DINOv3 for better theoretical guarantees.
+
+        Note: When using Sinkhorn-Knopp, you do NOT need to call update_center() since
+        centering is not used.
+
+        Args:
+            teacher_patch_tokens: Teacher patch logits [n_masked, patch_out_dim]
+            teacher_temp: Temperature for softmax
+            n_masked_patches_tensor: Total number of masked patches across all GPUs (int or tensor)
+            n_iterations: Number of Sinkhorn iterations (default: 3)
+
+        Returns:
+            Teacher probabilities [n_masked, patch_out_dim] with uniform prototype distribution
+        """
+        return sinkhorn_knopp(
+            teacher_output=teacher_patch_tokens,
+            teacher_temp=teacher_temp,
+            num_samples=n_masked_patches_tensor,
+            n_iterations=n_iterations,
+        )
+
+    @torch.no_grad()
+    def softmax_center_teacher(
+        self, teacher_patch_tokens, teacher_temp, update_centers=True
+    ):
+        """Apply classical centering and sharpening to teacher patch logits.
+
+        **FOR CLASSICAL CENTERING APPROACH ONLY.**
+
+        This method subtracts the center (EMA of batch means) from teacher logits before
+        applying softmax. This prevents mode collapse by ensuring balanced prototype usage.
+
+        Args:
+            teacher_patch_tokens: Teacher patch logits [n_masked, patch_out_dim]
+            teacher_temp: Temperature for teacher softmax
+            update_centers: Whether to apply queued center update before centering
+
+        Returns:
+            Teacher probabilities after centering [n_masked, patch_out_dim]
+        """
+        if update_centers:
+            self.apply_center_update()
+        if self.center is not None:
+            return F.softmax(
+                (teacher_patch_tokens - self.center) / teacher_temp, dim=-1
+            )
+        else:
+            return F.softmax(teacher_patch_tokens / teacher_temp, dim=-1)
 
     @torch.no_grad()
     def update_center(self, teacher_patch_tokens):
