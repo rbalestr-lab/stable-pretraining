@@ -29,8 +29,8 @@ def cross_entropy_loss(t, s, temp):
     return -torch.sum(t.float() * F.log_softmax(s.float() / temp, dim=-1), dim=-1)
 
 
-class DINOCLSTokenLoss(torch.nn.Module):
-    """DINO CLS token loss for self-distillation with cross-entropy :cite:`caron2021emerging`.
+class DINOv1Loss(torch.nn.Module):
+    """DINOv1 loss for self-distillation with cross-entropy :cite:`caron2021emerging`.
 
     This loss computes cross-entropy between teacher and student logits after applying
     temperature scaling and normalization. The teacher uses either classical centering or
@@ -38,7 +38,7 @@ class DINOCLSTokenLoss(torch.nn.Module):
 
     Usage:
         ```python
-        dino_loss = DINOCLSTokenLoss()
+        dino_loss = DINOv1Loss()
 
         # Get logits from prototype layer
         student_logits = prototype_layer(student_embeddings)  # [n_views, B, out_dim]
@@ -270,7 +270,7 @@ class iBOTPatchLoss(torch.nn.Module):
     """iBOT patch-level prediction loss for masked patch prediction.
 
     This loss computes cross-entropy between teacher and student patch predictions
-    for masked patches only. Like DINOCLSTokenLoss, it supports either classical
+    for masked patches only. Like DINOv1Loss, it supports either classical
     centering or Sinkhorn-Knopp normalization to prevent mode collapse.
 
     Usage:
@@ -314,7 +314,7 @@ class iBOTPatchLoss(torch.nn.Module):
         self.patch_out_dim = patch_out_dim
         self.student_temp = student_temp
         self.center_momentum = center_momentum
-        self.register_buffer("center", torch.zeros(1, patch_out_dim))
+        self.center = None
         self.updated = True
         self.reduce_handle = None
         self.len_teacher_patch_tokens = None
@@ -341,7 +341,12 @@ class iBOTPatchLoss(torch.nn.Module):
         """
         if update_centers:
             self.apply_center_update()
-        return F.softmax((teacher_patch_tokens - self.center) / teacher_temp, dim=-1)
+        if self.center is not None:
+            return F.softmax(
+                (teacher_patch_tokens - self.center) / teacher_temp, dim=-1
+            )
+        else:
+            return F.softmax(teacher_patch_tokens / teacher_temp, dim=-1)
 
     @torch.no_grad()
     def sinkhorn_knopp_teacher(
@@ -509,9 +514,13 @@ class iBOTPatchLoss(torch.nn.Module):
             # Average across GPUs
             _t = self.async_batch_center / world_size
 
-            # EMA update
-            self.center = self.center * self.center_momentum + _t * (
-                1 - self.center_momentum
-            )
+            # Initialize center on first call
+            if self.center is None:
+                self.center = _t.clone()
+            else:
+                # EMA update
+                self.center = self.center * self.center_momentum + _t * (
+                    1 - self.center_momentum
+                )
 
             self.updated = True

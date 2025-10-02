@@ -17,13 +17,8 @@ class TestiBOTPatchLoss:
 
         assert loss_fn.student_temp == 0.1
         assert loss_fn.center_momentum == 0.9
-        assert loss_fn.center.shape == (1, 1, 256)
-        # Center should be NaN before init_weights
-        assert torch.isnan(loss_fn.center).all()
-
-        # After init_weights, center should be zero
-        loss_fn.init_weights()
-        assert torch.allclose(loss_fn.center, torch.zeros_like(loss_fn.center))
+        # Center should be None initially (lazy initialization)
+        assert loss_fn.center is None
 
     def test_forward_with_perfect_match(self):
         """Loss with perfect match should be lower than with mismatch."""
@@ -31,7 +26,6 @@ class TestiBOTPatchLoss:
         batch_size, n_patches, dim = 2, 4, 16
 
         loss_fn = iBOTPatchLoss(patch_out_dim=dim)
-        loss_fn.init_weights()
 
         # Create teacher distribution
         teacher_probs = F.softmax(torch.randn(batch_size, n_patches, dim), dim=-1)
@@ -57,7 +51,6 @@ class TestiBOTPatchLoss:
         batch_size, n_patches, dim = 2, 4, 16
 
         loss_fn = iBOTPatchLoss(patch_out_dim=dim)
-        loss_fn.init_weights()
 
         # Teacher predicts one thing, student predicts opposite
         teacher_probs = torch.zeros(batch_size, n_patches, dim)
@@ -79,7 +72,6 @@ class TestiBOTPatchLoss:
         batch_size, n_patches, dim = 4, 8, 32
 
         loss_fn = iBOTPatchLoss(patch_out_dim=dim)
-        loss_fn.init_weights()
 
         # Create masks (some patches masked, some not)
         masks = torch.zeros(batch_size, n_patches, dtype=torch.bool)
@@ -104,7 +96,6 @@ class TestiBOTPatchLoss:
         batch_size, n_patches, dim = 2, 4, 16
 
         loss_fn = iBOTPatchLoss(patch_out_dim=dim)
-        loss_fn.init_weights()
 
         masks = torch.ones(batch_size, n_patches, dtype=torch.bool)
         n_masked = batch_size * n_patches
@@ -136,7 +127,6 @@ class TestiBOTPatchLoss:
         batch_size, n_patches, dim = 2, 8, 16
 
         loss_fn = iBOTPatchLoss(patch_out_dim=dim)
-        loss_fn.init_weights()
 
         masks = torch.ones(batch_size, n_patches, dtype=torch.bool)
         n_total = batch_size * n_patches
@@ -163,11 +153,10 @@ class TestiBOTPatchLoss:
         n_samples, dim = 100, 64
 
         loss_fn = iBOTPatchLoss(patch_out_dim=dim, center_momentum=0.9)
-        loss_fn.init_weights()
 
         teacher_logits = torch.randn(n_samples, dim)
 
-        # First call: center is zero, should just do softmax
+        # First call: center is None, should just do softmax without centering
         probs1 = loss_fn.softmax_center_teacher(
             teacher_logits, teacher_temp=0.1, update_centers=False
         )
@@ -179,8 +168,8 @@ class TestiBOTPatchLoss:
         loss_fn.update_center(teacher_logits.unsqueeze(0))
         loss_fn.apply_center_update()
 
-        # Center should have moved
-        assert not torch.allclose(loss_fn.center, torch.zeros_like(loss_fn.center))
+        # Center should have been initialized (not None anymore)
+        assert loss_fn.center is not None
 
         # Second call with updated center
         probs2 = loss_fn.softmax_center_teacher(
@@ -196,7 +185,6 @@ class TestiBOTPatchLoss:
         n_samples, dim = 50, 32
 
         loss_fn = iBOTPatchLoss(patch_out_dim=dim)
-        loss_fn.init_weights()
 
         teacher_logits = torch.randn(n_samples, dim)
 
@@ -220,7 +208,6 @@ class TestiBOTPatchLoss:
         momentum = 0.9
 
         loss_fn = iBOTPatchLoss(patch_out_dim=dim, center_momentum=momentum)
-        loss_fn.init_weights()
 
         # First batch
         teacher_logits1 = torch.randn(1, n_samples, dim)
@@ -238,9 +225,9 @@ class TestiBOTPatchLoss:
         assert not torch.allclose(center1, center2)
 
         # Verify EMA formula: new = old * momentum + batch * (1 - momentum)
-        expected_center2 = center1 * momentum + teacher_logits2.mean(
-            (0, 1), keepdim=True
-        ).unsqueeze(0) * (1 - momentum)
+        # teacher_logits2 is (1, n_samples, dim), mean over (0, 1) gives (1, dim)
+        batch_mean = teacher_logits2.mean((0, 1), keepdim=True)
+        expected_center2 = center1 * momentum + batch_mean * (1 - momentum)
         assert torch.allclose(center2, expected_center2, atol=1e-5)
 
     def test_loss_is_positive(self):
@@ -249,7 +236,6 @@ class TestiBOTPatchLoss:
         batch_size, n_patches, dim = 3, 5, 20
 
         loss_fn = iBOTPatchLoss(patch_out_dim=dim)
-        loss_fn.init_weights()
 
         teacher_probs = F.softmax(torch.randn(batch_size, n_patches, dim), dim=-1)
         student_logits = torch.randn(batch_size, n_patches, dim)
@@ -267,11 +253,9 @@ class TestiBOTPatchLoss:
 
         # High temperature (0.5)
         loss_fn_high_temp = iBOTPatchLoss(patch_out_dim=dim, student_temp=0.5)
-        loss_fn_high_temp.init_weights()
 
         # Low temperature (0.05)
         loss_fn_low_temp = iBOTPatchLoss(patch_out_dim=dim, student_temp=0.05)
-        loss_fn_low_temp.init_weights()
 
         # Create somewhat mismatched predictions
         teacher_probs = F.softmax(torch.randn(batch_size, n_patches, dim), dim=-1)
@@ -290,7 +274,6 @@ class TestiBOTPatchLoss:
         batch_size, n_patches, dim = 4, 8, 16
 
         loss_fn = iBOTPatchLoss(patch_out_dim=dim)
-        loss_fn.init_weights()
 
         # Uniform mask: all patches masked equally
         masks_uniform = torch.ones(batch_size, n_patches, dtype=torch.bool)

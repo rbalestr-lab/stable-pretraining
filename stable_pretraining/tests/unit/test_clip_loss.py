@@ -5,7 +5,8 @@ from unittest.mock import patch
 
 from stable_pretraining.losses import CLIPLoss
 
-DDP_GATHER_PATH = "stable_pretraining.losses.all_gather"
+# Mock the all_gather function where it's actually imported (in joint_embedding.py)
+DDP_GATHER_PATH = "stable_pretraining.losses.joint_embedding.all_gather"
 
 
 @pytest.mark.unit

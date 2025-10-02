@@ -444,7 +444,7 @@ def dino_forward(self, batch, stage):
         self: Module instance (automatically bound) with required attributes:
             - backbone: TeacherStudentWrapper for feature extraction
             - projector: TeacherStudentWrapper for projection head
-            - dino_loss: DINOCLSTokenLoss instance (required, pass spt.losses.DINOCLSTokenLoss())
+            - dino_loss: DINOv1Loss instance (required, pass spt.losses.DINOv1Loss())
             - warmup_temperature_teacher (float): Starting teacher temperature
             - temperature_teacher (float): Final teacher temperature
             - warmup_epochs_temperature_teacher (int): Epochs to warm up temperature
@@ -556,8 +556,8 @@ def dino_forward(self, batch, stage):
 
     if not hasattr(self, "dino_loss"):
         raise ValueError(
-            "dino_forward requires 'dino_loss' to be provided (e.g., spt.losses.DINOCLSTokenLoss()). "
-            "Pass it when constructing the Module: Module(..., dino_loss=spt.losses.DINOCLSTokenLoss(), ...)"
+            "dino_forward requires 'dino_loss' to be provided (e.g., spt.losses.DINOv1Loss()). "
+            "Pass it when constructing the Module: Module(..., dino_loss=spt.losses.DINOv1Loss(), ...)"
         )
 
     if not hasattr(self, "projector"):
