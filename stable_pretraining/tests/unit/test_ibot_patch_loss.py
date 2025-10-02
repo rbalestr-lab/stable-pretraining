@@ -26,25 +26,30 @@ class TestiBOTPatchLoss:
         assert torch.allclose(loss_fn.center, torch.zeros_like(loss_fn.center))
 
     def test_forward_with_perfect_match(self):
-        """Loss should be low when student matches teacher perfectly."""
+        """Loss with perfect match should be lower than with mismatch."""
         torch.manual_seed(0)
         batch_size, n_patches, dim = 2, 4, 16
 
         loss_fn = iBOTPatchLoss(patch_out_dim=dim)
         loss_fn.init_weights()
 
-        # Create identical predictions (perfect match)
+        # Create teacher distribution
         teacher_probs = F.softmax(torch.randn(batch_size, n_patches, dim), dim=-1)
-        # Student logits that produce same probabilities
-        student_logits = torch.log(teacher_probs + 1e-8) * loss_fn.student_temp
 
-        # All patches are masked
+        # Perfect match: student logits that produce same probabilities
+        student_logits_perfect = torch.log(teacher_probs + 1e-8) * loss_fn.student_temp
+
+        # Poor match: random student logits
+        student_logits_random = torch.randn(batch_size, n_patches, dim)
+
         masks = torch.ones(batch_size, n_patches, dtype=torch.bool)
 
-        loss = loss_fn.forward(student_logits, teacher_probs, masks)
+        loss_perfect = loss_fn.forward(student_logits_perfect, teacher_probs, masks)
+        loss_random = loss_fn.forward(student_logits_random, teacher_probs, masks)
 
-        assert loss.ndim == 0  # scalar
-        assert loss.item() < 0.01  # very small loss for perfect match
+        assert loss_perfect.ndim == 0  # scalar
+        assert loss_random.ndim == 0  # scalar
+        assert loss_perfect < loss_random  # perfect match should have lower loss
 
     def test_forward_with_mismatch(self):
         """Loss should be high when student predictions are wrong."""

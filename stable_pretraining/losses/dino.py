@@ -20,8 +20,7 @@ from .utils import sinkhorn_knopp
 def cross_entropy_loss(t, s, temp):
     """Cross-entropy loss function for iBOT.
 
-    Computes the cross-entropy loss between teacher probabilities and student logits.
-    Standard definition: CE(t, s) = -Σ t[i] * log(softmax(s[i]))
+    Computes per-sample cross-entropy: -Σ t[i] * log_softmax(s[i]/temp)
 
     Args:
         t: Teacher predictions (probabilities) [*, D]
@@ -29,7 +28,7 @@ def cross_entropy_loss(t, s, temp):
         temp: Temperature for student softmax
 
     Returns:
-        Per-sample cross-entropy loss [*] (positive values to minimize)
+        Per-sample cross-entropy loss [*] (positive, lower is better)
     """
     return -torch.sum(t.float() * F.log_softmax(s.float() / temp, dim=-1), dim=-1)
 
@@ -200,7 +199,9 @@ class iBOTPatchLoss(torch.nn.Module):
         """
         if update_centers:
             self.apply_center_update()
-        return F.softmax((teacher_patch_tokens - self.center) / teacher_temp, dim=-1)
+        return F.softmax(
+            (teacher_patch_tokens - self.center.squeeze()) / teacher_temp, dim=-1
+        )
 
     @torch.no_grad()
     def sinkhorn_knopp_teacher(
