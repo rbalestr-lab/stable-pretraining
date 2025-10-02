@@ -94,7 +94,7 @@ module = spt.Module(
     vision_model=vision_model,
     text_model=text_model,
     forward=forward,
-    clip_loss=spt.losses.InfoNCELoss(temperature=0.07),
+    clip_loss=spt.losses.CLIPLoss(temperature=0.07),
     optim={
         "optimizer": {
             "type": "AdamW",
