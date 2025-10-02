@@ -560,6 +560,17 @@ def dino_forward(self, batch, stage):
             "Pass it when constructing the Module: Module(..., dino_loss=spt.losses.DINOCLSTokenLoss(), ...)"
         )
 
+    if not hasattr(self, "projector"):
+        raise ValueError(
+            "dino_forward requires 'projector' to be provided. "
+            "This should be a TeacherStudentWrapper containing the projector (MLP + normalize + prototypes). "
+            "Pass it when constructing the Module: Module(..., projector=wrapped_projector, ...)"
+        )
+
+    # Apply projector to get logits (separate teacher and student projectors)
+    teacher_logits = self.projector.forward_teacher(teacher_embeddings)
+    student_logits = self.projector.forward_student(student_embeddings)
+
     # Temperature scheduling for teacher
     if (
         hasattr(self, "warmup_epochs_temperature_teacher")
@@ -578,13 +589,16 @@ def dino_forward(self, batch, stage):
         # Default temperature if attributes not set
         temperature_teacher = getattr(self, "temperature_teacher", 0.07)
 
-    # Compute DINO loss
-    loss = self.dino_loss(
-        student_embeddings,
-        teacher_embeddings,
-        temperature_teacher=temperature_teacher,
-        update_center=self.training,
+    # Process teacher logits with classical centering (DINOv1 approach)
+    teacher_probs = self.dino_loss.softmax_center_teacher(
+        teacher_logits, teacher_temp=temperature_teacher
     )
+
+    # Compute DINO loss
+    loss = self.dino_loss(student_logits, teacher_probs)
+
+    # Queue async center update (will be applied next iteration)
+    self.dino_loss.update_center(teacher_logits)
 
     out["embedding"] = teacher_features.detach()
     out["loss"] = loss

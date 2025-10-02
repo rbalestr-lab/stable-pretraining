@@ -25,7 +25,7 @@ try:
 except ImportError:
     WANDB_AVAILABLE = False
 
-from . import backbone, callbacks, data, losses, module, optim, static, utils
+from . import backbone, callbacks, data, layers, losses, module, optim, static, utils
 from .__about__ import (
     __author__,
     __license__,
@@ -82,6 +82,7 @@ __all__ = [
     "static",
     "optim",
     "losses",
+    "layers",
     "callbacks",
     "backbone",
     # Classes

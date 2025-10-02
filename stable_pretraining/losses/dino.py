@@ -38,7 +38,7 @@ class DINOCLSTokenLoss(torch.nn.Module):
 
     Usage:
         ```python
-        dino_loss = DINOCLSTokenLoss(out_dim=65536)
+        dino_loss = DINOCLSTokenLoss()
 
         # Get logits from prototype layer
         student_logits = prototype_layer(student_embeddings)  # [n_views, B, out_dim]
@@ -50,28 +50,29 @@ class DINOCLSTokenLoss(torch.nn.Module):
         dino_loss.update_center(teacher_logits)  # Queue async center update
 
         # Approach 2: Sinkhorn-Knopp (more principled, slower, no centering needed)
-        teacher_probs = dino_loss.sinkhorn_knopp_teacher(teacher_logits, temp=0.04)
+        n_views, batch_size, _ = teacher_logits.shape
+        num_samples = n_views * batch_size  # Total samples across views
+        teacher_probs = dino_loss.sinkhorn_knopp_teacher(
+            teacher_logits, temp=0.04, num_samples=num_samples
+        )
         loss = dino_loss(student_logits, teacher_probs)
         # No update_center() needed for Sinkhorn-Knopp!
         ```
 
     Args:
-        out_dim (int): Dimensionality of prototypes (number of clusters). Default is 65536.
         temperature_student (float): Temperature for student softmax. Default is 0.1.
         center_momentum (float): EMA momentum for center update. Default is 0.9.
     """
 
     def __init__(
         self,
-        out_dim: int = 65536,
         temperature_student: float = 0.1,
         center_momentum: float = 0.9,
     ):
         super().__init__()
-        self.out_dim = out_dim
         self.temperature_student = temperature_student
         self.center_momentum = center_momentum
-        self.register_buffer("center", torch.zeros(1, out_dim))
+        self.center = None
         self.updated = True
         self.reduce_handle = None
         self.len_teacher_output = None
@@ -102,12 +103,14 @@ class DINOCLSTokenLoss(torch.nn.Module):
             return F.softmax(teacher_logits / teacher_temp, dim=-1)
 
     @torch.no_grad()
-    def sinkhorn_knopp_teacher(self, teacher_logits, teacher_temp, n_iterations=3):
+    def sinkhorn_knopp_teacher(
+        self, teacher_logits, teacher_temp, num_samples=None, n_iterations=3
+    ):
         """Apply Sinkhorn-Knopp optimal transport normalization to teacher logits.
 
         **FOR SINKHORN-KNOPP APPROACH ONLY. DOES NOT USE CENTER.**
 
-        This method applies optimal transport to enforce exact uniform distribution across
+        This method applies sinkhorn-knopp to enforce exact uniform distribution across
         prototypes without using centering. More principled than centering but more expensive.
         Used in SwAV and DINOv3 for better theoretical guarantees.
 
@@ -115,28 +118,40 @@ class DINOCLSTokenLoss(torch.nn.Module):
         apply_center_update() since centering is not used.
 
         Args:
-            teacher_logits: Teacher logits [batch, out_dim]
+            teacher_logits: Teacher logits [*, out_dim]. Can be any shape as long as last dim is out_dim.
+                           Common shapes: [batch, out_dim] or [n_views, batch, out_dim]
             teacher_temp: Temperature for softmax
+            num_samples: Total number of samples across all GPUs (int or tensor).
+                        If None, inferred from shape assuming [batch, out_dim] format.
+                        For multi-view [n_views, batch, out_dim], pass n_views * batch explicitly.
             n_iterations: Number of Sinkhorn iterations (default: 3)
 
         Returns:
-            Teacher probabilities [batch, out_dim] with uniform prototype distribution
+            Teacher probabilities [same shape as input] with uniform prototype distribution
         """
-        # Compute batch size (may need to handle distributed case)
-        if torch.distributed.is_available() and torch.distributed.is_initialized():
-            world_size = torch.distributed.get_world_size()
-        else:
-            world_size = 1
+        # Infer num_samples if not provided
+        if num_samples is None:
+            # Assume shape is [batch, out_dim]
+            batch_size = teacher_logits.shape[0]
+            if torch.distributed.is_available() and torch.distributed.is_initialized():
+                world_size = torch.distributed.get_world_size()
+                num_samples = batch_size * world_size
+            else:
+                num_samples = batch_size
 
-        batch_size = teacher_logits.shape[0]
-        num_samples = batch_size * world_size
+        # Flatten all dims except last (out_dim) for Sinkhorn-Knopp
+        original_shape = teacher_logits.shape
+        teacher_logits_flat = teacher_logits.view(-1, original_shape[-1])
 
-        return sinkhorn_knopp(
-            teacher_output=teacher_logits,
+        result = sinkhorn_knopp(
+            teacher_output=teacher_logits_flat,
             teacher_temp=teacher_temp,
             num_samples=num_samples,
             n_iterations=n_iterations,
         )
+
+        # Reshape back to original shape
+        return result.view(original_shape)
 
     def forward(
         self,
@@ -166,7 +181,7 @@ class DINOCLSTokenLoss(torch.nn.Module):
         )
 
         # Compute cross-entropy: -sum over dim K of (teacher_probs * log(student_probs))
-        # Using einsum for efficiency: sum over batch B and prototypes K, keep view dims S, T
+        # Using einsum : sum over batch B and prototypes K, keep view dims S, T
         loss_matrix = -torch.einsum(
             "s b k, t b k -> s t", student_log_probs, teacher_probs.float()
         )
@@ -240,9 +255,13 @@ class DINOCLSTokenLoss(torch.nn.Module):
 
             _t = self.async_batch_center / (self.len_teacher_output * world_size)
 
-            self.center = self.center * self.center_momentum + _t * (
-                1 - self.center_momentum
-            )
+            # Initialize center on first call
+            if self.center is None:
+                self.center = _t.clone()
+            else:
+                self.center = self.center * self.center_momentum + _t * (
+                    1 - self.center_momentum
+                )
 
             self.updated = True
 
