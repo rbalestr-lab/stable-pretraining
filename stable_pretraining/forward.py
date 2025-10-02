@@ -527,32 +527,28 @@ def dino_forward(self, batch, stage):
     # Teacher processes only global views
     with torch.no_grad():
         teacher_features = self.backbone.forward_teacher(global_images)
-        teacher_embeddings = self.projector.forward_teacher(teacher_features)
-        teacher_embeddings = teacher_embeddings.view(n_global, batch_size, -1)
+        teacher_logits = self.projector.forward_teacher(teacher_features)
+        teacher_logits = teacher_logits.view(n_global, batch_size, -1)
 
     # Student processes all views
-    student_embeddings_list = []
+    student_logits_list = []
 
     # Process global views through student
     student_features = self.backbone.forward_student(global_images)
-    student_global_embeddings = self.projector.forward_student(student_features)
-    student_global_embeddings = student_global_embeddings.view(n_global, batch_size, -1)
-    student_embeddings_list.append(student_global_embeddings)
+    student_global_logits = self.projector.forward_student(student_features)
+    student_global_logits = student_global_logits.view(n_global, batch_size, -1)
+    student_logits_list.append(student_global_logits)
 
     # Process local views through student (if any)
     if n_local > 0:
         local_images = torch.cat([view["image"] for view in local_views], dim=0)
         student_features = self.backbone.forward_student(local_images)
-        student_local_embeddings = self.projector.forward_student(student_features)
-        student_local_embeddings = student_local_embeddings.view(
-            n_local, batch_size, -1
-        )
-        student_embeddings_list.append(student_local_embeddings)
+        student_local_logits = self.projector.forward_student(student_features)
+        student_local_logits = student_local_logits.view(n_local, batch_size, -1)
+        student_logits_list.append(student_local_logits)
 
-    # Concatenate student embeddings along the view dimension
-    student_embeddings = torch.cat(
-        student_embeddings_list, dim=0
-    )  # [n_views, batch_size, dim]
+    # Concatenate student logits along the view dimension
+    student_logits = torch.cat(student_logits_list, dim=0)
 
     if not hasattr(self, "dino_loss"):
         raise ValueError(
@@ -566,10 +562,6 @@ def dino_forward(self, batch, stage):
             "This should be a TeacherStudentWrapper containing the projector (MLP + normalize + prototypes). "
             "Pass it when constructing the Module: Module(..., projector=wrapped_projector, ...)"
         )
-
-    # Apply projector to get logits (separate teacher and student projectors)
-    teacher_logits = self.projector.forward_teacher(teacher_embeddings)
-    student_logits = self.projector.forward_student(student_embeddings)
 
     # Temperature scheduling for teacher
     if (

@@ -1,4 +1,5 @@
 import lightning as pl
+import time
 import torch
 import torchmetrics
 from lightning.pytorch.loggers import WandbLogger
@@ -240,7 +241,7 @@ knn_probe = spt.callbacks.OnlineKNN(
 wandb_logger = WandbLogger(
     entity="stable-ssl",
     project="imagenet100-dino",
-    name="dino-vit-tiny-solo-params",
+    name=f"dino-vit-tiny-solo-params-{time.time()}",
     log_model=False,
 )
 
