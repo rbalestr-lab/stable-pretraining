@@ -1,10 +1,10 @@
-"""SwAV training on CIFAR10."""
+"""SwAV training on ImageNet-100 with ResNet-18."""
 
 import lightning as pl
 import torch
 import torchmetrics
-import torchvision
 from lightning.pytorch.loggers import WandbLogger
+from lightning.pytorch.callbacks import LearningRateMonitor
 from torch import nn
 
 import stable_pretraining as spt
@@ -40,135 +40,131 @@ LR = 0.6 if BATCH_SIZE <= 256 else 4.8  # Parameters used in the original paper
 USE_QUEUE = True if BATCH_SIZE < 256 else False
 QUEUE_LENGTH = 3840
 START_QUEUE_AT_EPOCH = 15
-PROJECTION_DIM = 128  # The output of the projector
+
 
 swav_transform = transforms.MultiViewTransform(
-    {
-        "global_1": transforms.Compose(
+    [
+        # Global crop 1: 224x224 with strong augmentations
+        transforms.Compose(
             transforms.RGB(),
-            transforms.RandomResizedCrop(32, scale=(0.2, 1.0)),
+            transforms.RandomResizedCrop(224, scale=(0.2, 1.0)),
             transforms.RandomHorizontalFlip(p=0.5),
             transforms.ColorJitter(
-                brightness=0.8, contrast=0.8, saturation=0.8, hue=0.2, p=0.8
+                brightness=0.4, contrast=0.4, saturation=0.4, hue=0.1, p=0.8
             ),
             transforms.RandomGrayscale(p=0.2),
-            transforms.ToImage(**spt.data.static.CIFAR10),
+            transforms.GaussianBlur(kernel_size=23, p=1.0),
+            transforms.ToImage(**spt.data.static.ImageNet),
         ),
-        "global_2": transforms.Compose(
+        # Global crop 2: 224x224 
+        transforms.Compose(
             transforms.RGB(),
-            transforms.RandomResizedCrop(32, scale=(0.2, 1.0)),
+            transforms.RandomResizedCrop(224, scale=(0.2, 1.0)),
             transforms.RandomHorizontalFlip(p=0.5),
             transforms.ColorJitter(
-                brightness=0.8, contrast=0.8, saturation=0.8, hue=0.2, p=0.8
+                brightness=0.4, contrast=0.4, saturation=0.4, hue=0.1, p=0.8
             ),
             transforms.RandomGrayscale(p=0.2),
-            transforms.GaussianBlur(kernel_size=3, p=0.5),
-            transforms.ToImage(**spt.data.static.CIFAR10),
+            transforms.GaussianBlur(kernel_size=23, p=0.1),
+            transforms.ToImage(**spt.data.static.ImageNet),
         ),
-        "local_1": transforms.Compose(
+        # Local crops (6 total): 96x96 to capture finer details
+        transforms.Compose(
             transforms.RGB(),
-            transforms.RandomResizedCrop(16, scale=(0.05, 0.2)), # Small crop
+            transforms.RandomResizedCrop(96, scale=(0.05, 0.2)),
             transforms.RandomHorizontalFlip(p=0.5),
             transforms.ColorJitter(
-                brightness=0.8, contrast=0.8, saturation=0.8, hue=0.2, p=0.8
+                brightness=0.4, contrast=0.4, saturation=0.4, hue=0.1, p=0.8
             ),
             transforms.RandomGrayscale(p=0.2),
-            transforms.GaussianBlur(kernel_size=3, p=0.5),
-            transforms.ToImage(**spt.data.static.CIFAR10),
+            transforms.ToImage(**spt.data.static.ImageNet),
         ),
-        "local_2": transforms.Compose(
+        transforms.Compose(
             transforms.RGB(),
-            transforms.RandomResizedCrop(16, scale=(0.05, 0.2)), # Small crop
+            transforms.RandomResizedCrop(96, scale=(0.05, 0.2)),
             transforms.RandomHorizontalFlip(p=0.5),
             transforms.ColorJitter(
-                brightness=0.8, contrast=0.8, saturation=0.8, hue=0.2, p=0.8
+                brightness=0.4, contrast=0.4, saturation=0.4, hue=0.1, p=0.8
             ),
             transforms.RandomGrayscale(p=0.2),
-            transforms.GaussianBlur(kernel_size=3, p=0.5),
-            transforms.ToImage(**spt.data.static.CIFAR10),
+            transforms.ToImage(**spt.data.static.ImageNet),
         ),
-        "local_3": transforms.Compose(
+        transforms.Compose(
             transforms.RGB(),
-            transforms.RandomResizedCrop(16, scale=(0.05, 0.2)), # Small crop
+            transforms.RandomResizedCrop(96, scale=(0.05, 0.2)),
             transforms.RandomHorizontalFlip(p=0.5),
             transforms.ColorJitter(
-                brightness=0.8, contrast=0.8, saturation=0.8, hue=0.2, p=0.8
+                brightness=0.4, contrast=0.4, saturation=0.4, hue=0.1, p=0.8
             ),
             transforms.RandomGrayscale(p=0.2),
-            transforms.GaussianBlur(kernel_size=3, p=0.5),
-            transforms.ToImage(**spt.data.static.CIFAR10),
+            transforms.ToImage(**spt.data.static.ImageNet),
         ),
-        "local_4": transforms.Compose(
+        transforms.Compose(
             transforms.RGB(),
-            transforms.RandomResizedCrop(16, scale=(0.05, 0.2)), # Small crop
+            transforms.RandomResizedCrop(96, scale=(0.05, 0.2)),
             transforms.RandomHorizontalFlip(p=0.5),
             transforms.ColorJitter(
-                brightness=0.8, contrast=0.8, saturation=0.8, hue=0.2, p=0.8
+                brightness=0.4, contrast=0.4, saturation=0.4, hue=0.1, p=0.8
             ),
             transforms.RandomGrayscale(p=0.2),
-            transforms.GaussianBlur(kernel_size=3, p=0.5),
-            transforms.ToImage(**spt.data.static.CIFAR10),
+            transforms.ToImage(**spt.data.static.ImageNet),
         ),
-        "local_5": transforms.Compose(
+        transforms.Compose(
             transforms.RGB(),
-            transforms.RandomResizedCrop(16, scale=(0.05, 0.2)), # Small crop
+            transforms.RandomResizedCrop(96, scale=(0.05, 0.2)),
             transforms.RandomHorizontalFlip(p=0.5),
             transforms.ColorJitter(
-                brightness=0.8, contrast=0.8, saturation=0.8, hue=0.2, p=0.8
+                brightness=0.4, contrast=0.4, saturation=0.4, hue=0.1, p=0.8
             ),
             transforms.RandomGrayscale(p=0.2),
-            transforms.GaussianBlur(kernel_size=3, p=0.5),
-            transforms.ToImage(**spt.data.static.CIFAR10),
+            transforms.ToImage(**spt.data.static.ImageNet),
         ),
-        "local_6": transforms.Compose(
+        transforms.Compose(
             transforms.RGB(),
-            transforms.RandomResizedCrop(16, scale=(0.05, 0.2)), # Small crop
+            transforms.RandomResizedCrop(96, scale=(0.05, 0.2)),
             transforms.RandomHorizontalFlip(p=0.5),
             transforms.ColorJitter(
-                brightness=0.8, contrast=0.8, saturation=0.8, hue=0.2, p=0.8
+                brightness=0.4, contrast=0.4, saturation=0.4, hue=0.1, p=0.8
             ),
             transforms.RandomGrayscale(p=0.2),
-            transforms.GaussianBlur(kernel_size=3, p=0.5),
-            transforms.ToImage(**spt.data.static.CIFAR10),
+            transforms.ToImage(**spt.data.static.ImageNet),
         ),
-    }
+    ]
 )
 
 val_transform = transforms.Compose(
     transforms.RGB(),
-    transforms.Resize((32, 32)),
-    transforms.ToImage(**spt.data.static.CIFAR10),
+    transforms.Resize((256, 256)),
+    transforms.CenterCrop((224, 224)),
+    transforms.ToImage(**spt.data.static.ImageNet),
 )
 
-data_dir = get_data_dir("cifar10")
-cifar_train = torchvision.datasets.CIFAR10(
-    root=str(data_dir), train=True, download=True
-)
-cifar_val = torchvision.datasets.CIFAR10(root=str(data_dir), train=False, download=True)
+data_dir = get_data_dir("imagenet100")
 
-train_dataset = spt.data.FromTorchDataset(
-    cifar_train,
-    names=["image", "label"],
+train_dataset = spt.data.HFDataset(
+    "clane9/imagenet-100",
+    split="train",
+    cache_dir=str(data_dir),
     transform=swav_transform,
 )
-val_dataset = spt.data.FromTorchDataset(
-    cifar_val,
-    names=["image", "label"],
+val_dataset = spt.data.HFDataset(
+    "clane9/imagenet-100",
+    split="validation",
+    cache_dir=str(data_dir),
     transform=val_transform,
 )
 
 train_dataloader = torch.utils.data.DataLoader(
     dataset=train_dataset,
-    # Updated to 8 views to match the multi-crop transform
     sampler=spt.data.sampler.RepeatedRandomSampler(train_dataset, n_views=8),
-    batch_size=256,
+    batch_size=BATCH_SIZE,
     num_workers=8,
     drop_last=True,
 )
 
 val_dataloader = torch.utils.data.DataLoader(
     dataset=val_dataset,
-    batch_size=256,
+    batch_size=BATCH_SIZE,
     num_workers=10,
 )
 
@@ -176,7 +172,8 @@ data = spt.data.DataModule(train=train_dataloader, val=val_dataloader)
 
 backbone = spt.backbone.from_torchvision(
     "resnet18",
-    low_resolution=True,
+    low_resolution=False,
+    weights=None
 )
 backbone.fc = torch.nn.Identity()
 
@@ -201,7 +198,7 @@ module = spt.Module(
     use_queue=USE_QUEUE,
     queue_length=QUEUE_LENGTH,
     start_queue_at_epoch=START_QUEUE_AT_EPOCH,
-    projection_dim=PROJECTION_DIM,
+    projection_dim=128,
     swav_loss=spt.losses.joint_embedding.SwAVLoss(
         temperature=0.1,
         sinkhorn_iterations=3,
@@ -211,6 +208,9 @@ module = spt.Module(
             "type": "LARS",
             "lr": LR,
             "weight_decay": 1e-6,
+            "clip_lr": True,
+            "eta": 0.02,
+            "exclude_bias_n_norm": True,
         },
         "scheduler": {
             "type": "LinearWarmupCosineAnnealing",
@@ -226,11 +226,11 @@ linear_probe = spt.callbacks.OnlineProbe(
     name="linear_probe",
     input="embedding",
     target="label",
-    probe=torch.nn.Linear(512, 10),
+    probe=torch.nn.Linear(512, 100),
     loss_fn=torch.nn.CrossEntropyLoss(),
     metrics={
-        "top1": torchmetrics.classification.MulticlassAccuracy(10),
-        "top5": torchmetrics.classification.MulticlassAccuracy(10, top_k=5),
+        "top1": torchmetrics.classification.MulticlassAccuracy(100),
+        "top5": torchmetrics.classification.MulticlassAccuracy(100, top_k=5),
     },
 )
 
@@ -239,22 +239,24 @@ knn_probe = spt.callbacks.OnlineKNN(
     input="embedding",
     target="label",
     queue_length=20000,
-    metrics={"accuracy": torchmetrics.classification.MulticlassAccuracy(10)},
+    metrics={"accuracy": torchmetrics.classification.MulticlassAccuracy(100)},
     input_dim=512,
-    k=10,
+    k=20,
 )
 
 wandb_logger = WandbLogger(
     entity="stable-ssl",
-    project="cifar10-swav",
+    project="imagenet100-swav-resnet18",
     log_model=False,
 )
+
+lr_monitor = LearningRateMonitor(logging_interval="step")
 
 trainer = pl.Trainer(
     max_epochs=MAX_EPOCHS,
     num_sanity_val_steps=0,
-    callbacks=[knn_probe, linear_probe, FreezePrototypesCallback(freeze_epochs=2)],
-    precision="16-mixed",  # Can be unstable
+    callbacks=[knn_probe, linear_probe, FreezePrototypesCallback(freeze_epochs=2), lr_monitor],
+    precision="16-mixed",
     logger=wandb_logger,
     enable_checkpointing=False,
 )
