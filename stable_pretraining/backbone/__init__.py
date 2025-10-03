@@ -17,6 +17,7 @@ from .utils import (
     from_timm,
     from_torchvision,
     set_embedding_dim,
+    vit_hf,
 )
 
 __all__ = [
@@ -29,6 +30,7 @@ __all__ = [
     FeaturesConcat,
     set_embedding_dim,
     ConvMixer,
+    vit_hf,
 ]
 
 if _MAE_AVAILABLE:

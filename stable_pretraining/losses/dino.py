@@ -180,7 +180,7 @@ class DINOv1Loss(torch.nn.Module):
     def softmax_center_teacher(self, teacher_logits, teacher_temp, update_centers=True):
         """Apply classical centering and sharpening to teacher logits.
 
-        **FOR CLASSICAL CENTERING APPROACH ONLY.**
+        **FOR CLASSICAL CENTERING APPROACH ONLY. NOT NEEDED FOR SINKHORN-KNOPP.**
 
         This method subtracts the center (EMA of batch means) from teacher logits before
         applying softmax. This prevents mode collapse by ensuring balanced prototype usage.
@@ -270,8 +270,8 @@ class iBOTPatchLoss(torch.nn.Module):
     """iBOT patch-level prediction loss for masked patch prediction.
 
     This loss computes cross-entropy between teacher and student patch predictions
-    for masked patches only. Like DINOv1Loss, it supports either classical
-    centering or Sinkhorn-Knopp normalization to prevent mode collapse.
+    for masked patches only. Uses Sinkhorn-Knopp normalization exclusively (as in DINOv2/v3)
+    to prevent mode collapse.
 
     Usage:
         ```python
@@ -282,50 +282,32 @@ class iBOTPatchLoss(torch.nn.Module):
         teacher_logits_masked = ...  # [n_masked, patch_out_dim]
         masks = ...  # [batch, n_patches] binary mask
 
-        # Approach 1: Classical centering (recommended, faster)
-        teacher_probs = ibot_loss.softmax_center_teacher(
+        # Apply Sinkhorn-Knopp to teacher logits
+        teacher_probs = ibot_loss.sinkhorn_knopp_teacher(
             teacher_logits_masked, temp=0.04
         )
         loss = ibot_loss.forward_masked(student_logits_masked, teacher_probs, masks)
-        ibot_loss.update_center(teacher_logits_masked)  # Queue async center update
-
-        # Approach 2: Sinkhorn-Knopp (more principled, slower, no centering needed)
-        n_masked = torch.tensor(student_logits_masked.shape[0])
-        teacher_probs = ibot_loss.sinkhorn_knopp_teacher(
-            teacher_logits_masked, temp=0.04, n_masked_patches_tensor=n_masked
-        )
-        loss = ibot_loss.forward_masked(student_logits_masked, teacher_probs, masks)
-        # No update_center() needed for Sinkhorn-Knopp!
         ```
 
     Args:
         patch_out_dim (int): Dimensionality of patch prototypes (number of clusters).
         student_temp (float): Temperature for student softmax. Default is 0.1.
-        center_momentum (float): EMA momentum for center update. Default is 0.9.
     """
 
     def __init__(
         self,
         patch_out_dim: int = None,
         student_temp: float = 0.1,
-        center_momentum: float = 0.9,
     ):
         super().__init__()
         self.patch_out_dim = patch_out_dim  # Can be None, will be inferred from logits
         self.student_temp = student_temp
-        self.center_momentum = center_momentum
-        self.center = None
-        self.updated = True
-        self.reduce_handle = None
-        self.len_teacher_patch_tokens = None
-        self.async_batch_center = None
 
     def forward(self, student_patch_logits, teacher_patch_probs, student_masks_flat):
         """Compute iBOT cross-entropy loss for all patches.
 
-        This is a pure loss computation with no side effects (no centering, no updates).
-        Teacher probabilities should be pre-processed with softmax_center_teacher() or
-        sinkhorn_knopp_teacher(). Center updates should be done separately with update_center().
+        This is a pure loss computation with no side effects.
+        Teacher probabilities should be pre-processed with sinkhorn_knopp_teacher().
 
         This version processes all patches and masks out non-masked ones. Use forward_masked()
         for memory-efficient computation with only masked patches.
@@ -357,12 +339,11 @@ class iBOTPatchLoss(torch.nn.Module):
     ):
         """Compute iBOT cross-entropy loss for masked patches only (memory-efficient).
 
-        This is a pure loss computation with no side effects (no centering, no updates).
-        Teacher probabilities should be pre-processed with softmax_center_teacher() or
-        sinkhorn_knopp_teacher(). Center updates should be done separately with update_center().
+        This is a pure loss computation with no side effects.
+        Teacher probabilities should be pre-processed with sinkhorn_knopp_teacher().
 
         This version processes only masked patches (more memory-efficient for large models).
-        Used in DINOv3.
+        Used in DINOv2/v3.
 
         Args:
             student_patch_logits_masked: Student logits for masked patches [n_masked, patch_out_dim]
@@ -405,14 +386,8 @@ class iBOTPatchLoss(torch.nn.Module):
     ):
         """Apply Sinkhorn-Knopp optimal transport normalization to teacher patch logits.
 
-        **FOR SINKHORN-KNOPP APPROACH ONLY. DOES NOT USE CENTER.**
-
         This method applies optimal transport to enforce exact uniform distribution across
-        prototypes without using centering. More principled than centering but more expensive.
-        Used in SwAV and DINOv3 for better theoretical guarantees.
-
-        Note: When using Sinkhorn-Knopp, you do NOT need to call update_center() since
-        centering is not used.
+        prototypes. Used exclusively in DINOv2/v3 for iBOT patch loss.
 
         Args:
             teacher_patch_tokens: Teacher patch logits [n_masked, patch_out_dim]
@@ -431,108 +406,13 @@ class iBOTPatchLoss(torch.nn.Module):
             n_iterations=n_iterations,
         )
 
-    @torch.no_grad()
-    def softmax_center_teacher(
-        self, teacher_patch_tokens, teacher_temp, update_centers=True
-    ):
-        """Apply classical centering and sharpening to teacher patch logits.
-
-        **FOR CLASSICAL CENTERING APPROACH ONLY.**
-
-        This method subtracts the center (EMA of batch means) from teacher logits before
-        applying softmax. This prevents mode collapse by ensuring balanced prototype usage.
-
-        Args:
-            teacher_patch_tokens: Teacher patch logits [n_masked, patch_out_dim]
-            teacher_temp: Temperature for teacher softmax
-            update_centers: Whether to apply queued center update before centering
-
-        Returns:
-            Teacher probabilities after centering [n_masked, patch_out_dim]
-        """
-        if update_centers:
-            self.apply_center_update()
-        if self.center is not None:
-            return F.softmax(
-                (teacher_patch_tokens - self.center) / teacher_temp, dim=-1
-            )
-        else:
-            return F.softmax(teacher_patch_tokens / teacher_temp, dim=-1)
-
-    @torch.no_grad()
-    def update_center(self, teacher_patch_tokens):
-        """Queue async center update from teacher patch logits.
-
-        **FOR CLASSICAL CENTERING APPROACH ONLY. NOT NEEDED FOR SINKHORN-KNOPP.**
-
-        Starts an asynchronous all-reduce for distributed training. The update is
-        applied later when softmax_center_teacher() is called with update_centers=True.
-        This allows the all-reduce to overlap with backward pass for efficiency.
-
-        Typical usage:
-            teacher_probs = ibot_loss.softmax_center_teacher(teacher_logits, temp)
-            loss = ibot_loss.forward_masked(student_logits, teacher_probs, masks)
-            ibot_loss.update_center(teacher_logits)  # Start async update
-            # ... backward pass happens here, overlapping with all-reduce ...
-            # Next iteration: softmax_center_teacher() will call apply_center_update()
-
-        Args:
-            teacher_patch_tokens: Teacher patch logits [n_masked, patch_out_dim]
-        """
-        # Mark as not updated yet
-        self.updated = False
-        self.len_teacher_patch_tokens = len(teacher_patch_tokens)
-
-        # Compute mean across masked patches
-        self.async_batch_center = teacher_patch_tokens.mean(dim=0, keepdim=True)
-
-        # Start async all-reduce across GPUs
-        if torch.distributed.is_available() and torch.distributed.is_initialized():
-            self.reduce_handle = torch.distributed.all_reduce(
-                self.async_batch_center, async_op=True
-            )
-
-    @torch.no_grad()
-    def apply_center_update(self):
-        """Apply the queued center update with EMA.
-
-        **FOR CLASSICAL CENTERING APPROACH ONLY. NOT NEEDED FOR SINKHORN-KNOPP.**
-
-        Waits for async all-reduce to complete and updates self.center with EMA.
-        Automatically called by softmax_center_teacher() if update_centers=True.
-        """
-        if self.updated is False:
-            world_size = (
-                torch.distributed.get_world_size()
-                if torch.distributed.is_available()
-                and torch.distributed.is_initialized()
-                else 1
-            )
-
-            if self.reduce_handle is not None:
-                self.reduce_handle.wait()
-
-            # Average across GPUs
-            _t = self.async_batch_center / world_size
-
-            # Initialize center on first call
-            if self.center is None:
-                self.center = _t.clone()
-            else:
-                # EMA update
-                self.center = self.center * self.center_momentum + _t * (
-                    1 - self.center_momentum
-                )
-
-            self.updated = True
-
 
 class DINOv2Loss(torch.nn.Module):
     """DINOv2 loss combining CLS token and masked patch losses.
 
     DINOv2 combines two losses:
-    - DINOv1Loss: CLS token distillation (global views)
-    - iBOTPatchLoss: Masked patch prediction
+    - DINOv1Loss: CLS token distillation (global views) - uses Sinkhorn-Knopp
+    - iBOTPatchLoss: Masked patch prediction - uses Sinkhorn-Knopp
 
     Both losses use Sinkhorn-Knopp normalization in DINOv2.
 
@@ -540,7 +420,7 @@ class DINOv2Loss(torch.nn.Module):
         dino_loss_weight (float): Weight for CLS token loss. Default is 1.0.
         ibot_loss_weight (float): Weight for iBOT patch loss. Default is 1.0.
         temperature_student (float): Temperature for student softmax in DINO. Default is 0.1.
-        center_momentum (float): EMA momentum for centering. Default is 0.9.
+        center_momentum (float): EMA momentum for DINO centering (not used by iBOT). Default is 0.9.
         patch_out_dim (int): Output dimension of patch projector. Required for iBOT loss.
         student_temp (float): Temperature for student softmax in iBOT. Default is 0.1.
     """
@@ -558,17 +438,16 @@ class DINOv2Loss(torch.nn.Module):
         self.dino_loss_weight = dino_loss_weight
         self.ibot_loss_weight = ibot_loss_weight
 
-        # DINO loss for CLS tokens
+        # DINO loss for CLS tokens (still uses classical centering)
         self.dino_loss = DINOv1Loss(
             temperature_student=temperature_student,
             center_momentum=center_momentum,
         )
 
-        # iBOT loss for patches (infer patch_out_dim if not provided)
+        # iBOT loss for patches (uses Sinkhorn-Knopp only)
         self.ibot_loss = iBOTPatchLoss(
-            patch_out_dim=patch_out_dim,  # Will be set dynamically on first forward
+            patch_out_dim=patch_out_dim,
             student_temp=student_temp,
-            center_momentum=center_momentum,
         )
 
     def forward(

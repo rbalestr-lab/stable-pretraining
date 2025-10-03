@@ -22,7 +22,6 @@ Example:
 """
 
 import torch
-from loguru import logger as logging
 
 from .callbacks.queue import find_or_create_queue_callback, OnlineQueue
 
@@ -709,15 +708,37 @@ def dinov2_forward(self, batch, stage):
     else:
         temperature_teacher = getattr(self, "temperature_teacher", 0.04)
 
-    # ===== CLS Token Processing (DINO) =====
+    # Get underlying backbones (handle TeacherStudentWrapper)
+    teacher_backbone = getattr(self.backbone, "teacher", self.backbone)
+    student_backbone = getattr(self.backbone, "student", self.backbone)
 
-    # Teacher processes only global views for CLS tokens
+    # ===== Extract tokens ONCE from teacher (used for both CLS and patches) =====
+
     with torch.no_grad():
-        # For timm ViT: forward_features returns only CLS token when num_classes=0
-        teacher_cls_features = self.backbone.forward_teacher(global_images)
+        # Extract teacher tokens for global views
+        # Support both HuggingFace ViT (returns dict with last_hidden_state) and timm ViT
+        teacher_output = teacher_backbone(global_images)
+
+        if hasattr(teacher_output, "last_hidden_state"):
+            # HuggingFace ViT: output.last_hidden_state is [B, num_patches+1, hidden_size]
+            teacher_cls_features = teacher_output.last_hidden_state[
+                :, 0, :
+            ]  # CLS token
+            teacher_patches_all = teacher_output.last_hidden_state[
+                :, 1:, :
+            ]  # Patch tokens
+        else:
+            # Fallback to timm or custom ViT (assumes returns tensor [B, num_patches+1, hidden_size])
+            teacher_cls_features = teacher_output[:, 0, :]
+            teacher_patches_all = teacher_output[:, 1:, :]
+
+        # Reshape CLS features for multi-view: [n_global * batch_size, dim] -> [n_global, batch_size, dim]
+        teacher_cls_features = teacher_cls_features.view(n_global, batch_size, -1)
 
         # CLS token projection
-        teacher_cls_logits = self.projector.forward_teacher(teacher_cls_features)
+        teacher_cls_logits = self.projector.forward_teacher(
+            teacher_cls_features.view(n_global * batch_size, -1)
+        )
         teacher_cls_logits = teacher_cls_logits.view(n_global, batch_size, -1)
 
         # Apply Sinkhorn-Knopp to CLS tokens
@@ -733,7 +754,14 @@ def dinov2_forward(self, batch, stage):
     student_logits_list = []
 
     # Process global views through student
-    student_cls_features = self.backbone.forward_student(global_images)
+    student_output = self.backbone.forward_student(global_images)
+    if hasattr(student_output, "last_hidden_state"):
+        student_cls_features = student_output.last_hidden_state[:, 0, :]
+    else:
+        student_cls_features = (
+            student_output[:, 0, :] if student_output.ndim == 3 else student_output
+        )
+
     student_global_cls_logits = self.projector.forward_student(student_cls_features)
     student_global_cls_logits = student_global_cls_logits.view(n_global, batch_size, -1)
     student_logits_list.append(student_global_cls_logits)
@@ -741,7 +769,19 @@ def dinov2_forward(self, batch, stage):
     # Process local views through student (if any)
     if n_local > 0:
         local_images = torch.cat([view["image"] for view in local_views], dim=0)
-        student_local_cls_features = self.backbone.forward_student(local_images)
+        # For HF ViT: need to pass interpolate_pos_encoding=True for different sized images
+        student_local_output = self.backbone.forward_student(
+            local_images, interpolate_pos_encoding=True
+        )
+        if hasattr(student_local_output, "last_hidden_state"):
+            student_local_cls_features = student_local_output.last_hidden_state[:, 0, :]
+        else:
+            student_local_cls_features = (
+                student_local_output[:, 0, :]
+                if student_local_output.ndim == 3
+                else student_local_output
+            )
+
         student_local_cls_logits = self.projector.forward_student(
             student_local_cls_features
         )
@@ -755,54 +795,36 @@ def dinov2_forward(self, batch, stage):
 
     # ===== Patch Processing (iBOT) =====
 
-    # Check if we can extract patches from the backbone
     if hasattr(self, "patch_projector"):
-        # Get mask ratio
         mask_ratio = getattr(self, "mask_ratio", 0.3)
 
-        # Extract patch tokens using timm's forward_features
-        # This assumes backbone is a timm ViT with forward_features method
         try:
             # Process first global view only for iBOT
             first_view = global_images[:batch_size]
 
-            # Get the underlying backbone (handle TeacherStudentWrapper)
-            if hasattr(self.backbone, "teacher"):
-                teacher_backbone = self.backbone.teacher
-                student_backbone = self.backbone.student
-            else:
-                teacher_backbone = self.backbone
-                student_backbone = self.backbone
-
             with torch.no_grad():
-                # Teacher forward_features returns all tokens [batch, num_prefix + n_patches, dim]
-                teacher_all_tokens = teacher_backbone.forward_features(first_view)
+                # Extract teacher patches from first view (already computed above)
+                teacher_patches = teacher_patches_all[
+                    :batch_size
+                ]  # [batch_size, n_patches, dim]
 
-                # Get number of prefix tokens (usually 1 for CLS)
-                num_prefix_tokens = getattr(teacher_backbone, "num_prefix_tokens", 1)
+                # Create random mask: True = masked, False = visible (vectorized exact-k per sample)
+                B, N, C = teacher_patches.shape
+                n_masked = int(N * mask_ratio)
 
-                # Extract patch tokens (skip CLS token)
-                teacher_patches = teacher_all_tokens[:, num_prefix_tokens:]
-
-                # Shape: [batch_size, n_patches, dim]
-                n_patches = teacher_patches.shape[1]
-                n_masked = int(n_patches * mask_ratio)
-
-                # Create random mask: 1 = masked, 0 = visible
-                masks = torch.zeros(
-                    batch_size,
-                    n_patches,
-                    dtype=torch.bool,
-                    device=teacher_patches.device,
+                bool_masked_pos = torch.zeros(
+                    B, N, dtype=torch.bool, device=teacher_patches.device
                 )
-                for i in range(batch_size):
-                    mask_indices = torch.randperm(
-                        n_patches, device=teacher_patches.device
-                    )[:n_masked]
-                    masks[i, mask_indices] = True
+                # Efficient: topk on random values (O(N) vs argsort O(N log N))
+                _, mask_indices = torch.topk(
+                    torch.rand(B, N, device=teacher_patches.device), n_masked, dim=1
+                )
+                bool_masked_pos.scatter_(1, mask_indices, True)
 
-                # Extract masked patches from teacher
-                teacher_masked_patches = teacher_patches[masks]
+                # Extract patches that WERE masked (these are visible to teacher, masked for student)
+                teacher_masked_patches = teacher_patches[
+                    bool_masked_pos
+                ]  # [B*n_masked, C]
                 teacher_patch_logits = self.patch_projector.forward_teacher(
                     teacher_masked_patches
                 )
@@ -815,12 +837,26 @@ def dinov2_forward(self, batch, stage):
                     num_samples=n_masked_total,
                 )
 
-            # Student forward_features
-            student_all_tokens = student_backbone.forward_features(first_view)
-            student_patches = student_all_tokens[:, num_prefix_tokens:]
+            # Student sees MASKED input (mask tokens injected at masked positions)
+            # HuggingFace ViT handles masking natively via bool_masked_pos parameter
+            student_output_masked = student_backbone(
+                first_view, bool_masked_pos=bool_masked_pos
+            )
 
-            # Extract masked patches from student (using same mask as teacher)
-            student_masked_patches = student_patches[masks]
+            if hasattr(student_output_masked, "last_hidden_state"):
+                student_patches = student_output_masked.last_hidden_state[
+                    :, 1:, :
+                ]  # Skip CLS
+            else:
+                # If not HF ViT, assume it's a raw tensor
+                student_patches = (
+                    student_output_masked[:, 1:, :]
+                    if student_output_masked.ndim == 3
+                    else student_output_masked
+                )
+
+            # Extract the MASK TOKEN OUTPUTS from student (at masked positions)
+            student_masked_patches = student_patches[bool_masked_pos]  # [B*n_masked, C]
             student_patch_logits = self.patch_projector.forward_student(
                 student_masked_patches
             )
@@ -845,28 +881,27 @@ def dinov2_forward(self, batch, stage):
                 masks=flat_mask,
             )
 
-        except (TypeError, AttributeError) as e:
-            # Backbone doesn't support forward_features, use DINO only
-            if "forward_features" in str(e) or "has no attribute" in str(e):
-                logging.warning(
-                    f"Backbone doesn't have forward_features method (not a timm ViT). "
-                    f"Falling back to DINO-only loss. Error: {e}"
-                )
-                loss = self.dinov2_loss.dino_loss(student_cls_logits, teacher_cls_probs)
-            else:
-                raise
+        except (RuntimeError, TypeError) as e:
+            # Backbone doesn't support HF ViT masking - provide clear error message
+            raise RuntimeError(
+                f"DINOv2 with iBOT (patch_projector) requires a HuggingFace ViT backbone that supports "
+                f"the 'bool_masked_pos' parameter for masking. "
+                f"\n\nPlease use: backbone = spt.backbone.vit_hf('tiny', use_mask_token=True)"
+                f"\n\nOriginal error: {e}"
+            ) from e
     else:
-        # No patch_projector provided, use DINO only
+        # No patch_projector provided, compute DINO loss only (no iBOT)
         if not hasattr(self, "dinov2_loss"):
-            if not hasattr(self, "dino_loss"):
-                raise ValueError(
-                    "dinov2_forward requires either 'dinov2_loss' or 'dino_loss' to be provided."
-                )
-            loss = self.dino_loss(student_cls_logits, teacher_cls_probs)
-        else:
-            loss = self.dinov2_loss.dino_loss(student_cls_logits, teacher_cls_probs)
+            raise ValueError(
+                "dinov2_forward requires 'dinov2_loss' to be provided. "
+                "Pass it when constructing the Module: Module(..., dinov2_loss=spt.losses.DINOv2Loss(), ...)"
+            )
 
-    out["embedding"] = teacher_cls_features.detach()
+        # Call DINOv2Loss with only CLS logits (iBOT disabled when no patch_projector)
+        loss = self.dinov2_loss.dino_loss(student_cls_logits, teacher_cls_probs)
+
+    # Return flattened CLS features for callbacks (probes expect [n_global * batch_size, dim])
+    out["embedding"] = teacher_cls_features.view(n_global * batch_size, -1).detach()
     out["loss"] = loss
 
     return out

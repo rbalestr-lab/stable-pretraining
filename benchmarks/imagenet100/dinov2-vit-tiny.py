@@ -148,11 +148,12 @@ val_dataloader = torch.utils.data.DataLoader(
 
 data = spt.data.DataModule(train=train_dataloader, val=val_dataloader)
 
-backbone = spt.backbone.from_timm(
-    "vit_tiny_patch16_224",
+backbone = spt.backbone.vit_hf(
+    size="tiny",
+    patch_size=16,
+    image_size=224,
     pretrained=False,
-    num_classes=0,
-    dynamic_img_size=True,
+    use_mask_token=True,  # Required for iBOT
 )
 
 wrapped_backbone = spt.TeacherStudentWrapper(

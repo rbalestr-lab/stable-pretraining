@@ -11,14 +11,10 @@ class TestiBOTPatchLoss:
 
     def test_initialization(self):
         """Test proper initialization of iBOTPatchLoss."""
-        loss_fn = iBOTPatchLoss(
-            patch_out_dim=256, student_temp=0.1, center_momentum=0.9
-        )
+        loss_fn = iBOTPatchLoss(patch_out_dim=256, student_temp=0.1)
 
         assert loss_fn.student_temp == 0.1
-        assert loss_fn.center_momentum == 0.9
-        # Center should be None initially (lazy initialization)
-        assert loss_fn.center is None
+        assert loss_fn.patch_out_dim == 256
 
     def test_forward_with_perfect_match(self):
         """Loss with perfect match should be lower than with mismatch."""
@@ -147,38 +143,6 @@ class TestiBOTPatchLoss:
         assert loss_truncated.ndim == 0
         assert not torch.isnan(loss_truncated)
 
-    def test_softmax_center_teacher(self):
-        """Test centering of teacher predictions."""
-        torch.manual_seed(0)
-        n_samples, dim = 100, 64
-
-        loss_fn = iBOTPatchLoss(patch_out_dim=dim, center_momentum=0.9)
-
-        teacher_logits = torch.randn(n_samples, dim)
-
-        # First call: center is None, should just do softmax without centering
-        probs1 = loss_fn.softmax_center_teacher(
-            teacher_logits, teacher_temp=0.1, update_centers=False
-        )
-
-        assert probs1.shape == (n_samples, dim)
-        assert torch.allclose(probs1.sum(dim=-1), torch.ones(n_samples), atol=1e-5)
-
-        # Update center
-        loss_fn.update_center(teacher_logits.unsqueeze(0))
-        loss_fn.apply_center_update()
-
-        # Center should have been initialized (not None anymore)
-        assert loss_fn.center is not None
-
-        # Second call with updated center
-        probs2 = loss_fn.softmax_center_teacher(
-            teacher_logits, teacher_temp=0.1, update_centers=False
-        )
-
-        # Probabilities should be different due to centering
-        assert not torch.allclose(probs1, probs2)
-
     def test_sinkhorn_knopp_teacher(self):
         """Test Sinkhorn-Knopp normalization of teacher predictions."""
         torch.manual_seed(42)
@@ -191,7 +155,7 @@ class TestiBOTPatchLoss:
         probs = loss_fn.sinkhorn_knopp_teacher(
             teacher_logits,
             teacher_temp=0.1,
-            n_masked_patches_tensor=torch.tensor(n_samples),
+            num_samples=n_samples,
             n_iterations=3,
         )
 
@@ -200,35 +164,6 @@ class TestiBOTPatchLoss:
         assert torch.allclose(probs.sum(dim=-1), torch.ones(n_samples), atol=1e-4)
         # All probabilities should be non-negative
         assert (probs >= 0).all()
-
-    def test_center_update_ema(self):
-        """Test that center update uses exponential moving average."""
-        torch.manual_seed(0)
-        n_samples, dim = 10, 16
-        momentum = 0.9
-
-        loss_fn = iBOTPatchLoss(patch_out_dim=dim, center_momentum=momentum)
-
-        # First batch - iBOT takes 2D input [n_masked, dim]
-        teacher_logits1 = torch.randn(n_samples, dim)
-        loss_fn.update_center(teacher_logits1)
-        loss_fn.apply_center_update()
-        center1 = loss_fn.center.clone()
-
-        # Second batch
-        teacher_logits2 = torch.randn(n_samples, dim)
-        loss_fn.update_center(teacher_logits2)
-        loss_fn.apply_center_update()
-        center2 = loss_fn.center.clone()
-
-        # Center should change but smoothly (due to momentum)
-        assert not torch.allclose(center1, center2)
-
-        # Verify EMA formula: new = old * momentum + batch * (1 - momentum)
-        # teacher_logits2 is (n_samples, dim), mean over dim 0 with keepdim gives (1, dim)
-        batch_mean = teacher_logits2.mean(dim=0, keepdim=True)
-        expected_center2 = center1 * momentum + batch_mean * (1 - momentum)
-        assert torch.allclose(center2, expected_center2, atol=1e-5)
 
     def test_loss_is_positive(self):
         """Cross-entropy loss should always be positive."""
