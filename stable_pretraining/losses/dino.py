@@ -266,34 +266,15 @@ class iBOTPatchLoss(torch.nn.Module):
     for masked patches only. Uses Sinkhorn-Knopp normalization exclusively (as in DINOv2/v3)
     to prevent mode collapse.
 
-    Usage:
-        ```python
-        ibot_loss = iBOTPatchLoss(patch_out_dim=8192)
-
-        # Get masked patch logits (already extracted, only masked patches)
-        student_logits_masked = ...  # [n_masked, patch_out_dim]
-        teacher_logits_masked = ...  # [n_masked, patch_out_dim]
-        masks = ...  # [batch, n_patches] binary mask
-
-        # Apply Sinkhorn-Knopp to teacher logits
-        teacher_probs = ibot_loss.sinkhorn_knopp_teacher(
-            teacher_logits_masked, temp=0.04
-        )
-        loss = ibot_loss.forward_masked(student_logits_masked, teacher_probs, masks)
-        ```
-
     Args:
-        patch_out_dim (int): Dimensionality of patch prototypes (number of clusters).
         student_temp (float): Temperature for student softmax. Default is 0.1.
     """
 
     def __init__(
         self,
-        patch_out_dim: int = None,
         student_temp: float = 0.1,
     ):
         super().__init__()
-        self.patch_out_dim = patch_out_dim  # Can be None, will be inferred from logits
         self.student_temp = student_temp
 
     def forward(self, student_patch_logits, teacher_patch_probs):
@@ -310,53 +291,6 @@ class iBOTPatchLoss(torch.nn.Module):
             teacher_patch_probs, student_patch_logits, self.student_temp
         )
         return loss.mean()
-
-    def forward_masked(
-        self,
-        student_patch_logits_masked,
-        teacher_patch_probs_masked,
-        student_masks_flat,
-        n_masked_patches=None,
-        masks_weight=None,
-    ):
-        """Compute iBOT cross-entropy loss for masked patches only (memory-efficient).
-
-        This is a pure loss computation with no side effects.
-        Teacher probabilities should be pre-processed with sinkhorn_knopp_teacher().
-
-        This version processes only masked patches (more memory-efficient for large models).
-        Used in DINOv2/v3.
-
-        Args:
-            student_patch_logits_masked: Student logits for masked patches [n_masked, patch_out_dim]
-            teacher_patch_probs_masked: Teacher probs for masked patches [n_masked, patch_out_dim]
-            student_masks_flat: Binary mask (1 = masked, 0 = unmasked) [batch, n_patches]
-            n_masked_patches: Number of patches to use (optional truncation)
-            masks_weight: Per-patch weights [n_masked] (optional, computed if None)
-
-        Returns:
-            Scalar iBOT loss value
-        """
-        loss = cross_entropy_loss(
-            teacher_patch_probs_masked, student_patch_logits_masked, self.student_temp
-        )
-
-        # Compute per-patch weights if not provided
-        # Default: 1 / num_masked_patches_per_sample for balanced contribution
-        if masks_weight is None:
-            masks_weight = (
-                (1 / student_masks_flat.sum(-1).clamp(min=1.0))
-                .unsqueeze(-1)
-                .expand_as(student_masks_flat)[student_masks_flat]
-            )
-
-        # Truncate to n_masked_patches if specified (for memory/speed)
-        if n_masked_patches is not None:
-            loss = loss[:n_masked_patches]
-            masks_weight = masks_weight[:n_masked_patches]
-
-        loss = loss * masks_weight
-        return loss.sum() / student_masks_flat.shape[0]
 
     @torch.no_grad()
     def sinkhorn_knopp_teacher(
@@ -403,7 +337,6 @@ class DINOv2Loss(torch.nn.Module):
         ibot_loss_weight (float): Weight for iBOT patch loss. Default is 1.0.
         temperature_student (float): Temperature for student softmax in DINO. Default is 0.1.
         center_momentum (float): EMA momentum for DINO centering (not used by iBOT). Default is 0.9.
-        patch_out_dim (int): Output dimension of patch projector. Required for iBOT loss.
         student_temp (float): Temperature for student softmax in iBOT. Default is 0.1.
     """
 
@@ -413,22 +346,18 @@ class DINOv2Loss(torch.nn.Module):
         ibot_loss_weight: float = 1.0,
         temperature_student: float = 0.1,
         center_momentum: float = 0.9,
-        patch_out_dim: int = None,
         student_temp: float = 0.1,
     ):
         super().__init__()
         self.dino_loss_weight = dino_loss_weight
         self.ibot_loss_weight = ibot_loss_weight
 
-        # DINO loss for CLS tokens (still uses classical centering)
         self.dino_loss = DINOv1Loss(
             temperature_student=temperature_student,
             center_momentum=center_momentum,
         )
 
-        # iBOT loss for patches (uses Sinkhorn-Knopp only)
         self.ibot_loss = iBOTPatchLoss(
-            patch_out_dim=patch_out_dim,
             student_temp=student_temp,
         )
 
