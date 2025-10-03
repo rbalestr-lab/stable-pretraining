@@ -160,6 +160,7 @@ class DataModule(pl.LightningDataModule):
                 loader.sampler.n_views,
                 loader.sampler.replacement,
                 loader.sampler.seed,
+                loader.sampler.pass_view_idx,
             )
             loader = DataLoader(
                 dataset=loader.dataset,

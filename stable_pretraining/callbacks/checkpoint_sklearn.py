@@ -122,14 +122,29 @@ class WandbCheckpoint(Callback):
             checkpoint["wandb"] = {"id": trainer.logger.version}
             # checkpoint["wandb_checkpoint_name"] = trainer.logger._checkpoint_name
             logging.info(f"Saving Wandb params {checkpoint['wandb']}")
+        logging.info("Checking for Wandb params to save... Done!")
 
     def on_load_checkpoint(self, trainer, pl_module, checkpoint):
         logging.info("Checking for Wandb init params... 🔧")
         if "wandb" in checkpoint:
             logging.info("Wandb info in checkpoint!!! Restoring same run... 🔧")
-            assert isinstance(trainer.logger, WandbLogger)
+            if not hasattr(trainer, "logger"):
+                logging.warning("Expected Trainer to have a logger, leaving...")
+                return
+            elif not isinstance(trainer.logger, WandbLogger):
+                logging.warning(
+                    f"Expected WandbLogger, got {trainer.logger}, leaving..."
+                )
+                return
+            else:
+                logging.info("Trainer has a WandbLogger!")
             import wandb
 
+            if wandb.run is None and trainer.global_rank > 0:
+                logging.info(
+                    "Run not initialized yet, skipping since this is a slave process!"
+                )
+                return
             logging.info(
                 f"Deleting current run {wandb.run.entity}/{wandb.run.project}/{wandb.run.id}... 🔧"
             )

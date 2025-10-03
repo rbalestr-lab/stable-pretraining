@@ -28,14 +28,20 @@ class TeacherStudentCallback(Callback):
         >>> trainer = pl.Trainer(callbacks=[TeacherStudentCallback()])
     """
 
-    def __init__(self, update_frequency: int = 1, update_after_backward: bool = True):
+    def __init__(self, update_frequency: int = 1, update_after_backward: bool = False):
         super().__init__()
         self.update_frequency = update_frequency
         self.update_after_backward = update_after_backward
         self._wrapper_found = False
+        # Track optimizer-step progress and accumulation steps
+        self._last_global_step = -1
+        self._backward_calls = 0
 
     def on_fit_start(self, trainer: pl.Trainer, pl_module: pl.LightningModule) -> None:
         """Log if TeacherStudentWrapper instances are found."""
+        # Reset counters at the start of fit
+        self._last_global_step = -1
+        self._backward_calls = 0
         wrapper_count = self._count_teacher_student_wrappers(pl_module)
         if wrapper_count > 0:
             self._wrapper_found = True
@@ -58,17 +64,23 @@ class TeacherStudentCallback(Callback):
         batch_idx: int,
     ) -> None:
         """Update teacher models after training batch if update_after_backward is False."""
-        if not self.update_after_backward and self._should_update(batch_idx):
-            self._update_all_wrappers(trainer, pl_module)
+        if not self.update_after_backward:
+            # Only update after an optimizer step (global_step increments on optimizer step)
+            current_step = trainer.global_step
+            if current_step != self._last_global_step and self._should_update(
+                current_step
+            ):
+                self._update_all_wrappers(trainer, pl_module)
+                self._last_global_step = current_step
 
     def on_after_backward(
         self, trainer: pl.Trainer, pl_module: pl.LightningModule
     ) -> None:
         """Update teacher models after backward pass if update_after_backward is True."""
         if self.update_after_backward:
-            # Get current batch idx from trainer
-            batch_idx = trainer.global_step
-            if self._should_update(batch_idx):
+            # Use an internal counter to respect update_frequency under gradient accumulation
+            self._backward_calls += 1
+            if self._should_update(self._backward_calls - 1):
                 self._update_all_wrappers(trainer, pl_module)
 
     def _should_update(self, batch_idx: int) -> bool:
@@ -87,16 +99,14 @@ class TeacherStudentCallback(Callback):
             if hasattr(module, "update_teacher") and callable(
                 getattr(module, "update_teacher")
             ):
-                # Update teacher parameters via EMA
-                module.update_teacher()
-
-                # Update EMA coefficient based on training progress
+                # Update EMA coefficient first (use current epoch's value), then update teacher parameters via EMA
                 if hasattr(module, "update_ema_coefficient") and callable(
                     getattr(module, "update_ema_coefficient")
                 ):
                     module.update_ema_coefficient(
                         trainer.current_epoch, trainer.max_epochs
                     )
+                module.update_teacher()
 
                 # Mark that updates are happening (for warning system)
                 if hasattr(module, "_mark_updated"):

@@ -15,6 +15,8 @@ from torchvision.transforms.functional import InterpolationMode
 from torchvision.transforms.v2 import functional as F
 from torchvision.transforms.v2._utils import query_chw
 
+from stable_pretraining.data.masking import multi_block_mask
+
 
 class Transform(v2.Transform):
     """Base transform class extending torchvision v2.Transform with nested data handling."""
@@ -122,6 +124,47 @@ class RandomGrayscale(Transform, v2.RandomGrayscale):
             self.target,
         )
         x[self.get_name(x)] = True
+        return x
+
+
+class Lambda(Transform):
+    """Applies a lambda callable to target key and store it in source."""
+
+    def __init__(self, lambd, source: str = "image", target: str = "image"):
+        super().__init__()
+        self.source = source
+        self.target = target
+        self.lambd = lambd
+
+    def __call__(self, x) -> Any:
+        self.nested_set(x, self.lambd(x), self.target)
+        return x
+
+
+class RoutingTransform(Transform):
+    """Applies a routing callable to conditionally apply a transform from many candidates."""
+
+    def __init__(self, router: callable, transforms: Union[list, tuple, dict]):
+        self.router = router
+        self.transforms = transforms
+
+    def __call__(self, x) -> Any:
+        route = self.router(x)
+        return self.transforms[route](x)
+
+
+class WrapTorchTransform(Transform, v2.Lambda):
+    """Applies a lambda callable to target key and store it in source."""
+
+    def __init__(self, transform, source: str = "image", target: str = "image"):
+        super().__init__(transform)
+        self.source = source
+        self.target = target
+
+    def __call__(self, x) -> Any:
+        self.nested_set(
+            x, super().__call__(self.nested_get(x, self.source)), self.target
+        )
         return x
 
 
@@ -603,21 +646,35 @@ class Compose(v2.Transform):
         return sample
 
 
-class MultiViewTransform(v2.Transform):
-    """Apply different transforms to different views of the same sample.
+class RoundRobinMultiViewTransform(v2.Transform):
+    """Round-robin multi-view transform that cycles through transforms using a counter.
 
-    When using RepeatedRandomSampler with n_views=2, this allows you to apply
-    different augmentations to each view. It alternates between transforms
-    based on a simple counter.
+    IMPORTANT: This transform is designed to work with RepeatedRandomSampler, where
+    each image index appears multiple times consecutively in the batch. It uses an
+    internal counter to apply different augmentations to each repeated occurrence.
+
+    BATCH SIZE NOTE: When using this with RepeatedRandomSampler, the batch_size
+    parameter refers to the total number of augmented samples, NOT the number of
+    unique images. For example, with batch_size=256 and n_views=2, you get 128
+    unique images, each appearing twice with different augmentations.
+
+    How it works:
+    1. RepeatedRandomSampler produces indices like [0,0,1,1,2,2,...] (for n_views=2)
+    2. DataLoader loads the same image multiple times
+    3. This transform applies a different augmentation each time using round-robin
 
     Args:
-        transforms: List of transforms, one for each view
+        transforms: List of transforms, one for each view. The counter cycles
+                   through these transforms in order.
 
     Example:
-        transform = MultiViewTransform([
-            strong_augmentation,  # Applied to first view
-            weak_augmentation,    # Applied to second view
+        # With RepeatedRandomSampler(dataset, n_views=2)
+        transform = RoundRobinMultiViewTransform([
+            strong_augmentation,  # Applied to 1st occurrence of each image
+            weak_augmentation,    # Applied to 2nd occurrence of each image
         ])
+
+    Warning: The internal counter makes this transform stateful and not thread-safe.
     """
 
     def __init__(self, transforms):
@@ -631,6 +688,249 @@ class MultiViewTransform(v2.Transform):
         transform_idx = self.counter % self.n_transforms
         self.counter += 1
         return self.transforms[transform_idx](sample)
+
+
+class MultiViewTransform(v2.Transform):
+    """Creates multiple views from one sample by applying different transforms.
+
+    Takes a single sample and applies different transforms to create multiple
+    views, returning a list of complete sample dicts. Preserves all modifications
+    each transform makes (masks, augmentation params, metadata, etc.).
+
+    Implementation Note:
+        This transform uses shallow copy (dict.copy()) for the input sample before
+        applying each transform. This is efficient and safe because:
+        - The shallow copy shares references to the original tensors/objects
+        - Standard transforms create NEW tensors (e.g., through mul(), resize(),
+          crop()) rather than modifying inputs in-place
+        - The original sample remains unchanged
+
+    Consequences of shallow copy:
+        - Memory efficient: Original tensors are not duplicated unnecessarily
+        - Safe with torchvision transforms: All torchvision transforms and our
+          custom transforms follow the pattern of creating new tensors
+        - Caution: If using custom transforms that modify tensors in-place (using
+          operations like mul_(), add_() with underscore), views may interfere with
+          each other. Always use non-in-place operations in custom transforms.
+
+    Args:
+        transforms: Either a list or dict of transforms.
+                   - List: Returns a list of views in the same order
+                   - Dict: Returns a dict of views with the same keys
+
+    Returns:
+        Union[List[dict], Dict[str, dict]]:
+            - If transforms is a list: Returns a list of transformed sample dicts
+            - If transforms is a dict: Returns a dict of transformed sample dicts with same keys
+            Each dict contains NEW tensors, not references to the original.
+
+    Example:
+        # List input - returns list of views
+        transform = MultiViewTransform([
+            strong_augmentation,  # Creates first view with strong aug
+            weak_augmentation,    # Creates second view with weak aug
+        ])
+        # Input: {"image": img, "label": 0}
+        # Output: [{"image": img_strong, "label": 0}, {"image": img_weak, "label": 0}]
+
+        # Dict input - returns dict of named views
+        transform = MultiViewTransform({
+            "student": strong_augmentation,
+            "teacher": weak_augmentation,
+        })
+        # Input: {"image": img, "label": 0}
+        # Output: {"student": {"image": img_strong, "label": 0},
+        #          "teacher": {"image": img_weak, "label": 0}}
+    """
+
+    def __init__(self, transforms):
+        super().__init__()
+        self.transforms = transforms
+        self.return_dict = isinstance(transforms, dict)
+
+    def __call__(self, sample):
+        """Create multiple views by applying different transforms to the sample."""
+        if self.return_dict:
+            # Dict input - return dict of views
+            views = {}
+            for key, transform in self.transforms.items():
+                # Copy to avoid transforms modifying the original
+                sample_copy = sample.copy()
+                # Apply transform to entire dict
+                transformed = transform(sample_copy)
+                views[key] = transformed
+        else:
+            # List input - return list of views
+            views = []
+            for transform in self.transforms:
+                # Copy to avoid transforms modifying the original
+                sample_copy = sample.copy()
+                # Apply transform to entire dict
+                transformed = transform(sample_copy)
+                views.append(transformed)
+
+        return views
+
+
+class ContextTargetsMultiBlockMask(Transform):
+    """Transform that adds multi-block masks to batch, with multiple target blocks and one disjoint context block.
+
+    Args:
+        patch_size: Size of the patch in patches
+        num_blocks: Number of blocks to sample
+        context_scale: Scale of the context block
+        aspect_ratio: Aspect ratio of the blocks
+        min_keep: Minimum number of patches that must be in the block
+
+    """
+
+    def __init__(
+        self,
+        patch_size=16,
+        context_scale=(0.85, 1.0),
+        context_aspect_ratio=(1.0, 1.0),
+        target_scales=((0.15, 0.2),) * 4,
+        target_aspect_ratios=((0.75, 1.5),) * 4,
+        min_keep=10,
+        source: str = "image",
+        target_context: str = "mask_context",
+        target_targets: str = "masks_target",
+    ):
+        super().__init__()
+        self.patch_size = patch_size
+        self.context_scale = context_scale
+        self.context_aspect_ratio = context_aspect_ratio
+        self.target_scales = target_scales
+        self.target_aspect_ratios = target_aspect_ratios
+        self.source = source
+        self.target_context = target_context
+        self.target_targets = target_targets
+        if len(target_scales) != len(target_aspect_ratios):
+            raise ValueError(
+                "Each scale must have its associated aspect ratio and vice versa.",
+                "Received {len(target_scales)=} {len(target_aspect_ratios)=}",
+            )
+
+        self.min_keep = min_keep
+
+    def __call__(self, x):
+        source = self.nested_get(x, self.source)
+        if isinstance(source, PIL.Image.Image):
+            W, H = source.size  # PIL is W,H
+        elif isinstance(source, torch.Tensor):
+            # assumes H W
+            H, W = source.shape[-2:]
+        else:
+            raise ValueError(
+                f"Source must be a PIL.Image.Image or a torch.Tensor, but got {type(source)} instead."
+            )
+
+        scales = [self.context_scale, *self.target_scales]
+        aspect_ratios = [self.context_aspect_ratio, *self.target_aspect_ratios]
+        context_mask, *target_masks = multi_block_mask(
+            H // self.patch_size,
+            W // self.patch_size,
+            block_scales=scales,
+            aspect_ratios=aspect_ratios,
+            min_keep=self.min_keep,
+        )
+        # makes targets disjoint with context
+        for mask in target_masks:
+            context_mask &= ~mask
+
+        x[self.target_context] = torch.nonzero(context_mask.flatten()).squeeze()
+        x[self.target_targets] = [
+            torch.nonzero(mask.flatten()).squeeze() for mask in target_masks
+        ]
+        x[self.get_name(x)] = torch.tensor([scales, aspect_ratios])
+        return x
+
+
+class RandomMask(Transform):
+    r"""Creates a random MAE-style mask for an image.
+
+    This transform generates a random permutation of all patch indices for an
+    input image. It then splits these indices into two disjoint sets:
+    'visible' and 'masked', according to the specified `mask_ratio`.
+
+    It also provides an `ids_restore` tensor, which can un-shuffle a sequence
+    of patches back to its original 2D grid order. All outputs are added as
+    new keys to the sample dictionary.
+
+    Example:
+        >>> # xdoctest: +SKIP
+        >>> transform = RandomMask(patch_size=16, mask_ratio=0.75)
+        >>> sample = {"image": torch.randn(3, 224, 224)}
+        >>> result = transform(sample)
+        >>> sorted(result.keys())
+        ['image', 'ids_restore', 'len_keep', 'mask_masked', 'mask_visible']
+        >>> result["len_keep"]
+        49
+        >>> result["mask_visible"].shape
+        torch.Size([49])
+
+    Args:
+        patch_size (int): The height and width of each square patch.
+        mask_ratio (float): The fraction of patches to be masked (e.g., 0.75).
+        source (str): The key in the sample dict for the source image tensor.
+        target_visible (str): The key to use when storing visible patch indices.
+        target_masked (str): The key to use when storing masked patch indices.
+        target_ids_restore (str): The key to use for the restoration indices.
+        target_len_keep (str): The key to use for the count of visible patches.
+    """
+
+    def __init__(
+        self,
+        patch_size=16,
+        mask_ratio=0.75,
+        source: str = "image",
+        target_visible: str = "mask_visible",
+        target_masked: str = "mask_masked",
+        target_ids_restore: str = "ids_restore",
+        target_len_keep: str = "len_keep",
+    ):
+        super().__init__()
+        self.patch_size = patch_size
+        self.mask_ratio = mask_ratio
+        self.source = source
+        self.target_visible = target_visible
+        self.target_masked = target_masked
+        self.target_ids_restore = target_ids_restore
+        self.target_len_keep = target_len_keep
+
+    def __call__(self, x):
+        source = self.nested_get(x, self.source)
+        if isinstance(source, PIL.Image.Image):
+            W, H = source.size  # PIL is W,H
+        elif isinstance(source, torch.Tensor):
+            # NOTE assumes _HW
+            H, W = source.shape[-2:]
+        else:
+            raise ValueError(
+                f"Source must be a PIL.Image.Image or a torch.Tensor, but got {type(source)} instead."
+            )
+
+        num_patches = (H // self.patch_size) * (W // self.patch_size)
+        len_keep = int(num_patches * (1 - self.mask_ratio))
+
+        # Generate random noise and shuffle indices (like MAE)
+        noise = torch.rand(num_patches)
+        ids_shuffle = torch.argsort(noise)
+        ids_restore = torch.argsort(ids_shuffle)  # inverse permutation
+
+        # Split into visible and masked
+        mask_visible = ids_shuffle[:len_keep]  # first len_keep are visible
+        mask_masked = ids_shuffle[len_keep:]  # rest are masked
+
+        # Add to sample
+        x[self.target_visible] = mask_visible
+        x[self.target_masked] = mask_masked
+        x[self.target_ids_restore] = (
+            ids_restore  # NEW: for reconstructing full sequence
+        )
+        x[self.target_len_keep] = len_keep
+
+        return x
 
 
 # class RandomClassSwitch(v2.Transform):

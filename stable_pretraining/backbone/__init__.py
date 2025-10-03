@@ -12,6 +12,7 @@ from .mlp import MLP
 from .resnet9 import Resnet9
 from .utils import (
     EvalOnly,
+    FeaturesConcat,
     TeacherStudentWrapper,
     from_timm,
     from_torchvision,
@@ -25,6 +26,7 @@ __all__ = [
     from_timm,
     from_torchvision,
     EvalOnly,
+    FeaturesConcat,
     set_embedding_dim,
     ConvMixer,
 ]

@@ -59,13 +59,19 @@ check the following points:
 - If your pull request addresses an issue, please use the pull request title to describe the issue and mention the issue number in the pull request description. This will make sure a link back to the original issue is created.
 - The documentation is updated if necessary. You can edit the documentation using any text editor and then generate the HTML output by typing ``make html`` from the ``docs/`` directory. The resulting HTML files will be placed in ``docs/build/html/`` and are viewable in a web browser.
 
-When creating a pull request (PR), use the appropriate prefix to indicate its status:
+When creating a pull request (PR), use the appropriate prefix to indicate its status and type:
 
-- ``[MRG]`` **(Ready for Merge)**: Use this prefix if your contribution is complete and ready for a detailed review. A core maintainer will review your code and approve it for merging if it meets the required standards.
+**Status prefix:**
 
-- ``[WIP]`` **(Work in Progress)**: Use this prefix for an incomplete contribution where further work is planned before seeking a full review. Consider including a `task list <https://github.com/blog/1375-task-lists-in-gfm-issues-pulls-comments>`_ in your PR description to outline planned work or track progress. Change the prefix to `[MRG]` once the PR is mature and ready for detailed review.
+- ``[WIP]`` **(Work in Progress)**: Use this prefix for an incomplete contribution where further work is planned before seeking a full review. Consider including a `task list <https://github.com/blog/1375-task-lists-in-gfm-issues-pulls-comments>`_ in your PR description to outline planned work or track progress. Remove the ``[WIP]`` prefix once the PR is ready for review.
 
+**Type prefix (use when PR is ready):**
 
+- ``[BugFix]``: For bug fixes and patches
+- ``[Feature]``: For new features or enhancements
+- ``[Example]``: For adding or updating examples
+- ``[Benchmark]``: For benchmark-related changes
+- ``[Doc]``: For documentation updates
 
 A ``[WIP]`` PR can serve multiple purposes:
 1- Indicate that you are actively working on something to prevent duplicated efforts by others.

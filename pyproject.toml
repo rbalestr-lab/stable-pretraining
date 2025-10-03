@@ -17,6 +17,11 @@ dependencies = [
     "hydra-core",
     "loguru",
     "tabulate",
+    "pandas",
+    "rich",
+    "requests-cache",
+    "prettytable",
+    "submitit",
 ]
 
 dynamic = ["version"]
@@ -30,8 +35,10 @@ stablepretraining_callbacks = "stable_pretraining.callbacks.factories:default"
 [tool.setuptools]
 packages = ["stable_pretraining"]
 
-[tool.setuptools.dynamic]
-version = {attr = "stable_pretraining.__about__.__version__"}
+[tool.setuptools_scm]
+tag_regex = "^v(?P<version>.+)$"
+write_to = "stable_pretraining/_version.py"
+write_to_template = "version = \"{version}\"\n"
 
 [project.optional-dependencies]
 # Advanced vision models and transforms
@@ -49,13 +56,11 @@ tracking = [
 # Cluster/SLURM execution support
 cluster = [
     "hydra-submitit-launcher",
-    "submitit",
 ]
 
 # Visualization and reporting tools
 visualization = [
     "matplotlib",
-    "prettytable",
 ]
 
 # Extra dataset support
@@ -68,7 +73,6 @@ datasets = [
 # Additional utilities
 extras = [
     "scikit-learn>=1.7.0",  # sklearn model checkpointing
-    "requests-cache[all]",  # Caching for API requests
     "richuru",  # Enhanced logging formatting
 ]
 

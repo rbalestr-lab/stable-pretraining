@@ -7,6 +7,7 @@ from .lr_scheduler import (
     LinearWarmupThreeStepsAnnealing,
     create_scheduler,
 )
+from .utils import create_optimizer
 
 __all__ = [
     LARS,
@@ -16,4 +17,5 @@ __all__ = [
     LinearWarmupCyclicAnnealing,
     LinearWarmupThreeStepsAnnealing,
     create_scheduler,
+    create_optimizer,
 ]

@@ -26,12 +26,18 @@ def fold_views(tensor, idx):
     Returns:
         Tuple of tensors, one for each view
     """
-    _, counts = torch.unique_consecutive(idx, return_counts=True)
+    sidx = torch.argsort(idx, stable=True)
+
+    _, counts = torch.unique_consecutive(idx[sidx], return_counts=True)
     if not counts.min().eq(counts.max()):
-        raise RuntimeError("counts are not the same for all samples!")
+        raise RuntimeError(
+            "counts are not the same for all samples!\n"
+            "This typically occurs when batch size and number of views\n"
+            "are not divisible"
+        )
     n_views = counts[0].item()
     fold_shape = (tensor.size(0) // n_views, n_views)
-    t = tensor.view(*fold_shape, *tensor.shape[1:])
+    t = tensor[sidx].view(*fold_shape, *tensor.shape[1:])
     return t.unbind(dim=1)
 
 
@@ -98,3 +104,54 @@ def random_split(
         Subset(dataset, indices[offset - length : offset])
         for offset, length in zip(itertools.accumulate(lengths), lengths)
     ]
+
+
+def apply_masks(x: torch.Tensor, *masks: torch.Tensor) -> torch.Tensor:
+    r"""Apply one or more masks to a batch of patched images.
+
+    This function is generalized to accept any number of mask tensors.
+    If a single mask is provided, the output shape is `[B, K, D]`. If `M`
+    masks are provided, the function creates `M` masked views
+    and concatenates them along the batch dimension, resulting in an
+    output of shape `[B*M, K, D]`.
+
+    Example:
+        >>> # xdoctest: +SKIP
+        >>> x = torch.randn(4, 196, 128)
+        >>> mask1 = torch.randint(0, 196, (4, 50))
+        >>> mask2 = torch.randint(0, 196, (4, 50))
+        >>> # Single mask case
+        >>> single_view = apply_masks(x, mask1)
+        >>> single_view.shape
+        torch.Size([4, 50, 128])
+        >>> # Multi-mask case
+        >>> multi_view = apply_masks(x, mask1, mask2)
+        >>> multi_view.shape
+        torch.Size([8, 50, 128])
+
+    Args:
+        x (torch.Tensor): Input tensor of patches with shape `[B, N, D]`.
+        *masks (torch.Tensor): A variable number of mask tensors, each a
+            tensor of indices with shape `[B, K]`.
+
+    Returns:
+        torch.Tensor: The tensor of selected patches. The shape will be
+            `[B, K, D]` for a single mask, or `[B*M, K, D]` for `M` masks.
+
+    Raises:
+        ValueError: If no masks are provided.
+    """
+    if not masks:
+        raise ValueError("At least one mask tensor must be provided.")
+
+    B, N, D = x.shape
+    M = len(masks)
+
+    idx = torch.stack([m.to(x.device, dtype=torch.long) for m in masks], dim=1)
+    K = idx.size(-1)
+
+    x_expanded = x.unsqueeze(1).expand(-1, M, -1, -1)
+    idx_expanded = idx.unsqueeze(-1).expand(-1, -1, -1, D)
+    out = x_expanded.gather(2, idx_expanded)
+
+    return out.reshape(B * M, K, D)

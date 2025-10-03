@@ -3,6 +3,7 @@
 from typing import Any, Optional, Tuple
 
 import torch
+import lightning as pl
 from torch.utils.data import DataLoader, Dataset
 
 
@@ -76,3 +77,52 @@ class MockTransform:
 
     def __call__(self, x):
         return x
+
+
+# 'Boring' vs. 'Mock'
+# Because we just need a valid, placeholder object to make the code run
+
+
+class BoringDataset(Dataset):
+    """A simple, minimal dataset for testing core Trainer/Manager logic."""
+
+    def __len__(self):
+        return 1
+
+    def __getitem__(self, idx):
+        return 0
+
+
+class BoringModule(pl.LightningModule):
+    """A minimal LightningModule for instantiating the Manager."""
+
+    def __init__(self):
+        super().__init__()
+        self.layer = torch.nn.Linear(1, 1)
+
+    def forward(self, x):
+        return self.layer(x)
+
+    def training_step(self, batch, batch_idx):
+        loss = self.layer(torch.randn(1)).sum()
+        self.log("train_loss", loss)
+        return loss
+
+    def configure_optimizers(self):
+        return torch.optim.SGD(self.parameters(), lr=0.1)
+
+
+class BoringDataModule(pl.LightningDataModule):
+    """A minimal LightningDataModule for instantiating the Manager."""
+
+    def train_dataloader(self):
+        return DataLoader(BoringDataset())
+
+
+class BoringTrainer(pl.Trainer):
+    """A mock Trainer that disables default callbacks for predictable testing environments."""
+
+    def __init__(self, **kwargs):
+        kwargs.setdefault("enable_progress_bar", False)
+        kwargs.setdefault("enable_model_summary", False)
+        super().__init__(**kwargs)

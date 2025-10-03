@@ -22,7 +22,9 @@ class Dataset(torch.utils.data.Dataset):
     def set_pl_trainer(self, trainer: pl.Trainer):
         self._trainer = trainer
 
-    def process_sample(self, sample):
+    def process_sample(self, sample, **kwargs):
+        for k, v in kwargs.items():
+            sample[k] = v
         if self._trainer is not None:
             if "global_step" in sample:
                 raise ValueError("Can't use that keywords")
@@ -150,8 +152,12 @@ class HFDataset(Dataset):
         self.dataset = dataset
 
     def __getitem__(self, idx):
+        extra = {}
+        if type(idx) is tuple:
+            extra["view_idx"] = idx[1]
+            idx = idx[0]
         sample = self.dataset[idx]
-        return self.process_sample(sample)
+        return self.process_sample(sample, **extra)
 
     def __len__(self):
         return self.dataset.num_rows

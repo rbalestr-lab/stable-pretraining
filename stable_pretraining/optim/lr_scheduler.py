@@ -10,6 +10,12 @@ from torch.optim.lr_scheduler import (
     SequentialLR,
     _LRScheduler,
 )
+import inspect
+from functools import partial
+from loguru import logger as logging
+from hydra.utils import instantiate
+from typing import Any, Union
+
 
 # Default parameter factories for common schedulers (both torch and custom)
 # These callables receive the calling module (for trainer context) and optimizer
@@ -74,27 +80,6 @@ DEFAULT_SCHEDULER_FACTORIES = {
 }
 
 
-def _resolve_scheduler_callable(name_or_class):
-    """Resolve a scheduler by name from torch or this module.
-
-    Accepts a string name, class, or callable. Returns a callable to construct the scheduler.
-    """
-    if not isinstance(name_or_class, str):
-        return name_or_class
-
-    # Try torch.optim.lr_scheduler first
-    if hasattr(torch.optim.lr_scheduler, name_or_class):
-        return getattr(torch.optim.lr_scheduler, name_or_class)
-
-    # Then try this module (custom functions/classes)
-    if name_or_class in globals():
-        return globals()[name_or_class]
-
-    raise ValueError(
-        f"Scheduler '{name_or_class}' not found in torch.optim.lr_scheduler or stable_pretraining.optim.lr_scheduler."
-    )
-
-
 def _build_default_params(name: str, module, optimizer):
     factory = DEFAULT_SCHEDULER_FACTORIES.get(name)
     if factory is None:
@@ -104,49 +89,104 @@ def _build_default_params(name: str, module, optimizer):
     return {k: v for k, v in params.items() if v is not None}
 
 
-def create_scheduler(optimizer, scheduler_config, module=None):
-    """Create a learning rate scheduler instance from a flexible config.
+def create_scheduler(
+    optimizer: torch.optim.Optimizer,
+    scheduler_config: Union[str, dict, partial, type],
+    module: Any = None,
+) -> torch.optim.lr_scheduler.LRScheduler:
+    """Create a learning rate scheduler with flexible configuration.
+
+    This function provides a unified way to create schedulers from various configuration formats,
+    used by both Module and OnlineProbe for consistency.
 
     Args:
-        optimizer: torch optimizer
-        scheduler_config: str | dict | partial | Class | callable
-        module: optional calling module for defaults (expects module.trainer)
+        optimizer: The optimizer to attach the scheduler to
+        scheduler_config: Can be:
+            - str: Name of scheduler (e.g., "CosineAnnealingLR")
+            - dict: {"type": "CosineAnnealingLR", "T_max": 1000, ...}
+            - partial: Pre-configured scheduler (e.g., partial(CosineAnnealingLR, T_max=1000))
+            - class: Direct scheduler class (will use smart defaults)
+        module: Optional module instance for accessing trainer properties (for smart defaults)
 
     Returns:
-        Instantiated scheduler
-    """
-    # partial -> call directly
-    if isinstance(scheduler_config, type(lambda: None)) and hasattr(
-        scheduler_config, "func"
-    ):
-        # It's a functools.partial (duck-typing), call with optimizer
-        return scheduler_config(optimizer)
+        Configured scheduler instance
 
-    # dict -> pop type + params
-    if isinstance(scheduler_config, dict):
+    Examples:
+        >>> # Simple string (uses smart defaults)
+        >>> scheduler = create_scheduler(opt, "CosineAnnealingLR")
+
+        >>> # With custom parameters
+        >>> scheduler = create_scheduler(
+        ...     opt, {"type": "StepLR", "step_size": 30, "gamma": 0.1}
+        ... )
+
+        >>> # Using partial for full control
+        >>> from functools import partial
+        >>> scheduler = create_scheduler(
+        ...     opt, partial(torch.optim.lr_scheduler.ExponentialLR, gamma=0.95)
+        ... )
+    """
+    logging.info("Instantiating scheduler!!!!")
+    # partial -> call directly
+    # Handle Hydra config objects
+    if hasattr(scheduler_config, "_target_"):
+        logging.info("\tUser provided a Hydra object, instantiating with optimizer!!")
+        return instantiate(scheduler_config, optimizer=optimizer, _convert_="object")
+    elif isinstance(scheduler_config, partial):
+        # It's a functools.partial (duck-typing), call with optimizer
+        logging.info("\tUser provided a partial function, calling with optimizer!!")
+        return scheduler_config(optimizer)
+    elif callable(scheduler_config):
+        # Get the signature of the original function
+        signature = inspect.signature(scheduler_config)
+        # Count the total parameters in the function
+        num_args = len(signature.parameters)
+
+        if num_args == 1:
+            logging.info(
+                "\tUser provided a callable with one arg, calling with optimizer!!"
+            )
+            return scheduler_config(optimizer)
+        elif num_args == 2:
+            logging.info(
+                "\tUser provided a callable with two args, calling with optimizer, module!!"
+            )
+            return scheduler_config(optimizer, module)
+        else:
+            raise NotImplementedError("Not more than 2 args in your lambda scheduler")
+    elif isinstance(scheduler_config, dict):
+        logging.info("\tUser provided a dict")
         cfg = dict(scheduler_config)
         scheduler_type = cfg.pop("type", "CosineAnnealingLR")
+        if type(scheduler_type) is not str:
+            raise ValueError(
+                "When using a dict specification for scheduler"
+                "the value of `type` must be a string! got"
+                f"{scheduler_type}"
+            )
         params = cfg
-    else:
+    elif isinstance(scheduler_config, str):
+        logging.info("\tUser provided a str (name)")
         scheduler_type = scheduler_config
         params = {}
-
-    scheduler_ctor = _resolve_scheduler_callable(scheduler_type)
-
+    if hasattr(torch.optim.lr_scheduler, scheduler_type):
+        fn = getattr(torch.optim.lr_scheduler, scheduler_type)
+    elif scheduler_type in globals():
+        fn = globals()[scheduler_type]
+    else:
+        raise ValueError(
+            f"Scheduler '{scheduler_type}' not found in torch.optim.lr_scheduler or stable_pretraining.optim.lr_scheduler."
+        )
     # If no params provided, use smart defaults if known
     if not params:
-        name = (
-            scheduler_ctor.__name__
-            if hasattr(scheduler_ctor, "__name__")
-            else str(scheduler_ctor)
-        )
+        name = fn.__name__ if hasattr(fn, "__name__") else str(fn)
         try:
             params = _build_default_params(name, module, optimizer)
         except Exception:
             params = {}
 
     # Instantiate. Works for both torch classes and our function factories.
-    return scheduler_ctor(optimizer, **params)
+    return fn(optimizer, **params)
 
 
 class CosineDecayer:
