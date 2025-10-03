@@ -90,7 +90,7 @@ class DINOv1Loss(torch.nn.Module):
         sinkhorn_knopp_teacher(). Center updates should be done separately with update_center().
 
         Args:
-            student_logits: Student predictions [n_views, batch_size, out_dim]
+            student_logits: Student logits [n_views, batch_size, out_dim]
             teacher_probs: Teacher probabilities (already normalized) [n_views, batch_size, out_dim]
 
         Returns:
@@ -101,29 +101,22 @@ class DINOv1Loss(torch.nn.Module):
             - teacher_probs: (T, B, K) where T = teacher views
             - output: scalar
         """
+        # Apply temperature-scaled log-softmax to student
         student_log_probs = F.log_softmax(
             student_logits.float() / self.temperature_student, dim=-1
         )
 
-        # Compute cross-entropy: -sum over dim K of (teacher_probs * log(student_probs))
-        # Using einsum : sum over batch B and prototypes K, keep view dims S, T
-        loss_matrix = -torch.einsum(
-            "s b k, t b k -> s t", student_log_probs, teacher_probs.float()
-        )
+        # Compute cross-entropy matrix: [S, T]
+        # Sum over batch and features, keep view dimensions
+        loss_matrix = -torch.einsum("sbk,tbk->st", student_log_probs, teacher_probs)
 
-        # Exclude diagonal (same view comparisons)
-        min_views = min(student_logits.shape[0], teacher_probs.shape[0])
-        loss_matrix = torch.diagonal_scatter(
-            loss_matrix, loss_matrix.new_zeros(min_views)
-        )
+        # Zero out diagonal (same view comparisons)
+        loss_matrix.fill_diagonal_(0)
 
-        # Average over all valid pairs
+        # Average over valid pairs and batch size
+        n_terms = loss_matrix.numel() - loss_matrix.diagonal().numel()
         batch_size = student_logits.shape[1]
-        n_student_views = student_logits.shape[0]
-        n_teacher_views = teacher_probs.shape[0]
-        n_pairs = n_student_views * n_teacher_views - min_views
-
-        return loss_matrix.sum() / (batch_size * n_pairs)
+        return loss_matrix.sum() / (n_terms * batch_size)
 
     @torch.no_grad()
     def sinkhorn_knopp_teacher(
