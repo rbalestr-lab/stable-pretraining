@@ -226,7 +226,8 @@ class SwAVLoss(torch.nn.Module):
             Q *= (r / u).unsqueeze(1)
             Q *= (c / torch.sum(Q, dim=0)).unsqueeze(0)
         return (Q / torch.sum(Q, dim=0, keepdim=True)).T
-    
+
+
 class InfoNCELoss(torch.nn.Module):
     """InfoNCE contrastive loss (one-directional).
 

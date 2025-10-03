@@ -67,7 +67,7 @@ swav_transform = transforms.MultiViewTransform(
         ),
         "local_1": transforms.Compose(
             transforms.RGB(),
-            transforms.RandomResizedCrop(16, scale=(0.05, 0.2)), # Small crop
+            transforms.RandomResizedCrop(16, scale=(0.05, 0.2)),  # Small crop
             transforms.RandomHorizontalFlip(p=0.5),
             transforms.ColorJitter(
                 brightness=0.8, contrast=0.8, saturation=0.8, hue=0.2, p=0.8
@@ -78,7 +78,7 @@ swav_transform = transforms.MultiViewTransform(
         ),
         "local_2": transforms.Compose(
             transforms.RGB(),
-            transforms.RandomResizedCrop(16, scale=(0.05, 0.2)), # Small crop
+            transforms.RandomResizedCrop(16, scale=(0.05, 0.2)),  # Small crop
             transforms.RandomHorizontalFlip(p=0.5),
             transforms.ColorJitter(
                 brightness=0.8, contrast=0.8, saturation=0.8, hue=0.2, p=0.8
@@ -89,7 +89,7 @@ swav_transform = transforms.MultiViewTransform(
         ),
         "local_3": transforms.Compose(
             transforms.RGB(),
-            transforms.RandomResizedCrop(16, scale=(0.05, 0.2)), # Small crop
+            transforms.RandomResizedCrop(16, scale=(0.05, 0.2)),  # Small crop
             transforms.RandomHorizontalFlip(p=0.5),
             transforms.ColorJitter(
                 brightness=0.8, contrast=0.8, saturation=0.8, hue=0.2, p=0.8
@@ -100,7 +100,7 @@ swav_transform = transforms.MultiViewTransform(
         ),
         "local_4": transforms.Compose(
             transforms.RGB(),
-            transforms.RandomResizedCrop(16, scale=(0.05, 0.2)), # Small crop
+            transforms.RandomResizedCrop(16, scale=(0.05, 0.2)),  # Small crop
             transforms.RandomHorizontalFlip(p=0.5),
             transforms.ColorJitter(
                 brightness=0.8, contrast=0.8, saturation=0.8, hue=0.2, p=0.8
@@ -111,7 +111,7 @@ swav_transform = transforms.MultiViewTransform(
         ),
         "local_5": transforms.Compose(
             transforms.RGB(),
-            transforms.RandomResizedCrop(16, scale=(0.05, 0.2)), # Small crop
+            transforms.RandomResizedCrop(16, scale=(0.05, 0.2)),  # Small crop
             transforms.RandomHorizontalFlip(p=0.5),
             transforms.ColorJitter(
                 brightness=0.8, contrast=0.8, saturation=0.8, hue=0.2, p=0.8
@@ -122,7 +122,7 @@ swav_transform = transforms.MultiViewTransform(
         ),
         "local_6": transforms.Compose(
             transforms.RGB(),
-            transforms.RandomResizedCrop(16, scale=(0.05, 0.2)), # Small crop
+            transforms.RandomResizedCrop(16, scale=(0.05, 0.2)),  # Small crop
             transforms.RandomHorizontalFlip(p=0.5),
             transforms.ColorJitter(
                 brightness=0.8, contrast=0.8, saturation=0.8, hue=0.2, p=0.8

@@ -56,7 +56,7 @@ swav_transform = transforms.MultiViewTransform(
             transforms.GaussianBlur(kernel_size=23, p=1.0),
             transforms.ToImage(**spt.data.static.ImageNet),
         ),
-        # Global crop 2: 224x224 
+        # Global crop 2: 224x224
         transforms.Compose(
             transforms.RGB(),
             transforms.RandomResizedCrop(224, scale=(0.2, 1.0)),
@@ -170,11 +170,7 @@ val_dataloader = torch.utils.data.DataLoader(
 
 data = spt.data.DataModule(train=train_dataloader, val=val_dataloader)
 
-backbone = spt.backbone.from_torchvision(
-    "resnet18",
-    low_resolution=False,
-    weights=None
-)
+backbone = spt.backbone.from_torchvision("resnet18", low_resolution=False, weights=None)
 backbone.fc = torch.nn.Identity()
 
 projector = nn.Sequential(
@@ -255,7 +251,12 @@ lr_monitor = LearningRateMonitor(logging_interval="step")
 trainer = pl.Trainer(
     max_epochs=MAX_EPOCHS,
     num_sanity_val_steps=0,
-    callbacks=[knn_probe, linear_probe, FreezePrototypesCallback(freeze_epochs=2), lr_monitor],
+    callbacks=[
+        knn_probe,
+        linear_probe,
+        FreezePrototypesCallback(freeze_epochs=2),
+        lr_monitor,
+    ],
     precision="16-mixed",
     logger=wandb_logger,
     enable_checkpointing=False,

@@ -385,7 +385,7 @@ def swav_forward(self, batch, stage):
         out["embedding"] = self.backbone(batch["image"])
         if "label" in batch:
             out["label"] = batch["label"]
-    
+
     return out
 
 
