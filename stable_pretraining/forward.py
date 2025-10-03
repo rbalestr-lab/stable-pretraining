@@ -499,7 +499,7 @@ def dino_forward(self, batch, stage):
 
         with torch.no_grad():
             teacher_features = self.backbone.forward_teacher(images)
-        out["embedding"] = teacher_features.detach()
+        out["embedding"] = teacher_features.last_hidden_state[:, 0].detach()
         return out
 
     # Multi-view processing
@@ -519,7 +519,7 @@ def dino_forward(self, batch, stage):
         all_images = torch.cat([view["image"] for view in all_views], dim=0)
         with torch.no_grad():
             teacher_features = self.backbone.forward_teacher(all_images)
-        out["embedding"] = teacher_features.detach()
+        out["embedding"] = teacher_features.last_hidden_state[:, 0].detach()
         return out
 
     # Training: separate processing for global and local views
@@ -668,7 +668,7 @@ def dinov2_forward(self, batch, stage):
 
         with torch.no_grad():
             teacher_features = self.backbone.forward_teacher(images)
-        out["embedding"] = teacher_features.detach()
+        out["embedding"] = teacher_features.last_hidden_state[:, 0].detach()
         return out
 
     # Multi-view processing
@@ -686,7 +686,7 @@ def dinov2_forward(self, batch, stage):
         all_images = torch.cat([view["image"] for view in all_views], dim=0)
         with torch.no_grad():
             teacher_features = self.backbone.forward_teacher(all_images)
-        out["embedding"] = teacher_features.detach()
+        out["embedding"] = teacher_features.last_hidden_state[:, 0].detach()
         return out
 
     # Training: separate processing for global and local views
