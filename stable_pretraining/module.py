@@ -6,6 +6,7 @@ import lightning as pl
 import torch
 import torchmetrics
 from loguru import logger as logging
+from omegaconf import DictConfig
 from tabulate import tabulate
 
 from .optim import create_optimizer, create_scheduler
@@ -460,7 +461,9 @@ class Module(pl.LightningModule):
 
         # Single optimizer case
         optimizer_cfg = self.optim.get("optimizer")
-        if isinstance(optimizer_cfg, (str, dict)) or hasattr(optimizer_cfg, "__call__"):
+        if isinstance(optimizer_cfg, (str, dict, DictConfig)) or hasattr(
+            optimizer_cfg, "__call__"
+        ):
             logging.info("Configuring single optimizer.")
 
             # Direct parameter extraction - use globally filtered parameters
@@ -494,14 +497,14 @@ class Module(pl.LightningModule):
             return [opt], [scheduler_dict]
 
         # Multiple optimizers case - check once
-        if not isinstance(self.optim, dict):
+        if not isinstance(self.optim, (dict, DictConfig)):
             raise ValueError(
                 "Optimizer must be either a partial function or a dict of optimizer configs"
             )
 
         # Verify all values are dicts
         optim_items = list(self.optim.items())
-        if not all(isinstance(v, dict) for _, v in optim_items):
+        if not all(isinstance(v, (dict, DictConfig)) for _, v in optim_items):
             raise ValueError("For multiple optimizers, all config values must be dicts")
 
         logging.info(
