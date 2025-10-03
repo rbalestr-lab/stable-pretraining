@@ -1,0 +1,106 @@
+<html> </html>
+<head> </head>
+<title> </title>
+<body> </body>
+<meta>
+<link>
+<style> </style>
+<base>
+<script> </script>
+<h1> </h1>
+<h2> </h2>
+<h3> </h3>
+<h4> </h4>
+<h5> </h5>
+<h6> </h6>
+<p> </p>
+<br>
+<hr>
+<pre> </pre>
+<b> </b>
+<strong> </strong>
+<i> </i>
+<em> </em>
+<mark> </mark>
+<small> </small>
+<del> </del>
+<ins> </ins>
+<sub> </sub>
+<sup> </sup>
+<u> </u>
+<code> </code>
+<kbd> </kbd>
+<samp> </samp>
+<var> </var>
+<blockquote> </blockquote>
+<cite> </cite>
+<abbr> </abbr>
+<dfn> </dfn>
+<q> </q>
+<time> </time>
+<bdi> </bdi>
+<bdo> </bdo>
+<wbr>
+<ul> </ul>
+<ol> </ol>
+<li> </li>
+<dl> </dl>
+<dt> </dt>
+<dd> </dd>
+<a> </a>
+<nav> </nav>
+<area>
+<map> </map>
+<img>
+<figure> </figure>
+<figcaption> </figcaption>
+<audio> </audio>
+<video> </video>
+<source>
+<track>
+<picture> </picture>
+<table> </table>
+<caption> </caption>
+<thead> </thead>
+<tbody> </tbody>
+<tfoot> </tfoot>
+<tr> </tr>
+<td> </td>
+<th> </th>
+<colgroup> </colgroup>
+<col>
+<form> </form>
+<input>
+<label> </label>
+<button> </button>
+<select> </select>
+<option> </option>
+<optgroup> </optgroup>
+<textarea> </textarea>
+<fieldset> </fieldset>
+<legend> </legend>
+<datalist> </datalist>
+<output> </output>
+<progress> </progress>
+<meter> </meter>
+<details> </details>
+<summary> </summary>
+<dialog> </dialog>
+<menu> </menu>
+<iframe> </iframe>
+<embed>
+<object> </object>
+<param>
+<noscript> </noscript>
+<template> </template>
+<slot> </slot>
+<canvas> </canvas>
+<header> </header>
+<footer> </footer>
+<main> </main>
+<section> </section>
+<article> </article>
+<aside> </aside>
+<div> </div>
+<span> </span>
+<address> </address>
