@@ -1,7 +1,7 @@
 import pytest
 import tempfile
 import os
-from spurious_corr.generators import SpuriousFileItemGenerator
+from stable_pretraining.data.spurious_corr.generators import SpuriousFileItemGenerator
 
 
 # Utility to create a temp file with test content

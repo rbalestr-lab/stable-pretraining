@@ -1,5 +1,5 @@
 import pytest
-from spurious_corr.generators import SpuriousDateGenerator
+from stable_pretraining.data.spurious_corr.generators import SpuriousDateGenerator
 
 
 @pytest.mark.unit
