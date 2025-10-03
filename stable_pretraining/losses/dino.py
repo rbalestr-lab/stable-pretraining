@@ -296,30 +296,19 @@ class iBOTPatchLoss(torch.nn.Module):
         self.patch_out_dim = patch_out_dim  # Can be None, will be inferred from logits
         self.student_temp = student_temp
 
-    def forward(self, student_patch_logits, teacher_patch_probs, student_masks_flat):
-        """Compute iBOT cross-entropy loss for all patches.
-
-        This is a pure loss computation with no side effects.
-        Teacher probabilities should be pre-processed with sinkhorn_knopp_teacher().
-
-        This version processes all patches and masks out non-masked ones. Use forward_masked()
-        for memory-efficient computation with only masked patches.
+    def forward(self, student_patch_logits, teacher_patch_probs):
+        """Compute iBOT cross-entropy loss for masked patches.
 
         Args:
-            student_patch_logits: Student patch logits [batch, n_patches, patch_out_dim]
-            teacher_patch_probs: Teacher probabilities (already normalized) [batch, n_patches, patch_out_dim]
-            student_masks_flat: Binary mask (1 = masked, 0 = unmasked) [batch, n_patches]
+            student_patch_logits: Student patch logits [n_masked_total, patch_out_dim]
+            teacher_patch_probs: Teacher probabilities [n_masked_total, patch_out_dim]
 
         Returns:
-            Scalar iBOT loss value (cross-entropy for masked patches only)
+            Scalar iBOT loss value
         """
         loss = cross_entropy_loss(
             teacher_patch_probs, student_patch_logits, self.student_temp
         )
-        # Weight by mask and normalize by number of masked patches per sample
-        loss = torch.sum(
-            loss * student_masks_flat.float(), dim=-1
-        ) / student_masks_flat.sum(dim=-1).clamp(min=1.0)
         return loss.mean()
 
     def forward_masked(
@@ -447,23 +436,24 @@ class DINOv2Loss(torch.nn.Module):
         self,
         student_cls_logits: torch.Tensor,
         teacher_cls_probs: torch.Tensor,
-        student_patch_logits: torch.Tensor,
-        teacher_patch_probs: torch.Tensor,
-        masks: torch.Tensor,
+        student_patch_logits: torch.Tensor = None,
+        teacher_patch_probs: torch.Tensor = None,
     ) -> torch.Tensor:
         """Compute combined DINOv2 loss.
 
         Args:
             student_cls_logits: Student CLS logits [n_views, batch, out_dim]
             teacher_cls_probs: Teacher CLS probs [n_views, batch, out_dim]
-            student_patch_logits: Student patch logits [batch, n_patches, patch_out_dim]
-            teacher_patch_probs: Teacher patch probs [batch, n_patches, patch_out_dim]
-            masks: Binary masks [batch, n_patches]
+            student_patch_logits: Student patch logits [n_masked_total, patch_out_dim] or None
+            teacher_patch_probs: Teacher patch probs [n_masked_total, patch_out_dim] or None
 
         Returns:
             Combined weighted loss
         """
         dino_loss = self.dino_loss(student_cls_logits, teacher_cls_probs)
-        ibot_loss = self.ibot_loss(student_patch_logits, teacher_patch_probs, masks)
 
+        if student_patch_logits is None or teacher_patch_probs is None:
+            return self.dino_loss_weight * dino_loss
+
+        ibot_loss = self.ibot_loss(student_patch_logits, teacher_patch_probs)
         return self.dino_loss_weight * dino_loss + self.ibot_loss_weight * ibot_loss

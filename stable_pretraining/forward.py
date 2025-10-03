@@ -861,24 +861,17 @@ def dinov2_forward(self, batch, stage):
                 student_masked_patches
             )
 
-            # Compute DINOv2 loss (DINO + iBOT)
             if not hasattr(self, "dinov2_loss"):
                 raise ValueError(
                     "dinov2_forward requires 'dinov2_loss' to be provided (e.g., spt.losses.DINOv2Loss()). "
                     "Pass it when constructing the Module: Module(..., dinov2_loss=spt.losses.DINOv2Loss(), ...)"
                 )
 
-            # Masks for loss: all ones since we already selected masked patches
-            flat_mask = torch.ones(
-                n_masked_total, dtype=torch.bool, device=student_patch_logits.device
-            )
-
             loss = self.dinov2_loss(
                 student_cls_logits=student_cls_logits,
                 teacher_cls_probs=teacher_cls_probs,
                 student_patch_logits=student_patch_logits,
                 teacher_patch_probs=teacher_patch_probs,
-                masks=flat_mask,
             )
 
         except (RuntimeError, TypeError) as e:
