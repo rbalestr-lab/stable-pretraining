@@ -222,7 +222,7 @@ class PILGaussianBlur(Transform):
 
     _NAMES = ["sigma_x", "sigma_y"]
 
-    def __init__(self, sigma=None, p=1, source: str = "image", target: str = "image"):
+    def __init__(self, sigma=None, p=1., source: str = "image", target: str = "image"):
         """Gaussian blur as a callable object.
 
         Args:
