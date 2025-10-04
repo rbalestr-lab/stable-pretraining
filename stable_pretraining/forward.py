@@ -337,6 +337,59 @@ def barlow_twins_forward(self, batch, stage):
     return out
 
 
+def swav_forward(self, batch, stage):
+    """Forward function for SwAV (Swapping Assignments between Views).
+
+    SwAV learns representations by predicting the cluster assignment (code) of one
+    view from the representation of another view. For small-batch training, this function
+    manages a feature queue to stabilize the training process.
+    """
+    out = {}
+    views = _get_views_list(batch)
+
+    if views is not None:
+        embeddings = [self.backbone(view["image"]) for view in views]
+        out["embedding"] = torch.cat(embeddings, dim=0)
+
+        if "label" in views[0]:
+            out["label"] = torch.cat([view["label"] for view in views], dim=0)
+
+        if self.training:
+            projections = [self.projector(emb) for emb in embeddings]
+            proj1, proj2 = projections[0], projections[1]
+
+            queue_feats = None
+            use_queue_logic = hasattr(self, "use_queue") and self.use_queue
+
+            if use_queue_logic:
+                if not hasattr(self, "_swav_queue_callback"):
+                    self._swav_queue_callback = find_or_create_queue_callback(
+                        self.trainer,
+                        key="swav_queue",
+                        queue_length=self.queue_length,
+                        dim=self.projection_dim,
+                    )
+                queue = OnlineQueue._shared_queues.get(self._swav_queue_callback.key)
+
+                if (
+                    queue is not None
+                    and len(queue.get()) > 0
+                    and self.trainer.current_epoch >= self.start_queue_at_epoch
+                ):
+                    queue_feats = queue.get().clone().detach().to(proj1.device)
+
+                out["swav_queue"] = torch.cat(projections).detach()
+
+            out["loss"] = self.swav_loss(proj1, proj2, self.prototypes, queue_feats)
+
+    else:
+        out["embedding"] = self.backbone(batch["image"])
+        if "label" in batch:
+            out["label"] = batch["label"]
+
+    return out
+
+
 def _find_nearest_neighbors(query, support_set):
     """Find the nearest neighbor for each query embedding in the support set."""
     query_norm = torch.nn.functional.normalize(query, dim=1)
