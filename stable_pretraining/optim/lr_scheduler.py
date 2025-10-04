@@ -14,6 +14,7 @@ import inspect
 from functools import partial
 from loguru import logger as logging
 from hydra.utils import instantiate
+from omegaconf import DictConfig, OmegaConf
 from typing import Any, Union
 
 
@@ -154,9 +155,13 @@ def create_scheduler(
             return scheduler_config(optimizer, module)
         else:
             raise NotImplementedError("Not more than 2 args in your lambda scheduler")
-    elif isinstance(scheduler_config, dict):
+    elif isinstance(scheduler_config, (dict, DictConfig)):
         logging.info("\tUser provided a dict")
-        cfg = dict(scheduler_config)
+        # Convert DictConfig to dict if needed
+        if isinstance(scheduler_config, DictConfig):
+            cfg = OmegaConf.to_container(scheduler_config, resolve=True)
+        else:
+            cfg = dict(scheduler_config)
         scheduler_type = cfg.pop("type", "CosineAnnealingLR")
         if type(scheduler_type) is not str:
             raise ValueError(
