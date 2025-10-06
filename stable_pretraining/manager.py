@@ -8,7 +8,6 @@ from typing import Union
 import hydra
 import lightning
 import lightning as pl
-import pandas as pd
 import submitit
 from lightning.pytorch.callbacks import ModelCheckpoint
 from lightning.pytorch.utilities.rank_zero import rank_zero_only
@@ -97,6 +96,24 @@ class Manager(submitit.helpers.Checkpointable):
             self.ckpt_path = None
         # self.slurm_requeue_signal = slurm_requeue_signal
 
+    def _upload_hydra_config_to_wandb(self):
+        """Upload Hydra config to WandB for tracking and filtering.
+
+        This uploads the trainer, module, and data configs as nested dicts.
+        WandB automatically flattens them for filtering in the UI.
+        """
+        if not (WANDB_AVAILABLE and wandb.run):
+            return
+
+        config = dict(
+            trainer=OmegaConf.to_container(self.trainer, resolve=True),
+            module=OmegaConf.to_container(self.module, resolve=True),
+            data=OmegaConf.to_container(self.data, resolve=True),
+        )
+        logging.info("\tUploading Hydra config to WandB 📤")
+        wandb.config.update(config)
+        logging.info("\tHydra config uploaded successfully ✅")
+
     @rank_zero_only
     def init_and_sync_wandb(self):
         # only useful with wandb
@@ -131,8 +148,16 @@ class Manager(submitit.helpers.Checkpointable):
         elif isinstance(
             self.trainer.logger, lightning.pytorch.loggers.wandb.WandbLogger
         ):
-            logging.info("📈📈📈 WandbLogger already setup, skipping init 📈📈📈")
+            logging.info("📈📈📈 WandbLogger already setup, syncing config 📈📈📈")
             logging.info(f"📈📈📈 init={self.trainer.logger._wandb_init} 📈📈📈")
+            # Logger was pre-instantiated (e.g., by Hydra) - sync config and return
+            if WANDB_AVAILABLE and wandb.run:
+                if len(wandb.config.keys()):
+                    logging.info(
+                        "\t\ta Wandb™ config is provided (sweep mode), skipping Hydra config upload"
+                    )
+                else:
+                    self._upload_hydra_config_to_wandb()
             return
         elif self.trainer.logger is None:
             logging.warning("📈📈📈 No logger used! 📈📈📈")
@@ -161,20 +186,6 @@ class Manager(submitit.helpers.Checkpointable):
                 self.trainer.logger.resume = "allow"
                 logging.info(f"{prefix}`resume` set to `allow` for subsequent runs ✅")
 
-        # we defer adding the config to later
-        # to make sure we use the possibly given
-        # sweep config
-        # if self.logger.get("config", None) is not None:
-        #     # this will be a nested dict
-        #     config = OmegaConf.to_container(self.logger.config, resolve=True)
-        #     # now we flatten
-        #     config = pd.json_normalize(config, sep="_")
-        #     config = config.to_dict(orient="records")[0]
-        #     logging.info(f"\tflattening Hydra's config for Wandb ✅")
-        #     self.logger.config = None
-        # else:
-        #     config = None
-
         if exp.offline:
             previous_run = self._wandb_previous_dir()
             logging.info(f"\t\tFound a previous run ({previous_run}), reusing config")
@@ -184,63 +195,12 @@ class Manager(submitit.helpers.Checkpointable):
             exp.config.update(last_config)
             logging.info("\t\treloaded!")
         elif WANDB_AVAILABLE and wandb.run and len(wandb.config.keys()):
-            logging.info("\t\ta Wandb™ config is provided, not uploading Hydra's:")
-            # TODO: make Wandb parameters the trainer one
-            # for key, value in wandb.config.items():
-            #     # need to handle the fact that our base configs have a _
-            #     # and users wouldn't provide that
-            #     accessor = key.split(".")
-            #     if accessor[0] == "trainer":
-            #         accessor = accessor[1:]
-            #     if accessor[0] in [
-            #         "data",
-            #         "module",
-            #         "hardware",
-            #         "loss",
-            #         "metric",
-            #         "optim",
-            #     ]:
-            #         if "_" != accessor[0][0]:
-            #             accessor[0] = "_" + accessor[0]
-            #     key = ".".join(accessor)
-            #     try:
-            #         original = rgetattr(self, key)
-            #         rsetattr(self, key, value)
-            #         assert rgetattr(self, key) == value
-            #         logging.info(
-            #             f"\t\t\toverriding: {key} from {original} to {value} ✅"
-            #         )
-            #     except Exception as e:
-            #         logging.error(f"❌ Error while trying to override {key} ❌")
-            #         raise e
-        else:
-            logging.info("\tWandb's config is empty, using Hydra's 📤")
-            config = dict(
-                trainer=OmegaConf.to_container(self.trainer, resolve=True),
-                module=OmegaConf.to_container(self.module, resolve=True),
-                data=OmegaConf.to_container(self.data, resolve=True),
+            logging.info(
+                "\t\ta Wandb™ config is provided (sweep mode), not uploading Hydra's"
             )
-            config = pd.json_normalize(config, sep=".")
-            config = config.to_dict(orient="records")[0]
-            while True:
-                logging.info("\t\tflattening one level of Hydra's config) 📤")
-                valid = True
-                for k in list(config.keys()):
-                    if type(config[k]) is list:
-                        valid = False
-                        for i, j in enumerate(config[k]):
-                            config[f"{k}.{i}"] = j
-                        del config[k]
-                config = pd.json_normalize(config, sep=".")
-                config = config.to_dict(orient="records")[0]
-                if valid:
-                    break
-            logging.info(f"\tFinal Hydra's config has {len(config)} items) 📤")
-            if WANDB_AVAILABLE and wandb.run:
-                wandb.config.update(config)
-            # TODO: should we updated the config to the DictConfig too for next run to check?
-            # with open_dict(self.logger):
-            #     self.trainer.logger.config = config
+        else:
+            # WandB sweep not active, upload Hydra config
+            self._upload_hydra_config_to_wandb()
 
     @property
     def instantiated_module(self):
