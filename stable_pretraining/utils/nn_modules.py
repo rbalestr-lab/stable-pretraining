@@ -124,14 +124,23 @@ class UnsortedQueue(torch.nn.Module):
             self.out.resize_(shape)
             self.out.copy_(new_out)
             self.initialized.fill_(True)
-        if self.pointer + item.size(0) < self.max_length:
-            self.out[self.pointer : self.pointer + item.size(0)] = item
-            self.pointer.add_(item.size(0))
+
+        batch_size = item.size(0)
+
+        # Handle case where batch is larger than queue capacity
+        if batch_size >= self.max_length:
+            # Keep only the last max_length items from the batch
+            self.out[:] = item[-self.max_length :]
+            self.pointer.fill_(0)
+            self.filled.fill_(True)
+        elif self.pointer + batch_size < self.max_length:
+            self.out[self.pointer : self.pointer + batch_size] = item
+            self.pointer.add_(batch_size)
         else:
             remaining = self.max_length - self.pointer
             self.out[-remaining:] = item[:remaining]
-            self.out[: item.size(0) - remaining] = item[remaining:]
-            self.pointer.copy_(item.size(0) - remaining)
+            self.out[: batch_size - remaining] = item[remaining:]
+            self.pointer.copy_(batch_size - remaining)
             self.filled.copy_(True)
         return self.out if self.filled else self.out[: self.pointer]
 
@@ -231,7 +240,19 @@ class OrderedQueue(torch.nn.Module):
 
         batch_size = item.size(0)
 
-        if self.pointer + batch_size < self.max_length:
+        # Handle case where batch is larger than queue capacity
+        if batch_size >= self.max_length:
+            # Keep only the last max_length items from the batch
+            self.out[:] = item[-self.max_length :]
+            self.order_indices[:] = torch.arange(
+                self.global_counter + batch_size - self.max_length,
+                self.global_counter + batch_size,
+                device=self.order_indices.device,
+            )
+            self.pointer.fill_(0)
+            self.filled.fill_(True)
+            self.global_counter.add_(batch_size)
+        elif self.pointer + batch_size < self.max_length:
             # Simple case: no wraparound
             self.out[self.pointer : self.pointer + batch_size] = item
             # Assign sequential order indices
@@ -241,6 +262,7 @@ class OrderedQueue(torch.nn.Module):
                 device=self.order_indices.device,
             )
             self.pointer.add_(batch_size)
+            self.global_counter.add_(batch_size)
         else:
             # Wraparound case
             remaining = self.max_length - self.pointer
@@ -261,8 +283,8 @@ class OrderedQueue(torch.nn.Module):
 
             self.pointer.copy_(batch_size - remaining)
             self.filled.copy_(True)
+            self.global_counter.add_(batch_size)
 
-        self.global_counter.add_(batch_size)
         return self.get()
 
     def get(self):
