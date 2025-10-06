@@ -151,13 +151,7 @@ class Manager(submitit.helpers.Checkpointable):
             logging.info("📈📈📈 WandbLogger already setup, syncing config 📈📈📈")
             logging.info(f"📈📈📈 init={self.trainer.logger._wandb_init} 📈📈📈")
             # Logger was pre-instantiated (e.g., by Hydra) - sync config and return
-            if WANDB_AVAILABLE and wandb.run:
-                if len(wandb.config.keys()):
-                    logging.info(
-                        "\t\ta Wandb™ config is provided (sweep mode), skipping Hydra config upload"
-                    )
-                else:
-                    self._upload_hydra_config_to_wandb()
+            self._upload_hydra_config_to_wandb()
             return
         elif self.trainer.logger is None:
             logging.warning("📈📈📈 No logger used! 📈📈📈")
@@ -194,12 +188,8 @@ class Manager(submitit.helpers.Checkpointable):
             # at most last_config has an extra `ckpt_path`
             exp.config.update(last_config)
             logging.info("\t\treloaded!")
-        elif WANDB_AVAILABLE and wandb.run and len(wandb.config.keys()):
-            logging.info(
-                "\t\ta Wandb™ config is provided (sweep mode), not uploading Hydra's"
-            )
         else:
-            # WandB sweep not active, upload Hydra config
+            # Upload Hydra config (WandB handles merging with sweep params)
             self._upload_hydra_config_to_wandb()
 
     @property
