@@ -116,14 +116,15 @@ class Manager(submitit.helpers.Checkpointable):
 
     @rank_zero_only
     def init_and_sync_wandb(self):
-        # only useful with wandb
-        # to set any non-given variable to the DictConfig
-        # so that we can resume on requeue
+        """Initialize and sync WandB logger with Hydra config.
 
-        # this override is only useful if receiving parameters
-        # from wandb e.g. using wandb sweep. We retrieve them and
-        # requeue with those instead of user args
+        Handles two cases:
+        1. WandbLogger pre-instantiated by Hydra -> just sync config
+        2. WandbLogger as DictConfig -> instantiate, sync metadata, then sync config
+        """
         self.override = []
+
+        # Early returns for non-WandB loggers
         if isinstance(
             self.trainer.logger, lightning.pytorch.loggers.logger.DummyLogger
         ):
@@ -145,52 +146,64 @@ class Manager(submitit.helpers.Checkpointable):
             logging.info(f"📈📈📈 save_dir={self.trainer.logger.save_dir} 📈📈📈")
             logging.info(f"📈📈📈 log_dir={self.trainer.logger.log_dir} 📈📈📈")
             return
-        elif isinstance(
-            self.trainer.logger, lightning.pytorch.loggers.wandb.WandbLogger
-        ):
-            logging.info("📈📈📈 WandbLogger already setup, syncing config 📈📈📈")
-            logging.info(f"📈📈📈 init={self.trainer.logger._wandb_init} 📈📈📈")
-            # Logger was pre-instantiated (e.g., by Hydra) - sync config and return
-            self._upload_hydra_config_to_wandb()
-            return
         elif self.trainer.logger is None:
             logging.warning("📈📈📈 No logger used! 📈📈📈")
             return
 
-        if "wandb" not in self.trainer.logger._target_.lower():
-            return
-        logging.info("📈📈📈 Using Wandb 📈📈📈")
-        exp = self._trainer.logger.experiment
-        with open_dict(self.trainer):
-            prefix = "\t\t● config's "
-            for name in ["entity", "project", "name", "id"]:
-                cfg_value = self.trainer.logger.get(name, None)
-                w_value = getattr(exp, name)
-                if cfg_value == w_value:
-                    logging.info(f"{prefix}{name} ({cfg_value}) left as-is ✅")
-                    continue
-                self.override.append(f"++manager.trainer.logger.{name}={w_value}")
-                logging.info(f"{prefix}{name} ({cfg_value}) updated to {w_value} ✅")
-                # setattr(self.trainer.logger, name, w_value)
-                self.trainer.logger[name] = w_value
-            if self.trainer.logger.get("resume", None):
-                logging.info(f"{prefix}`resume` already set to `allow`! ✅")
-            else:
-                self.override.append("++manager.trainer.logger.resume=allow")
-                self.trainer.logger.resume = "allow"
-                logging.info(f"{prefix}`resume` set to `allow` for subsequent runs ✅")
+        # From here on: WandB logger (either pre-instantiated or DictConfig)
 
-        if exp.offline:
-            previous_run = self._wandb_previous_dir()
-            logging.info(f"\t\tFound a previous run ({previous_run}), reusing config")
-            with open(previous_run / "files/wandb-config.json", "r") as f:
-                last_config = json.load(f)
-            # at most last_config has an extra `ckpt_path`
-            exp.config.update(last_config)
-            logging.info("\t\treloaded!")
+        # Case 1: WandB logger already instantiated (e.g., by Hydra)
+        if isinstance(self.trainer.logger, lightning.pytorch.loggers.wandb.WandbLogger):
+            logging.info("📈📈📈 WandbLogger already setup 📈📈📈")
+            logging.info(f"📈📈📈 init={self.trainer.logger._wandb_init} 📈📈📈")
+            # Skip to config sync at the end
+
+        # Case 2: WandB logger is DictConfig - need to instantiate and sync metadata
         else:
-            # Upload Hydra config (WandB handles merging with sweep params)
-            self._upload_hydra_config_to_wandb()
+            if "wandb" not in self.trainer.logger._target_.lower():
+                return
+
+            logging.info("📈📈📈 Using Wandb 📈📈📈")
+            exp = self._trainer.logger.experiment
+
+            # Sync metadata (entity, project, name, id) for resuming on requeue
+            with open_dict(self.trainer):
+                prefix = "\t\t● config's "
+                for name in ["entity", "project", "name", "id"]:
+                    cfg_value = self.trainer.logger.get(name, None)
+                    w_value = getattr(exp, name)
+                    if cfg_value == w_value:
+                        logging.info(f"{prefix}{name} ({cfg_value}) left as-is ✅")
+                        continue
+                    self.override.append(f"++manager.trainer.logger.{name}={w_value}")
+                    logging.info(
+                        f"{prefix}{name} ({cfg_value}) updated to {w_value} ✅"
+                    )
+                    self.trainer.logger[name] = w_value
+
+                if self.trainer.logger.get("resume", None):
+                    logging.info(f"{prefix}`resume` already set to `allow`! ✅")
+                else:
+                    self.override.append("++manager.trainer.logger.resume=allow")
+                    self.trainer.logger.resume = "allow"
+                    logging.info(
+                        f"{prefix}`resume` set to `allow` for subsequent runs ✅"
+                    )
+
+            # Handle offline mode (reload config from previous run)
+            if exp.offline:
+                previous_run = self._wandb_previous_dir()
+                logging.info(
+                    f"\t\tFound a previous run ({previous_run}), reusing config"
+                )
+                with open(previous_run / "files/wandb-config.json", "r") as f:
+                    last_config = json.load(f)
+                exp.config.update(last_config)
+                logging.info("\t\treloaded!")
+                return  # Don't upload config when offline
+
+        # Upload Hydra config to WandB (for both cases, unless offline)
+        self._upload_hydra_config_to_wandb()
 
     @property
     def instantiated_module(self):
