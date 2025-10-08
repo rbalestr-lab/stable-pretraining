@@ -15,7 +15,7 @@ sys.path.append(str(Path(__file__).parent.parent))
 sys.path.append(str(Path(__file__).resolve().parents[3]))
 from utils import get_data_dir
 
-vicreg_transform = transforms.MultiViewTransform(
+barlow_transform = transforms.MultiViewTransform(
     [
         transforms.Compose(
             transforms.RGB(),
@@ -56,7 +56,7 @@ train_dataset = spt.data.HFDataset(
     "clane9/imagenet-100",
     split="train",
     cache_dir=str(data_dir),
-    transform=vicreg_transform,
+    transform=barlow_transform,
 )
 val_dataset = spt.data.HFDataset(
     "clane9/imagenet-100",
@@ -90,10 +90,10 @@ backbone = spt.backbone.from_torchvision(
 backbone.fc = torch.nn.Identity()
 
 projector = nn.Sequential(
-    nn.Linear(2048, 8192),
+    nn.Linear(2048, 8192, bias=False),
     nn.BatchNorm1d(8192),
     nn.ReLU(inplace=True),
-    nn.Linear(8192, 8192),
+    nn.Linear(8192, 8192, bias=False),
     nn.BatchNorm1d(8192),
     nn.ReLU(inplace=True),
     nn.Linear(8192, 8192, bias=False),
@@ -102,16 +102,12 @@ projector = nn.Sequential(
 module = spt.Module(
     backbone=backbone,
     projector=projector,
-    forward=forward.vicreg_forward,
-    vicreg_loss=spt.losses.VICRegLoss(
-        sim_coeff=25.0,
-        std_coeff=25.0,
-        cov_coeff=1.0,
-    ),
+    forward=forward.barlow_twins_forward,
+    barlow_loss=spt.losses.BarlowTwinsLoss(lambd=0.0051),
     optim={
         "optimizer": {
             "type": "LARS",
-            "lr": 0.3 * batch_size / 256,
+            "lr": 0.2 * batch_size / 256,
             "weight_decay": 1e-4,
             "clip_lr": True,
             "eta": 0.02,
@@ -146,6 +142,7 @@ knn_probe = spt.callbacks.OnlineKNN(
     k=20,
 )
 
+
 # RankMe for comparison
 rankme = RankMe(
     name="rankme",
@@ -154,9 +151,11 @@ rankme = RankMe(
     target_shape=2048,
 )
 
+
+
 wandb_logger = WandbLogger(
-    project="imagenet100-vicreg",
-    name="vicreg-resnet50",
+    project="imagenet100-barlow",
+    name="barlow-resnet50",
     log_model=False,
 )
 
@@ -167,6 +166,8 @@ trainer = pl.Trainer(
     precision="16-mixed",
     logger=wandb_logger,
     enable_checkpointing=False,
+    devices=1,
+    accelerator="gpu",
 )
 
 manager = spt.Manager(trainer=trainer, module=module, data=data)

@@ -1,8 +1,8 @@
 import lightning as pl
 import torch
-import torch.nn as nn
 import torchmetrics
 from lightning.pytorch.loggers import WandbLogger
+from torch import nn
 
 import stable_pretraining as spt
 from stable_pretraining import forward
@@ -15,7 +15,7 @@ sys.path.append(str(Path(__file__).parent.parent))
 sys.path.append(str(Path(__file__).resolve().parents[3]))
 from utils import get_data_dir
 
-vicreg_transform = transforms.MultiViewTransform(
+simclr_transform = transforms.MultiViewTransform(
     [
         transforms.Compose(
             transforms.RGB(),
@@ -56,7 +56,7 @@ train_dataset = spt.data.HFDataset(
     "clane9/imagenet-100",
     split="train",
     cache_dir=str(data_dir),
-    transform=vicreg_transform,
+    transform=simclr_transform,
 )
 val_dataset = spt.data.HFDataset(
     "clane9/imagenet-100",
@@ -66,6 +66,8 @@ val_dataset = spt.data.HFDataset(
 )
 
 batch_size = 256
+world_size = 1
+total_batch_size = batch_size * world_size
 train_dataloader = torch.utils.data.DataLoader(
     dataset=train_dataset,
     batch_size=batch_size,
@@ -89,25 +91,26 @@ backbone = spt.backbone.from_torchvision(
 )
 backbone.fc = torch.nn.Identity()
 
+class BatchNorm1dNoBias(nn.BatchNorm1d):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.bias.requires_grad = False
+        with torch.no_grad():
+            self.bias.zero_()
+
 projector = nn.Sequential(
-    nn.Linear(2048, 8192),
-    nn.BatchNorm1d(8192),
+    nn.Linear(2048, 2048, bias=False),
+    nn.BatchNorm1d(2048),
     nn.ReLU(inplace=True),
-    nn.Linear(8192, 8192),
-    nn.BatchNorm1d(8192),
-    nn.ReLU(inplace=True),
-    nn.Linear(8192, 8192, bias=False),
+    nn.Linear(2048, 128, bias=False),
+    BatchNorm1dNoBias(128)
 )
 
 module = spt.Module(
     backbone=backbone,
     projector=projector,
-    forward=forward.vicreg_forward,
-    vicreg_loss=spt.losses.VICRegLoss(
-        sim_coeff=25.0,
-        std_coeff=25.0,
-        cov_coeff=1.0,
-    ),
+    forward=forward.simclr_forward,
+    simclr_loss=spt.losses.NTXEntLoss(temperature=0.5),
     optim={
         "optimizer": {
             "type": "LARS",
@@ -146,17 +149,18 @@ knn_probe = spt.callbacks.OnlineKNN(
     k=20,
 )
 
+
 # RankMe for comparison
 rankme = RankMe(
     name="rankme",
     target="embedding",
     queue_length=2048,
     target_shape=2048,
-)
+)  
 
 wandb_logger = WandbLogger(
-    project="imagenet100-vicreg",
-    name="vicreg-resnet50",
+    project="imagenet100-simclr",
+    name="simclr-resnet50",
     log_model=False,
 )
 
@@ -167,6 +171,8 @@ trainer = pl.Trainer(
     precision="16-mixed",
     logger=wandb_logger,
     enable_checkpointing=False,
+    devices=1,
+    accelerator="gpu",
 )
 
 manager = spt.Manager(trainer=trainer, module=module, data=data)
