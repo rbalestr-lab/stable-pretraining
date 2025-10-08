@@ -13,6 +13,7 @@ from .clip_zero_shot import CLIPZeroShot
 from .embedding_cache import EmbeddingCache
 from .earlystop import EpochMilestones
 from .wd_schedule import WeightDecayUpdater
+from .cleanup import CleanUpCallback
 
 __all__ = [
     OnlineProbe,
@@ -34,4 +35,5 @@ __all__ = [
     EmbeddingCache,
     EpochMilestones,
     WeightDecayUpdater,
+    CleanUpCallback,
 ]
