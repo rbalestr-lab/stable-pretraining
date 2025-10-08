@@ -8,6 +8,7 @@ import torchmetrics
 from loguru import logger as logging
 from omegaconf import DictConfig
 from tabulate import tabulate
+from pathlib import Path
 
 from .optim import create_optimizer, create_scheduler
 
@@ -83,6 +84,9 @@ class Module(pl.LightningModule):
         else:
             logging.info("Saving provided hyperparameters.")
             self.save_hyperparameters(hparams)
+        self.save_hyperparameters(
+            {**self.hparams, "system.working_dir": str(Path().resolve())}
+        )
 
         logging.info("Setting custom forward method.")
         if forward is None:

@@ -89,7 +89,11 @@ class LinearProbe(torch.nn.Module):
 
     def __init__(self, embedding_dim, num_classes, pooling="cls", norm_layer=None):
         super().__init__()
-        assert pooling in ("cls", "mean"), "pooling must be 'cls' or 'mean'"
+        assert pooling in (
+            "cls",
+            "mean",
+            None,
+        ), "pooling must be 'cls' or 'mean' or None"
         self.pooling = pooling
         self.norm = norm_layer(embedding_dim) if norm_layer is not None else None
         self.fc = torch.nn.Linear(embedding_dim, num_classes)
@@ -99,21 +103,11 @@ class LinearProbe(torch.nn.Module):
         if x.dim() == 2:
             # (N, D): no pooling or normalization
             pooled = x
+        elif self.pooling == "cls":
+            pooled = x[:, 0, :]  # (N, D)
+        elif self.pooling == "mean":  # 'mean'
+            pooled = x.mean(dim=1)  # (N, D)
         else:
-            # (N, T, D): apply normalization and pooling
-            if self.norm is not None:
-                # For BatchNorm1d, input should be (N*T, D) or (N, D, T)
-                if isinstance(self.norm, torch.nn.BatchNorm1d):
-                    # Reshape to (N*T, D) for BatchNorm1d
-                    N, T, D = x.shape
-                    x_ = x.contiguous().view(-1, D)
-                    x_ = self.norm(x_)
-                    x = x_.view(N, T, D)
-                else:
-                    x = self.norm(x)
-            if self.pooling == "cls":
-                pooled = x[:, 0, :]  # (N, D)
-            else:  # 'mean'
-                pooled = x.mean(dim=1)  # (N, D)
-        out = self.fc(pooled)  # (N, num_classes)
+            pooled = x.flatten(1)
+        out = self.fc(self.norm(pooled))  # (N, num_classes)
         return out
