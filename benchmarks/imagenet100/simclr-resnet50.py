@@ -91,19 +91,12 @@ backbone = spt.backbone.from_torchvision(
 )
 backbone.fc = torch.nn.Identity()
 
-class BatchNorm1dNoBias(nn.BatchNorm1d):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.bias.requires_grad = False
-        with torch.no_grad():
-            self.bias.zero_()
-
 projector = nn.Sequential(
     nn.Linear(2048, 2048, bias=False),
     nn.BatchNorm1d(2048),
     nn.ReLU(inplace=True),
     nn.Linear(2048, 128, bias=False),
-    BatchNorm1dNoBias(128)
+    spt.utils.BatchNorm1dNoBias(128),
 )
 
 module = spt.Module(
@@ -156,7 +149,7 @@ rankme = RankMe(
     target="embedding",
     queue_length=2048,
     target_shape=2048,
-)  
+)
 
 wandb_logger = WandbLogger(
     project="imagenet100-simclr",

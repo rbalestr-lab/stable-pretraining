@@ -1,4 +1,4 @@
-"""SwAV training on ImageNet-100 with ResNet-18."""
+"""SwAV training on ImageNet-100 with ResNet-50."""
 
 import lightning as pl
 import torch
@@ -32,7 +32,7 @@ class FreezePrototypesCallback(pl.Callback):
 
 
 BATCH_SIZE = 512
-MAX_EPOCHS = 50
+MAX_EPOCHS = 500
 WARMUP_EPOCHS = 10
 END_LR = 6e-4 if BATCH_SIZE <= 256 else 4.8e-3  # Parameters used in the original paper
 LR = 0.6 if BATCH_SIZE <= 256 else 4.8  # Parameters used in the original paper
@@ -43,9 +43,9 @@ START_QUEUE_AT_EPOCH = 15
 
 
 swav_transform = transforms.MultiViewTransform(
-    [
+    {
         # Global crop 1: 224x224 with strong augmentations
-        transforms.Compose(
+        "global_1": transforms.Compose(
             transforms.RGB(),
             transforms.RandomResizedCrop(224, scale=(0.2, 1.0)),
             transforms.RandomHorizontalFlip(p=0.5),
@@ -57,7 +57,7 @@ swav_transform = transforms.MultiViewTransform(
             transforms.ToImage(**spt.data.static.ImageNet),
         ),
         # Global crop 2: 224x224
-        transforms.Compose(
+        "global_2": transforms.Compose(
             transforms.RGB(),
             transforms.RandomResizedCrop(224, scale=(0.2, 1.0)),
             transforms.RandomHorizontalFlip(p=0.5),
@@ -69,7 +69,7 @@ swav_transform = transforms.MultiViewTransform(
             transforms.ToImage(**spt.data.static.ImageNet),
         ),
         # Local crops (6 total): 96x96 to capture finer details
-        transforms.Compose(
+        "local_1": transforms.Compose(
             transforms.RGB(),
             transforms.RandomResizedCrop(96, scale=(0.05, 0.2)),
             transforms.RandomHorizontalFlip(p=0.5),
@@ -79,7 +79,7 @@ swav_transform = transforms.MultiViewTransform(
             transforms.RandomGrayscale(p=0.2),
             transforms.ToImage(**spt.data.static.ImageNet),
         ),
-        transforms.Compose(
+        "local_2": transforms.Compose(
             transforms.RGB(),
             transforms.RandomResizedCrop(96, scale=(0.05, 0.2)),
             transforms.RandomHorizontalFlip(p=0.5),
@@ -89,7 +89,7 @@ swav_transform = transforms.MultiViewTransform(
             transforms.RandomGrayscale(p=0.2),
             transforms.ToImage(**spt.data.static.ImageNet),
         ),
-        transforms.Compose(
+        "local_3": transforms.Compose(
             transforms.RGB(),
             transforms.RandomResizedCrop(96, scale=(0.05, 0.2)),
             transforms.RandomHorizontalFlip(p=0.5),
@@ -99,7 +99,7 @@ swav_transform = transforms.MultiViewTransform(
             transforms.RandomGrayscale(p=0.2),
             transforms.ToImage(**spt.data.static.ImageNet),
         ),
-        transforms.Compose(
+        "local_4": transforms.Compose(
             transforms.RGB(),
             transforms.RandomResizedCrop(96, scale=(0.05, 0.2)),
             transforms.RandomHorizontalFlip(p=0.5),
@@ -109,7 +109,7 @@ swav_transform = transforms.MultiViewTransform(
             transforms.RandomGrayscale(p=0.2),
             transforms.ToImage(**spt.data.static.ImageNet),
         ),
-        transforms.Compose(
+        "local_5": transforms.Compose(
             transforms.RGB(),
             transforms.RandomResizedCrop(96, scale=(0.05, 0.2)),
             transforms.RandomHorizontalFlip(p=0.5),
@@ -119,7 +119,7 @@ swav_transform = transforms.MultiViewTransform(
             transforms.RandomGrayscale(p=0.2),
             transforms.ToImage(**spt.data.static.ImageNet),
         ),
-        transforms.Compose(
+        "local_6": transforms.Compose(
             transforms.RGB(),
             transforms.RandomResizedCrop(96, scale=(0.05, 0.2)),
             transforms.RandomHorizontalFlip(p=0.5),
@@ -129,7 +129,7 @@ swav_transform = transforms.MultiViewTransform(
             transforms.RandomGrayscale(p=0.2),
             transforms.ToImage(**spt.data.static.ImageNet),
         ),
-    ]
+    }
 )
 
 val_transform = transforms.Compose(
@@ -156,25 +156,27 @@ val_dataset = spt.data.HFDataset(
 
 train_dataloader = torch.utils.data.DataLoader(
     dataset=train_dataset,
-    sampler=spt.data.sampler.RepeatedRandomSampler(train_dataset, n_views=8),
     batch_size=BATCH_SIZE,
     num_workers=8,
     drop_last=True,
+    persistent_workers=True,
+    shuffle=True,
 )
 
 val_dataloader = torch.utils.data.DataLoader(
     dataset=val_dataset,
     batch_size=BATCH_SIZE,
-    num_workers=10,
+    num_workers=8,
+    persistent_workers=True,
 )
 
 data = spt.data.DataModule(train=train_dataloader, val=val_dataloader)
 
-backbone = spt.backbone.from_torchvision("resnet18", low_resolution=False, weights=None)
+backbone = spt.backbone.from_torchvision("resnet50", low_resolution=False, weights=None)
 backbone.fc = torch.nn.Identity()
 
 projector = nn.Sequential(
-    nn.Linear(512, 2048),
+    nn.Linear(2048, 2048),
     nn.BatchNorm1d(2048),
     nn.ReLU(inplace=True),
     nn.Linear(2048, 128),
@@ -222,7 +224,7 @@ linear_probe = spt.callbacks.OnlineProbe(
     name="linear_probe",
     input="embedding",
     target="label",
-    probe=torch.nn.Linear(512, 100),
+    probe=torch.nn.Linear(2048, 100),
     loss_fn=torch.nn.CrossEntropyLoss(),
     metrics={
         "top1": torchmetrics.classification.MulticlassAccuracy(100),
@@ -236,13 +238,13 @@ knn_probe = spt.callbacks.OnlineKNN(
     target="label",
     queue_length=20000,
     metrics={"accuracy": torchmetrics.classification.MulticlassAccuracy(100)},
-    input_dim=512,
+    input_dim=2048,
     k=20,
 )
 
 wandb_logger = WandbLogger(
     entity="stable-ssl",
-    project="imagenet100-swav-resnet18",
+    project="imagenet100-swav-resnet50",
     log_model=False,
 )
 

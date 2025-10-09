@@ -581,7 +581,16 @@ def dino_forward(self, batch, stage):
     # Teacher processes only global views
     with torch.no_grad():
         teacher_features = self.backbone.forward_teacher(global_images)
-        teacher_logits = self.projector.forward_teacher(teacher_features)
+        # Extract CLS token from HF output
+        if hasattr(teacher_features, "last_hidden_state"):
+            teacher_cls_features = teacher_features.last_hidden_state[:, 0, :]
+        else:
+            teacher_cls_features = (
+                teacher_features[:, 0, :]
+                if teacher_features.ndim == 3
+                else teacher_features
+            )
+        teacher_logits = self.projector.forward_teacher(teacher_cls_features)
         teacher_logits = teacher_logits.view(n_global, batch_size, -1)
 
     # Student processes all views
@@ -589,15 +598,37 @@ def dino_forward(self, batch, stage):
 
     # Process global views through student
     student_features = self.backbone.forward_student(global_images)
-    student_global_logits = self.projector.forward_student(student_features)
+    # Extract CLS token from HF output
+    if hasattr(student_features, "last_hidden_state"):
+        student_cls_features = student_features.last_hidden_state[:, 0, :]
+    else:
+        student_cls_features = (
+            student_features[:, 0, :]
+            if student_features.ndim == 3
+            else student_features
+        )
+    student_global_logits = self.projector.forward_student(student_cls_features)
     student_global_logits = student_global_logits.view(n_global, batch_size, -1)
     student_logits_list.append(student_global_logits)
 
     # Process local views through student (if any)
     if n_local > 0:
         local_images = torch.cat([view["image"] for view in local_views], dim=0)
-        student_features = self.backbone.forward_student(local_images)
-        student_local_logits = self.projector.forward_student(student_features)
+        student_features = self.backbone.forward_student(
+            local_images, interpolate_pos_encoding=True
+        )
+        # Extract CLS token from HF output
+        if hasattr(student_features, "last_hidden_state"):
+            student_local_cls_features = student_features.last_hidden_state[:, 0, :]
+        else:
+            student_local_cls_features = (
+                student_features[:, 0, :]
+                if student_features.ndim == 3
+                else student_features
+            )
+        student_local_logits = self.projector.forward_student(
+            student_local_cls_features
+        )
         student_local_logits = student_local_logits.view(n_local, batch_size, -1)
         student_logits_list.append(student_local_logits)
 
@@ -646,7 +677,7 @@ def dino_forward(self, batch, stage):
     # Queue async center update (will be applied next iteration)
     self.dino_loss.update_center(teacher_logits)
 
-    out["embedding"] = teacher_features.detach()
+    out["embedding"] = teacher_cls_features.detach()
     out["loss"] = loss
 
     return out
@@ -936,15 +967,12 @@ def dinov2_forward(self, batch, stage):
                 f"\n\nOriginal error: {e}"
             ) from e
     else:
-        # No patch_projector provided, compute DINO loss only (no iBOT)
-        if not hasattr(self, "dinov2_loss"):
-            raise ValueError(
-                "dinov2_forward requires 'dinov2_loss' to be provided. "
-                "Pass it when constructing the Module: Module(..., dinov2_loss=spt.losses.DINOv2Loss(), ...)"
-            )
-
-        # Call DINOv2Loss with only CLS logits (iBOT disabled when no patch_projector)
-        loss = self.dinov2_loss.dino_loss(student_cls_logits, teacher_cls_probs)
+        # No patch_projector provided - raise error instead of falling back to DINO-only
+        raise ValueError(
+            "dinov2_forward requires 'patch_projector' for iBOT loss. "
+            "Either provide a patch_projector: Module(..., patch_projector=...) "
+            "or use dino_forward instead if you only want the DINO (CLS token) loss without iBOT."
+        )
 
     # Return flattened CLS features for callbacks (probes expect [n_global * batch_size, dim])
     out["embedding"] = teacher_cls_features.view(n_global * batch_size, -1).detach()

@@ -39,7 +39,15 @@ from .inspection_utils import (
     get_required_fn_parameters,
 )
 from .error_handling import with_hf_retry_ratelimit
-from .nn_modules import EMA, ImageToVideoEncoder, Normalize, OrderedQueue, UnsortedQueue
+from .nn_modules import (
+    BatchNorm1dNoBias,
+    EMA,
+    ImageToVideoEncoder,
+    L2Norm,
+    Normalize,
+    OrderedQueue,
+    UnsortedQueue,
+)
 
 __all__ = [
     # autograd
@@ -78,11 +86,13 @@ __all__ = [
     "stable_svd",
     "stable_svdvals",
     # nn_modules
-    "ImageToVideoEncoder",
-    "Normalize",
-    "UnsortedQueue",
-    "OrderedQueue",
+    "BatchNorm1dNoBias",
     "EMA",
+    "ImageToVideoEncoder",
+    "L2Norm",
+    "Normalize",
+    "OrderedQueue",
+    "UnsortedQueue",
     # visualization
     "imshow_with_grid",
     "visualize_images_graph",

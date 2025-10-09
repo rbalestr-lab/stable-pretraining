@@ -138,7 +138,7 @@ class Module(pl.LightningModule):
     ):
         """Override to globally exclude callback-related parameters.
 
-        Excludes parameters that belong to `self._callbacks_modules` or `self.callbacks_metrics`.
+        Excludes parameters that belong to `self.callbacks_modules` or `self.callbacks_metrics`.
         This prevents accidental optimization of callback/metric internals, even if external code
         calls `self.parameters()` or `self.named_parameters()` directly.
         """
@@ -149,7 +149,7 @@ class Module(pl.LightningModule):
             )
         for name, param in super().named_parameters(prefix=prefix, recurse=recurse):
             if (
-                name.startswith("_callbacks_modules.")
+                name.startswith("callbacks_modules.")
                 or name.startswith("callbacks_metrics.")
                 and not with_callbacks
             ):
@@ -190,7 +190,7 @@ class Module(pl.LightningModule):
             if not key.startswith("loss_"):
                 continue
             total_loss += state[key]
-            name = key.lstrip("loss_")
+            name = key.removeprefix("loss_")
             idx = self._optimizer_index_by_name[name]
             callback_optimizers.append(idx)
 
@@ -358,7 +358,7 @@ class Module(pl.LightningModule):
         # Map module -> group index with inheritance
         module_to_group = {}
         for qual_name, module in self.named_modules():
-            if "_callbacks_modules" in qual_name or "callbacks_metrics" in qual_name:
+            if "callbacks_modules" in qual_name or "callbacks_metrics" in qual_name:
                 continue
 
             # inherit parent's group if any

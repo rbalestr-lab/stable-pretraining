@@ -1,19 +1,20 @@
 import lightning as pl
 import torch
-import torch.nn as nn
 import torchmetrics
 from lightning.pytorch.loggers import WandbLogger
+from torch import nn
 
 import stable_pretraining as spt
-from stable_pretraining.data import transforms
 from stable_pretraining import forward
+from stable_pretraining.data import transforms
+from stable_pretraining.callbacks.queue import OnlineQueue
 import sys
 from pathlib import Path
 
 sys.path.append(str(Path(__file__).parent.parent))
 from utils import get_data_dir
 
-byol_transform = transforms.MultiViewTransform(
+nnclr_transform = transforms.MultiViewTransform(
     [
         transforms.Compose(
             transforms.RGB(),
@@ -54,7 +55,7 @@ train_dataset = spt.data.HFDataset(
     "clane9/imagenet-100",
     split="train",
     cache_dir=str(data_dir),
-    transform=byol_transform,
+    transform=nnclr_transform,
 )
 val_dataset = spt.data.HFDataset(
     "clane9/imagenet-100",
@@ -63,7 +64,7 @@ val_dataset = spt.data.HFDataset(
     transform=val_transform,
 )
 
-batch_size = 512  # Per GPU batch size (4096 / 8 GPUs)
+batch_size = 256
 train_dataloader = torch.utils.data.DataLoader(
     dataset=train_dataset,
     batch_size=batch_size,
@@ -81,27 +82,17 @@ val_dataloader = torch.utils.data.DataLoader(
 
 data = spt.data.DataModule(train=train_dataloader, val=val_dataloader)
 
-backbone = spt.backbone.from_torchvision("resnet50", low_resolution=False, weights=None)
-backbone.fc = nn.Identity()
-
-wrapped_backbone = spt.TeacherStudentWrapper(
-    backbone,
-    warm_init=True,
-    base_ema_coefficient=0.996,
-    final_ema_coefficient=1.0,
+backbone = spt.backbone.from_torchvision(
+    "resnet50",
+    low_resolution=False,
 )
+backbone.fc = torch.nn.Identity()
 
 projector = nn.Sequential(
-    nn.Linear(2048, 4096),
-    nn.BatchNorm1d(4096),
+    nn.Linear(2048, 2048),
+    nn.BatchNorm1d(2048),
     nn.ReLU(inplace=True),
-    nn.Linear(4096, 256),
-)
-wrapped_projector = spt.TeacherStudentWrapper(
-    projector,
-    warm_init=True,
-    base_ema_coefficient=0.996,
-    final_ema_coefficient=1.0,
+    nn.Linear(2048, 256),
 )
 
 predictor = nn.Sequential(
@@ -111,17 +102,18 @@ predictor = nn.Sequential(
     nn.Linear(4096, 256),
 )
 
+
 module = spt.Module(
-    backbone=wrapped_backbone,
-    projector=wrapped_projector,
+    backbone=backbone,
+    projector=projector,
     predictor=predictor,
-    forward=forward.byol_forward,
-    byol_loss=spt.losses.BYOLLoss(),
+    forward=forward.nnclr_forward,
+    nnclr_loss=spt.losses.NTXEntLoss(temperature=0.1),
     optim={
         "optimizer": {
             "type": "LARS",
-            "lr": 5 * 4096 / 256,  # Scale LR for global batch size of 4096
-            "weight_decay": 1e-6,
+            "lr": 0.3 * batch_size / 256,
+            "weight_decay": 1e-4,
             "clip_lr": True,
             "eta": 0.02,
             "exclude_bias_n_norm": True,
@@ -131,14 +123,18 @@ module = spt.Module(
         },
         "interval": "epoch",
     },
+    hparams={
+        "support_set_size": 16384,
+        "projection_dim": 256,
+    },
 )
 
 linear_probe = spt.callbacks.OnlineProbe(
     name="linear_probe",
     input="embedding",
     target="label",
-    probe=nn.Linear(2048, 100),
-    loss_fn=nn.CrossEntropyLoss(),
+    probe=torch.nn.Linear(2048, 100),
+    loss_fn=torch.nn.CrossEntropyLoss(),
     metrics={
         "top1": torchmetrics.classification.MulticlassAccuracy(100),
         "top5": torchmetrics.classification.MulticlassAccuracy(100, top_k=5),
@@ -155,21 +151,30 @@ knn_probe = spt.callbacks.OnlineKNN(
     k=20,
 )
 
+support_queue = OnlineQueue(
+    key="nnclr_support_set",
+    queue_length=module.hparams.support_set_size,
+    dim=module.hparams.projection_dim,
+)
+
 wandb_logger = WandbLogger(
     entity="stable-ssl",
-    project="imagenet100-byol",
-    name="byol-resnet50-8gpus",
+    project="imagenet100-nnclr",
+    name="nnclr-resnet50",
     log_model=False,
 )
 
+# --- Trainer ---
 trainer = pl.Trainer(
     max_epochs=400,
     num_sanity_val_steps=0,
-    callbacks=[linear_probe, knn_probe],
+    callbacks=[linear_probe, knn_probe, support_queue],
     precision="16-mixed",
     logger=wandb_logger,
-    devices=8,  # Use 8 GPUs
-    strategy="ddp_find_unused_parameters_true",  # DDP with unused parameters detection
+    enable_checkpointing=True,
+    devices=1,
+    accelerator="gpu",
+    sync_batchnorm=False,
 )
 
 manager = spt.Manager(trainer=trainer, module=module, data=data)

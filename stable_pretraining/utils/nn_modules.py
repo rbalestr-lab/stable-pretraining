@@ -7,6 +7,40 @@ import torch
 import torch.nn.functional as F
 
 
+class BatchNorm1dNoBias(torch.nn.BatchNorm1d):
+    """BatchNorm1d with learnable scale but no learnable bias (center=False).
+
+    This is used in contrastive learning methods like SimCLR where the final
+    projection layer uses batch normalization with scale (gamma) but without
+    bias (beta). This follows the original SimCLR implementation where the
+    bias term is removed from the final BatchNorm layer.
+
+    The bias is frozen at 0 and set to non-trainable, while the weight (scale)
+    parameter remains learnable.
+
+    Example:
+        ```python
+        # SimCLR-style projector
+        projector = nn.Sequential(
+            nn.Linear(2048, 2048, bias=False),
+            nn.BatchNorm1d(2048),
+            nn.ReLU(inplace=True),
+            nn.Linear(2048, 128, bias=False),
+            spt.utils.nn_modules.BatchNorm1dNoBias(128),  # Final layer: no bias
+        )
+        ```
+
+    Note:
+        This is equivalent to TensorFlow's BatchNorm with center=False, scale=True.
+    """
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.bias.requires_grad = False
+        with torch.no_grad():
+            self.bias.zero_()
+
+
 class L2Norm(torch.nn.Module):
     """L2 normalization layer that normalizes input to unit length.
 

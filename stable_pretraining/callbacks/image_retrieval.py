@@ -22,7 +22,7 @@ def wrap_validation_step(fn, input, name):
         batch = fn(batch, batch_idx)
 
         with torch.no_grad():
-            norm = self._callbacks_modules[name]["normalizer"](batch[input])
+            norm = self.callbacks_modules[name]["normalizer"](batch[input])
             norm = torch.nn.functional.normalize(norm, dim=1, p=2)
 
         idx = self.all_gather(batch["sample_idx"])
@@ -59,8 +59,8 @@ class ImageRetrieval(Callback):
         logging.info(f"Setting up callback ({self.NAME})")
         logging.info(f"\t- {input=}")
         logging.info(f"\t- {query_col=}")
-        logging.info("\t- caching modules into `_callbacks_modules`")
-        if name in pl_module._callbacks_modules:
+        logging.info("\t- caching modules into `callbacks_modules`")
+        if name in pl_module.callbacks_modules:
             raise ValueError(f"{name=} already used in callbacks")
         if type(features_dim) in [list, tuple]:
             features_dim = np.prod(features_dim)
@@ -79,14 +79,14 @@ class ImageRetrieval(Callback):
         else:
             normalizer = torch.nn.Identity()
 
-        pl_module._callbacks_modules[name] = torch.nn.ModuleDict(
+        pl_module.callbacks_modules[name] = torch.nn.ModuleDict(
             {
                 "normalizer": normalizer,
             }
         )
 
         logging.info(
-            f"`_callbacks_modules` now contains ({list(pl_module._callbacks_modules.keys())})"
+            f"`callbacks_modules` now contains ({list(pl_module.callbacks_modules.keys())})"
         )
 
         if not isinstance(retrieval_col, list):
