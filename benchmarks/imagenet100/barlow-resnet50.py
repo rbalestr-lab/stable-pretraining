@@ -151,8 +151,6 @@ rankme = RankMe(
     target_shape=2048,
 )
 
-
-
 wandb_logger = WandbLogger(
     project="imagenet100-barlow",
     name="barlow-resnet50",
