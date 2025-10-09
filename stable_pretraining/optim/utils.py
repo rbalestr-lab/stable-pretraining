@@ -6,9 +6,9 @@ from typing import Union
 
 import torch
 from hydra.utils import instantiate
+from omegaconf import DictConfig, OmegaConf
 
 from .. import optim as ssl_optim
-from loguru import logger as logging
 
 
 def create_optimizer(
@@ -49,7 +49,6 @@ def create_optimizer(
         >>> # Direct class
         >>> opt = create_optimizer(model.parameters(), torch.optim.RMSprop)
     """
-    logging.info("Instantiating optimizer!!!!")
     # Handle Hydra config objects
     if hasattr(optimizer_config, "_target_"):
         return instantiate(optimizer_config, params=params, _convert_="object")
@@ -63,8 +62,12 @@ def create_optimizer(
         return optimizer_config(params)
 
     # dict -> extract type and kwargs
-    if isinstance(optimizer_config, dict):
-        config_copy = optimizer_config.copy()
+    if isinstance(optimizer_config, (dict, DictConfig)):
+        # Convert DictConfig to dict if needed
+        if isinstance(optimizer_config, DictConfig):
+            config_copy = OmegaConf.to_container(optimizer_config, resolve=True)
+        else:
+            config_copy = optimizer_config.copy()
         opt_type = config_copy.pop("type", "AdamW")
         kwargs = config_copy
     else:

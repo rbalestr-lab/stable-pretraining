@@ -98,8 +98,8 @@ class ImageRetrieval(Callback):
                     f"Only `RetrievalMetric` is supported for {self.NAME} callback, but got {metric} for {k}"
                 )
 
-        logging.info("\t- caching metrics into `_callbacks_metrics`")
-        pl_module._callbacks_metrics[name] = format_metrics_as_dict(metrics)
+        logging.info("\t- caching metrics into `callbacks_metrics`")
+        pl_module.callbacks_metrics[name] = format_metrics_as_dict(metrics)
 
         logging.info("\t- wrapping the `validation_step`")
         fn = wrap_validation_step(pl_module.validation_step, input, name)
@@ -182,7 +182,7 @@ class ImageRetrieval(Callback):
             indexes = torch.cat(indexes)
 
             logs = {}
-            for k, metric in pl_module._callbacks_metrics[self.name]["_val"].items():
+            for k, metric in pl_module.callbacks_metrics[self.name]["_val"].items():
                 res = metric(preds, targets, indexes=indexes)
                 logs[f"eval/{self.name}_{k}"] = res.item() * 100
 

@@ -17,9 +17,111 @@ except ImportError:
     _TIMM_AVAILABLE = False
 
 try:
-    from transformers import TimmWrapperModel
+    from transformers import TimmWrapperModel, ViTConfig, ViTModel
+
+    _TRANSFORMERS_AVAILABLE = True
 except ImportError:
     TimmWrapperModel = None
+    ViTConfig = None
+    ViTModel = None
+    _TRANSFORMERS_AVAILABLE = False
+
+
+def vit_hf(
+    size: str = "tiny",
+    patch_size: int = 16,
+    image_size: int = 224,
+    pretrained: bool = False,
+    use_mask_token: bool = True,
+    **kwargs,
+) -> nn.Module:
+    """Create a Vision Transformer using HuggingFace transformers.
+
+    This provides a clean, well-maintained ViT implementation with native support for:
+    - Masking via bool_masked_pos parameter
+    - Learnable mask token
+    - Easy access to CLS and patch tokens
+
+    Args:
+        size: Model size - "tiny", "small", "base", or "large"
+        patch_size: Patch size (default: 16)
+        image_size: Input image size (default: 224)
+        pretrained: Load pretrained weights from HuggingFace Hub
+        use_mask_token: Whether to include learnable mask token (needed for iBOT)
+        **kwargs: Additional ViTConfig parameters
+
+    Returns:
+        HuggingFace ViTModel
+
+    Example:
+        >>> backbone = vit_hf("tiny", use_mask_token=True)
+        >>> x = torch.randn(2, 3, 224, 224)
+        >>>
+        >>> # Without masking
+        >>> output = backbone(x)
+        >>> cls_token = output.last_hidden_state[:, 0, :]
+        >>> patch_tokens = output.last_hidden_state[:, 1:, :]
+        >>>
+        >>> # With masking (for iBOT student)
+        >>> masks = torch.zeros(2, 196, dtype=torch.bool)
+        >>> masks[:, :59] = True  # Mask 30%
+        >>> output = backbone(x, bool_masked_pos=masks)
+    """
+    if not _TRANSFORMERS_AVAILABLE:
+        raise ImportError(
+            "transformers library is required for vit_hf. "
+            "Install with: pip install transformers"
+        )
+
+    # ViT size configurations (matching timm/DINOv3)
+    size_configs = {
+        "tiny": {"hidden_size": 192, "num_hidden_layers": 12, "num_attention_heads": 3},
+        "small": {
+            "hidden_size": 384,
+            "num_hidden_layers": 12,
+            "num_attention_heads": 6,
+        },
+        "base": {
+            "hidden_size": 768,
+            "num_hidden_layers": 12,
+            "num_attention_heads": 12,
+        },
+        "large": {
+            "hidden_size": 1024,
+            "num_hidden_layers": 24,
+            "num_attention_heads": 16,
+        },
+    }
+
+    if size not in size_configs:
+        raise ValueError(
+            f"Invalid size '{size}'. Choose from {list(size_configs.keys())}"
+        )
+
+    config_params = size_configs[size]
+    config_params["intermediate_size"] = config_params["hidden_size"] * 4
+    config_params["image_size"] = image_size
+    config_params["patch_size"] = patch_size
+    config_params.update(kwargs)
+
+    if pretrained:
+        # Try to load pretrained model from HF Hub
+        model_name = f"google/vit-{size}-patch{patch_size}-{image_size}"
+        logging.info(f"Loading pretrained ViT from {model_name}")
+        model = ViTModel.from_pretrained(
+            model_name, add_pooling_layer=False, use_mask_token=use_mask_token
+        )
+    else:
+        config = ViTConfig(**config_params)
+        model = ViTModel(config, add_pooling_layer=False, use_mask_token=use_mask_token)
+        logging.info(f"Created ViT-{size} from scratch with config: {config_params}")
+
+    # IMPORTANT: Set model to always interpolate position encodings for dynamic input sizes
+    # This allows processing images of different sizes (e.g., 224x224 global + 96x96 local views)
+    # Must be set as instance attribute, not in config
+    model.config.interpolate_pos_encoding = True
+
+    return model
 
 
 class EvalOnly(nn.Module):

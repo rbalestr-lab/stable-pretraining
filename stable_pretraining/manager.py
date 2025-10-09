@@ -13,7 +13,7 @@ import submitit
 from lightning.pytorch.callbacks import ModelCheckpoint
 from lightning.pytorch.utilities.rank_zero import rank_zero_only
 from loguru import logger as logging
-from omegaconf import DictConfig, OmegaConf, open_dict
+from omegaconf import DictConfig, OmegaConf
 import os
 from . import WANDB_AVAILABLE
 
@@ -23,6 +23,40 @@ else:
     wandb = None
 
 from .utils import get_required_fn_parameters
+
+
+def print_logger_info(logger):
+    if isinstance(logger, lightning.pytorch.loggers.logger.DummyLogger):
+        logging.info("📈📈📈 DummyLogger setup 📈📈📈")
+
+    elif isinstance(logger, lightning.pytorch.loggers.tensorboard.TensorBoardLogger):
+        logging.info("📈📈📈 TensorBoardLogger setup 📈📈📈")
+        logging.info(f"📈📈📈 root_dir={logger.root_dir} 📈📈📈")
+        logging.info(f"📈📈📈 save_dir={logger.save_dir} 📈📈📈")
+        logging.info(f"📈📈📈 log_dir={logger.log_dir} 📈📈📈")
+
+    elif isinstance(logger, lightning.pytorch.loggers.csv_logs.CSVLogger):
+        logging.info("📈📈📈 CSVLogger setup 📈📈📈")
+        logging.info(f"📈📈📈 root_dir={logger.root_dir} 📈📈📈")
+        logging.info(f"📈📈📈 save_dir={logger.save_dir} 📈📈📈")
+        logging.info(f"📈📈📈 log_dir={logger.log_dir} 📈📈📈")
+
+    elif isinstance(logger, lightning.pytorch.loggers.wandb.WandbLogger):
+        logging.info("📈📈📈 WandbLogger setup 📈📈📈")
+        logging.info(f"📈📈📈 init={logger._wandb_init} 📈📈📈")
+
+    elif logger is None:
+        logging.warning("📈📈📈 No logger used! 📈📈📈")
+    else:
+        logging.warning("📈📈📈 Unrecogniezed logger! 📈📈📈")
+
+
+def print_signal_info():
+    logging.info("\t● 👂👂👂 SIGNALS HANDLERS 👂👂👂")
+    logging.info(f"\t\t- SIGUSR1: `{signal.getsignal(signal.SIGUSR1)}`")
+    logging.info(f"\t\t- SIGUSR2: `{signal.getsignal(signal.SIGUSR2)}`")
+    logging.info(f"\t\t- SIGCONT: `{signal.getsignal(signal.SIGCONT)}`")
+    logging.info(f"\t\t- SIGTERM: `{signal.getsignal(signal.SIGTERM)}`")
 
 
 class Manager(submitit.helpers.Checkpointable):
@@ -51,129 +85,24 @@ class Manager(submitit.helpers.Checkpointable):
                 "User didn't specify seed, runs won't be exactly reproducible!"
             )
         self.compile = compile
-        if type(trainer) is dict:
-            trainer = OmegaConf.create(trainer)
-        if type(trainer) is DictConfig:
-            self.trainer: DictConfig = copy.deepcopy(trainer)
-            logging.debug("\t● trainer config saved ✅")
-        elif isinstance(trainer, pl.Trainer):
-            self.trainer = trainer
-            logging.debug("\t● trainer already instantiated ✅")
-        else:
-            raise ValueError(
-                f"`trainer` must be a dict, DictConfig or pl.Trainer, not {type(trainer)}"
-            )
-
-        if type(module) is dict:
-            module = OmegaConf.create(module)
-        if type(module) is DictConfig:
-            self.module: DictConfig = copy.deepcopy(module)
-            logging.debug("\t● module config saved ✅")
-        elif isinstance(module, pl.LightningModule):
-            self.module = module
-            logging.debug("\t● module already instantiated ✅")
-        else:
-            raise ValueError(
-                f"`module` must be a dict, DictConfig or pl.LightningModule, not {type(module)}"
-            )
-
-        if type(data) is dict:
-            data = OmegaConf.create(data)
-        if type(data) is DictConfig:
-            self.data: DictConfig = copy.deepcopy(data)
-            logging.debug("\t● data config saved ✅")
-        elif isinstance(data, pl.LightningDataModule):
-            self.data = data
-            logging.debug("\t● data already instantiated ✅")
-        else:
-            raise ValueError(
-                f"`data` must be a dict, DictConfig or pl.LightningDataModule, not {type(data)}"
-            )
+        self._register_trainer(trainer)
+        self._register_module(module)
+        self._register_data(data)
 
         self.seed = seed
         if ckpt_path is not None:
-            self.ckpt_path = Path(ckpt_path).with_suffix(".ckpt").resolve()
-        else:
-            self.ckpt_path = None
-        # self.slurm_requeue_signal = slurm_requeue_signal
+            ckpt_path = Path(ckpt_path).with_suffix(".ckpt").resolve()
+        self.ckpt_path = ckpt_path
 
     @rank_zero_only
     def init_and_sync_wandb(self):
-        # only useful with wandb
-        # to set any non-given variable to the DictConfig
-        # so that we can resume on requeue
-
-        # this override is only useful if receiving parameters
-        # from wandb e.g. using wandb sweep. We retrieve them and
-        # requeue with those instead of user args
-        self.override = []
-        if isinstance(
-            self.trainer.logger, lightning.pytorch.loggers.logger.DummyLogger
+        """Handles some utilities for WandB."""
+        if not isinstance(
+            self._trainer.logger, lightning.pytorch.loggers.wandb.WandbLogger
         ):
-            logging.info("📈📈📈 DummyLogger already setup, skipping init 📈📈📈")
-            return
-        elif isinstance(
-            self.trainer.logger, lightning.pytorch.loggers.tensorboard.TensorBoardLogger
-        ):
-            logging.info("📈📈📈 TensorBoardLogger already setup, skipping init 📈📈📈")
-            logging.info(f"📈📈📈 root_dir={self.trainer.logger.root_dir} 📈📈📈")
-            logging.info(f"📈📈📈 save_dir={self.trainer.logger.save_dir} 📈📈📈")
-            logging.info(f"📈📈📈 log_dir={self.trainer.logger.log_dir} 📈📈📈")
-            return
-        elif isinstance(
-            self.trainer.logger, lightning.pytorch.loggers.csv_logs.CSVLogger
-        ):
-            logging.info("📈📈📈 CSVLogger already setup, skipping init 📈📈📈")
-            logging.info(f"📈📈📈 root_dir={self.trainer.logger.root_dir} 📈📈📈")
-            logging.info(f"📈📈📈 save_dir={self.trainer.logger.save_dir} 📈📈📈")
-            logging.info(f"📈📈📈 log_dir={self.trainer.logger.log_dir} 📈📈📈")
-            return
-        elif isinstance(
-            self.trainer.logger, lightning.pytorch.loggers.wandb.WandbLogger
-        ):
-            logging.info("📈📈📈 WandbLogger already setup, skipping init 📈📈📈")
-            logging.info(f"📈📈📈 init={self.trainer.logger._wandb_init} 📈📈📈")
-            return
-        elif self.trainer.logger is None:
-            logging.warning("📈📈📈 No logger used! 📈📈📈")
-            return
-
-        if "wandb" not in self.trainer.logger._target_.lower():
             return
         logging.info("📈📈📈 Using Wandb 📈📈📈")
         exp = self._trainer.logger.experiment
-        with open_dict(self.trainer):
-            prefix = "\t\t● config's "
-            for name in ["entity", "project", "name", "id"]:
-                cfg_value = self.trainer.logger.get(name, None)
-                w_value = getattr(exp, name)
-                if cfg_value == w_value:
-                    logging.info(f"{prefix}{name} ({cfg_value}) left as-is ✅")
-                    continue
-                self.override.append(f"++manager.trainer.logger.{name}={w_value}")
-                logging.info(f"{prefix}{name} ({cfg_value}) updated to {w_value} ✅")
-                # setattr(self.trainer.logger, name, w_value)
-                self.trainer.logger[name] = w_value
-            if self.trainer.logger.get("resume", None):
-                logging.info(f"{prefix}`resume` already set to `allow`! ✅")
-            else:
-                self.override.append("++manager.trainer.logger.resume=allow")
-                self.trainer.logger.resume = "allow"
-                logging.info(f"{prefix}`resume` set to `allow` for subsequent runs ✅")
-
-        # we defer adding the config to later
-        # to make sure we use the possibly given
-        # sweep config
-        # if self.logger.get("config", None) is not None:
-        #     # this will be a nested dict
-        #     config = OmegaConf.to_container(self.logger.config, resolve=True)
-        #     # now we flatten
-        #     config = pd.json_normalize(config, sep="_")
-        #     config = config.to_dict(orient="records")[0]
-        #     logging.info(f"\tflattening Hydra's config for Wandb ✅")
-        #     self.logger.config = None
-        # else:
-        #     config = None
 
         if exp.offline:
             previous_run = self._wandb_previous_dir()
@@ -185,41 +114,20 @@ class Manager(submitit.helpers.Checkpointable):
             logging.info("\t\treloaded!")
         elif WANDB_AVAILABLE and wandb.run and len(wandb.config.keys()):
             logging.info("\t\ta Wandb™ config is provided, not uploading Hydra's:")
-            # TODO: make Wandb parameters the trainer one
-            # for key, value in wandb.config.items():
-            #     # need to handle the fact that our base configs have a _
-            #     # and users wouldn't provide that
-            #     accessor = key.split(".")
-            #     if accessor[0] == "trainer":
-            #         accessor = accessor[1:]
-            #     if accessor[0] in [
-            #         "data",
-            #         "module",
-            #         "hardware",
-            #         "loss",
-            #         "metric",
-            #         "optim",
-            #     ]:
-            #         if "_" != accessor[0][0]:
-            #             accessor[0] = "_" + accessor[0]
-            #     key = ".".join(accessor)
-            #     try:
-            #         original = rgetattr(self, key)
-            #         rsetattr(self, key, value)
-            #         assert rgetattr(self, key) == value
-            #         logging.info(
-            #             f"\t\t\toverriding: {key} from {original} to {value} ✅"
-            #         )
-            #     except Exception as e:
-            #         logging.error(f"❌ Error while trying to override {key} ❌")
-            #         raise e
         else:
-            logging.info("\tWandb's config is empty, using Hydra's 📤")
-            config = dict(
-                trainer=OmegaConf.to_container(self.trainer, resolve=True),
-                module=OmegaConf.to_container(self.module, resolve=True),
-                data=OmegaConf.to_container(self.data, resolve=True),
-            )
+            logging.info("\tWandb's config is empty, trying to use Hydra's 📤")
+            config = {}
+            if isinstance(self.trainer, dict):
+                config["trainer"] = OmegaConf.to_container(self.trainer, resolve=True)
+            if isinstance(self.module, dict):
+                config["module"] = OmegaConf.to_container(self.module, resolve=True)
+            if isinstance(self.data, dict):
+                config["data"] = OmegaConf.to_container(self.data, resolve=True)
+            if not config:
+                logging.info(
+                    "\tEverything already instantiated, nothing is added to config!"
+                )
+                return
             config = pd.json_normalize(config, sep=".")
             config = config.to_dict(orient="records")[0]
             while True:
@@ -238,9 +146,6 @@ class Manager(submitit.helpers.Checkpointable):
             logging.info(f"\tFinal Hydra's config has {len(config)} items) 📤")
             if WANDB_AVAILABLE and wandb.run:
                 wandb.config.update(config)
-            # TODO: should we updated the config to the DictConfig too for next run to check?
-            # with open_dict(self.logger):
-            #     self.trainer.logger.config = config
 
     @property
     def instantiated_module(self):
@@ -321,13 +226,8 @@ class Manager(submitit.helpers.Checkpointable):
                 self._trainer.callbacks.append(TeacherStudentCallback())
 
         self.init_and_sync_wandb()
-        logging.info("\t● logger updated accordingly ✅")
-
-        logging.info("\t● 👂👂👂 SIGNALS HANDLERS 👂👂👂")
-        logging.info(f"\t\t- SIGUSR1: `{signal.getsignal(signal.SIGUSR1)}`")
-        logging.info(f"\t\t- SIGUSR2: `{signal.getsignal(signal.SIGUSR2)}`")
-        logging.info(f"\t\t- SIGCONT: `{signal.getsignal(signal.SIGCONT)}`")
-        logging.info(f"\t\t- SIGTERM: `{signal.getsignal(signal.SIGTERM)}`")
+        print_logger_info(self._trainer.logger)
+        print_signal_info()
 
         logging.info("\t● 📞📞📞 CALLBACKS 📞📞📞")
         logging.info(f"\t\t - we found {len(self._trainer.callbacks)} callbacks")
@@ -632,3 +532,45 @@ class Manager(submitit.helpers.Checkpointable):
                 logging.error(
                     "\t\t CRITICAL SLURM WARNING: This job will lose all progress if it is preempted or requeued. It is highly recommended to configure checkpointing."
                 )
+
+    def _register_trainer(self, trainer):
+        if type(trainer) is dict:
+            trainer = OmegaConf.create(trainer)
+        if type(trainer) is DictConfig:
+            self.trainer: DictConfig = copy.deepcopy(trainer)
+            logging.debug("\t● trainer config saved ✅")
+        elif isinstance(trainer, pl.Trainer):
+            self.trainer = trainer
+            logging.debug("\t● trainer already instantiated ✅")
+        else:
+            raise ValueError(
+                f"`trainer` must be a dict, DictConfig or pl.Trainer, not {type(trainer)}"
+            )
+
+    def _register_module(self, module):
+        if type(module) is dict:
+            module = OmegaConf.create(module)
+        if type(module) is DictConfig:
+            self.module: DictConfig = copy.deepcopy(module)
+            logging.debug("\t● module config saved ✅")
+        elif isinstance(module, pl.LightningModule):
+            self.module = module
+            logging.debug("\t● module already instantiated ✅")
+        else:
+            raise ValueError(
+                f"`module` must be a dict, DictConfig or pl.LightningModule, not {type(module)}"
+            )
+
+    def _register_data(self, data):
+        if type(data) is dict:
+            data = OmegaConf.create(data)
+        if type(data) is DictConfig:
+            self.data: DictConfig = copy.deepcopy(data)
+            logging.debug("\t● data config saved ✅")
+        elif isinstance(data, pl.LightningDataModule):
+            self.data = data
+            logging.debug("\t● data already instantiated ✅")
+        else:
+            raise ValueError(
+                f"`data` must be a dict, DictConfig or pl.LightningDataModule, not {type(data)}"
+            )

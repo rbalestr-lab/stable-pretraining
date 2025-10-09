@@ -133,9 +133,7 @@ class OnlineKNN(Callback):
             logging.info(f"{self.name}: Using queue for target '{self.target}'")
 
             logging.info(f"{self.name}: Setting up metrics")
-            if not hasattr(pl_module, "_callbacks_metrics"):
-                pl_module._callbacks_metrics = {}
-            pl_module._callbacks_metrics[self.name] = format_metrics_as_dict(
+            pl_module.callbacks_metrics[self.name] = format_metrics_as_dict(
                 self.metrics
             )
 
@@ -239,7 +237,7 @@ class OnlineKNN(Callback):
     ) -> None:
         """Compute and log validation metrics."""
         logs = {}
-        for metric_name, metric in pl_module._callbacks_metrics[self.name][
+        for metric_name, metric in pl_module.callbacks_metrics[self.name][
             "_val"
         ].items():
             metric(predictions, targets)

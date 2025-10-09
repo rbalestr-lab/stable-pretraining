@@ -166,6 +166,13 @@ class SLURMInfo(Callback):
         logging.info(f"Partition: {self._get_env_var('SLURM_JOB_PARTITION')}")
         logging.info(f"Node List: {self._get_env_var('SLURM_JOB_NODELIST')}")
         logging.info(f"Submit Directory: {self._get_env_var('SLURM_SUBMIT_DIR')}")
+        pl_module.save_hyperparameters(
+            {
+                **pl_module.hparams,
+                "slurm.job_id": self._get_env_var("SLURM_JOB_ID"),
+                "slurm.task_id": self._get_env_var("SLURM_ARRAY_TASK_ID"),
+            },
+        )
 
     def _get_env_var(self, var, default="N/A"):
         return os.environ.get(var, default)

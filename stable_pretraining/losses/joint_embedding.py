@@ -135,6 +135,99 @@ class BarlowTwinsLoss(torch.nn.Module):
         return loss
 
 
+class SwAVLoss(torch.nn.Module):
+    """Computes the SwAV loss, optionally using a feature queue.
+
+    This loss function contains the core components of the SwAV algorithm, including
+    the Sinkhorn-Knopp algorithm for online clustering and the swapped-prediction
+    contrastive task.
+
+    Args:
+        temperature (float, optional): The temperature scaling factor for the softmax
+            in the swapped prediction task. Default is 0.1.
+        sinkhorn_iterations (int, optional): The number of iterations for the
+            Sinkhorn-Knopp algorithm. Default is 3.
+        epsilon (float, optional): A small value for numerical stability in the
+            Sinkhorn-Knopp algorithm. Default is 0.05.
+
+    Note:
+        Introduced in the SwAV paper :cite:`caron2020unsupervised`.
+    """
+
+    def __init__(
+        self,
+        temperature: float = 0.1,
+        sinkhorn_iterations: int = 3,
+        epsilon: float = 0.05,
+    ):
+        super().__init__()
+        self.temperature = temperature
+        self.sinkhorn_iterations = sinkhorn_iterations
+        self.epsilon = epsilon
+
+    def forward(self, proj1, proj2, prototypes, queue_feats=None):
+        """Compute the SwAV loss.
+
+        Args:
+        proj1 (torch.Tensor): Raw projections of the first view.
+        proj2 (torch.Tensor): Raw projections of the second view.
+        prototypes (torch.nn.Module): The prototype vectors.
+        queue_feats (torch.Tensor, optional): Raw features from the queue.
+        """
+        proj1 = F.normalize(proj1, dim=1, p=2)
+        proj2 = F.normalize(proj2, dim=1, p=2)
+        if queue_feats is not None:
+            queue_feats = F.normalize(queue_feats, dim=1, p=2)
+
+        with torch.no_grad():
+            w = prototypes.weight.data.clone()
+            w = F.normalize(w, dim=1, p=2)
+            prototypes.weight.copy_(w)
+
+        scores1 = prototypes(proj1)
+        scores2 = prototypes(proj2)
+
+        with torch.no_grad():
+            if queue_feats is not None:
+                combined_feats = torch.cat([proj1, proj2, queue_feats])
+                combined_scores = prototypes(combined_feats)
+                all_q = self.sinkhorn(combined_scores)
+                q1 = all_q[: proj1.shape[0]]
+                q2 = all_q[proj1.shape[0] : proj1.shape[0] * 2]
+            else:
+                batch_scores = torch.cat([scores1, scores2])
+                all_q = self.sinkhorn(batch_scores)
+                q1, q2 = all_q.chunk(2)
+
+        loss = self.swapped_prediction(scores1, q2) + self.swapped_prediction(
+            scores2, q1
+        )
+        return loss / 2.0
+
+    def swapped_prediction(self, scores, q):
+        """Computes the cross-entropy loss for the swapped prediction task."""
+        scores = scores.float()
+        loss = -torch.mean(
+            torch.sum(q * F.log_softmax(scores / self.temperature, dim=1), dim=1)
+        )
+        return loss
+
+    @torch.no_grad()
+    def sinkhorn(self, scores):
+        """Applies the Sinkhorn-Knopp algorithm."""
+        scores = scores.float()
+        Q = torch.exp(scores / self.epsilon).T
+        Q /= torch.sum(Q)
+        K, B = Q.shape
+        r = torch.ones(K, device=Q.device) / K
+        c = torch.ones(B, device=Q.device) / B
+        for _ in range(self.sinkhorn_iterations):
+            u = torch.sum(Q, dim=1)
+            Q *= (r / u).unsqueeze(1)
+            Q *= (c / torch.sum(Q, dim=0)).unsqueeze(0)
+        return (Q / torch.sum(Q, dim=0, keepdim=True)).T
+
+
 class InfoNCELoss(torch.nn.Module):
     """InfoNCE contrastive loss (one-directional).
 

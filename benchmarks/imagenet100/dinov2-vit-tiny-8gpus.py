@@ -1,12 +1,11 @@
 import lightning as pl
-import time
 import torch
 import torchmetrics
 from lightning.pytorch.loggers import WandbLogger
 from torch import nn
 
 import stable_pretraining as spt
-from stable_pretraining.forward import dino_forward
+from stable_pretraining.forward import dinov2_forward
 from stable_pretraining.data import transforms
 import sys
 from pathlib import Path
@@ -14,7 +13,7 @@ from pathlib import Path
 sys.path.append(str(Path(__file__).parent.parent))
 from utils import get_data_dir
 
-dino_transform = transforms.MultiViewTransform(
+dinov2_transform = transforms.MultiViewTransform(
     {
         "global_1": transforms.Compose(
             transforms.RGB(),
@@ -121,7 +120,7 @@ train_dataset = spt.data.HFDataset(
     "clane9/imagenet-100",
     split="train",
     cache_dir=str(data_dir),
-    transform=dino_transform,
+    transform=dinov2_transform,
 )
 val_dataset = spt.data.HFDataset(
     "clane9/imagenet-100",
@@ -130,11 +129,11 @@ val_dataset = spt.data.HFDataset(
     transform=val_transform,
 )
 
-batch_size = 256
+batch_size = 32  # Per GPU batch size (256 / 8 GPUs)
 train_dataloader = torch.utils.data.DataLoader(
     dataset=train_dataset,
     batch_size=batch_size,
-    num_workers=4,
+    num_workers=32,
     drop_last=True,
     persistent_workers=True,
     shuffle=True,
@@ -142,17 +141,18 @@ train_dataloader = torch.utils.data.DataLoader(
 val_dataloader = torch.utils.data.DataLoader(
     dataset=val_dataset,
     batch_size=batch_size,
-    num_workers=4,
+    num_workers=32,
     persistent_workers=True,
 )
 
 data = spt.data.DataModule(train=train_dataloader, val=val_dataloader)
 
-backbone = spt.backbone.from_timm(
-    "vit_tiny_patch16_224",
+backbone = spt.backbone.vit_hf(
+    size="tiny",
+    patch_size=16,
+    image_size=224,
     pretrained=False,
-    num_classes=0,
-    dynamic_img_size=True,
+    use_mask_token=True,  # Required for iBOT
 )
 
 wrapped_backbone = spt.TeacherStudentWrapper(
@@ -162,7 +162,7 @@ wrapped_backbone = spt.TeacherStudentWrapper(
     final_ema_coefficient=1.0,
 )
 
-
+# CLS token projector (DINO component)
 projector = nn.Sequential(
     nn.Linear(192, 2048),
     nn.BatchNorm1d(2048),
@@ -182,17 +182,37 @@ wrapped_projector = spt.TeacherStudentWrapper(
     final_ema_coefficient=1.0,
 )
 
+# Patch projector (iBOT component)
+patch_projector = nn.Sequential(
+    nn.Linear(192, 2048),
+    nn.BatchNorm1d(2048),
+    nn.GELU(),
+    nn.Linear(2048, 2048),
+    nn.BatchNorm1d(2048),
+    nn.GELU(),
+    nn.Linear(2048, 256),
+    spt.utils.nn_modules.L2Norm(),
+    nn.Linear(256, 65536, bias=False),  # Prototypes layer
+)
+
+wrapped_patch_projector = spt.TeacherStudentWrapper(
+    patch_projector,
+    warm_init=True,
+    base_ema_coefficient=0.9995,
+    final_ema_coefficient=1.0,
+)
+
 module = spt.Module(
     backbone=wrapped_backbone,
     projector=wrapped_projector,
-    forward=dino_forward,
-    dino_loss=spt.losses.DINOv1Loss(
+    patch_projector=wrapped_patch_projector,
+    forward=dinov2_forward,
+    dinov2_loss=spt.losses.DINOv2Loss(
         temperature_student=0.1,
         center_momentum=0.9,
+        ibot_loss_weight=1.0,
     ),
-    warmup_temperature_teacher=0.04,
-    temperature_teacher=0.07,
-    warmup_epochs_temperature_teacher=50,
+    mask_ratio=0.3,
     optim={
         "optimizer": {
             "type": "AdamW",
@@ -240,8 +260,8 @@ knn_probe = spt.callbacks.OnlineKNN(
 
 wandb_logger = WandbLogger(
     entity="stable-ssl",
-    project="imagenet100-dino",
-    name=f"dino-vit-tiny-solo-params-{time.time()}",
+    project="imagenet100-dinov2",
+    name="dinov2-vit-tiny-8gpus",
     log_model=False,
 )
 
@@ -251,7 +271,8 @@ trainer = pl.Trainer(
     callbacks=[teacher_student_callback, linear_probe, knn_probe],
     precision="16-mixed",
     logger=wandb_logger,
-    devices=1,
+    devices=8,  # Use 8 GPUs
+    strategy="ddp_find_unused_parameters_true",  # DDP with unused parameters detection
     sync_batchnorm=True,
     accelerator="gpu",
 )

@@ -1,4 +1,4 @@
-"""Stable SSL utilities package.
+"""Stable-pretraining utilities package.
 
 This package provides various utilities for self-supervised learning experiments
 including distributed training helpers, custom autograd functions, neural network
@@ -38,6 +38,7 @@ from .inspection_utils import (
     dict_values,
     get_required_fn_parameters,
 )
+from .error_handling import with_hf_retry_ratelimit
 from .nn_modules import EMA, ImageToVideoEncoder, Normalize, OrderedQueue, UnsortedQueue
 
 __all__ = [
@@ -87,4 +88,5 @@ __all__ = [
     "visualize_images_graph",
     # batch_utils
     "get_data_from_batch_or_outputs",
+    "with_hf_retry_ratelimit",
 ]

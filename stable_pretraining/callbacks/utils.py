@@ -5,7 +5,7 @@ import torch
 import torchmetrics
 from lightning.pytorch import Callback, LightningModule, Trainer
 from loguru import logger as logging
-
+import types
 from ..optim import create_optimizer, create_scheduler, LARS
 
 
@@ -49,10 +49,6 @@ class TrainableCallback(Callback):
         self._scheduler_config = scheduler
         self._pl_module = None
 
-        # Will be initialized in setup
-        self.optimizer = None
-        self.scheduler = None
-
     def _initialize_module(self, pl_module: LightningModule) -> torch.nn.Module:
         """Initialize the module for this callback.
 
@@ -69,26 +65,46 @@ class TrainableCallback(Callback):
     def setup_module(self, trainer: Trainer, pl_module: LightningModule) -> None:
         """Initialize and store the module.
 
-        This method handles module initialization and storage in _callbacks_modules.
+        This method handles module initialization and storage in callbacks_modules.
         Subclasses can override this if they need custom module setup logic.
         """
         # Initialize module
         module = self._initialize_module(pl_module)
 
-        # Ensure all parameters require gradients
-        for param in module.parameters():
-            param.requires_grad = True
-
         # Move to correct device
         module = module.to(pl_module.device)
 
-        # Store module in pl_module._callbacks_modules
-        logging.info(f"{self.name}: Storing module in _callbacks_modules")
-        if not hasattr(pl_module, "_callbacks_modules"):
-            pl_module._callbacks_modules = {}
-        pl_module._callbacks_modules[self.name] = module
+        # Store module in pl_module.callbacks_modules
+        logging.info(f"{self.name}: Storing module in callbacks_modules")
+        if not hasattr(pl_module, "callbacks_modules"):
+            pl_module.callbacks_modules = torch.nn.ModuleDict()
+        pl_module.callbacks_modules[self.name] = module
 
-    def setup_optimizer(self, trainer: Trainer, pl_module: LightningModule) -> None:
+    def wrap_configure_optimizers(self, pl_module):
+        fn = pl_module.configure_optimizers
+
+        def new_configure_optimizers(self, callback=self, fn=fn):
+            outputs = fn()
+            if outputs is None:
+                optimizers = []
+                schedulers = []
+            else:
+                optimizers, schedulers = outputs
+            self._optimizer_index_by_name[callback.name] = len(self._optimizer_names)
+            self._optimizer_names.append(callback.name)
+            self._optimizer_frequencies[callback.name] = (
+                callback.accumulate_grad_batches
+            )
+            optimizers.append(callback.setup_optimizer(self))
+            schedulers.append(callback.setup_scheduler(optimizers[-1], self))
+            return optimizers, schedulers
+
+        # Bind the new method to the instance
+        pl_module.configure_optimizers = types.MethodType(
+            new_configure_optimizers, pl_module
+        )
+
+    def setup_optimizer(self, pl_module: LightningModule) -> None:
         """Initialize optimizer with inheritance from main module if needed."""
         if self._optimizer_config is None:
             # Try to inherit from main module's optimizer config
@@ -109,15 +125,13 @@ class TrainableCallback(Callback):
                             f"{self.name}: Inheriting optimizer config from '{first_opt_key}'"
                         )
 
-                    self.optimizer = create_optimizer(
-                        self.module.parameters(), main_opt_config
-                    )
+                    return create_optimizer(self.module.parameters(), main_opt_config)
                 else:
                     # Fallback to LARS
                     logging.info(
                         f"{self.name}: Main module optim format not recognized, using LARS"
                     )
-                    self.optimizer = LARS(
+                    return LARS(
                         self.module.parameters(),
                         lr=0.1,
                         clip_lr=True,
@@ -130,7 +144,7 @@ class TrainableCallback(Callback):
                 logging.info(
                     f"{self.name}: No main module optimizer config found, using default LARS"
                 )
-                self.optimizer = LARS(
+                return LARS(
                     self.module.parameters(),
                     lr=0.1,
                     clip_lr=True,
@@ -140,11 +154,10 @@ class TrainableCallback(Callback):
                 )
         else:
             # Use explicitly provided optimizer config
-            self.optimizer = create_optimizer(
-                self.module.parameters(), self._optimizer_config
-            )
+            logging.info(f"{self.name}: Use explicitly provided optimizer config")
+            return create_optimizer(self.module.parameters(), self._optimizer_config)
 
-    def setup_scheduler(self, trainer: Trainer, pl_module: LightningModule) -> None:
+    def setup_scheduler(self, optimizer, pl_module: LightningModule) -> None:
         """Initialize scheduler with inheritance from main module if needed."""
         if self._scheduler_config is None:
             # Try to inherit from main module's scheduler config
@@ -157,8 +170,8 @@ class TrainableCallback(Callback):
                         logging.info(
                             f"{self.name}: Inheriting scheduler config from main module"
                         )
-                        self.scheduler = create_scheduler(
-                            self.optimizer, main_sched_config, module=pl_module
+                        return create_scheduler(
+                            optimizer, main_sched_config, module=pl_module
                         )
                     else:
                         # Multi-optimizer config, use the first one
@@ -169,28 +182,22 @@ class TrainableCallback(Callback):
                         logging.info(
                             f"{self.name}: Inheriting scheduler config from '{first_opt_key}'"
                         )
-                        self.scheduler = create_scheduler(
-                            self.optimizer, main_sched_config, module=pl_module
+                        return create_scheduler(
+                            optimizer, main_sched_config, module=pl_module
                         )
                 else:
                     # Fallback to ConstantLR
                     logging.info(f"{self.name}: Using default ConstantLR scheduler")
-                    self.scheduler = torch.optim.lr_scheduler.ConstantLR(
-                        self.optimizer, factor=1.0
-                    )
+                    return torch.optim.lr_scheduler.ConstantLR(optimizer, factor=1.0)
             else:
                 # No main module config, use default
                 logging.info(
                     f"{self.name}: No main module scheduler config found, using ConstantLR"
                 )
-                self.scheduler = torch.optim.lr_scheduler.ConstantLR(
-                    self.optimizer, factor=1.0
-                )
+                return torch.optim.lr_scheduler.ConstantLR(optimizer, factor=1.0)
         else:
-            # Use explicitly provided scheduler config
-            self.scheduler = create_scheduler(
-                self.optimizer, self._scheduler_config, module=pl_module
-            )
+            logging.info(f"{self.name}: Use explicitly provided optimizer config")
+            return create_scheduler(optimizer, self._scheduler_config, module=pl_module)
 
     def setup(self, trainer: Trainer, pl_module: LightningModule, stage: str) -> None:
         """Setup module, optimizer, and scheduler."""
@@ -200,30 +207,15 @@ class TrainableCallback(Callback):
 
         self._pl_module = pl_module
         self.setup_module(trainer, pl_module)
-        self.setup_optimizer(trainer, pl_module)
-        self.setup_scheduler(trainer, pl_module)
-
+        self.wrap_configure_optimizers(pl_module)
         logging.info(f"{self.name}: Setup complete")
-
-    def optimizer_step(self, batch_idx: int, trainer: Trainer) -> None:
-        """Perform optimizer step with gradient accumulation support."""
-        if (batch_idx + 1) % self.accumulate_grad_batches == 0:
-            if (
-                hasattr(trainer.precision_plugin, "scaler")
-                and trainer.precision_plugin.scaler is not None
-            ):
-                trainer.precision_plugin.scaler.step(self.optimizer)
-            else:
-                self.optimizer.step()
-            self.optimizer.zero_grad(set_to_none=True)
-            self.scheduler.step()
 
     @property
     def module(self):
-        """Access module from pl_module._callbacks_modules.
+        """Access module from pl_module.callbacks_modules.
 
         This property is only accessible after setup() has been called.
-        The module is stored centrally in pl_module._callbacks_modules
+        The module is stored centrally in pl_module.callbacks_modules
         to avoid duplication in checkpoints.
         """
         if self._pl_module is None:
@@ -231,34 +223,12 @@ class TrainableCallback(Callback):
                 f"{self.name}: module not accessible before setup(). "
                 "The module is initialized during the setup phase."
             )
-        return self._pl_module._callbacks_modules[self.name]
+        return self._pl_module.callbacks_modules[self.name]
 
     @property
     def state_key(self) -> str:
         """Unique identifier for this callback's state during checkpointing."""
         return f"{self.__class__.__name__}[name={self.name}]"
-
-    def state_dict(self) -> dict:
-        """Save callback state - only optimizer and scheduler states.
-
-        The module itself is saved via pl_module._callbacks_modules,
-        so we don't duplicate it here.
-        """
-        return {
-            "optimizer": self.optimizer.state_dict() if self.optimizer else None,
-            "scheduler": self.scheduler.state_dict() if self.scheduler else None,
-        }
-
-    def load_state_dict(self, state_dict: dict) -> None:
-        """Load callback state - only optimizer and scheduler states.
-
-        The module itself is loaded via pl_module._callbacks_modules,
-        so we don't handle it here.
-        """
-        if "optimizer" in state_dict and self.optimizer:
-            self.optimizer.load_state_dict(state_dict["optimizer"])
-        if "scheduler" in state_dict and self.scheduler:
-            self.scheduler.load_state_dict(state_dict["scheduler"])
 
 
 class EarlyStopping(torch.nn.Module):

@@ -10,6 +10,7 @@ except ImportError:
 from .convmixer import ConvMixer
 from .mlp import MLP
 from .resnet9 import Resnet9
+from .probe import MultiHeadAttentiveProbe, LinearProbe
 from .utils import (
     EvalOnly,
     FeaturesConcat,
@@ -17,6 +18,7 @@ from .utils import (
     from_timm,
     from_torchvision,
     set_embedding_dim,
+    vit_hf,
 )
 
 __all__ = [
@@ -29,6 +31,9 @@ __all__ = [
     FeaturesConcat,
     set_embedding_dim,
     ConvMixer,
+    vit_hf,
+    MultiHeadAttentiveProbe,
+    LinearProbe,
 ]
 
 if _MAE_AVAILABLE:
