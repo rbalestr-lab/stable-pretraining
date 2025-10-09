@@ -56,7 +56,7 @@ class TestUnifiedQueueManagement:
         # Mock a LightningModule for setup
         class MockModule:
             def __init__(self):
-                self._callbacks_modules = {}
+                self.callbacks_modules = {}
 
         pl_module = MockModule()
 
@@ -99,7 +99,7 @@ class TestUnifiedQueueManagement:
 
         class MockModule:
             def __init__(self):
-                self._callbacks_modules = {}
+                self.callbacks_modules = {}
 
             def all_gather(self, tensor):
                 return tensor.unsqueeze(0)
@@ -200,7 +200,7 @@ class TestUnifiedQueueManagement:
 
         class MockModule:
             def __init__(self):
-                self._callbacks_modules = {}
+                self.callbacks_modules = {}
 
         pl_module = MockModule()
 
