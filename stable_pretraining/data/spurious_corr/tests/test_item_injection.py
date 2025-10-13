@@ -1,5 +1,5 @@
 import pytest
-from stable_pretraining.data.spurious_corr.modifiers import ItemInjection
+from stable_pretraining.data.transforms import ItemInjection
 
 
 @pytest.mark.unit

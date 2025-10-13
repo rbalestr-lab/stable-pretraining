@@ -1,5 +1,5 @@
 import pytest
-from stable_pretraining.data.spurious_corr.modifiers import HTMLInjection
+from stable_pretraining.data.transforms import HTMLInjection
 
 
 @pytest.mark.unit

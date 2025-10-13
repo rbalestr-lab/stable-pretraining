@@ -1,8 +1,12 @@
 """Demonstration of the spurious_corr library capabilities."""
 
-from spurious_corr.modifiers import ItemInjection, HTMLInjection, CompositeModifier
-from spurious_corr.generators import SpuriousDateGenerator
-from spurious_corr.utils import (
+from stable_pretraining.data.spurious_corr.modifiers import (
+    ItemInjection,
+    HTMLInjection,
+    CompositeModifier,
+)
+from stable_pretraining.data.spurious_corr.generators import SpuriousDateGenerator
+from stable_pretraining.data.spurious_corr.utils import (
     pretty_print,
     pretty_print_dataset,
     highlight_from_file,
@@ -10,7 +14,7 @@ from spurious_corr.utils import (
     highlight_html,
     highlight_dates,
 )
-from spurious_corr.transform import spurious_transform
+from stable_pretraining.data.spurious_corr.transform import spurious_transform
 from datasets import load_dataset
 
 
