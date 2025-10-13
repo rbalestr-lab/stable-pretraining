@@ -6,7 +6,7 @@ It includes functionality for text transformations, various generators for spuri
 text, and utilities for printing and highlighting text.
 """
 
-from .modifiers import (
+from ..transforms import (
     Modifier as Modifier,
     CompositeModifier as CompositeModifier,
     ItemInjection as ItemInjection,
