@@ -1,20 +1,21 @@
 import lightning as pl
 import torch
+import torch.nn as nn
 import torchmetrics
 from lightning.pytorch.loggers import WandbLogger
-from torch import nn
 
 import stable_pretraining as spt
 from stable_pretraining import forward
 from stable_pretraining.data import transforms
-from stable_pretraining.callbacks.queue import OnlineQueue
+from stable_pretraining.callbacks.rankme import RankMe
 import sys
 from pathlib import Path
 
 sys.path.append(str(Path(__file__).parent.parent))
+sys.path.append(str(Path(__file__).resolve().parents[3]))
 from utils import get_data_dir
 
-nnclr_transform = transforms.MultiViewTransform(
+barlow_transform = transforms.MultiViewTransform(
     [
         transforms.Compose(
             transforms.RGB(),
@@ -55,7 +56,7 @@ train_dataset = spt.data.HFDataset(
     "clane9/imagenet-100",
     split="train",
     cache_dir=str(data_dir),
-    transform=nnclr_transform,
+    transform=barlow_transform,
 )
 val_dataset = spt.data.HFDataset(
     "clane9/imagenet-100",
@@ -64,13 +65,11 @@ val_dataset = spt.data.HFDataset(
     transform=val_transform,
 )
 
-batch_size = 512
-world_size = 1
-total_batch_size = batch_size * world_size
+batch_size = 256
 train_dataloader = torch.utils.data.DataLoader(
     dataset=train_dataset,
     batch_size=batch_size,
-    num_workers=4,
+    num_workers=8,
     drop_last=True,
     persistent_workers=True,
     shuffle=True,
@@ -78,43 +77,37 @@ train_dataloader = torch.utils.data.DataLoader(
 val_dataloader = torch.utils.data.DataLoader(
     dataset=val_dataset,
     batch_size=batch_size,
-    num_workers=4,
+    num_workers=8,
     persistent_workers=True,
 )
 
 data = spt.data.DataModule(train=train_dataloader, val=val_dataloader)
 
 backbone = spt.backbone.from_torchvision(
-    "resnet18",
+    "resnet50",
     low_resolution=False,
 )
 backbone.fc = torch.nn.Identity()
 
 projector = nn.Sequential(
-    nn.Linear(512, 2048),
-    nn.BatchNorm1d(2048),
+    nn.Linear(2048, 8192, bias=False),
+    nn.BatchNorm1d(8192),
     nn.ReLU(inplace=True),
-    nn.Linear(2048, 256),
-)
-
-predictor = nn.Sequential(
-    nn.Linear(256, 4096),
-    nn.BatchNorm1d(4096),
+    nn.Linear(8192, 8192, bias=False),
+    nn.BatchNorm1d(8192),
     nn.ReLU(inplace=True),
-    nn.Linear(4096, 256),
+    nn.Linear(8192, 8192, bias=False),
 )
-
 
 module = spt.Module(
     backbone=backbone,
     projector=projector,
-    predictor=predictor,
-    forward=forward.nnclr_forward,
-    nnclr_loss=spt.losses.NTXEntLoss(temperature=0.1),
+    forward=forward.barlow_twins_forward,
+    barlow_loss=spt.losses.BarlowTwinsLoss(lambd=0.0051),
     optim={
         "optimizer": {
             "type": "LARS",
-            "lr": 0.3,
+            "lr": 0.2 * batch_size / 256,
             "weight_decay": 1e-4,
             "clip_lr": True,
             "eta": 0.02,
@@ -125,17 +118,13 @@ module = spt.Module(
         },
         "interval": "epoch",
     },
-    hparams={
-        "support_set_size": 16384,
-        "projection_dim": 256,
-    },
 )
 
 linear_probe = spt.callbacks.OnlineProbe(
     name="linear_probe",
     input="embedding",
     target="label",
-    probe=torch.nn.Linear(512, 100),
+    probe=torch.nn.Linear(2048, 100),
     loss_fn=torch.nn.CrossEntropyLoss(),
     metrics={
         "top1": torchmetrics.classification.MulticlassAccuracy(100),
@@ -149,34 +138,34 @@ knn_probe = spt.callbacks.OnlineKNN(
     target="label",
     queue_length=20000,
     metrics={"accuracy": torchmetrics.classification.MulticlassAccuracy(100)},
-    input_dim=512,
+    input_dim=2048,
     k=20,
 )
 
-support_queue = OnlineQueue(
-    key="nnclr_support_set",
-    queue_length=module.hparams.support_set_size,
-    dim=module.hparams.projection_dim,
+
+# RankMe for comparison
+rankme = RankMe(
+    name="rankme",
+    target="embedding",
+    queue_length=2048,
+    target_shape=2048,
 )
 
 wandb_logger = WandbLogger(
-    entity="stable-ssl",
-    project="imagenet100-nnclr",
-    name="nnclr-resnet18-1gpu",
+    project="imagenet100-barlow",
+    name="barlow-resnet50",
     log_model=False,
 )
 
-# --- Trainer ---
 trainer = pl.Trainer(
     max_epochs=400,
     num_sanity_val_steps=0,
-    callbacks=[linear_probe, knn_probe, support_queue],
+    callbacks=[knn_probe, linear_probe, rankme],
     precision="16-mixed",
     logger=wandb_logger,
-    enable_checkpointing=True,
+    enable_checkpointing=False,
     devices=1,
     accelerator="gpu",
-    sync_batchnorm=False,
 )
 
 manager = spt.Manager(trainer=trainer, module=module, data=data)

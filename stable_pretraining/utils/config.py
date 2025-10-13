@@ -6,6 +6,47 @@ import hydra
 import torch
 from hydra.core.hydra_config import HydraConfig
 from omegaconf import OmegaConf, open_dict
+import torch.distributed as dist
+from typing import Any
+
+
+def is_dist() -> bool:
+    """Returns True if torch.distributed is available and initialized."""
+    return dist.is_available() and dist.is_initialized()
+
+
+def load_hparams_from_ckpt(path: str) -> Any:
+    """Loads a checkpoint safely in both distributed and non-distributed settings.
+
+    - If torch.distributed is initialized, only src_rank loads from disk,
+      then broadcasts to all other ranks.
+    - If not, loads directly from disk.
+
+    Args:
+        path: Path to checkpoint file.
+
+    Returns:
+        The loaded hparams.
+    """
+    if is_dist():
+        world_size = dist.get_world_size()
+        rank = dist.get_rank()
+        # If only one process, just load directly
+        if world_size == 1:
+            return torch.load(
+                path, map_location=torch.device("meta"), weights_only=False
+            )
+        obj = None
+        if rank == 0:
+            obj = torch.load(
+                path, map_location=torch.device("meta"), weights_only=False
+            )["hyper_parameters"]
+        obj_list = [obj]
+        dist.broadcast_object_list(obj_list, src=0)
+        dist.barrier()
+        return obj_list[0]
+    else:
+        return torch.load(path, map_location=torch.device("meta"))["hyper_parameters"]
 
 
 def execute_from_config(manager, cfg):

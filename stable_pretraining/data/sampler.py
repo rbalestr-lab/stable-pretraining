@@ -108,7 +108,6 @@ class RepeatedRandomSampler(torch.utils.data.DistributedSampler):
                 yield from indices
             else:
                 indices = [(idx, v % self.n_views) for v, idx in enumerate(indices)]
-                print("IN IT!!!!")
                 yield from indices
 
 

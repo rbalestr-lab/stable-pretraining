@@ -4,12 +4,15 @@ This module provides dataset wrappers and utilities for working with real data s
 including PyTorch datasets, HuggingFace datasets, and dataset subsets.
 """
 
+from pathlib import Path
 import time
 from collections.abc import Sequence
 
 import lightning as pl
 import torch
 from loguru import logger as logging
+from datasets import config as hf_config
+from ..utils import with_hf_retry_ratelimit
 
 
 class Dataset(torch.utils.data.Dataset):
@@ -142,14 +145,29 @@ class HFDataset(Dataset):
             kwargs["storage_options"] = {
                 "client_kwargs": {"timeout": ClientTimeout(total=3600)}
             }
-        dataset = datasets.load_dataset(*args, **kwargs)
+
+        hf_path = kwargs.get("path", args[0] if len(args) > 0 else None)
+
+        if not isinstance(hf_path, str):
+            raise ValueError("Only string dataset path/name is supported")
+
+        load_dataset_fn = datasets.load_dataset
+        if self.is_saved_with_save_to_disk(hf_path):
+            logging.info(f"Loading dataset with load_from_disk {hf_path}")
+            load_dataset_fn = datasets.load_from_disk
+
+        dataset = with_hf_retry_ratelimit(load_dataset_fn, *args, **kwargs)
         dataset = dataset.add_column("sample_idx", list(range(dataset.num_rows)))
+
         if rename_columns is not None:
             for k, v in rename_columns.items():
                 dataset = dataset.rename_column(k, v)
         if remove_columns is not None:
             dataset = dataset.remove_columns(remove_columns)
         self.dataset = dataset
+
+    def is_saved_with_save_to_disk(self, path):
+        return Path(path, hf_config.DATASET_STATE_JSON_FILENAME).exists()
 
     def __getitem__(self, idx):
         extra = {}

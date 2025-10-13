@@ -9,7 +9,6 @@ from hydra.utils import instantiate
 from omegaconf import DictConfig, OmegaConf
 
 from .. import optim as ssl_optim
-from loguru import logger as logging
 
 
 def create_optimizer(
@@ -50,7 +49,6 @@ def create_optimizer(
         >>> # Direct class
         >>> opt = create_optimizer(model.parameters(), torch.optim.RMSprop)
     """
-    logging.info("Instantiating optimizer!!!!")
     # Handle Hydra config objects
     if hasattr(optimizer_config, "_target_"):
         return instantiate(optimizer_config, params=params, _convert_="object")

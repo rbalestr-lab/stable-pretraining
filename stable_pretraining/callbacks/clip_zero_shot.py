@@ -67,17 +67,15 @@ class CLIPZeroShot(Callback):
 
         # Setup metrics
         logging.info(f"{self.name}: Setting up metrics")
-        if not hasattr(pl_module, "_callbacks_metrics"):
-            pl_module._callbacks_metrics = {}
-        pl_module._callbacks_metrics[self.name] = format_metrics_as_dict(
+        pl_module.callbacks_metrics[self.name] = format_metrics_as_dict(
             self.metrics_config
         )
 
         self.image_backbone = self.image_backbone.to(device=pl_module.device)
         self.text_backbone = self.text_backbone.to(device=pl_module.device)
 
-        self._train_metrics = pl_module._callbacks_metrics[self.name]["_train"]
-        self._val_metrics = pl_module._callbacks_metrics[self.name]["_val"]
+        self._train_metrics = pl_module.callbacks_metrics[self.name]["_train"]
+        self._val_metrics = pl_module.callbacks_metrics[self.name]["_val"]
         self.class_tokens = self.tokenizer_fn(self.class_names).to(
             device=pl_module.device
         )
@@ -113,7 +111,7 @@ class CLIPZeroShot(Callback):
             batch[prediction_key] = logits.detach()
 
         logs = {}
-        for metric_name, metric in pl_module._callbacks_metrics[self.name][
+        for metric_name, metric in pl_module.callbacks_metrics[self.name][
             "_val"
         ].items():
             metric(

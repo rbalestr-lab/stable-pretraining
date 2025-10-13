@@ -214,9 +214,12 @@ class TestProbingUnit:
     def test_online_probe_lifecycle_methods(self):
         """Test OnlineProbe callback lifecycle methods."""
         from stable_pretraining.callbacks import OnlineProbe
+        from stable_pretraining import Module
 
         # Create probe with mock components
+        module = Module(optim=None)
         probe = OnlineProbe(
+            module=module,
             name="test_probe",
             input="embedding",
             target="label",
@@ -236,6 +239,6 @@ class TestProbingUnit:
         # Test that probe_module property exists but is not accessible before setup
         # Note: hasattr returns False for properties that raise AttributeError
         # So we check if it's a property on the class instead
-        assert isinstance(getattr(type(probe), "probe_module", None), property)
-        with pytest.raises(AttributeError, match="module not accessible before setup"):
-            _ = probe.probe_module
+        assert len(module.callbacks_metrics) == 1
+        assert len(module.callbacks_modules) == 1
+        module.configure_optimizers()

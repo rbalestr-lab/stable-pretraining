@@ -8,6 +8,7 @@ import torchmetrics
 from loguru import logger as logging
 from omegaconf import DictConfig
 from tabulate import tabulate
+from pathlib import Path
 
 from .optim import create_optimizer, create_scheduler
 
@@ -68,9 +69,8 @@ class Module(pl.LightningModule):
 
         # Manual optimization to support multiple optimizers and custom stepping
         self.automatic_optimization = False
-
-        self._callbacks_modules = torch.nn.ModuleDict()
-        self._callbacks_metrics = torch.nn.ModuleDict()
+        self.callbacks_modules = torch.nn.ModuleDict()
+        self.callbacks_metrics = torch.nn.ModuleDict()
 
         if len(args) > 0:
             raise ValueError(
@@ -84,6 +84,9 @@ class Module(pl.LightningModule):
         else:
             logging.info("Saving provided hyperparameters.")
             self.save_hyperparameters(hparams)
+        self.save_hyperparameters(
+            {**self.hparams, "system.working_dir": str(Path().resolve())}
+        )
 
         logging.info("Setting custom forward method.")
         if forward is None:
@@ -130,24 +133,43 @@ class Module(pl.LightningModule):
     def forward(self, *args, **kwargs):
         raise NotImplementedError("The forward() method must be implemented.")
 
-    def named_parameters(self, prefix: str = "", recurse: bool = True):
+    def named_parameters(
+        self, with_callbacks=True, prefix: str = "", recurse: bool = True
+    ):
         """Override to globally exclude callback-related parameters.
 
-        Excludes parameters that belong to `self._callbacks_modules` or `self._callbacks_metrics`.
+        Excludes parameters that belong to `self.callbacks_modules` or `self.callbacks_metrics`.
         This prevents accidental optimization of callback/metric internals, even if external code
         calls `self.parameters()` or `self.named_parameters()` directly.
         """
+        if with_callbacks:
+            logging.warning(
+                "You are calling self.parameters which also gives callbacks "
+                "parameters, to remove then, pass `with_callbacks=False`"
+            )
         for name, param in super().named_parameters(prefix=prefix, recurse=recurse):
-            if name.startswith("_callbacks_modules.") or name.startswith(
-                "_callbacks_metrics."
-            ):
+            is_callback = name.startswith("callbacks_")
+            if is_callback and not with_callbacks:
                 continue
             yield name, param
 
-    def parameters(self, recurse: bool = True):
+    def parameters(self, with_callbacks=True, recurse: bool = True):
         """Override to route through the filtered `named_parameters` implementation."""
-        for _, param in self.named_parameters(recurse=recurse):
+        for _, param in self.named_parameters(with_callbacks, recurse=recurse):
             yield param
+
+    def rescale_loss_for_grad_acc(self, loss):
+        accum = max(
+            int(
+                getattr(
+                    self.trainer,
+                    "accumulate_grad_batches_",
+                    getattr(self.trainer, "accumulate_grad_batches", 1),
+                )
+            ),
+            1,
+        )
+        return loss / accum
 
     def training_step(self, batch, batch_idx):
         """Manual optimization training step with support for multiple optimizers.
@@ -160,16 +182,12 @@ class Module(pl.LightningModule):
         """
         state = self(batch, stage="fit")
 
-        # Early exit if optimization disabled
-        if getattr(self, "optim", None) is None or self.optim is False:
-            return state
-
-        if "loss" not in state:
-            raise ValueError("Training step requires 'loss' in the output state.")
-
         # Resolve optimizers and schedulers (can be single or list)
         optimizers = self.optimizers()
-        if not isinstance(optimizers, (list, tuple)):
+        # there are NO optimizers either from main or callbacks, no need to stay here!
+        if isinstance(optimizers, pl.pytorch.core.optimizer._MockOptimizer):
+            return
+        elif not isinstance(optimizers, (list, tuple)):
             optimizers = [optimizers]
 
         schedulers = self.lr_schedulers()
@@ -178,94 +196,61 @@ class Module(pl.LightningModule):
         elif not isinstance(schedulers, (list, tuple)):
             schedulers = [schedulers]
 
-        # Get the joint loss
-        loss = state["loss"]
-
-        # Log training loss each step (and aggregate per epoch)
-        log_value = loss.detach() if torch.is_tensor(loss) else float(loss)
-        self.log(
-            "train/loss",
-            log_value,
-            on_step=True,
-            on_epoch=True,
-            prog_bar=True,
-            logger=True,
-            sync_dist=True,
-        )
-
-        # Gradient accumulation factor
-        # Check for transferred parameter first (from Lightning patch), then original
-        accum = max(
-            int(
-                getattr(
-                    self.trainer,
-                    "accumulate_grad_batches_",
-                    getattr(self.trainer, "accumulate_grad_batches", 1),
-                )
-            ),
-            1,
-        )
-        scale = 1.0 / float(accum)
+        if len(optimizers) != len(schedulers):
+            raise ValueError(
+                "We need as many schedulers as optimizers!"
+                "if you don't want to use one, either use a "
+                "ConstantLR, or return None"
+            )
 
         # Compute gradients once for the joint loss
-        self.manual_backward(loss * scale)
+        self.manual_backward(state["loss"])
 
+        zero_grad_opts = []
         # Stepping and gradient clipping at accumulation boundary
-        if (batch_idx + 1) % accum == 0:
-            for idx, opt in enumerate(optimizers):
-                # Honor per-optimizer frequency if available
-                step_freq = 1
-                if self._optimizer_names and self._optimizer_frequencies:
-                    name = self._optimizer_names[idx]
-                    step_freq = int(self._optimizer_frequencies.get(name, 1))
-                if step_freq < 1:
-                    step_freq = 1
+        for idx, opt in enumerate(optimizers):
+            name = self._optimizer_names[idx]
+            # in case module has no optimizer, special case
+            # Honor per-optimizer frequency if available
+            if (batch_idx + 1) % self._optimizer_frequencies[name] != 0:
+                continue
 
-                if (batch_idx + 1) % step_freq != 0:
-                    continue
+            # Clip gradients for this optimizer then step
+            clip_val = getattr(
+                self.trainer, "gradient_clip_val_", self.trainer.gradient_clip_val
+            )
+            clip_algo = getattr(
+                self.trainer,
+                "gradient_clip_algorithm_",
+                self.trainer.gradient_clip_algorithm,
+            )
 
-                # Clip gradients for this optimizer then step
-                # Check for transferred parameters first (from Lightning patch), then original
-                clip_val = getattr(
-                    self.trainer, "gradient_clip_val_", self.trainer.gradient_clip_val
+            if clip_val is not None and clip_val > 0:
+                self.clip_gradients(
+                    opt,
+                    gradient_clip_val=clip_val,
+                    gradient_clip_algorithm=clip_algo,
                 )
-                clip_algo = getattr(
-                    self.trainer,
-                    "gradient_clip_algorithm_",
-                    self.trainer.gradient_clip_algorithm,
-                )
+            opt.step()
+            zero_grad_opts.append(opt)
+            # Step its scheduler if it exists
+            if schedulers[idx] is not None:
+                assert schedulers[idx].optimizer == opt.optimizer
+                schedulers[idx].step()
 
-                if clip_val is not None and clip_val > 0:
-                    self.clip_gradients(
-                        opt,
-                        gradient_clip_val=clip_val,
-                        gradient_clip_algorithm=clip_algo,
-                    )
-                opt.step()
-                opt.zero_grad(set_to_none=True)
-
-                # Step matching scheduler if it exists
-                if idx < len(schedulers) and schedulers[idx] is not None:
-                    try:
-                        schedulers[idx].step()
-                    except Exception as e:
-                        logging.warning(
-                            f"Scheduler step failed for optimizer index {idx}: {e}"
-                        )
-
+        # zero grad what's needed
+        for opt in zero_grad_opts:
+            opt.zero_grad(set_to_none=True)
         return state
 
     def validation_step(self, batch, batch_idx):
-        state = self.forward(batch, stage="validate")
-        return state
+        return self.forward(batch, stage="validate")
 
     def test_step(self, batch, batch_idx):
-        state = self.forward(batch, stage="test")
-        return state
+        return self.forward(batch, stage="test")
 
     def predict_step(self, batch, batch_idx):
-        state = self.forward(batch, stage="predict")
-        return state
+        return self.forward(batch, stage="predict")
 
     def _get_scheduler_name(self, scheduler_config, scheduler_instance=None):
         """Extract scheduler name from various config formats."""
@@ -328,7 +313,7 @@ class Module(pl.LightningModule):
         # Map module -> group index with inheritance
         module_to_group = {}
         for qual_name, module in self.named_modules():
-            if "_callbacks_modules" in qual_name or "_callbacks_metrics" in qual_name:
+            if "callbacks_modules" in qual_name or "callbacks_metrics" in qual_name:
                 continue
 
             # inherit parent's group if any
@@ -446,6 +431,10 @@ class Module(pl.LightningModule):
         """
         logging.info("Configuring optimizers and learning rate schedulers...")
 
+        self._optimizer_index_by_name = {}
+        self._optimizer_names = []
+        self._optimizer_frequencies = {}
+
         # Early exit for disabled optimization
         if hasattr(self, "optim") and not self.optim:
             logging.info("Optimization disabled - skipping optimizer configuration.")
@@ -457,6 +446,7 @@ class Module(pl.LightningModule):
             )
             self.optim = dict(optimizer=partial(torch.optim.AdamW))
         elif isinstance(self.optim, partial):
+            logging.info("Using user's partial optimizer.")
             self.optim = dict(optimizer=self.optim)
 
         # Single optimizer case
@@ -467,9 +457,9 @@ class Module(pl.LightningModule):
             logging.info("Configuring single optimizer.")
 
             # Direct parameter extraction - use globally filtered parameters
-            params = list(self.parameters())
+            params = list(self.parameters(with_callbacks=False))
 
-            opt = create_optimizer(params, optimizer_cfg or "AdamW")
+            opt = create_optimizer(params, optimizer_cfg)
 
             # Create scheduler
             default = dict(
@@ -484,11 +474,21 @@ class Module(pl.LightningModule):
             )
 
             # Track names/frequencies for training_step
-            self._optimizer_names = ["default"]
-            self._optimizer_index_by_name = {"default": 0}
-            self._optimizer_frequencies = {
-                "default": int(self.optim.get("frequency", 1))
-            }
+            self._optimizer_names.append("default")
+            self._optimizer_index_by_name["default"] = 0
+            accum = max(
+                int(
+                    getattr(
+                        self.trainer,
+                        "accumulate_grad_batches_",
+                        getattr(self.trainer, "accumulate_grad_batches", 1),
+                    )
+                ),
+                1,
+            )
+            self._optimizer_frequencies["default"] = int(
+                self.optim.get("frequency", accum)
+            )
 
             # Build scheduler config dict for Lightning
             scheduler_dict = self._build_scheduler_config(sched, self.optim)
@@ -519,10 +519,6 @@ class Module(pl.LightningModule):
         # Build optimizers and schedulers
         optimizers = []
         schedulers = []
-
-        self._optimizer_names = []
-        self._optimizer_index_by_name = {}
-        self._optimizer_frequencies = {}
 
         for name, config in optim_items:
             params = params_by_name.get(name, [])

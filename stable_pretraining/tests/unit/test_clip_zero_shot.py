@@ -71,7 +71,7 @@ class TestCLIPZeroShotUnit:
             device = torch.device("cpu")
 
             def __init__(self):
-                self._callbacks_metrics = {}
+                self.callbacks_metrics = {}
                 self.logged = {}
 
             def log_dict(self, logs, **kwargs):
@@ -80,7 +80,7 @@ class TestCLIPZeroShotUnit:
 
         m = M()
         # mimic format_metrics_as_dict result structure
-        m._callbacks_metrics["zs"] = {"_train": {}, "_val": metrics_dict}
+        m.callbacks_metrics["zs"] = {"_train": {}, "_val": metrics_dict}
         return m
 
     @patch("stable_pretraining.callbacks.clip_zero_shot.get_data_from_batch_or_outputs")
@@ -386,6 +386,6 @@ class TestCLIPZeroShotUnit:
             trainer, pl_module, outputs={}, batch=batch, batch_idx=0
         )
 
-        metric = pl_module._callbacks_metrics["zs"]["_val"]["top1"]
+        metric = pl_module.callbacks_metrics["zs"]["_val"]["top1"]
         acc = metric.compute().item()
         assert 0.8 <= acc <= 1.0

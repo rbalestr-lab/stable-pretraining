@@ -127,7 +127,6 @@ def create_scheduler(
         ...     opt, partial(torch.optim.lr_scheduler.ExponentialLR, gamma=0.95)
         ... )
     """
-    logging.info("Instantiating scheduler!!!!")
     # partial -> call directly
     # Handle Hydra config objects
     if hasattr(scheduler_config, "_target_"):

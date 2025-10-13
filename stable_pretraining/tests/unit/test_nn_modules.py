@@ -101,6 +101,54 @@ class TestUnsortedQueue:
         # It will have [5, 6, 7, 3, 4] in buffer order
         assert set(result.numpy().tolist()) == {3.0, 4.0, 5.0, 6.0, 7.0}
 
+    def test_batch_larger_than_queue(self):
+        """Test appending a batch larger than queue capacity."""
+        q = UnsortedQueue(5, shape=2)
+
+        # Append a batch of 10 items to a queue of size 5
+        large_batch = torch.tensor(
+            [[i * 2, i * 2 + 1] for i in range(10)], dtype=torch.float32
+        )
+        result = q.append(large_batch)
+
+        # Should keep only the last 5 items from the batch
+        assert result.shape == (5, 2)
+        expected = torch.tensor(
+            [[10, 11], [12, 13], [14, 15], [16, 17], [18, 19]], dtype=torch.float32
+        )
+        assert torch.allclose(result, expected)
+        assert q.filled.item()
+
+    def test_batch_exactly_queue_size(self):
+        """Test appending a batch exactly equal to queue capacity."""
+        q = UnsortedQueue(5, shape=3)
+
+        batch = torch.tensor(
+            [[1, 2, 3], [4, 5, 6], [7, 8, 9], [10, 11, 12], [13, 14, 15]],
+            dtype=torch.float32,
+        )
+        result = q.append(batch)
+
+        assert result.shape == (5, 3)
+        assert torch.allclose(result, batch)
+        assert q.filled.item()
+
+    def test_multiple_large_batches(self):
+        """Test appending multiple batches larger than queue capacity."""
+        q = UnsortedQueue(3)
+
+        # First large batch
+        batch1 = torch.tensor([1, 2, 3, 4, 5], dtype=torch.float32)
+        result1 = q.append(batch1)
+        expected1 = torch.tensor([3, 4, 5], dtype=torch.float32)
+        assert torch.allclose(result1, expected1)
+
+        # Second large batch
+        batch2 = torch.tensor([10, 20, 30, 40], dtype=torch.float32)
+        result2 = q.append(batch2)
+        expected2 = torch.tensor([20, 30, 40], dtype=torch.float32)
+        assert torch.allclose(result2, expected2)
+
 
 @pytest.mark.unit
 class TestOrderedQueue:
@@ -219,6 +267,58 @@ class TestOrderedQueue:
         result = q.get()
         expected = torch.tensor([7, 8, 9], dtype=torch.float32)
         assert torch.allclose(result, expected)
+
+    def test_batch_larger_than_queue(self):
+        """Test appending a batch larger than queue capacity."""
+        q = OrderedQueue(5, shape=2)
+
+        # Append a batch of 10 items to a queue of size 5
+        large_batch = torch.tensor(
+            [[i * 2, i * 2 + 1] for i in range(10)], dtype=torch.float32
+        )
+        result = q.append(large_batch)
+
+        # Should keep only the last 5 items from the batch in order
+        assert result.shape == (5, 2)
+        expected = torch.tensor(
+            [[10, 11], [12, 13], [14, 15], [16, 17], [18, 19]], dtype=torch.float32
+        )
+        assert torch.allclose(result, expected)
+        assert q.filled.item()
+        assert q.global_counter.item() == 10
+
+    def test_batch_exactly_queue_size(self):
+        """Test appending a batch exactly equal to queue capacity."""
+        q = OrderedQueue(5, shape=3)
+
+        batch = torch.tensor(
+            [[1, 2, 3], [4, 5, 6], [7, 8, 9], [10, 11, 12], [13, 14, 15]],
+            dtype=torch.float32,
+        )
+        result = q.append(batch)
+
+        assert result.shape == (5, 3)
+        assert torch.allclose(result, batch)
+        assert q.filled.item()
+        assert q.global_counter.item() == 5
+
+    def test_multiple_large_batches_with_order(self):
+        """Test appending multiple batches larger than queue capacity maintains order."""
+        q = OrderedQueue(3)
+
+        # First large batch
+        batch1 = torch.tensor([1, 2, 3, 4, 5], dtype=torch.float32)
+        result1 = q.append(batch1)
+        expected1 = torch.tensor([3, 4, 5], dtype=torch.float32)
+        assert torch.allclose(result1, expected1)
+        assert q.global_counter.item() == 5
+
+        # Second large batch
+        batch2 = torch.tensor([10, 20, 30, 40], dtype=torch.float32)
+        result2 = q.append(batch2)
+        expected2 = torch.tensor([20, 30, 40], dtype=torch.float32)
+        assert torch.allclose(result2, expected2)
+        assert q.global_counter.item() == 9
 
 
 @pytest.mark.unit

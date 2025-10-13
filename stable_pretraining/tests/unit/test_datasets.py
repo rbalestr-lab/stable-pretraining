@@ -220,3 +220,147 @@ class TestDatasetUnit:
 
         assert ep_idx.item() == 2
         assert frame_idx < episode_length[ep_idx]
+
+    def test_hf_dataset_path_validation(self):
+        """Test HFDataset validates the path parameter is a string."""
+        from stable_pretraining.data.datasets import HFDataset
+
+        # Test with non-string path in kwargs
+        with pytest.raises(ValueError):
+            with patch("datasets.load_dataset"):
+                HFDataset(path=123)
+
+        # Test with non-string path as positional arg
+        with pytest.raises(ValueError):
+            with patch("datasets.load_dataset"):
+                HFDataset(["not", "a", "string"])
+
+        # Test with None path
+        with pytest.raises(ValueError):
+            with patch("datasets.load_dataset"):
+                HFDataset()
+
+    def test_hf_dataset_is_saved_with_save_to_disk_detection(self):
+        """Test detection of datasets saved with save_to_disk."""
+        from stable_pretraining.data.datasets import HFDataset
+
+        # Test when dataset state file exists
+        with patch("pathlib.Path.exists", return_value=True):
+            with patch("datasets.load_from_disk") as mock_load_from_disk:
+                mock_dataset = Mock()
+                mock_dataset.num_rows = 100
+                mock_dataset.add_column.return_value = mock_dataset
+                mock_load_from_disk.return_value = mock_dataset
+
+                dataset = HFDataset("/path/to/saved/dataset")
+
+                # Verify load_from_disk was called
+                mock_load_from_disk.assert_called_once()
+                assert dataset.dataset is not None
+
+        # Test when dataset state file does not exist
+        with patch("pathlib.Path.exists", return_value=False):
+            with patch("datasets.load_dataset") as mock_load_dataset:
+                mock_dataset = Mock()
+                mock_dataset.num_rows = 100
+                mock_dataset.add_column.return_value = mock_dataset
+                mock_load_dataset.return_value = mock_dataset
+
+                dataset = HFDataset("/path/to/hf/dataset")
+
+                # Verify load_dataset was called
+                mock_load_dataset.assert_called_once()
+                assert dataset.dataset is not None
+
+    def test_hf_dataset_sample_idx_addition(self):
+        """Test that sample_idx column is automatically added to datasets."""
+        from stable_pretraining.data.datasets import HFDataset
+
+        with patch("pathlib.Path.exists", return_value=False):
+            with patch("datasets.load_dataset") as mock_load_dataset:
+                mock_dataset = Mock()
+                mock_dataset.num_rows = 50
+                mock_dataset.add_column.return_value = mock_dataset
+                mock_dataset.rename_column.return_value = mock_dataset
+                mock_load_dataset.return_value = mock_dataset
+
+                HFDataset("test/dataset", split="train")
+
+                # Verify add_column was called with correct parameters
+                mock_dataset.add_column.assert_called_once_with(
+                    "sample_idx", list(range(50))
+                )
+
+    def test_hf_dataset_load_function_selection(self):
+        """Test that correct load function is selected based on path type."""
+        from stable_pretraining.data.datasets import HFDataset
+
+        # Test load_from_disk path
+        with patch("pathlib.Path.exists", return_value=True):
+            with patch("datasets.load_from_disk") as mock_load_from_disk:
+                with patch("datasets.load_dataset") as mock_load_dataset:
+                    mock_dataset = Mock()
+                    mock_dataset.num_rows = 100
+                    mock_dataset.add_column.return_value = mock_dataset
+                    mock_load_from_disk.return_value = mock_dataset
+
+                    HFDataset("/local/saved/dataset")
+
+                    # load_from_disk should be called, not load_dataset
+                    mock_load_from_disk.assert_called_once()
+                    mock_load_dataset.assert_not_called()
+
+        # Test load_dataset path
+        with patch("pathlib.Path.exists", return_value=False):
+            with patch("datasets.load_from_disk") as mock_load_from_disk:
+                with patch("datasets.load_dataset") as mock_load_dataset:
+                    mock_dataset = Mock()
+                    mock_dataset.num_rows = 100
+                    mock_dataset.add_column.return_value = mock_dataset
+                    mock_load_dataset.return_value = mock_dataset
+
+                    HFDataset("huggingface/dataset", split="train")
+
+                    # load_dataset should be called, not load_from_disk
+                    mock_load_dataset.assert_called_once()
+                    mock_load_from_disk.assert_not_called()
+
+    def test_hf_dataset_storage_options_default(self):
+        """Test that default storage options are added when not provided."""
+        from stable_pretraining.data.datasets import HFDataset
+
+        with patch("pathlib.Path.exists", return_value=False):
+            with patch("datasets.load_dataset") as mock_load_dataset:
+                mock_dataset = Mock()
+                mock_dataset.num_rows = 10
+                mock_dataset.add_column.return_value = mock_dataset
+                mock_load_dataset.return_value = mock_dataset
+
+                # Call without storage_options
+                HFDataset("test/dataset", split="train")
+
+                # Verify storage_options was added
+                call_kwargs = mock_load_dataset.call_args[1]
+                assert "storage_options" in call_kwargs
+                assert "client_kwargs" in call_kwargs["storage_options"]
+                assert "timeout" in call_kwargs["storage_options"]["client_kwargs"]
+
+    def test_hf_dataset_storage_options_preserved(self):
+        """Test that custom storage options are preserved."""
+        from stable_pretraining.data.datasets import HFDataset
+
+        custom_storage = {"custom": "option"}
+
+        with patch("pathlib.Path.exists", return_value=False):
+            with patch("datasets.load_dataset") as mock_load_dataset:
+                mock_dataset = Mock()
+                mock_dataset.num_rows = 10
+                mock_dataset.add_column.return_value = mock_dataset
+                mock_load_dataset.return_value = mock_dataset
+
+                # Call with custom storage_options
+                HFDataset("test/dataset", split="train", storage_options=custom_storage)
+
+                # Verify custom storage_options was used
+                call_kwargs = mock_load_dataset.call_args[1]
+                assert call_kwargs["storage_options"] == custom_storage

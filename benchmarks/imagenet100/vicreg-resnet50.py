@@ -7,10 +7,12 @@ from lightning.pytorch.loggers import WandbLogger
 import stable_pretraining as spt
 from stable_pretraining import forward
 from stable_pretraining.data import transforms
+from stable_pretraining.callbacks.rankme import RankMe
 import sys
 from pathlib import Path
 
 sys.path.append(str(Path(__file__).parent.parent))
+sys.path.append(str(Path(__file__).resolve().parents[3]))
 from utils import get_data_dir
 
 vicreg_transform = transforms.MultiViewTransform(
@@ -82,19 +84,19 @@ val_dataloader = torch.utils.data.DataLoader(
 data = spt.data.DataModule(train=train_dataloader, val=val_dataloader)
 
 backbone = spt.backbone.from_torchvision(
-    "resnet18",
+    "resnet50",
     low_resolution=False,
 )
 backbone.fc = torch.nn.Identity()
 
 projector = nn.Sequential(
-    nn.Linear(512, 2048),
-    nn.BatchNorm1d(2048),
+    nn.Linear(2048, 8192),
+    nn.BatchNorm1d(8192),
     nn.ReLU(inplace=True),
-    nn.Linear(2048, 2048),
-    nn.BatchNorm1d(2048),
+    nn.Linear(8192, 8192),
+    nn.BatchNorm1d(8192),
     nn.ReLU(inplace=True),
-    nn.Linear(2048, 2048),
+    nn.Linear(8192, 8192, bias=False),
 )
 
 module = spt.Module(
@@ -104,7 +106,7 @@ module = spt.Module(
     vicreg_loss=spt.losses.VICRegLoss(
         sim_coeff=25.0,
         std_coeff=25.0,
-        cov_coeff=200.0,
+        cov_coeff=1.0,
     ),
     optim={
         "optimizer": {
@@ -126,7 +128,7 @@ linear_probe = spt.callbacks.OnlineProbe(
     name="linear_probe",
     input="embedding",
     target="label",
-    probe=torch.nn.Linear(512, 100),
+    probe=torch.nn.Linear(2048, 100),
     loss_fn=torch.nn.CrossEntropyLoss(),
     metrics={
         "top1": torchmetrics.classification.MulticlassAccuracy(100),
@@ -140,21 +142,28 @@ knn_probe = spt.callbacks.OnlineKNN(
     target="label",
     queue_length=20000,
     metrics={"accuracy": torchmetrics.classification.MulticlassAccuracy(100)},
-    input_dim=512,
+    input_dim=2048,
     k=20,
 )
 
+# RankMe for comparison
+rankme = RankMe(
+    name="rankme",
+    target="embedding",
+    queue_length=2048,
+    target_shape=2048,
+)
+
 wandb_logger = WandbLogger(
-    entity="stable-ssl",
     project="imagenet100-vicreg",
-    name="vicreg-resnet18",
+    name="vicreg-resnet50",
     log_model=False,
 )
 
 trainer = pl.Trainer(
     max_epochs=400,
     num_sanity_val_steps=0,
-    callbacks=[knn_probe, linear_probe],
+    callbacks=[knn_probe, linear_probe, rankme],
     precision="16-mixed",
     logger=wandb_logger,
     enable_checkpointing=False,

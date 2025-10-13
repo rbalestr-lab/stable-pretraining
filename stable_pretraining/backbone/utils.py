@@ -1,6 +1,6 @@
 import copy
 import math
-from typing import Optional, Union, Iterable
+from typing import Union, Iterable, List, Optional, Any
 
 import torch
 import torchvision
@@ -499,6 +499,130 @@ def from_timm(model_name, low_resolution=False, **kwargs):
     return model
 
 
+def _map_shapes(obj: Any) -> Any:
+    """Recursively maps a nested structure, replacing torch.Tensor objects with their .shape.
+
+    We preserve the original structure for lists, tuples, dicts, sets, namedtuples, and dataclasses.
+    Non-tensor objects are left unchanged.
+    """
+    import dataclasses
+
+    if isinstance(obj, torch.Tensor):
+        return obj.shape
+    elif isinstance(obj, dict):
+        return {k: _map_shapes(v) for k, v in obj.items()}
+    elif isinstance(obj, list):
+        return [_map_shapes(v) for v in obj]
+    elif isinstance(obj, tuple) and hasattr(obj, "_fields"):  # namedtuple
+        return type(obj)(*(_map_shapes(v) for v in obj))
+    elif isinstance(obj, tuple):
+        return tuple(_map_shapes(v) for v in obj)
+    elif isinstance(obj, set):
+        return {_map_shapes(v) for v in obj}
+    elif dataclasses.is_dataclass(obj) and not isinstance(obj, type):
+        return dataclasses.replace(
+            obj,
+            **{
+                f.name: _map_shapes(getattr(obj, f.name))
+                for f in dataclasses.fields(obj)
+            },
+        )
+    else:
+        return obj
+
+
+def get_output_shape(model: torch.nn.Module, *inputs, **kwargs) -> Any:
+    """Infers the output shapes of a PyTorch nn.Module by forwarding fake inputs on the 'meta' device using FakeTensorMode.
+
+    Handles arbitrary nested output structures (lists, dicts, tuples, sets, namedtuples, dataclasses), preserving their
+    structure but replacing torch.Tensor objects with their .shape.
+    This function temporarily replaces the model's parameters and buffers with fake tensors on the 'meta' device,
+    converts all tensor inputs and keyword arguments to 'meta', and runs the forward pass under FakeTensorMode.
+    After execution, the original parameters and buffers are restored. No real computation or memory allocation occurs.
+
+    Args:
+        model (torch.nn.Module): The PyTorch module to evaluate. Must be on a real device (e.g., CPU).
+        *inputs: Positional arguments to pass to the model's forward method. All torch.Tensor inputs are converted to 'meta'.
+        **kwargs: Keyword arguments to pass to the model's forward method. All torch.Tensor values are converted to 'meta'.
+
+    Returns:
+        Any: The output structure from the model's forward pass, with all torch.Tensor objects replaced by their .shape.
+             Non-tensor objects are left unchanged.
+
+    Notes:
+        - Supports nested output structures: dict, list, tuple, set, namedtuple, and dataclasses.
+        - No real memory is allocated; all tensors are on the 'meta' device.
+        - Not thread-safe: concurrent calls may interfere with parameter/buffer swapping.
+        - Requires PyTorch 1.11+ for FakeTensorMode.
+        - If the model contains custom buffers or state, ensure they are handled appropriately.
+        - Raises exceptions if model forward fails or if parameters/buffers cannot be swapped.
+        - Non-tensor outputs are returned unchanged.
+
+    Example:
+        shapes = get_output_shape_multi_input(model, input1, input2, key1=kwarg1)
+        # shapes will have the same structure as the model's output, but with torch.Size in place of tensors.
+    """
+    from torch.nn.utils.stateless import functional_call
+    import dataclasses
+
+    # Try to use FakeTensorConverter if available (PyTorch 2.x+)
+    try:
+        from torch._subclasses.fake_tensor import FakeTensorMode, FakeTensorConverter
+
+        fake_mode = FakeTensorMode()
+        converter = FakeTensorConverter()
+
+        def to_fake(t):
+            return converter.from_real_tensor(fake_mode, t)
+
+    except ImportError:
+        # Fallback: just use .to('meta') inside FakeTensorMode
+        from torch._subclasses.fake_tensor import FakeTensorMode
+
+        fake_mode = FakeTensorMode()
+
+        def to_fake(t):
+            return t.to("meta")
+
+    # Prepare fake params and buffers
+    params_and_buffers = dict(model.named_parameters())
+    params_and_buffers.update(model.named_buffers())
+    fake_params_and_buffers = {k: to_fake(v) for k, v in params_and_buffers.items()}
+
+    # Recursively convert all tensor inputs/kwargs to fake/meta
+    def convert_inputs(obj):
+        if isinstance(obj, torch.Tensor):
+            return to_fake(obj)
+        elif isinstance(obj, dict):
+            return {k: convert_inputs(v) for k, v in obj.items()}
+        elif isinstance(obj, list):
+            return [convert_inputs(v) for v in obj]
+        elif isinstance(obj, tuple) and hasattr(obj, "_fields"):  # namedtuple
+            return type(obj)(*(convert_inputs(v) for v in obj))
+        elif isinstance(obj, tuple):
+            return tuple(convert_inputs(v) for v in obj)
+        elif isinstance(obj, set):
+            return {convert_inputs(v) for v in obj}
+        elif dataclasses.is_dataclass(obj) and not isinstance(obj, type):
+            return dataclasses.replace(
+                obj,
+                **{
+                    f.name: convert_inputs(getattr(obj, f.name))
+                    for f in dataclasses.fields(obj)
+                },
+            )
+        else:
+            return obj
+
+    fake_inputs = [convert_inputs(inp) for inp in inputs]
+    fake_kwargs = {k: convert_inputs(v) for k, v in kwargs.items()}
+    with fake_mode:
+        output = functional_call(
+            model, fake_params_and_buffers, tuple(fake_inputs), fake_kwargs
+        )
+    return _map_shapes(output)
+
+
 def set_embedding_dim(
     module,
     dim,
@@ -576,3 +700,49 @@ def set_embedding_dim(
         # Use to_empty() for meta tensors which have no data
         module = module.to_empty(device=original_device)
     return module
+
+
+def get_children_modules(
+    model: nn.Module, parent_name: str, L: int = 1, partial_match: bool = False
+) -> List[str]:
+    """Extracts unique module names matching a given parent_name and L submodules.
+
+    Args:
+        model: The root nn.Module.
+        parent_name: The string or path component to match (e.g., 'blocks').
+        L: Number of levels after the parent_name to include in the result.
+        partial_match: whether to check with == or in
+
+    Returns:
+        Sorted list of unique qualified module names at depth L after the parent_name.
+    """
+    result: List[str] = []
+    for name, _ in model.named_modules():
+        parts = name.split(".")
+        matches = [
+            i
+            for i, p in enumerate(parts)
+            if (parent_name in p if partial_match else parent_name == p)
+        ]
+        if not matches:
+            continue
+        for idx in matches:
+            target_idx = idx + L
+            if target_idx < len(parts):
+                truncated = ".".join(parts[: target_idx + 1])
+                if truncated in result:
+                    continue
+                # Ensure this is a valid submodule
+                try:
+                    model.get_submodule(truncated)
+                    result.append(truncated)
+                except AttributeError:
+                    continue
+            elif L == 0:
+                truncated = ".".join(parts[: idx + 1])
+                try:
+                    model.get_submodule(truncated)
+                    result.append(truncated)
+                except AttributeError:
+                    continue
+    return result

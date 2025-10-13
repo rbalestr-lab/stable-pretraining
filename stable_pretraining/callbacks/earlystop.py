@@ -1,4 +1,11 @@
 import lightning as pl
+from typing import Union, Iterable
+from loguru import logger as logging
+import numpy as np
+
+
+def to_scalar(x):
+    return x.item() if hasattr(x, "item") else x
 
 
 class EpochMilestones(pl.Callback):
@@ -39,13 +46,14 @@ class EpochMilestones(pl.Callback):
 
     def __init__(
         self,
-        metric_name: str,
+        metric_name: Union[Iterable[str], str],
         milestones: dict[int, float],
         direction: str = "max",
         after_validation: bool = True,
     ):
         super().__init__()
-
+        if type(metric_name) is str:
+            metric_name = [metric_name]
         self.metric_name = metric_name
         self.milestones = milestones
         self.direction = direction
@@ -55,24 +63,45 @@ class EpochMilestones(pl.Callback):
         # Get the current epoch
         epoch = trainer.current_epoch
         if epoch not in self.milestones:
+            logging.info(f"EpochMilestones: {epoch=} is not in milestones, skipping...")
             return
+        logging.info(f"EpochMilestones: {epoch=} is in milestones, checking condition!")
         # Retrieve the metric from the logged metrics
         metrics = trainer.callback_metrics
-        current_value = metrics.get(self.metric_name)
-        # If the metric is not available, do nothing
-        if current_value is None:
-            raise ValueError(f"Desired metric {self.metric_name} is not available")
-
+        values = [metrics.get(name) for name in self.metric_name]
         # Stop training if the metric is not greater than min_value
-
-        if (self.direction == "max" and current_value <= self.milestones[epoch]) or (
-            self.direction == "min" and current_value >= self.milestones[epoch]
-        ):
-            trainer.should_stop = True
-            print(
-                f"Early stopping: {self.metric_name}={current_value:.4f} "
-                f"at epoch {epoch} (<= {self.milestones[epoch]})"
+        if self.direction == "max":
+            final = np.max([to_scalar(x) for x in values])
+            logging.info(
+                f"EpochMilestones: Maximum value among {self.metric_name} is {final}"
             )
+            if final < self.milestones[epoch]:
+                logging.warning(
+                    f"EpochMilestones: Value {final} below threshold"
+                    f" {self.milestones[epoch]}... stopping!"
+                )
+                trainer.should_stop = True
+            else:
+                logging.warning(
+                    f"EpochMilestones: Value {final} above threshold"
+                    f" {self.milestones[epoch]}... Yayy!"
+                )
+        else:
+            final = np.min([to_scalar(x) for x in values])
+            logging.info(
+                f"EpochMilestones: Minimum value among {self.metric_name} is {final}"
+            )
+            if final > self.milestones[epoch]:
+                logging.warning(
+                    f"EpochMilestones: Value {final} above threshold"
+                    f" {self.milestones[epoch]}... stopping!"
+                )
+                trainer.should_stop = True
+            else:
+                logging.warning(
+                    f"EpochMilestones: Value {final} below threshold"
+                    f" {self.milestones[epoch]}... Yayy!"
+                )
 
     def on_training_end(self, trainer, pl_module):
         if self.after_validation:

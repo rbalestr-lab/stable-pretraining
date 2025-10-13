@@ -1,4 +1,4 @@
-"""Stable SSL utilities package.
+"""Stable-pretraining utilities package.
 
 This package provides various utilities for self-supervised learning experiments
 including distributed training helpers, custom autograd functions, neural network
@@ -16,6 +16,7 @@ from .config import (
     replace_module,
     rgetattr,
     rsetattr,
+    load_hparams_from_ckpt,
 )
 from .data_generation import (
     generate_dae_samples,
@@ -38,7 +39,16 @@ from .inspection_utils import (
     dict_values,
     get_required_fn_parameters,
 )
-from .nn_modules import EMA, ImageToVideoEncoder, Normalize, OrderedQueue, UnsortedQueue
+from .error_handling import with_hf_retry_ratelimit
+from .nn_modules import (
+    BatchNorm1dNoBias,
+    EMA,
+    ImageToVideoEncoder,
+    L2Norm,
+    Normalize,
+    OrderedQueue,
+    UnsortedQueue,
+)
 
 __all__ = [
     # autograd
@@ -77,14 +87,18 @@ __all__ = [
     "stable_svd",
     "stable_svdvals",
     # nn_modules
-    "ImageToVideoEncoder",
-    "Normalize",
-    "UnsortedQueue",
-    "OrderedQueue",
+    "BatchNorm1dNoBias",
     "EMA",
+    "ImageToVideoEncoder",
+    "L2Norm",
+    "Normalize",
+    "OrderedQueue",
+    "UnsortedQueue",
     # visualization
     "imshow_with_grid",
     "visualize_images_graph",
     # batch_utils
     "get_data_from_batch_or_outputs",
+    "with_hf_retry_ratelimit",
+    "load_hparams_from_ckpt",
 ]

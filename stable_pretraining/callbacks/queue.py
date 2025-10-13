@@ -108,9 +108,9 @@ class OnlineQueue(Callback):
             self._shared_queues[self.key] = OrderedQueue(
                 max_length, self.dim, self.dtype
             )
-            # Register in _callbacks_modules for consistency
+            # Register in callbacks_modules for consistency
             queue_key = f"ordered_queue_{self.key}"
-            pl_module._callbacks_modules[queue_key] = self._shared_queues[self.key]
+            pl_module.callbacks_modules[queue_key] = self._shared_queues[self.key]
             logging.info(
                 f"OnlineQueue: Created shared queue for '{self.key}' with size {max_length}"
             )
@@ -135,7 +135,7 @@ class OnlineQueue(Callback):
             # Replace the queue
             self._shared_queues[self.key] = new_queue
             queue_key = f"ordered_queue_{self.key}"
-            pl_module._callbacks_modules[queue_key] = new_queue
+            pl_module.callbacks_modules[queue_key] = new_queue
 
     def on_train_batch_end(
         self,

@@ -20,10 +20,11 @@ class WeightDecayUpdater(Callback):
 
     def __init__(
         self,
-        schedule_type: str = "linear",
+        schedule_type: str = "cosine",
         start_value: float = 0.01,
         end_value: float = 0.0,
         param_group_indices: list = None,
+        opt_idx: int = None,
     ):
         super().__init__()
         self.schedule_type = schedule_type
@@ -31,6 +32,7 @@ class WeightDecayUpdater(Callback):
         self.end_value = end_value
         self.param_group_indices = param_group_indices
         self.total_steps = None  # Will be set in on_fit_start
+        self.opt_idx = opt_idx
 
     def on_fit_start(self, trainer: Trainer, pl_module: LightningModule):
         # Prefer max_steps if set
@@ -40,9 +42,12 @@ class WeightDecayUpdater(Callback):
         logger.info(f"[WeightDecayUpdater] Using total_steps={self.total_steps}")
 
     def on_before_optimizer_step(
-        self, trainer: Trainer, pl_module: LightningModule, optimizer, opt_idx=0
+        self, trainer: Trainer, pl_module: LightningModule, optimizer
     ):
-        step = trainer.global_step
+        optis = pl_module.optimizers()
+        if self.opt_idx is not None and optimizer != optis[self.opt_idx].optimizer:
+            return
+        step = trainer.global_step // len(optis)
         accumulate_grad_batches = trainer.accumulate_grad_batches
         if (step + 1) % accumulate_grad_batches != 0:
             logger.debug(
@@ -90,12 +95,14 @@ class WeightDecayUpdater(Callback):
             "end_value": self.end_value,
             "param_group_indices": self.param_group_indices,
             "total_steps": self.total_steps,
+            "opt_idx": self.opt_idx,
         }
 
     def load_state_dict(self, state_dict):
         self.schedule_type = state_dict.get("schedule_type", self.schedule_type)
         self.start_value = state_dict.get("start_value", self.start_value)
         self.end_value = state_dict.get("end_value", self.end_value)
+        self.opt_idx = state_dict.get("opt_idx", self.opt_idx)
         self.param_group_indices = state_dict.get(
             "param_group_indices", self.param_group_indices
         )
