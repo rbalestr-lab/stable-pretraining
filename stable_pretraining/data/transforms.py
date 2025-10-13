@@ -1,7 +1,8 @@
 from contextlib import contextmanager
 from itertools import islice
-from random import getstate, random, setstate
+from random import getstate, setstate
 from random import seed as rseed
+import random
 import re
 from typing import Any, Dict, List, Optional, Sequence, Tuple, Union
 
