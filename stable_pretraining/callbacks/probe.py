@@ -8,7 +8,7 @@ from loguru import logger as logging
 import types
 from ..utils import get_data_from_batch_or_outputs
 
-from .utils import TrainableCallback, format_metrics_as_dict
+from .utils import TrainableCallback
 
 
 class OnlineProbe(TrainableCallback):
@@ -68,7 +68,7 @@ class OnlineProbe(TrainableCallback):
         input: str,
         target: str,
         probe: torch.nn.Module,
-        loss_fn: callable,
+        loss_fn: callable = None,
         optimizer: Optional[Union[str, dict, partial, torch.optim.Optimizer]] = None,
         scheduler: Optional[
             Union[str, dict, partial, torch.optim.lr_scheduler.LRScheduler]
@@ -79,6 +79,8 @@ class OnlineProbe(TrainableCallback):
         # Initialize base class
         self.input = input
         self.target = target
+        if loss_fn is None:
+            logging.warning(f"Not loss given to {name}, will use output of `probe`")
         self.loss_fn = loss_fn
 
         # Store probe configuration for later initialization
@@ -97,9 +99,7 @@ class OnlineProbe(TrainableCallback):
         logging.info(f"  - Target: {target}")
         logging.info(f"  - Accumulate grad batches: {accumulate_grad_batches}")
         # Setup metrics
-        logging.info(f"{self.name}: Setting up metrics")
-        assert self.name not in module.callbacks_metrics
-        module.callbacks_metrics[self.name] = format_metrics_as_dict(metrics)
+        self.metrics = metrics
         logging.info(f"{self.name}: We are wrapping up your `forward`!")
         self.wrap_forward(pl_module=module)
 
@@ -118,26 +118,35 @@ class OnlineProbe(TrainableCallback):
 
         def new_forward(self, batch, stage, callback=self, fn=fn):
             outputs = fn(batch, stage)
-            x = get_data_from_batch_or_outputs(
-                callback.input, batch, outputs, caller_name=callback.name
-            )
-            y = get_data_from_batch_or_outputs(
-                callback.target, batch, outputs, caller_name=callback.name
-            )
-
-            if x is None or y is None:
-                raise ValueError(
-                    f"Callback {callback.name} missing {callback.input} or {callback.target}"
+            if (
+                callback.input is None
+                or callback.target is None
+                or callback.loss_fn is None
+            ):
+                assert callback.target is None
+                assert callback.input is None
+                assert callback.loss_fn is None
+                return callback.module(batch, outputs, self)
+            else:
+                x = get_data_from_batch_or_outputs(
+                    callback.input, batch, outputs, caller_name=callback.name
+                )
+                y = get_data_from_batch_or_outputs(
+                    callback.target, batch, outputs, caller_name=callback.name
                 )
 
-            if type(x) is list:
-                _x = [i.detach() for i in x]
-            elif type(x) is dict:
-                _x = {k: v.detach() for k, v in x.items()}
-            else:
-                _x = x.detach()
+                if x is None or y is None:
+                    raise ValueError(
+                        f"Callback {callback.name} missing {callback.input} or {callback.target}"
+                    )
 
-            preds = callback.module(_x)
+                if type(x) is list:
+                    _x = [i.detach() for i in x]
+                elif type(x) is dict:
+                    _x = {k: v.detach() for k, v in x.items()}
+                else:
+                    _x = x.detach()
+                preds = callback.module(_x)
 
             prediction_key = f"{callback.name}_preds"
             assert prediction_key not in batch
@@ -149,7 +158,7 @@ class OnlineProbe(TrainableCallback):
                 assert f"train/{callback.name}_loss" not in logs
                 if "loss" not in outputs:
                     outputs["loss"] = 0
-                outputs["loss"] += loss
+                outputs["loss"] = outputs["loss"] + loss
                 logs[f"train/{callback.name}_loss"] = loss.item()
 
                 my_metrics = self.callbacks_metrics[callback.name]["_train"]

@@ -2,9 +2,12 @@ import lightning as pl
 from typing import Union, Iterable
 from loguru import logger as logging
 import numpy as np
+import torchmetrics
 
 
 def to_scalar(x):
+    if isinstance(x, torchmetrics.Metric):
+        return x.compute().item()
     return x.item() if hasattr(x, "item") else x
 
 

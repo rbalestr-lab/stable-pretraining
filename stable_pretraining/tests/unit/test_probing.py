@@ -227,6 +227,7 @@ class TestProbingUnit:
             loss_fn=nn.CrossEntropyLoss(),
             metrics={"accuracy": torchmetrics.classification.MulticlassAccuracy(10)},
         )
+        module.configure_model()
 
         # Test that lifecycle methods exist
         assert hasattr(probe, "setup")

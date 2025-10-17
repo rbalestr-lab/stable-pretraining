@@ -1,41 +1,65 @@
 #!/usr/bin/env python
-"""Multi-GPU test script for supervised training with online probing.
 
-This script demonstrates distributed training across 2 GPUs using DDP.
-Assumes GPUs are already allocated (e.g., via SLURM).
-"""
-
-import hydra
 from functools import partial
 
 
-@hydra.main()
-def main(cfg):
+def main():
+    import torch
+    from pathlib import Path
+
+    m01 = run("gpu", 1)
+    m02 = run("gpu", 2)
+    m11 = run("gpu", 2)
+    m12 = run("gpu", 2)
+    m21 = run("gpu", 1)
+    m22 = run("gpu", 1)
+    Path("./lightning_logs").unlink()
+
+    assert set(m01.keys()) == set(m02.keys())
+    for k in m01:
+        if "step" in k:
+            continue
+        if not torch.isclose(m01[k], m02[k], rtol=1e-04, atol=1e-4):
+            print("error with ", k, m01[k], m02[k])
+            raise ValueError()
+        else:
+            print("success with ", k)
+    assert set(m11.keys()) == set(m12.keys())
+    for k in m11:
+        if "step" in k:
+            continue
+        if not torch.isclose(m11[k], m12[k], rtol=1e-04, atol=1e-4):
+            print("error with ", k, m11[k], m12[k])
+            raise ValueError()
+        else:
+            print("success with ", k)
+    assert set(m21.keys()) == set(m22.keys())
+    for k in m21:
+        if "step" in k:
+            continue
+        if not torch.isclose(m21[k], m22[k], rtol=1e-04, atol=1e-4):
+            print("error with ", k, m21[k], m22[k])
+            raise ValueError()
+        else:
+            print("success with ", k)
+
+
+def run(accelerator, devices):
+    import os
+
+    os.environ["TORCH_DISTRIBUTED_DEBUG"] = "DETAIL"
+
     import lightning as pl
     import torch
     import torchmetrics
     import torchvision
-    from lightning.pytorch.loggers import WandbLogger
+    from lightning.pytorch.loggers import CSVLogger
     from transformers import AutoConfig, AutoModelForImageClassification
 
     import stable_pretraining as ssl
     from stable_pretraining.data import transforms
     from stable_pretraining.data.datasets import Dataset
-
-    pl.seed_everything(0)
-
-    mean = [0.485, 0.456, 0.406]
-    std = [0.229, 0.224, 0.225]
-    train_transform = transforms.Compose(
-        transforms.RGB(),
-        transforms.RandomHorizontalFlip(p=0.5),
-        transforms.ToImage(mean=mean, std=std),
-    )
-
-    # Use torchvision CIFAR-10
-    cifar_train = torchvision.datasets.CIFAR10(
-        root="/tmp/cifar10", train=True, download=True
-    )
+    from torch.utils.data import Subset
 
     # Create a custom wrapper that adds sample_idx
 
@@ -54,23 +78,25 @@ def main(cfg):
         def __len__(self):
             return len(self.dataset)
 
+    pl.seed_everything(0, workers=True)
+    # torch.use_deterministic_algorithms(True)
+
+    train_transform = transforms.ToImage()
+
+    # Use torchvision CIFAR-10
+    cifar_train = Subset(
+        torchvision.datasets.CIFAR10(root="/tmp/cifar10", train=True, download=True),
+        torch.randperm(40000)[:256],
+    )
+
     train_dataset = IndexedDataset(cifar_train, transform=train_transform)
 
     # Increase batch size for multi-GPU training (64 per GPU * 2 GPUs = 128 total)
     train = torch.utils.data.DataLoader(
-        dataset=train_dataset,
-        sampler=ssl.data.sampler.RepeatedRandomSampler(train_dataset, n_views=2),
-        batch_size=32,  # This is per-GPU batch size
-        num_workers=8,  # Reduced workers per GPU to avoid overload
-        drop_last=True,
-        persistent_workers=True,  # Keep workers alive between epochs
+        dataset=train_dataset, batch_size=256 // devices, num_workers=8
     )
 
-    val_transform = transforms.Compose(
-        transforms.RGB(),
-        transforms.Resize((32, 32)),
-        transforms.ToImage(mean=mean, std=std),
-    )
+    val_transform = transforms.ToImage()
 
     # Use torchvision CIFAR-10 for validation
     cifar_val = torchvision.datasets.CIFAR10(
@@ -78,10 +104,7 @@ def main(cfg):
     )
     val_dataset = IndexedDataset(cifar_val, transform=val_transform)
     val = torch.utils.data.DataLoader(
-        dataset=val_dataset,
-        batch_size=128,  # Per-GPU batch size
-        num_workers=4,
-        persistent_workers=True,
+        dataset=val_dataset, batch_size=128 // devices, num_workers=8, drop_last=False
     )
     data = ssl.data.DataModule(train=train, val=val)
 
@@ -89,21 +112,20 @@ def main(cfg):
         output = {}
         output["embedding"] = self.backbone(batch["image"])["logits"]
         if self.training:
-            proj = self.projector(output["embedding"])
-            output["loss"] = torch.nn.functional.cross_entropy(proj, batch["label"])
+            output["loss"] = torch.nn.functional.cross_entropy(
+                output["embedding"], batch["label"]
+            )
+            self.log("loss", output["loss"], sync_dist=True, on_step=True)
         return output
 
     config = AutoConfig.from_pretrained("microsoft/resnet-18")
     backbone = AutoModelForImageClassification.from_config(config)
-    projector = torch.nn.Linear(512, 10)
-    backbone.classifier[1] = torch.nn.Identity()
+    backbone.classifier[1] = torch.nn.Linear(512, 10)
 
     module = ssl.Module(
-        backbone=backbone,
-        projector=projector,
-        forward=forward,
-        optim=partial(torch.optim.AdamW, lr=1e-5),
+        backbone=backbone, forward=forward, optim=partial(torch.optim.AdamW, lr=0.001)
     )
+    print("DEVICE", module.device)
 
     # Configure callbacks
     linear_probe = ssl.callbacks.OnlineProbe(
@@ -111,7 +133,7 @@ def main(cfg):
         name="linear_probe",
         input="embedding",
         target="label",
-        probe=torch.nn.Linear(512, 10),
+        probe=torch.nn.Linear(10, 10),
         loss_fn=torch.nn.CrossEntropyLoss(),
         metrics={
             "top1": torchmetrics.classification.MulticlassAccuracy(10),
@@ -119,24 +141,22 @@ def main(cfg):
         },
     )
 
-    wandb_logger = WandbLogger(project="simclr-cifar10_multigpu")
-
     # Configure multi-GPU trainer
     trainer = pl.Trainer(
-        max_epochs=100000,  # Increased epochs for better results
+        max_epochs=4,
         callbacks=[linear_probe],
-        precision="16-mixed",  # Use mixed precision for faster training
-        logger=wandb_logger,
+        logger=CSVLogger("./"),
         enable_checkpointing=False,
         sync_batchnorm=True,
+        accelerator=accelerator,
+        devices=devices,
+        precision="64",
     )
 
-    manager = ssl.Manager(
-        trainer=trainer, module=module, data=data, ckpt_path="restart"
-    )
+    manager = ssl.Manager(trainer=trainer, module=module, data=data)
     manager()
-
-    print("Training completed!")
+    # manager.evaluate()
+    return manager._trainer.logged_metrics
 
 
 if __name__ == "__main__":

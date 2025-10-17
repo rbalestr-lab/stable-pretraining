@@ -50,24 +50,28 @@ class TrainableCallback(Callback):
         self._optimizer_config = optimizer
         self._scheduler_config = scheduler
         self._pl_module = module
-        self.setup_model(module)
+        self.wrap_configure_model(module)
         self.wrap_configure_optimizers(module)
 
-    def setup_model(self, pl_module: LightningModule) -> None:
-        """Initialize and store the module.
+    def wrap_configure_model(self, pl_module):
+        fn = pl_module.configure_model
 
-        This method handles module initialization and storage in callbacks_modules.
-        Subclasses can override this if they need custom module setup logic.
-        """
-        # Initialize module
-        module = self.configure_model(pl_module)
+        def new_configure_model(self, callback=self, fn=fn):
+            # Initialize module
+            fn()
+            module = callback.configure_model(self)
+            # Store module in pl_module.callbacks_modules
+            logging.info(f"{callback.name}: Storing module in callbacks_modules")
+            self.callbacks_modules[callback.name] = module
+            logging.info(f"{callback.name}: Setting up metrics")
+            assert callback.name not in self.callbacks_metrics
+            self.callbacks_metrics[callback.name] = format_metrics_as_dict(
+                callback.metrics
+            )
 
-        # Move to correct device
-        module = module.to(pl_module.device)
-
-        # Store module in pl_module.callbacks_modules
-        logging.info(f"{self.name}: Storing module in callbacks_modules")
-        pl_module.callbacks_modules[self.name] = module
+        # Bind the new method to the instance
+        logging.info(f"{self.name}: We are wrapping up your `configure_optimizers`!")
+        pl_module.configure_model = types.MethodType(new_configure_model, pl_module)
 
     def configure_model(self, pl_module: LightningModule) -> torch.nn.Module:
         """Initialize the module for this callback.
