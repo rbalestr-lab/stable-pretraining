@@ -75,6 +75,18 @@ class TestTransformUtils:
         # Check that normalization was applied
         assert not torch.allclose(result["image"], image)
 
+    def test_add_sample_idx_transform(self):
+        """Test adding the sample idex for the injections."""
+        pass
+
+    def test_add_patch_transform(self):
+        """Test adding the spurious patch into images."""
+        pass
+
+    def test_class_conditional_injector(self):
+        """Test conditional injections."""
+        pass
+
     def test_transform_params_initialization(self):
         """Test that transforms can be initialized with various parameters."""
         # Test each transform can be created
@@ -87,6 +99,13 @@ class TestTransformUtils:
             transforms.RandomResizedCrop(size=(32, 32)),
             transforms.RandomSolarize(threshold=0.5, p=0.2),
             transforms.RandomRotation(degrees=90),
+            transforms.AddSampleIdx(),
+            transforms.ClassConditionalInjector(
+                transformation=transforms.AddPatch(
+                    patch_size=0.1, color=(1.0, 0.0, 0.0), position="center"
+                ),
+                total_samples=10000,
+            ),
         ]
 
         for t in transforms_to_test:
