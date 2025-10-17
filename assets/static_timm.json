@@ -11,7 +11,8 @@
     "blocks.8",
     "blocks.9",
     "blocks.10",
-    "blocks.11"
+    "blocks.11",
+    "head"
   ],
   "vit_base_patch8_224": [
     "blocks.0",
@@ -25,7 +26,8 @@
     "blocks.8",
     "blocks.9",
     "blocks.10",
-    "blocks.11"
+    "blocks.11",
+    "head"
   ],
   "vit_base_patch14_dinov2": [
     "blocks.0",
@@ -39,7 +41,8 @@
     "blocks.8",
     "blocks.9",
     "blocks.10",
-    "blocks.11"
+    "blocks.11",
+    "head"
   ],
   "vit_base_patch14_reg4_dinov2": [
     "blocks.0",
@@ -53,7 +56,8 @@
     "blocks.8",
     "blocks.9",
     "blocks.10",
-    "blocks.11"
+    "blocks.11",
+    "head"
   ],
   "vit_base_patch16_18x2_224": [
     "blocks.0",
@@ -73,7 +77,8 @@
     "blocks.14",
     "blocks.15",
     "blocks.16",
-    "blocks.17"
+    "blocks.17",
+    "head"
   ],
   "vit_base_patch16_224": [
     "blocks.0",
@@ -87,7 +92,8 @@
     "blocks.8",
     "blocks.9",
     "blocks.10",
-    "blocks.11"
+    "blocks.11",
+    "head"
   ],
   "vit_base_patch16_224_miil": [
     "blocks.0",
@@ -101,7 +107,8 @@
     "blocks.8",
     "blocks.9",
     "blocks.10",
-    "blocks.11"
+    "blocks.11",
+    "head"
   ],
   "vit_base_patch16_384": [
     "blocks.0",
@@ -115,7 +122,8 @@
     "blocks.8",
     "blocks.9",
     "blocks.10",
-    "blocks.11"
+    "blocks.11",
+    "head"
   ],
   "vit_base_patch16_clip_224": [
     "blocks.0",
@@ -129,7 +137,8 @@
     "blocks.8",
     "blocks.9",
     "blocks.10",
-    "blocks.11"
+    "blocks.11",
+    "head"
   ],
   "vit_base_patch16_clip_384": [
     "blocks.0",
@@ -143,7 +152,8 @@
     "blocks.8",
     "blocks.9",
     "blocks.10",
-    "blocks.11"
+    "blocks.11",
+    "head"
   ],
   "vit_base_patch16_clip_quickgelu_224": [
     "blocks.0",
@@ -157,7 +167,8 @@
     "blocks.8",
     "blocks.9",
     "blocks.10",
-    "blocks.11"
+    "blocks.11",
+    "head"
   ],
   "vit_base_patch16_gap_224": [
     "blocks.0",
@@ -171,7 +182,8 @@
     "blocks.8",
     "blocks.9",
     "blocks.10",
-    "blocks.11"
+    "blocks.11",
+    "head"
   ],
   "vit_base_patch16_plus_240": [
     "blocks.0",
@@ -185,7 +197,8 @@
     "blocks.8",
     "blocks.9",
     "blocks.10",
-    "blocks.11"
+    "blocks.11",
+    "head"
   ],
   "vit_base_patch16_plus_clip_240": [
     "blocks.0",
@@ -199,7 +212,8 @@
     "blocks.8",
     "blocks.9",
     "blocks.10",
-    "blocks.11"
+    "blocks.11",
+    "head"
   ],
   "vit_base_patch16_reg4_gap_256": [
     "blocks.0",
@@ -213,7 +227,8 @@
     "blocks.8",
     "blocks.9",
     "blocks.10",
-    "blocks.11"
+    "blocks.11",
+    "head"
   ],
   "vit_base_patch16_rope_224": [
     "blocks.0",
@@ -227,7 +242,8 @@
     "blocks.8",
     "blocks.9",
     "blocks.10",
-    "blocks.11"
+    "blocks.11",
+    "head"
   ],
   "vit_base_patch16_rope_ape_224": [
     "blocks.0",
@@ -241,7 +257,8 @@
     "blocks.8",
     "blocks.9",
     "blocks.10",
-    "blocks.11"
+    "blocks.11",
+    "head"
   ],
   "vit_base_patch16_rope_mixed_224": [
     "blocks.0",
@@ -255,7 +272,8 @@
     "blocks.8",
     "blocks.9",
     "blocks.10",
-    "blocks.11"
+    "blocks.11",
+    "head"
   ],
   "vit_base_patch16_rope_mixed_ape_224": [
     "blocks.0",
@@ -269,7 +287,8 @@
     "blocks.8",
     "blocks.9",
     "blocks.10",
-    "blocks.11"
+    "blocks.11",
+    "head"
   ],
   "vit_base_patch16_rope_reg1_gap_256": [
     "blocks.0",
@@ -283,7 +302,8 @@
     "blocks.8",
     "blocks.9",
     "blocks.10",
-    "blocks.11"
+    "blocks.11",
+    "head"
   ],
   "vit_base_patch16_rpn_224": [
     "blocks.0",
@@ -297,7 +317,8 @@
     "blocks.8",
     "blocks.9",
     "blocks.10",
-    "blocks.11"
+    "blocks.11",
+    "head"
   ],
   "vit_base_patch16_siglip_224": [
     "blocks.0",
@@ -311,7 +332,8 @@
     "blocks.8",
     "blocks.9",
     "blocks.10",
-    "blocks.11"
+    "blocks.11",
+    "head"
   ],
   "vit_base_patch16_siglip_256": [
     "blocks.0",
@@ -325,7 +347,8 @@
     "blocks.8",
     "blocks.9",
     "blocks.10",
-    "blocks.11"
+    "blocks.11",
+    "head"
   ],
   "vit_base_patch16_siglip_384": [
     "blocks.0",
@@ -339,7 +362,8 @@
     "blocks.8",
     "blocks.9",
     "blocks.10",
-    "blocks.11"
+    "blocks.11",
+    "head"
   ],
   "vit_base_patch16_siglip_512": [
     "blocks.0",
@@ -353,7 +377,8 @@
     "blocks.8",
     "blocks.9",
     "blocks.10",
-    "blocks.11"
+    "blocks.11",
+    "head"
   ],
   "vit_base_patch16_siglip_gap_224": [
     "blocks.0",
@@ -367,7 +392,8 @@
     "blocks.8",
     "blocks.9",
     "blocks.10",
-    "blocks.11"
+    "blocks.11",
+    "head"
   ],
   "vit_base_patch16_siglip_gap_256": [
     "blocks.0",
@@ -381,7 +407,8 @@
     "blocks.8",
     "blocks.9",
     "blocks.10",
-    "blocks.11"
+    "blocks.11",
+    "head"
   ],
   "vit_base_patch16_siglip_gap_384": [
     "blocks.0",
@@ -395,7 +422,8 @@
     "blocks.8",
     "blocks.9",
     "blocks.10",
-    "blocks.11"
+    "blocks.11",
+    "head"
   ],
   "vit_base_patch16_siglip_gap_512": [
     "blocks.0",
@@ -409,7 +437,8 @@
     "blocks.8",
     "blocks.9",
     "blocks.10",
-    "blocks.11"
+    "blocks.11",
+    "head"
   ],
   "vit_base_patch16_xp_224": [
     "blocks.0",
@@ -423,7 +452,8 @@
     "blocks.8",
     "blocks.9",
     "blocks.10",
-    "blocks.11"
+    "blocks.11",
+    "head"
   ],
   "vit_base_patch32_224": [
     "blocks.0",
@@ -437,7 +467,8 @@
     "blocks.8",
     "blocks.9",
     "blocks.10",
-    "blocks.11"
+    "blocks.11",
+    "head"
   ],
   "vit_base_patch32_384": [
     "blocks.0",
@@ -451,7 +482,8 @@
     "blocks.8",
     "blocks.9",
     "blocks.10",
-    "blocks.11"
+    "blocks.11",
+    "head"
   ],
   "vit_base_patch32_clip_224": [
     "blocks.0",
@@ -465,7 +497,8 @@
     "blocks.8",
     "blocks.9",
     "blocks.10",
-    "blocks.11"
+    "blocks.11",
+    "head"
   ],
   "vit_base_patch32_clip_256": [
     "blocks.0",
@@ -479,7 +512,8 @@
     "blocks.8",
     "blocks.9",
     "blocks.10",
-    "blocks.11"
+    "blocks.11",
+    "head"
   ],
   "vit_base_patch32_clip_384": [
     "blocks.0",
@@ -493,7 +527,8 @@
     "blocks.8",
     "blocks.9",
     "blocks.10",
-    "blocks.11"
+    "blocks.11",
+    "head"
   ],
   "vit_base_patch32_clip_448": [
     "blocks.0",
@@ -507,7 +542,8 @@
     "blocks.8",
     "blocks.9",
     "blocks.10",
-    "blocks.11"
+    "blocks.11",
+    "head"
   ],
   "vit_base_patch32_clip_quickgelu_224": [
     "blocks.0",
@@ -521,7 +557,8 @@
     "blocks.8",
     "blocks.9",
     "blocks.10",
-    "blocks.11"
+    "blocks.11",
+    "head"
   ],
   "vit_base_patch32_plus_256": [
     "blocks.0",
@@ -535,7 +572,8 @@
     "blocks.8",
     "blocks.9",
     "blocks.10",
-    "blocks.11"
+    "blocks.11",
+    "head"
   ],
   "vit_base_patch32_siglip_256": [
     "blocks.0",
@@ -549,7 +587,8 @@
     "blocks.8",
     "blocks.9",
     "blocks.10",
-    "blocks.11"
+    "blocks.11",
+    "head"
   ],
   "vit_base_patch32_siglip_gap_256": [
     "blocks.0",
@@ -563,7 +602,8 @@
     "blocks.8",
     "blocks.9",
     "blocks.10",
-    "blocks.11"
+    "blocks.11",
+    "head"
   ],
   "vit_base_r26_s32_224": [
     "patch_embed.backbone.stages.0.blocks.0",
@@ -585,7 +625,8 @@
     "blocks.8",
     "blocks.9",
     "blocks.10",
-    "blocks.11"
+    "blocks.11",
+    "head"
   ],
   "vit_base_r50_s16_224": [
     "patch_embed.backbone.stages.0.blocks.0",
@@ -615,7 +656,8 @@
     "blocks.8",
     "blocks.9",
     "blocks.10",
-    "blocks.11"
+    "blocks.11",
+    "head"
   ],
   "vit_base_r50_s16_384": [
     "patch_embed.backbone.stages.0.blocks.0",
@@ -645,7 +687,8 @@
     "blocks.8",
     "blocks.9",
     "blocks.10",
-    "blocks.11"
+    "blocks.11",
+    "head"
   ],
   "vit_base_resnet26d_224": [
     "blocks.0",
@@ -659,7 +702,8 @@
     "blocks.8",
     "blocks.9",
     "blocks.10",
-    "blocks.11"
+    "blocks.11",
+    "head"
   ],
   "vit_base_resnet50d_224": [
     "blocks.0",
@@ -673,7 +717,8 @@
     "blocks.8",
     "blocks.9",
     "blocks.10",
-    "blocks.11"
+    "blocks.11",
+    "head"
   ],
   "vit_betwixt_patch16_gap_256": [
     "blocks.0",
@@ -687,7 +732,8 @@
     "blocks.8",
     "blocks.9",
     "blocks.10",
-    "blocks.11"
+    "blocks.11",
+    "head"
   ],
   "vit_betwixt_patch16_reg1_gap_256": [
     "blocks.0",
@@ -701,7 +747,8 @@
     "blocks.8",
     "blocks.9",
     "blocks.10",
-    "blocks.11"
+    "blocks.11",
+    "head"
   ],
   "vit_betwixt_patch16_reg4_gap_256": [
     "blocks.0",
@@ -715,7 +762,8 @@
     "blocks.8",
     "blocks.9",
     "blocks.10",
-    "blocks.11"
+    "blocks.11",
+    "head"
   ],
   "vit_betwixt_patch16_reg4_gap_384": [
     "blocks.0",
@@ -729,7 +777,8 @@
     "blocks.8",
     "blocks.9",
     "blocks.10",
-    "blocks.11"
+    "blocks.11",
+    "head"
   ],
   "vit_betwixt_patch16_rope_reg4_gap_256": [
     "blocks.0",
@@ -743,7 +792,8 @@
     "blocks.8",
     "blocks.9",
     "blocks.10",
-    "blocks.11"
+    "blocks.11",
+    "head"
   ],
   "vit_betwixt_patch32_clip_224": [
     "blocks.0",
@@ -757,7 +807,8 @@
     "blocks.8",
     "blocks.9",
     "blocks.10",
-    "blocks.11"
+    "blocks.11",
+    "head"
   ],
   "vit_giant_patch14_224": [
     "blocks.0",
@@ -799,7 +850,8 @@
     "blocks.36",
     "blocks.37",
     "blocks.38",
-    "blocks.39"
+    "blocks.39",
+    "head"
   ],
   "vit_giant_patch14_clip_224": [
     "blocks.0",
@@ -841,7 +893,8 @@
     "blocks.36",
     "blocks.37",
     "blocks.38",
-    "blocks.39"
+    "blocks.39",
+    "head"
   ],
   "vit_giant_patch14_dinov2": [
     "blocks.0",
@@ -883,7 +936,8 @@
     "blocks.36",
     "blocks.37",
     "blocks.38",
-    "blocks.39"
+    "blocks.39",
+    "head"
   ],
   "vit_giant_patch14_reg4_dinov2": [
     "blocks.0",
@@ -925,7 +979,8 @@
     "blocks.36",
     "blocks.37",
     "blocks.38",
-    "blocks.39"
+    "blocks.39",
+    "head"
   ],
   "vit_giant_patch16_gap_224": [
     "blocks.0",
@@ -967,7 +1022,8 @@
     "blocks.36",
     "blocks.37",
     "blocks.38",
-    "blocks.39"
+    "blocks.39",
+    "head"
   ],
   "vit_giantopt_patch16_siglip_256": [
     "blocks.0",
@@ -1009,7 +1065,8 @@
     "blocks.36",
     "blocks.37",
     "blocks.38",
-    "blocks.39"
+    "blocks.39",
+    "head"
   ],
   "vit_giantopt_patch16_siglip_384": [
     "blocks.0",
@@ -1051,7 +1108,8 @@
     "blocks.36",
     "blocks.37",
     "blocks.38",
-    "blocks.39"
+    "blocks.39",
+    "head"
   ],
   "vit_giantopt_patch16_siglip_gap_256": [
     "blocks.0",
@@ -1093,7 +1151,8 @@
     "blocks.36",
     "blocks.37",
     "blocks.38",
-    "blocks.39"
+    "blocks.39",
+    "head"
   ],
   "vit_giantopt_patch16_siglip_gap_384": [
     "blocks.0",
@@ -1135,7 +1194,8 @@
     "blocks.36",
     "blocks.37",
     "blocks.38",
-    "blocks.39"
+    "blocks.39",
+    "head"
   ],
   "vit_gigantic_patch14_224": [
     "blocks.0",
@@ -1185,7 +1245,8 @@
     "blocks.44",
     "blocks.45",
     "blocks.46",
-    "blocks.47"
+    "blocks.47",
+    "head"
   ],
   "vit_gigantic_patch14_clip_224": [
     "blocks.0",
@@ -1235,7 +1296,8 @@
     "blocks.44",
     "blocks.45",
     "blocks.46",
-    "blocks.47"
+    "blocks.47",
+    "head"
   ],
   "vit_gigantic_patch14_clip_quickgelu_224": [
     "blocks.0",
@@ -1285,7 +1347,8 @@
     "blocks.44",
     "blocks.45",
     "blocks.46",
-    "blocks.47"
+    "blocks.47",
+    "head"
   ],
   "vit_huge_patch14_224": [
     "blocks.0",
@@ -1319,7 +1382,8 @@
     "blocks.28",
     "blocks.29",
     "blocks.30",
-    "blocks.31"
+    "blocks.31",
+    "head"
   ],
   "vit_huge_patch14_clip_224": [
     "blocks.0",
@@ -1353,7 +1417,8 @@
     "blocks.28",
     "blocks.29",
     "blocks.30",
-    "blocks.31"
+    "blocks.31",
+    "head"
   ],
   "vit_huge_patch14_clip_336": [
     "blocks.0",
@@ -1387,7 +1452,8 @@
     "blocks.28",
     "blocks.29",
     "blocks.30",
-    "blocks.31"
+    "blocks.31",
+    "head"
   ],
   "vit_huge_patch14_clip_378": [
     "blocks.0",
@@ -1421,7 +1487,8 @@
     "blocks.28",
     "blocks.29",
     "blocks.30",
-    "blocks.31"
+    "blocks.31",
+    "head"
   ],
   "vit_huge_patch14_clip_quickgelu_224": [
     "blocks.0",
@@ -1455,7 +1522,8 @@
     "blocks.28",
     "blocks.29",
     "blocks.30",
-    "blocks.31"
+    "blocks.31",
+    "head"
   ],
   "vit_huge_patch14_clip_quickgelu_378": [
     "blocks.0",
@@ -1489,7 +1557,8 @@
     "blocks.28",
     "blocks.29",
     "blocks.30",
-    "blocks.31"
+    "blocks.31",
+    "head"
   ],
   "vit_huge_patch14_gap_224": [
     "blocks.0",
@@ -1523,7 +1592,8 @@
     "blocks.28",
     "blocks.29",
     "blocks.30",
-    "blocks.31"
+    "blocks.31",
+    "head"
   ],
   "vit_huge_patch14_xp_224": [
     "blocks.0",
@@ -1557,7 +1627,8 @@
     "blocks.28",
     "blocks.29",
     "blocks.30",
-    "blocks.31"
+    "blocks.31",
+    "head"
   ],
   "vit_huge_patch16_gap_448": [
     "blocks.0",
@@ -1591,7 +1662,8 @@
     "blocks.28",
     "blocks.29",
     "blocks.30",
-    "blocks.31"
+    "blocks.31",
+    "head"
   ],
   "vit_intern300m_patch14_448": [
     "blocks.0",
@@ -1617,7 +1689,8 @@
     "blocks.20",
     "blocks.21",
     "blocks.22",
-    "blocks.23"
+    "blocks.23",
+    "head"
   ],
   "vit_large_patch14_224": [
     "blocks.0",
@@ -1643,7 +1716,8 @@
     "blocks.20",
     "blocks.21",
     "blocks.22",
-    "blocks.23"
+    "blocks.23",
+    "head"
   ],
   "vit_large_patch14_clip_224": [
     "blocks.0",
@@ -1669,7 +1743,8 @@
     "blocks.20",
     "blocks.21",
     "blocks.22",
-    "blocks.23"
+    "blocks.23",
+    "head"
   ],
   "vit_large_patch14_clip_336": [
     "blocks.0",
@@ -1695,7 +1770,8 @@
     "blocks.20",
     "blocks.21",
     "blocks.22",
-    "blocks.23"
+    "blocks.23",
+    "head"
   ],
   "vit_large_patch14_clip_quickgelu_224": [
     "blocks.0",
@@ -1721,7 +1797,8 @@
     "blocks.20",
     "blocks.21",
     "blocks.22",
-    "blocks.23"
+    "blocks.23",
+    "head"
   ],
   "vit_large_patch14_clip_quickgelu_336": [
     "blocks.0",
@@ -1747,7 +1824,8 @@
     "blocks.20",
     "blocks.21",
     "blocks.22",
-    "blocks.23"
+    "blocks.23",
+    "head"
   ],
   "vit_large_patch14_dinov2": [
     "blocks.0",
@@ -1773,7 +1851,8 @@
     "blocks.20",
     "blocks.21",
     "blocks.22",
-    "blocks.23"
+    "blocks.23",
+    "head"
   ],
   "vit_large_patch14_reg4_dinov2": [
     "blocks.0",
@@ -1799,7 +1878,8 @@
     "blocks.20",
     "blocks.21",
     "blocks.22",
-    "blocks.23"
+    "blocks.23",
+    "head"
   ],
   "vit_large_patch14_xp_224": [
     "blocks.0",
@@ -1825,7 +1905,8 @@
     "blocks.20",
     "blocks.21",
     "blocks.22",
-    "blocks.23"
+    "blocks.23",
+    "head"
   ],
   "vit_large_patch16_224": [
     "blocks.0",
@@ -1851,7 +1932,8 @@
     "blocks.20",
     "blocks.21",
     "blocks.22",
-    "blocks.23"
+    "blocks.23",
+    "head"
   ],
   "vit_large_patch16_384": [
     "blocks.0",
@@ -1877,7 +1959,8 @@
     "blocks.20",
     "blocks.21",
     "blocks.22",
-    "blocks.23"
+    "blocks.23",
+    "head"
   ],
   "vit_large_patch16_rope_224": [
     "blocks.0",
@@ -1903,7 +1986,8 @@
     "blocks.20",
     "blocks.21",
     "blocks.22",
-    "blocks.23"
+    "blocks.23",
+    "head"
   ],
   "vit_large_patch16_rope_ape_224": [
     "blocks.0",
@@ -1929,7 +2013,8 @@
     "blocks.20",
     "blocks.21",
     "blocks.22",
-    "blocks.23"
+    "blocks.23",
+    "head"
   ],
   "vit_large_patch16_rope_mixed_224": [
     "blocks.0",
@@ -1955,7 +2040,8 @@
     "blocks.20",
     "blocks.21",
     "blocks.22",
-    "blocks.23"
+    "blocks.23",
+    "head"
   ],
   "vit_large_patch16_rope_mixed_ape_224": [
     "blocks.0",
@@ -1981,7 +2067,8 @@
     "blocks.20",
     "blocks.21",
     "blocks.22",
-    "blocks.23"
+    "blocks.23",
+    "head"
   ],
   "vit_large_patch16_siglip_256": [
     "blocks.0",
@@ -2007,7 +2094,8 @@
     "blocks.20",
     "blocks.21",
     "blocks.22",
-    "blocks.23"
+    "blocks.23",
+    "head"
   ],
   "vit_large_patch16_siglip_384": [
     "blocks.0",
@@ -2033,7 +2121,8 @@
     "blocks.20",
     "blocks.21",
     "blocks.22",
-    "blocks.23"
+    "blocks.23",
+    "head"
   ],
   "vit_large_patch16_siglip_512": [
     "blocks.0",
@@ -2059,7 +2148,8 @@
     "blocks.20",
     "blocks.21",
     "blocks.22",
-    "blocks.23"
+    "blocks.23",
+    "head"
   ],
   "vit_large_patch16_siglip_gap_256": [
     "blocks.0",
@@ -2085,7 +2175,8 @@
     "blocks.20",
     "blocks.21",
     "blocks.22",
-    "blocks.23"
+    "blocks.23",
+    "head"
   ],
   "vit_large_patch16_siglip_gap_384": [
     "blocks.0",
@@ -2111,7 +2202,8 @@
     "blocks.20",
     "blocks.21",
     "blocks.22",
-    "blocks.23"
+    "blocks.23",
+    "head"
   ],
   "vit_large_patch16_siglip_gap_512": [
     "blocks.0",
@@ -2137,7 +2229,8 @@
     "blocks.20",
     "blocks.21",
     "blocks.22",
-    "blocks.23"
+    "blocks.23",
+    "head"
   ],
   "vit_large_patch32_224": [
     "blocks.0",
@@ -2163,7 +2256,8 @@
     "blocks.20",
     "blocks.21",
     "blocks.22",
-    "blocks.23"
+    "blocks.23",
+    "head"
   ],
   "vit_large_patch32_384": [
     "blocks.0",
@@ -2189,7 +2283,8 @@
     "blocks.20",
     "blocks.21",
     "blocks.22",
-    "blocks.23"
+    "blocks.23",
+    "head"
   ],
   "vit_large_r50_s32_224": [
     "patch_embed.backbone.stages.0.blocks.0",
@@ -2231,7 +2326,8 @@
     "blocks.20",
     "blocks.21",
     "blocks.22",
-    "blocks.23"
+    "blocks.23",
+    "head"
   ],
   "vit_large_r50_s32_384": [
     "patch_embed.backbone.stages.0.blocks.0",
@@ -2273,7 +2369,8 @@
     "blocks.20",
     "blocks.21",
     "blocks.22",
-    "blocks.23"
+    "blocks.23",
+    "head"
   ],
   "vit_little_patch16_reg1_gap_256": [
     "blocks.0",
@@ -2289,7 +2386,8 @@
     "blocks.10",
     "blocks.11",
     "blocks.12",
-    "blocks.13"
+    "blocks.13",
+    "head"
   ],
   "vit_little_patch16_reg4_gap_256": [
     "blocks.0",
@@ -2305,7 +2403,8 @@
     "blocks.10",
     "blocks.11",
     "blocks.12",
-    "blocks.13"
+    "blocks.13",
+    "head"
   ],
   "vit_medium_patch16_clip_224": [
     "blocks.0",
@@ -2319,7 +2418,8 @@
     "blocks.8",
     "blocks.9",
     "blocks.10",
-    "blocks.11"
+    "blocks.11",
+    "head"
   ],
   "vit_medium_patch16_gap_240": [
     "blocks.0",
@@ -2333,7 +2433,8 @@
     "blocks.8",
     "blocks.9",
     "blocks.10",
-    "blocks.11"
+    "blocks.11",
+    "head"
   ],
   "vit_medium_patch16_gap_256": [
     "blocks.0",
@@ -2347,7 +2448,8 @@
     "blocks.8",
     "blocks.9",
     "blocks.10",
-    "blocks.11"
+    "blocks.11",
+    "head"
   ],
   "vit_medium_patch16_gap_384": [
     "blocks.0",
@@ -2361,7 +2463,8 @@
     "blocks.8",
     "blocks.9",
     "blocks.10",
-    "blocks.11"
+    "blocks.11",
+    "head"
   ],
   "vit_medium_patch16_reg1_gap_256": [
     "blocks.0",
@@ -2375,7 +2478,8 @@
     "blocks.8",
     "blocks.9",
     "blocks.10",
-    "blocks.11"
+    "blocks.11",
+    "head"
   ],
   "vit_medium_patch16_reg4_gap_256": [
     "blocks.0",
@@ -2389,7 +2493,8 @@
     "blocks.8",
     "blocks.9",
     "blocks.10",
-    "blocks.11"
+    "blocks.11",
+    "head"
   ],
   "vit_medium_patch16_rope_reg1_gap_256": [
     "blocks.0",
@@ -2403,7 +2508,8 @@
     "blocks.8",
     "blocks.9",
     "blocks.10",
-    "blocks.11"
+    "blocks.11",
+    "head"
   ],
   "vit_medium_patch32_clip_224": [
     "blocks.0",
@@ -2417,7 +2523,8 @@
     "blocks.8",
     "blocks.9",
     "blocks.10",
-    "blocks.11"
+    "blocks.11",
+    "head"
   ],
   "vit_mediumd_patch16_reg4_gap_256": [
     "blocks.0",
@@ -2439,7 +2546,8 @@
     "blocks.16",
     "blocks.17",
     "blocks.18",
-    "blocks.19"
+    "blocks.19",
+    "head"
   ],
   "vit_mediumd_patch16_reg4_gap_384": [
     "blocks.0",
@@ -2461,7 +2569,8 @@
     "blocks.16",
     "blocks.17",
     "blocks.18",
-    "blocks.19"
+    "blocks.19",
+    "head"
   ],
   "vit_mediumd_patch16_rope_reg1_gap_256": [
     "blocks.0",
@@ -2483,7 +2592,8 @@
     "blocks.16",
     "blocks.17",
     "blocks.18",
-    "blocks.19"
+    "blocks.19",
+    "head"
   ],
   "vit_pe_core_base_patch16_224": [
     "blocks.0",
@@ -2497,7 +2607,8 @@
     "blocks.8",
     "blocks.9",
     "blocks.10",
-    "blocks.11"
+    "blocks.11",
+    "head"
   ],
   "vit_pe_core_gigantic_patch14_448": [
     "blocks.0",
@@ -2549,7 +2660,8 @@
     "blocks.46",
     "blocks.47",
     "blocks.48",
-    "blocks.49"
+    "blocks.49",
+    "head"
   ],
   "vit_pe_core_large_patch14_336": [
     "blocks.0",
@@ -2575,7 +2687,8 @@
     "blocks.20",
     "blocks.21",
     "blocks.22",
-    "blocks.23"
+    "blocks.23",
+    "head"
   ],
   "vit_pe_core_small_patch16_384": [
     "blocks.0",
@@ -2589,7 +2702,8 @@
     "blocks.8",
     "blocks.9",
     "blocks.10",
-    "blocks.11"
+    "blocks.11",
+    "head"
   ],
   "vit_pe_core_tiny_patch16_384": [
     "blocks.0",
@@ -2603,7 +2717,8 @@
     "blocks.8",
     "blocks.9",
     "blocks.10",
-    "blocks.11"
+    "blocks.11",
+    "head"
   ],
   "vit_pe_lang_gigantic_patch14_448": [
     "blocks.0",
@@ -2652,7 +2767,8 @@
     "blocks.43",
     "blocks.44",
     "blocks.45",
-    "blocks.46"
+    "blocks.46",
+    "head"
   ],
   "vit_pe_lang_large_patch14_448": [
     "blocks.0",
@@ -2677,7 +2793,8 @@
     "blocks.19",
     "blocks.20",
     "blocks.21",
-    "blocks.22"
+    "blocks.22",
+    "head"
   ],
   "vit_pe_spatial_base_patch16_512": [
     "blocks.0",
@@ -2691,7 +2808,8 @@
     "blocks.8",
     "blocks.9",
     "blocks.10",
-    "blocks.11"
+    "blocks.11",
+    "head"
   ],
   "vit_pe_spatial_gigantic_patch14_448": [
     "blocks.0",
@@ -2743,7 +2861,8 @@
     "blocks.46",
     "blocks.47",
     "blocks.48",
-    "blocks.49"
+    "blocks.49",
+    "head"
   ],
   "vit_pe_spatial_large_patch14_448": [
     "blocks.0",
@@ -2769,7 +2888,8 @@
     "blocks.20",
     "blocks.21",
     "blocks.22",
-    "blocks.23"
+    "blocks.23",
+    "head"
   ],
   "vit_pe_spatial_small_patch16_512": [
     "blocks.0",
@@ -2783,7 +2903,8 @@
     "blocks.8",
     "blocks.9",
     "blocks.10",
-    "blocks.11"
+    "blocks.11",
+    "head"
   ],
   "vit_pe_spatial_tiny_patch16_512": [
     "blocks.0",
@@ -2797,7 +2918,8 @@
     "blocks.8",
     "blocks.9",
     "blocks.10",
-    "blocks.11"
+    "blocks.11",
+    "head"
   ],
   "vit_pwee_patch16_reg1_gap_256": [
     "blocks.0",
@@ -2815,7 +2937,8 @@
     "blocks.12",
     "blocks.13",
     "blocks.14",
-    "blocks.15"
+    "blocks.15",
+    "head"
   ],
   "vit_relpos_base_patch16_224": [
     "blocks.0",
@@ -2829,7 +2952,8 @@
     "blocks.8",
     "blocks.9",
     "blocks.10",
-    "blocks.11"
+    "blocks.11",
+    "head"
   ],
   "vit_relpos_base_patch16_cls_224": [
     "blocks.0",
@@ -2843,7 +2967,8 @@
     "blocks.8",
     "blocks.9",
     "blocks.10",
-    "blocks.11"
+    "blocks.11",
+    "head"
   ],
   "vit_relpos_base_patch16_clsgap_224": [
     "blocks.0",
@@ -2857,7 +2982,8 @@
     "blocks.8",
     "blocks.9",
     "blocks.10",
-    "blocks.11"
+    "blocks.11",
+    "head"
   ],
   "vit_relpos_base_patch16_plus_240": [
     "blocks.0",
@@ -2871,7 +2997,8 @@
     "blocks.8",
     "blocks.9",
     "blocks.10",
-    "blocks.11"
+    "blocks.11",
+    "head"
   ],
   "vit_relpos_base_patch16_rpn_224": [
     "blocks.0",
@@ -2885,7 +3012,8 @@
     "blocks.8",
     "blocks.9",
     "blocks.10",
-    "blocks.11"
+    "blocks.11",
+    "head"
   ],
   "vit_relpos_base_patch32_plus_rpn_256": [
     "blocks.0",
@@ -2899,7 +3027,8 @@
     "blocks.8",
     "blocks.9",
     "blocks.10",
-    "blocks.11"
+    "blocks.11",
+    "head"
   ],
   "vit_relpos_medium_patch16_224": [
     "blocks.0",
@@ -2913,7 +3042,8 @@
     "blocks.8",
     "blocks.9",
     "blocks.10",
-    "blocks.11"
+    "blocks.11",
+    "head"
   ],
   "vit_relpos_medium_patch16_cls_224": [
     "blocks.0",
@@ -2927,7 +3057,8 @@
     "blocks.8",
     "blocks.9",
     "blocks.10",
-    "blocks.11"
+    "blocks.11",
+    "head"
   ],
   "vit_relpos_medium_patch16_rpn_224": [
     "blocks.0",
@@ -2941,7 +3072,8 @@
     "blocks.8",
     "blocks.9",
     "blocks.10",
-    "blocks.11"
+    "blocks.11",
+    "head"
   ],
   "vit_relpos_small_patch16_224": [
     "blocks.0",
@@ -2955,7 +3087,8 @@
     "blocks.8",
     "blocks.9",
     "blocks.10",
-    "blocks.11"
+    "blocks.11",
+    "head"
   ],
   "vit_relpos_small_patch16_rpn_224": [
     "blocks.0",
@@ -2969,7 +3102,8 @@
     "blocks.8",
     "blocks.9",
     "blocks.10",
-    "blocks.11"
+    "blocks.11",
+    "head"
   ],
   "vit_small_patch8_224": [
     "blocks.0",
@@ -2983,7 +3117,8 @@
     "blocks.8",
     "blocks.9",
     "blocks.10",
-    "blocks.11"
+    "blocks.11",
+    "head"
   ],
   "vit_small_patch14_dinov2": [
     "blocks.0",
@@ -2997,7 +3132,8 @@
     "blocks.8",
     "blocks.9",
     "blocks.10",
-    "blocks.11"
+    "blocks.11",
+    "head"
   ],
   "vit_small_patch14_reg4_dinov2": [
     "blocks.0",
@@ -3011,7 +3147,8 @@
     "blocks.8",
     "blocks.9",
     "blocks.10",
-    "blocks.11"
+    "blocks.11",
+    "head"
   ],
   "vit_small_patch16_18x2_224": [
     "blocks.0",
@@ -3031,7 +3168,8 @@
     "blocks.14",
     "blocks.15",
     "blocks.16",
-    "blocks.17"
+    "blocks.17",
+    "head"
   ],
   "vit_small_patch16_36x1_224": [
     "blocks.0",
@@ -3069,7 +3207,8 @@
     "blocks.32",
     "blocks.33",
     "blocks.34",
-    "blocks.35"
+    "blocks.35",
+    "head"
   ],
   "vit_small_patch16_224": [
     "blocks.0",
@@ -3083,7 +3222,8 @@
     "blocks.8",
     "blocks.9",
     "blocks.10",
-    "blocks.11"
+    "blocks.11",
+    "head"
   ],
   "vit_small_patch16_384": [
     "blocks.0",
@@ -3097,7 +3237,8 @@
     "blocks.8",
     "blocks.9",
     "blocks.10",
-    "blocks.11"
+    "blocks.11",
+    "head"
   ],
   "vit_small_patch16_rope_224": [
     "blocks.0",
@@ -3111,7 +3252,8 @@
     "blocks.8",
     "blocks.9",
     "blocks.10",
-    "blocks.11"
+    "blocks.11",
+    "head"
   ],
   "vit_small_patch16_rope_ape_224": [
     "blocks.0",
@@ -3125,7 +3267,8 @@
     "blocks.8",
     "blocks.9",
     "blocks.10",
-    "blocks.11"
+    "blocks.11",
+    "head"
   ],
   "vit_small_patch16_rope_mixed_224": [
     "blocks.0",
@@ -3139,7 +3282,8 @@
     "blocks.8",
     "blocks.9",
     "blocks.10",
-    "blocks.11"
+    "blocks.11",
+    "head"
   ],
   "vit_small_patch16_rope_mixed_ape_224": [
     "blocks.0",
@@ -3153,7 +3297,8 @@
     "blocks.8",
     "blocks.9",
     "blocks.10",
-    "blocks.11"
+    "blocks.11",
+    "head"
   ],
   "vit_small_patch32_224": [
     "blocks.0",
@@ -3167,7 +3312,8 @@
     "blocks.8",
     "blocks.9",
     "blocks.10",
-    "blocks.11"
+    "blocks.11",
+    "head"
   ],
   "vit_small_patch32_384": [
     "blocks.0",
@@ -3181,7 +3327,8 @@
     "blocks.8",
     "blocks.9",
     "blocks.10",
-    "blocks.11"
+    "blocks.11",
+    "head"
   ],
   "vit_small_r26_s32_224": [
     "patch_embed.backbone.stages.0.blocks.0",
@@ -3203,7 +3350,8 @@
     "blocks.8",
     "blocks.9",
     "blocks.10",
-    "blocks.11"
+    "blocks.11",
+    "head"
   ],
   "vit_small_r26_s32_384": [
     "patch_embed.backbone.stages.0.blocks.0",
@@ -3225,7 +3373,8 @@
     "blocks.8",
     "blocks.9",
     "blocks.10",
-    "blocks.11"
+    "blocks.11",
+    "head"
   ],
   "vit_small_resnet26d_224": [
     "blocks.0",
@@ -3235,7 +3384,8 @@
     "blocks.4",
     "blocks.5",
     "blocks.6",
-    "blocks.7"
+    "blocks.7",
+    "head"
   ],
   "vit_small_resnet50d_s16_224": [
     "blocks.0",
@@ -3245,7 +3395,8 @@
     "blocks.4",
     "blocks.5",
     "blocks.6",
-    "blocks.7"
+    "blocks.7",
+    "head"
   ],
   "vit_so150m2_patch16_reg1_gap_256": [
     "blocks.0",
@@ -3268,7 +3419,8 @@
     "blocks.17",
     "blocks.18",
     "blocks.19",
-    "blocks.20"
+    "blocks.20",
+    "head"
   ],
   "vit_so150m2_patch16_reg1_gap_384": [
     "blocks.0",
@@ -3291,7 +3443,8 @@
     "blocks.17",
     "blocks.18",
     "blocks.19",
-    "blocks.20"
+    "blocks.20",
+    "head"
   ],
   "vit_so150m2_patch16_reg1_gap_448": [
     "blocks.0",
@@ -3314,7 +3467,8 @@
     "blocks.17",
     "blocks.18",
     "blocks.19",
-    "blocks.20"
+    "blocks.20",
+    "head"
   ],
   "vit_so150m_patch16_reg4_gap_256": [
     "blocks.0",
@@ -3334,7 +3488,8 @@
     "blocks.14",
     "blocks.15",
     "blocks.16",
-    "blocks.17"
+    "blocks.17",
+    "head"
   ],
   "vit_so150m_patch16_reg4_gap_384": [
     "blocks.0",
@@ -3354,7 +3509,8 @@
     "blocks.14",
     "blocks.15",
     "blocks.16",
-    "blocks.17"
+    "blocks.17",
+    "head"
   ],
   "vit_so150m_patch16_reg4_map_256": [
     "blocks.0",
@@ -3374,7 +3530,8 @@
     "blocks.14",
     "blocks.15",
     "blocks.16",
-    "blocks.17"
+    "blocks.17",
+    "head"
   ],
   "vit_so400m_patch14_siglip_224": [
     "blocks.0",
@@ -3403,7 +3560,8 @@
     "blocks.23",
     "blocks.24",
     "blocks.25",
-    "blocks.26"
+    "blocks.26",
+    "head"
   ],
   "vit_so400m_patch14_siglip_378": [
     "blocks.0",
@@ -3432,7 +3590,8 @@
     "blocks.23",
     "blocks.24",
     "blocks.25",
-    "blocks.26"
+    "blocks.26",
+    "head"
   ],
   "vit_so400m_patch14_siglip_384": [
     "blocks.0",
@@ -3461,7 +3620,8 @@
     "blocks.23",
     "blocks.24",
     "blocks.25",
-    "blocks.26"
+    "blocks.26",
+    "head"
   ],
   "vit_so400m_patch14_siglip_gap_224": [
     "blocks.0",
@@ -3490,7 +3650,8 @@
     "blocks.23",
     "blocks.24",
     "blocks.25",
-    "blocks.26"
+    "blocks.26",
+    "head"
   ],
   "vit_so400m_patch14_siglip_gap_378": [
     "blocks.0",
@@ -3519,7 +3680,8 @@
     "blocks.23",
     "blocks.24",
     "blocks.25",
-    "blocks.26"
+    "blocks.26",
+    "head"
   ],
   "vit_so400m_patch14_siglip_gap_384": [
     "blocks.0",
@@ -3548,7 +3710,8 @@
     "blocks.23",
     "blocks.24",
     "blocks.25",
-    "blocks.26"
+    "blocks.26",
+    "head"
   ],
   "vit_so400m_patch14_siglip_gap_448": [
     "blocks.0",
@@ -3577,7 +3740,8 @@
     "blocks.23",
     "blocks.24",
     "blocks.25",
-    "blocks.26"
+    "blocks.26",
+    "head"
   ],
   "vit_so400m_patch14_siglip_gap_896": [
     "blocks.0",
@@ -3606,7 +3770,8 @@
     "blocks.23",
     "blocks.24",
     "blocks.25",
-    "blocks.26"
+    "blocks.26",
+    "head"
   ],
   "vit_so400m_patch16_siglip_256": [
     "blocks.0",
@@ -3635,7 +3800,8 @@
     "blocks.23",
     "blocks.24",
     "blocks.25",
-    "blocks.26"
+    "blocks.26",
+    "head"
   ],
   "vit_so400m_patch16_siglip_384": [
     "blocks.0",
@@ -3664,7 +3830,8 @@
     "blocks.23",
     "blocks.24",
     "blocks.25",
-    "blocks.26"
+    "blocks.26",
+    "head"
   ],
   "vit_so400m_patch16_siglip_512": [
     "blocks.0",
@@ -3693,7 +3860,8 @@
     "blocks.23",
     "blocks.24",
     "blocks.25",
-    "blocks.26"
+    "blocks.26",
+    "head"
   ],
   "vit_so400m_patch16_siglip_gap_256": [
     "blocks.0",
@@ -3722,7 +3890,8 @@
     "blocks.23",
     "blocks.24",
     "blocks.25",
-    "blocks.26"
+    "blocks.26",
+    "head"
   ],
   "vit_so400m_patch16_siglip_gap_384": [
     "blocks.0",
@@ -3751,7 +3920,8 @@
     "blocks.23",
     "blocks.24",
     "blocks.25",
-    "blocks.26"
+    "blocks.26",
+    "head"
   ],
   "vit_so400m_patch16_siglip_gap_512": [
     "blocks.0",
@@ -3780,7 +3950,8 @@
     "blocks.23",
     "blocks.24",
     "blocks.25",
-    "blocks.26"
+    "blocks.26",
+    "head"
   ],
   "vit_srelpos_medium_patch16_224": [
     "blocks.0",
@@ -3794,7 +3965,8 @@
     "blocks.8",
     "blocks.9",
     "blocks.10",
-    "blocks.11"
+    "blocks.11",
+    "head"
   ],
   "vit_srelpos_small_patch16_224": [
     "blocks.0",
@@ -3808,7 +3980,8 @@
     "blocks.8",
     "blocks.9",
     "blocks.10",
-    "blocks.11"
+    "blocks.11",
+    "head"
   ],
   "vit_tiny_patch16_224": [
     "blocks.0",
@@ -3822,7 +3995,8 @@
     "blocks.8",
     "blocks.9",
     "blocks.10",
-    "blocks.11"
+    "blocks.11",
+    "head"
   ],
   "vit_tiny_patch16_384": [
     "blocks.0",
@@ -3836,7 +4010,8 @@
     "blocks.8",
     "blocks.9",
     "blocks.10",
-    "blocks.11"
+    "blocks.11",
+    "head"
   ],
   "vit_tiny_r_s16_p8_224": [
     "blocks.0",
@@ -3850,7 +4025,8 @@
     "blocks.8",
     "blocks.9",
     "blocks.10",
-    "blocks.11"
+    "blocks.11",
+    "head"
   ],
   "vit_tiny_r_s16_p8_384": [
     "blocks.0",
@@ -3864,7 +4040,8 @@
     "blocks.8",
     "blocks.9",
     "blocks.10",
-    "blocks.11"
+    "blocks.11",
+    "head"
   ],
   "vit_wee_patch16_reg1_gap_256": [
     "blocks.0",
@@ -3880,7 +4057,8 @@
     "blocks.10",
     "blocks.11",
     "blocks.12",
-    "blocks.13"
+    "blocks.13",
+    "head"
   ],
   "vit_xsmall_patch16_clip_224": [
     "blocks.0",
@@ -3892,7 +4070,8 @@
     "blocks.6",
     "blocks.7",
     "blocks.8",
-    "blocks.9"
+    "blocks.9",
+    "head"
   ],
   "swin_base_patch4_window7_224": [
     "layers.0.blocks.0",
@@ -3918,7 +4097,8 @@
     "layers.2.blocks.16",
     "layers.2.blocks.17",
     "layers.3.blocks.0",
-    "layers.3.blocks.1"
+    "layers.3.blocks.1",
+    "head.flatten"
   ],
   "swin_base_patch4_window12_384": [
     "layers.0.blocks.0",
@@ -3944,7 +4124,8 @@
     "layers.2.blocks.16",
     "layers.2.blocks.17",
     "layers.3.blocks.0",
-    "layers.3.blocks.1"
+    "layers.3.blocks.1",
+    "head.flatten"
   ],
   "swin_large_patch4_window7_224": [
     "layers.0.blocks.0",
@@ -3970,7 +4151,8 @@
     "layers.2.blocks.16",
     "layers.2.blocks.17",
     "layers.3.blocks.0",
-    "layers.3.blocks.1"
+    "layers.3.blocks.1",
+    "head.flatten"
   ],
   "swin_large_patch4_window12_384": [
     "layers.0.blocks.0",
@@ -3996,7 +4178,8 @@
     "layers.2.blocks.16",
     "layers.2.blocks.17",
     "layers.3.blocks.0",
-    "layers.3.blocks.1"
+    "layers.3.blocks.1",
+    "head.flatten"
   ],
   "swin_s3_base_224": [
     "layers.0.blocks.0",
@@ -4034,7 +4217,8 @@
     "layers.2.blocks.28",
     "layers.2.blocks.29",
     "layers.3.blocks.0",
-    "layers.3.blocks.1"
+    "layers.3.blocks.1",
+    "head.flatten"
   ],
   "swin_s3_small_224": [
     "layers.0.blocks.0",
@@ -4060,7 +4244,8 @@
     "layers.2.blocks.16",
     "layers.2.blocks.17",
     "layers.3.blocks.0",
-    "layers.3.blocks.1"
+    "layers.3.blocks.1",
+    "head.flatten"
   ],
   "swin_s3_tiny_224": [
     "layers.0.blocks.0",
@@ -4074,7 +4259,8 @@
     "layers.2.blocks.4",
     "layers.2.blocks.5",
     "layers.3.blocks.0",
-    "layers.3.blocks.1"
+    "layers.3.blocks.1",
+    "head.flatten"
   ],
   "swin_small_patch4_window7_224": [
     "layers.0.blocks.0",
@@ -4100,7 +4286,8 @@
     "layers.2.blocks.16",
     "layers.2.blocks.17",
     "layers.3.blocks.0",
-    "layers.3.blocks.1"
+    "layers.3.blocks.1",
+    "head.flatten"
   ],
   "swin_tiny_patch4_window7_224": [
     "layers.0.blocks.0",
@@ -4114,7 +4301,8 @@
     "layers.2.blocks.4",
     "layers.2.blocks.5",
     "layers.3.blocks.0",
-    "layers.3.blocks.1"
+    "layers.3.blocks.1",
+    "head.flatten"
   ],
   "swinv2_base_window8_256": [
     "layers.0.blocks.0",
@@ -4140,7 +4328,8 @@
     "layers.2.blocks.16",
     "layers.2.blocks.17",
     "layers.3.blocks.0",
-    "layers.3.blocks.1"
+    "layers.3.blocks.1",
+    "head.flatten"
   ],
   "swinv2_base_window12_192": [
     "layers.0.blocks.0",
@@ -4166,7 +4355,8 @@
     "layers.2.blocks.16",
     "layers.2.blocks.17",
     "layers.3.blocks.0",
-    "layers.3.blocks.1"
+    "layers.3.blocks.1",
+    "head.flatten"
   ],
   "swinv2_base_window12to16_192to256": [
     "layers.0.blocks.0",
@@ -4192,7 +4382,8 @@
     "layers.2.blocks.16",
     "layers.2.blocks.17",
     "layers.3.blocks.0",
-    "layers.3.blocks.1"
+    "layers.3.blocks.1",
+    "head.flatten"
   ],
   "swinv2_base_window12to24_192to384": [
     "layers.0.blocks.0",
@@ -4218,7 +4409,8 @@
     "layers.2.blocks.16",
     "layers.2.blocks.17",
     "layers.3.blocks.0",
-    "layers.3.blocks.1"
+    "layers.3.blocks.1",
+    "head.flatten"
   ],
   "swinv2_base_window16_256": [
     "layers.0.blocks.0",
@@ -4244,7 +4436,8 @@
     "layers.2.blocks.16",
     "layers.2.blocks.17",
     "layers.3.blocks.0",
-    "layers.3.blocks.1"
+    "layers.3.blocks.1",
+    "head.flatten"
   ],
   "swinv2_cr_base_224": [
     "stages.0.blocks.0",
@@ -4270,7 +4463,8 @@
     "stages.2.blocks.16",
     "stages.2.blocks.17",
     "stages.3.blocks.0",
-    "stages.3.blocks.1"
+    "stages.3.blocks.1",
+    "head.flatten"
   ],
   "swinv2_cr_base_384": [
     "stages.0.blocks.0",
@@ -4296,7 +4490,8 @@
     "stages.2.blocks.16",
     "stages.2.blocks.17",
     "stages.3.blocks.0",
-    "stages.3.blocks.1"
+    "stages.3.blocks.1",
+    "head.flatten"
   ],
   "swinv2_cr_base_ns_224": [
     "stages.0.blocks.0",
@@ -4322,7 +4517,8 @@
     "stages.2.blocks.16",
     "stages.2.blocks.17",
     "stages.3.blocks.0",
-    "stages.3.blocks.1"
+    "stages.3.blocks.1",
+    "head.flatten"
   ],
   "swinv2_cr_giant_224": [
     "stages.0.blocks.0",
@@ -4372,7 +4568,8 @@
     "stages.2.blocks.40",
     "stages.2.blocks.41",
     "stages.3.blocks.0",
-    "stages.3.blocks.1"
+    "stages.3.blocks.1",
+    "head.flatten"
   ],
   "swinv2_cr_giant_384": [
     "stages.0.blocks.0",
@@ -4422,7 +4619,8 @@
     "stages.2.blocks.40",
     "stages.2.blocks.41",
     "stages.3.blocks.0",
-    "stages.3.blocks.1"
+    "stages.3.blocks.1",
+    "head.flatten"
   ],
   "swinv2_cr_huge_224": [
     "stages.0.blocks.0",
@@ -4448,7 +4646,8 @@
     "stages.2.blocks.16",
     "stages.2.blocks.17",
     "stages.3.blocks.0",
-    "stages.3.blocks.1"
+    "stages.3.blocks.1",
+    "head.flatten"
   ],
   "swinv2_cr_huge_384": [
     "stages.0.blocks.0",
@@ -4474,7 +4673,8 @@
     "stages.2.blocks.16",
     "stages.2.blocks.17",
     "stages.3.blocks.0",
-    "stages.3.blocks.1"
+    "stages.3.blocks.1",
+    "head.flatten"
   ],
   "swinv2_cr_large_224": [
     "stages.0.blocks.0",
@@ -4500,7 +4700,8 @@
     "stages.2.blocks.16",
     "stages.2.blocks.17",
     "stages.3.blocks.0",
-    "stages.3.blocks.1"
+    "stages.3.blocks.1",
+    "head.flatten"
   ],
   "swinv2_cr_large_384": [
     "stages.0.blocks.0",
@@ -4526,7 +4727,8 @@
     "stages.2.blocks.16",
     "stages.2.blocks.17",
     "stages.3.blocks.0",
-    "stages.3.blocks.1"
+    "stages.3.blocks.1",
+    "head.flatten"
   ],
   "swinv2_cr_small_224": [
     "stages.0.blocks.0",
@@ -4552,7 +4754,8 @@
     "stages.2.blocks.16",
     "stages.2.blocks.17",
     "stages.3.blocks.0",
-    "stages.3.blocks.1"
+    "stages.3.blocks.1",
+    "head.flatten"
   ],
   "swinv2_cr_small_384": [
     "stages.0.blocks.0",
@@ -4578,7 +4781,8 @@
     "stages.2.blocks.16",
     "stages.2.blocks.17",
     "stages.3.blocks.0",
-    "stages.3.blocks.1"
+    "stages.3.blocks.1",
+    "head.flatten"
   ],
   "swinv2_cr_small_ns_224": [
     "stages.0.blocks.0",
@@ -4604,7 +4808,8 @@
     "stages.2.blocks.16",
     "stages.2.blocks.17",
     "stages.3.blocks.0",
-    "stages.3.blocks.1"
+    "stages.3.blocks.1",
+    "head.flatten"
   ],
   "swinv2_cr_small_ns_256": [
     "stages.0.blocks.0",
@@ -4630,7 +4835,8 @@
     "stages.2.blocks.16",
     "stages.2.blocks.17",
     "stages.3.blocks.0",
-    "stages.3.blocks.1"
+    "stages.3.blocks.1",
+    "head.flatten"
   ],
   "swinv2_cr_tiny_224": [
     "stages.0.blocks.0",
@@ -4644,7 +4850,8 @@
     "stages.2.blocks.4",
     "stages.2.blocks.5",
     "stages.3.blocks.0",
-    "stages.3.blocks.1"
+    "stages.3.blocks.1",
+    "head.flatten"
   ],
   "swinv2_cr_tiny_384": [
     "stages.0.blocks.0",
@@ -4658,7 +4865,8 @@
     "stages.2.blocks.4",
     "stages.2.blocks.5",
     "stages.3.blocks.0",
-    "stages.3.blocks.1"
+    "stages.3.blocks.1",
+    "head.flatten"
   ],
   "swinv2_cr_tiny_ns_224": [
     "stages.0.blocks.0",
@@ -4672,7 +4880,8 @@
     "stages.2.blocks.4",
     "stages.2.blocks.5",
     "stages.3.blocks.0",
-    "stages.3.blocks.1"
+    "stages.3.blocks.1",
+    "head.flatten"
   ],
   "swinv2_large_window12_192": [
     "layers.0.blocks.0",
@@ -4698,7 +4907,8 @@
     "layers.2.blocks.16",
     "layers.2.blocks.17",
     "layers.3.blocks.0",
-    "layers.3.blocks.1"
+    "layers.3.blocks.1",
+    "head.flatten"
   ],
   "swinv2_large_window12to16_192to256": [
     "layers.0.blocks.0",
@@ -4724,7 +4934,8 @@
     "layers.2.blocks.16",
     "layers.2.blocks.17",
     "layers.3.blocks.0",
-    "layers.3.blocks.1"
+    "layers.3.blocks.1",
+    "head.flatten"
   ],
   "swinv2_large_window12to24_192to384": [
     "layers.0.blocks.0",
@@ -4750,7 +4961,8 @@
     "layers.2.blocks.16",
     "layers.2.blocks.17",
     "layers.3.blocks.0",
-    "layers.3.blocks.1"
+    "layers.3.blocks.1",
+    "head.flatten"
   ],
   "swinv2_small_window8_256": [
     "layers.0.blocks.0",
@@ -4776,7 +4988,8 @@
     "layers.2.blocks.16",
     "layers.2.blocks.17",
     "layers.3.blocks.0",
-    "layers.3.blocks.1"
+    "layers.3.blocks.1",
+    "head.flatten"
   ],
   "swinv2_small_window16_256": [
     "layers.0.blocks.0",
@@ -4802,7 +5015,8 @@
     "layers.2.blocks.16",
     "layers.2.blocks.17",
     "layers.3.blocks.0",
-    "layers.3.blocks.1"
+    "layers.3.blocks.1",
+    "head.flatten"
   ],
   "swinv2_tiny_window8_256": [
     "layers.0.blocks.0",
@@ -4816,7 +5030,8 @@
     "layers.2.blocks.4",
     "layers.2.blocks.5",
     "layers.3.blocks.0",
-    "layers.3.blocks.1"
+    "layers.3.blocks.1",
+    "head.flatten"
   ],
   "swinv2_tiny_window16_256": [
     "layers.0.blocks.0",
@@ -4830,7 +5045,8 @@
     "layers.2.blocks.4",
     "layers.2.blocks.5",
     "layers.3.blocks.0",
-    "layers.3.blocks.1"
+    "layers.3.blocks.1",
+    "head.flatten"
   ],
   "convnext_atto": [
     "stages.0.blocks.0",
@@ -4844,7 +5060,8 @@
     "stages.2.blocks.4",
     "stages.2.blocks.5",
     "stages.3.blocks.0",
-    "stages.3.blocks.1"
+    "stages.3.blocks.1",
+    "head.fc"
   ],
   "convnext_atto_ols": [
     "stages.0.blocks.0",
@@ -4858,7 +5075,8 @@
     "stages.2.blocks.4",
     "stages.2.blocks.5",
     "stages.3.blocks.0",
-    "stages.3.blocks.1"
+    "stages.3.blocks.1",
+    "head.fc"
   ],
   "convnext_atto_rms": [
     "stages.0.blocks.0",
@@ -4872,7 +5090,8 @@
     "stages.2.blocks.4",
     "stages.2.blocks.5",
     "stages.3.blocks.0",
-    "stages.3.blocks.1"
+    "stages.3.blocks.1",
+    "head.fc"
   ],
   "convnext_base": [
     "stages.0.blocks.0",
@@ -4910,7 +5129,8 @@
     "stages.2.blocks.26",
     "stages.3.blocks.0",
     "stages.3.blocks.1",
-    "stages.3.blocks.2"
+    "stages.3.blocks.2",
+    "head.fc"
   ],
   "convnext_femto": [
     "stages.0.blocks.0",
@@ -4924,7 +5144,8 @@
     "stages.2.blocks.4",
     "stages.2.blocks.5",
     "stages.3.blocks.0",
-    "stages.3.blocks.1"
+    "stages.3.blocks.1",
+    "head.fc"
   ],
   "convnext_femto_ols": [
     "stages.0.blocks.0",
@@ -4938,7 +5159,8 @@
     "stages.2.blocks.4",
     "stages.2.blocks.5",
     "stages.3.blocks.0",
-    "stages.3.blocks.1"
+    "stages.3.blocks.1",
+    "head.fc"
   ],
   "convnext_large": [
     "stages.0.blocks.0",
@@ -4976,7 +5198,8 @@
     "stages.2.blocks.26",
     "stages.3.blocks.0",
     "stages.3.blocks.1",
-    "stages.3.blocks.2"
+    "stages.3.blocks.2",
+    "head.fc"
   ],
   "convnext_large_mlp": [
     "stages.0.blocks.0",
@@ -5014,7 +5237,8 @@
     "stages.2.blocks.26",
     "stages.3.blocks.0",
     "stages.3.blocks.1",
-    "stages.3.blocks.2"
+    "stages.3.blocks.2",
+    "head.fc"
   ],
   "convnext_nano": [
     "stages.0.blocks.0",
@@ -5030,7 +5254,8 @@
     "stages.2.blocks.6",
     "stages.2.blocks.7",
     "stages.3.blocks.0",
-    "stages.3.blocks.1"
+    "stages.3.blocks.1",
+    "head.fc"
   ],
   "convnext_nano_ols": [
     "stages.0.blocks.0",
@@ -5046,7 +5271,8 @@
     "stages.2.blocks.6",
     "stages.2.blocks.7",
     "stages.3.blocks.0",
-    "stages.3.blocks.1"
+    "stages.3.blocks.1",
+    "head.fc"
   ],
   "convnext_pico": [
     "stages.0.blocks.0",
@@ -5060,7 +5286,8 @@
     "stages.2.blocks.4",
     "stages.2.blocks.5",
     "stages.3.blocks.0",
-    "stages.3.blocks.1"
+    "stages.3.blocks.1",
+    "head.fc"
   ],
   "convnext_pico_ols": [
     "stages.0.blocks.0",
@@ -5074,7 +5301,8 @@
     "stages.2.blocks.4",
     "stages.2.blocks.5",
     "stages.3.blocks.0",
-    "stages.3.blocks.1"
+    "stages.3.blocks.1",
+    "head.fc"
   ],
   "convnext_small": [
     "stages.0.blocks.0",
@@ -5112,7 +5340,8 @@
     "stages.2.blocks.26",
     "stages.3.blocks.0",
     "stages.3.blocks.1",
-    "stages.3.blocks.2"
+    "stages.3.blocks.2",
+    "head.fc"
   ],
   "convnext_tiny": [
     "stages.0.blocks.0",
@@ -5132,7 +5361,8 @@
     "stages.2.blocks.8",
     "stages.3.blocks.0",
     "stages.3.blocks.1",
-    "stages.3.blocks.2"
+    "stages.3.blocks.2",
+    "head.fc"
   ],
   "convnext_tiny_hnf": [
     "stages.0.blocks.0",
@@ -5152,7 +5382,8 @@
     "stages.2.blocks.8",
     "stages.3.blocks.0",
     "stages.3.blocks.1",
-    "stages.3.blocks.2"
+    "stages.3.blocks.2",
+    "head.flatten"
   ],
   "convnext_xlarge": [
     "stages.0.blocks.0",
@@ -5190,7 +5421,8 @@
     "stages.2.blocks.26",
     "stages.3.blocks.0",
     "stages.3.blocks.1",
-    "stages.3.blocks.2"
+    "stages.3.blocks.2",
+    "head.fc"
   ],
   "convnext_xxlarge": [
     "stages.0.blocks.0",
@@ -5232,7 +5464,8 @@
     "stages.2.blocks.29",
     "stages.3.blocks.0",
     "stages.3.blocks.1",
-    "stages.3.blocks.2"
+    "stages.3.blocks.2",
+    "head.fc"
   ],
   "convnext_zepto_rms": [
     "stages.0.blocks.0",
@@ -5244,7 +5477,8 @@
     "stages.2.blocks.2",
     "stages.2.blocks.3",
     "stages.3.blocks.0",
-    "stages.3.blocks.1"
+    "stages.3.blocks.1",
+    "head.fc"
   ],
   "convnext_zepto_rms_ols": [
     "stages.0.blocks.0",
@@ -5256,7 +5490,8 @@
     "stages.2.blocks.2",
     "stages.2.blocks.3",
     "stages.3.blocks.0",
-    "stages.3.blocks.1"
+    "stages.3.blocks.1",
+    "head.fc"
   ],
   "convnextv2_atto": [
     "stages.0.blocks.0",
@@ -5270,7 +5505,8 @@
     "stages.2.blocks.4",
     "stages.2.blocks.5",
     "stages.3.blocks.0",
-    "stages.3.blocks.1"
+    "stages.3.blocks.1",
+    "head.fc"
   ],
   "convnextv2_base": [
     "stages.0.blocks.0",
@@ -5308,7 +5544,8 @@
     "stages.2.blocks.26",
     "stages.3.blocks.0",
     "stages.3.blocks.1",
-    "stages.3.blocks.2"
+    "stages.3.blocks.2",
+    "head.fc"
   ],
   "convnextv2_femto": [
     "stages.0.blocks.0",
@@ -5322,7 +5559,8 @@
     "stages.2.blocks.4",
     "stages.2.blocks.5",
     "stages.3.blocks.0",
-    "stages.3.blocks.1"
+    "stages.3.blocks.1",
+    "head.fc"
   ],
   "convnextv2_huge": [
     "stages.0.blocks.0",
@@ -5360,7 +5598,8 @@
     "stages.2.blocks.26",
     "stages.3.blocks.0",
     "stages.3.blocks.1",
-    "stages.3.blocks.2"
+    "stages.3.blocks.2",
+    "head.fc"
   ],
   "convnextv2_large": [
     "stages.0.blocks.0",
@@ -5398,7 +5637,8 @@
     "stages.2.blocks.26",
     "stages.3.blocks.0",
     "stages.3.blocks.1",
-    "stages.3.blocks.2"
+    "stages.3.blocks.2",
+    "head.fc"
   ],
   "convnextv2_nano": [
     "stages.0.blocks.0",
@@ -5414,7 +5654,8 @@
     "stages.2.blocks.6",
     "stages.2.blocks.7",
     "stages.3.blocks.0",
-    "stages.3.blocks.1"
+    "stages.3.blocks.1",
+    "head.fc"
   ],
   "convnextv2_pico": [
     "stages.0.blocks.0",
@@ -5428,7 +5669,8 @@
     "stages.2.blocks.4",
     "stages.2.blocks.5",
     "stages.3.blocks.0",
-    "stages.3.blocks.1"
+    "stages.3.blocks.1",
+    "head.fc"
   ],
   "convnextv2_small": [
     "stages.0.blocks.0",
@@ -5466,7 +5708,8 @@
     "stages.2.blocks.26",
     "stages.3.blocks.0",
     "stages.3.blocks.1",
-    "stages.3.blocks.2"
+    "stages.3.blocks.2",
+    "head.fc"
   ],
   "convnextv2_tiny": [
     "stages.0.blocks.0",
@@ -5486,7 +5729,8 @@
     "stages.2.blocks.8",
     "stages.3.blocks.0",
     "stages.3.blocks.1",
-    "stages.3.blocks.2"
+    "stages.3.blocks.2",
+    "head.fc"
   ],
   "levit_128": [
     "stages.0.blocks.0",
@@ -5500,7 +5744,8 @@
     "stages.2.blocks.0",
     "stages.2.blocks.1",
     "stages.2.blocks.2",
-    "stages.2.blocks.3"
+    "stages.2.blocks.3",
+    "head_dist.linear"
   ],
   "levit_128s": [
     "stages.0.blocks.0",
@@ -5511,7 +5756,8 @@
     "stages.2.blocks.0",
     "stages.2.blocks.1",
     "stages.2.blocks.2",
-    "stages.2.blocks.3"
+    "stages.2.blocks.3",
+    "head_dist.linear"
   ],
   "levit_192": [
     "stages.0.blocks.0",
@@ -5525,7 +5771,8 @@
     "stages.2.blocks.0",
     "stages.2.blocks.1",
     "stages.2.blocks.2",
-    "stages.2.blocks.3"
+    "stages.2.blocks.3",
+    "head_dist.linear"
   ],
   "levit_256": [
     "stages.0.blocks.0",
@@ -5539,7 +5786,8 @@
     "stages.2.blocks.0",
     "stages.2.blocks.1",
     "stages.2.blocks.2",
-    "stages.2.blocks.3"
+    "stages.2.blocks.3",
+    "head_dist.linear"
   ],
   "levit_256d": [
     "stages.0.blocks.0",
@@ -5559,7 +5807,8 @@
     "stages.2.blocks.2",
     "stages.2.blocks.3",
     "stages.2.blocks.4",
-    "stages.2.blocks.5"
+    "stages.2.blocks.5",
+    "head.linear"
   ],
   "levit_384": [
     "stages.0.blocks.0",
@@ -5573,7 +5822,8 @@
     "stages.2.blocks.0",
     "stages.2.blocks.1",
     "stages.2.blocks.2",
-    "stages.2.blocks.3"
+    "stages.2.blocks.3",
+    "head_dist.linear"
   ],
   "levit_384_s8": [
     "stages.0.blocks.0",
@@ -5587,7 +5837,8 @@
     "stages.2.blocks.0",
     "stages.2.blocks.1",
     "stages.2.blocks.2",
-    "stages.2.blocks.3"
+    "stages.2.blocks.3",
+    "head_dist.linear"
   ],
   "levit_512": [
     "stages.0.blocks.0",
@@ -5601,7 +5852,8 @@
     "stages.2.blocks.0",
     "stages.2.blocks.1",
     "stages.2.blocks.2",
-    "stages.2.blocks.3"
+    "stages.2.blocks.3",
+    "head.linear"
   ],
   "levit_512_s8": [
     "stages.0.blocks.0",
@@ -5615,7 +5867,8 @@
     "stages.2.blocks.0",
     "stages.2.blocks.1",
     "stages.2.blocks.2",
-    "stages.2.blocks.3"
+    "stages.2.blocks.3",
+    "head.linear"
   ],
   "levit_512d": [
     "stages.0.blocks.0",
@@ -5635,7 +5888,8 @@
     "stages.2.blocks.2",
     "stages.2.blocks.3",
     "stages.2.blocks.4",
-    "stages.2.blocks.5"
+    "stages.2.blocks.5",
+    "head.linear"
   ],
   "levit_conv_128": [
     "stages.0.blocks.0",
@@ -5649,7 +5903,8 @@
     "stages.2.blocks.0",
     "stages.2.blocks.1",
     "stages.2.blocks.2",
-    "stages.2.blocks.3"
+    "stages.2.blocks.3",
+    "head_dist.linear"
   ],
   "levit_conv_128s": [
     "stages.0.blocks.0",
@@ -5660,7 +5915,8 @@
     "stages.2.blocks.0",
     "stages.2.blocks.1",
     "stages.2.blocks.2",
-    "stages.2.blocks.3"
+    "stages.2.blocks.3",
+    "head_dist.linear"
   ],
   "levit_conv_192": [
     "stages.0.blocks.0",
@@ -5674,7 +5930,8 @@
     "stages.2.blocks.0",
     "stages.2.blocks.1",
     "stages.2.blocks.2",
-    "stages.2.blocks.3"
+    "stages.2.blocks.3",
+    "head_dist.linear"
   ],
   "levit_conv_256": [
     "stages.0.blocks.0",
@@ -5688,7 +5945,8 @@
     "stages.2.blocks.0",
     "stages.2.blocks.1",
     "stages.2.blocks.2",
-    "stages.2.blocks.3"
+    "stages.2.blocks.3",
+    "head_dist.linear"
   ],
   "levit_conv_256d": [
     "stages.0.blocks.0",
@@ -5708,7 +5966,8 @@
     "stages.2.blocks.2",
     "stages.2.blocks.3",
     "stages.2.blocks.4",
-    "stages.2.blocks.5"
+    "stages.2.blocks.5",
+    "head.linear"
   ],
   "levit_conv_384": [
     "stages.0.blocks.0",
@@ -5722,7 +5981,8 @@
     "stages.2.blocks.0",
     "stages.2.blocks.1",
     "stages.2.blocks.2",
-    "stages.2.blocks.3"
+    "stages.2.blocks.3",
+    "head_dist.linear"
   ],
   "levit_conv_384_s8": [
     "stages.0.blocks.0",
@@ -5736,7 +5996,8 @@
     "stages.2.blocks.0",
     "stages.2.blocks.1",
     "stages.2.blocks.2",
-    "stages.2.blocks.3"
+    "stages.2.blocks.3",
+    "head_dist.linear"
   ],
   "levit_conv_512": [
     "stages.0.blocks.0",
@@ -5750,7 +6011,8 @@
     "stages.2.blocks.0",
     "stages.2.blocks.1",
     "stages.2.blocks.2",
-    "stages.2.blocks.3"
+    "stages.2.blocks.3",
+    "head.linear"
   ],
   "levit_conv_512_s8": [
     "stages.0.blocks.0",
@@ -5764,7 +6026,8 @@
     "stages.2.blocks.0",
     "stages.2.blocks.1",
     "stages.2.blocks.2",
-    "stages.2.blocks.3"
+    "stages.2.blocks.3",
+    "head.linear"
   ],
   "levit_conv_512d": [
     "stages.0.blocks.0",
@@ -5784,7 +6047,8 @@
     "stages.2.blocks.2",
     "stages.2.blocks.3",
     "stages.2.blocks.4",
-    "stages.2.blocks.5"
+    "stages.2.blocks.5",
+    "head.linear"
   ],
   "maxvit_base_tf_224": [
     "stages.0.blocks.0",
@@ -5810,7 +6074,8 @@
     "stages.2.blocks.12",
     "stages.2.blocks.13",
     "stages.3.blocks.0",
-    "stages.3.blocks.1"
+    "stages.3.blocks.1",
+    "head.fc"
   ],
   "maxvit_base_tf_384": [
     "stages.0.blocks.0",
@@ -5836,7 +6101,8 @@
     "stages.2.blocks.12",
     "stages.2.blocks.13",
     "stages.3.blocks.0",
-    "stages.3.blocks.1"
+    "stages.3.blocks.1",
+    "head.fc"
   ],
   "maxvit_base_tf_512": [
     "stages.0.blocks.0",
@@ -5862,7 +6128,8 @@
     "stages.2.blocks.12",
     "stages.2.blocks.13",
     "stages.3.blocks.0",
-    "stages.3.blocks.1"
+    "stages.3.blocks.1",
+    "head.fc"
   ],
   "maxvit_large_tf_224": [
     "stages.0.blocks.0",
@@ -5888,7 +6155,8 @@
     "stages.2.blocks.12",
     "stages.2.blocks.13",
     "stages.3.blocks.0",
-    "stages.3.blocks.1"
+    "stages.3.blocks.1",
+    "head.fc"
   ],
   "maxvit_large_tf_384": [
     "stages.0.blocks.0",
@@ -5914,7 +6182,8 @@
     "stages.2.blocks.12",
     "stages.2.blocks.13",
     "stages.3.blocks.0",
-    "stages.3.blocks.1"
+    "stages.3.blocks.1",
+    "head.fc"
   ],
   "maxvit_large_tf_512": [
     "stages.0.blocks.0",
@@ -5940,7 +6209,8 @@
     "stages.2.blocks.12",
     "stages.2.blocks.13",
     "stages.3.blocks.0",
-    "stages.3.blocks.1"
+    "stages.3.blocks.1",
+    "head.fc"
   ],
   "maxvit_nano_rw_256": [
     "stages.0.blocks.0",
@@ -5949,7 +6219,8 @@
     "stages.2.blocks.0",
     "stages.2.blocks.1",
     "stages.2.blocks.2",
-    "stages.3.blocks.0"
+    "stages.3.blocks.0",
+    "head.flatten"
   ],
   "maxvit_pico_rw_256": [
     "stages.0.blocks.0",
@@ -5962,7 +6233,8 @@
     "stages.2.blocks.3",
     "stages.2.blocks.4",
     "stages.3.blocks.0",
-    "stages.3.blocks.1"
+    "stages.3.blocks.1",
+    "head.flatten"
   ],
   "maxvit_rmlp_base_rw_224": [
     "stages.0.blocks.0",
@@ -5988,7 +6260,8 @@
     "stages.2.blocks.12",
     "stages.2.blocks.13",
     "stages.3.blocks.0",
-    "stages.3.blocks.1"
+    "stages.3.blocks.1",
+    "head.fc"
   ],
   "maxvit_rmlp_base_rw_384": [
     "stages.0.blocks.0",
@@ -6014,7 +6287,8 @@
     "stages.2.blocks.12",
     "stages.2.blocks.13",
     "stages.3.blocks.0",
-    "stages.3.blocks.1"
+    "stages.3.blocks.1",
+    "head.fc"
   ],
   "maxvit_rmlp_nano_rw_256": [
     "stages.0.blocks.0",
@@ -6023,7 +6297,8 @@
     "stages.2.blocks.0",
     "stages.2.blocks.1",
     "stages.2.blocks.2",
-    "stages.3.blocks.0"
+    "stages.3.blocks.0",
+    "head.flatten"
   ],
   "maxvit_rmlp_pico_rw_256": [
     "stages.0.blocks.0",
@@ -6036,7 +6311,8 @@
     "stages.2.blocks.3",
     "stages.2.blocks.4",
     "stages.3.blocks.0",
-    "stages.3.blocks.1"
+    "stages.3.blocks.1",
+    "head.flatten"
   ],
   "maxvit_rmlp_small_rw_224": [
     "stages.0.blocks.0",
@@ -6049,7 +6325,8 @@
     "stages.2.blocks.3",
     "stages.2.blocks.4",
     "stages.3.blocks.0",
-    "stages.3.blocks.1"
+    "stages.3.blocks.1",
+    "head.flatten"
   ],
   "maxvit_rmlp_small_rw_256": [
     "stages.0.blocks.0",
@@ -6062,7 +6339,8 @@
     "stages.2.blocks.3",
     "stages.2.blocks.4",
     "stages.3.blocks.0",
-    "stages.3.blocks.1"
+    "stages.3.blocks.1",
+    "head.flatten"
   ],
   "maxvit_rmlp_tiny_rw_256": [
     "stages.0.blocks.0",
@@ -6075,7 +6353,8 @@
     "stages.2.blocks.3",
     "stages.2.blocks.4",
     "stages.3.blocks.0",
-    "stages.3.blocks.1"
+    "stages.3.blocks.1",
+    "head.flatten"
   ],
   "maxvit_small_tf_224": [
     "stages.0.blocks.0",
@@ -6088,7 +6367,8 @@
     "stages.2.blocks.3",
     "stages.2.blocks.4",
     "stages.3.blocks.0",
-    "stages.3.blocks.1"
+    "stages.3.blocks.1",
+    "head.fc"
   ],
   "maxvit_small_tf_384": [
     "stages.0.blocks.0",
@@ -6101,7 +6381,8 @@
     "stages.2.blocks.3",
     "stages.2.blocks.4",
     "stages.3.blocks.0",
-    "stages.3.blocks.1"
+    "stages.3.blocks.1",
+    "head.fc"
   ],
   "maxvit_small_tf_512": [
     "stages.0.blocks.0",
@@ -6114,7 +6395,8 @@
     "stages.2.blocks.3",
     "stages.2.blocks.4",
     "stages.3.blocks.0",
-    "stages.3.blocks.1"
+    "stages.3.blocks.1",
+    "head.fc"
   ],
   "maxvit_tiny_pm_256": [
     "stages.0.blocks.0",
@@ -6127,7 +6409,8 @@
     "stages.2.blocks.3",
     "stages.2.blocks.4",
     "stages.3.blocks.0",
-    "stages.3.blocks.1"
+    "stages.3.blocks.1",
+    "head.flatten"
   ],
   "maxvit_tiny_rw_224": [
     "stages.0.blocks.0",
@@ -6140,7 +6423,8 @@
     "stages.2.blocks.3",
     "stages.2.blocks.4",
     "stages.3.blocks.0",
-    "stages.3.blocks.1"
+    "stages.3.blocks.1",
+    "head.flatten"
   ],
   "maxvit_tiny_rw_256": [
     "stages.0.blocks.0",
@@ -6153,7 +6437,8 @@
     "stages.2.blocks.3",
     "stages.2.blocks.4",
     "stages.3.blocks.0",
-    "stages.3.blocks.1"
+    "stages.3.blocks.1",
+    "head.flatten"
   ],
   "maxvit_tiny_tf_224": [
     "stages.0.blocks.0",
@@ -6166,7 +6451,8 @@
     "stages.2.blocks.3",
     "stages.2.blocks.4",
     "stages.3.blocks.0",
-    "stages.3.blocks.1"
+    "stages.3.blocks.1",
+    "head.fc"
   ],
   "maxvit_tiny_tf_384": [
     "stages.0.blocks.0",
@@ -6179,7 +6465,8 @@
     "stages.2.blocks.3",
     "stages.2.blocks.4",
     "stages.3.blocks.0",
-    "stages.3.blocks.1"
+    "stages.3.blocks.1",
+    "head.fc"
   ],
   "maxvit_tiny_tf_512": [
     "stages.0.blocks.0",
@@ -6192,7 +6479,8 @@
     "stages.2.blocks.3",
     "stages.2.blocks.4",
     "stages.3.blocks.0",
-    "stages.3.blocks.1"
+    "stages.3.blocks.1",
+    "head.fc"
   ],
   "maxvit_xlarge_tf_224": [
     "stages.0.blocks.0",
@@ -6218,7 +6506,8 @@
     "stages.2.blocks.12",
     "stages.2.blocks.13",
     "stages.3.blocks.0",
-    "stages.3.blocks.1"
+    "stages.3.blocks.1",
+    "head.fc"
   ],
   "maxvit_xlarge_tf_384": [
     "stages.0.blocks.0",
@@ -6244,7 +6533,8 @@
     "stages.2.blocks.12",
     "stages.2.blocks.13",
     "stages.3.blocks.0",
-    "stages.3.blocks.1"
+    "stages.3.blocks.1",
+    "head.fc"
   ],
   "maxvit_xlarge_tf_512": [
     "stages.0.blocks.0",
@@ -6270,7 +6560,8 @@
     "stages.2.blocks.12",
     "stages.2.blocks.13",
     "stages.3.blocks.0",
-    "stages.3.blocks.1"
+    "stages.3.blocks.1",
+    "head.fc"
   ],
   "maxxvit_rmlp_nano_rw_256": [
     "stages.0.blocks.0",
@@ -6279,7 +6570,8 @@
     "stages.2.blocks.0",
     "stages.2.blocks.1",
     "stages.2.blocks.2",
-    "stages.3.blocks.0"
+    "stages.3.blocks.0",
+    "head.flatten"
   ],
   "maxxvit_rmlp_small_rw_256": [
     "stages.0.blocks.0",
@@ -6292,7 +6584,8 @@
     "stages.2.blocks.3",
     "stages.2.blocks.4",
     "stages.3.blocks.0",
-    "stages.3.blocks.1"
+    "stages.3.blocks.1",
+    "head.flatten"
   ],
   "maxxvit_rmlp_tiny_rw_256": [
     "stages.0.blocks.0",
@@ -6305,7 +6598,8 @@
     "stages.2.blocks.3",
     "stages.2.blocks.4",
     "stages.3.blocks.0",
-    "stages.3.blocks.1"
+    "stages.3.blocks.1",
+    "head.flatten"
   ],
   "maxxvitv2_nano_rw_256": [
     "stages.0.blocks.0",
@@ -6314,7 +6608,8 @@
     "stages.2.blocks.0",
     "stages.2.blocks.1",
     "stages.2.blocks.2",
-    "stages.3.blocks.0"
+    "stages.3.blocks.0",
+    "head.flatten"
   ],
   "maxxvitv2_rmlp_base_rw_224": [
     "stages.0.blocks.0",
@@ -6338,7 +6633,8 @@
     "stages.2.blocks.10",
     "stages.2.blocks.11",
     "stages.3.blocks.0",
-    "stages.3.blocks.1"
+    "stages.3.blocks.1",
+    "head.flatten"
   ],
   "maxxvitv2_rmlp_base_rw_384": [
     "stages.0.blocks.0",
@@ -6362,7 +6658,8 @@
     "stages.2.blocks.10",
     "stages.2.blocks.11",
     "stages.3.blocks.0",
-    "stages.3.blocks.1"
+    "stages.3.blocks.1",
+    "head.flatten"
   ],
   "maxxvitv2_rmlp_large_rw_224": [
     "stages.0.blocks.0",
@@ -6390,7 +6687,8 @@
     "stages.2.blocks.14",
     "stages.2.blocks.15",
     "stages.3.blocks.0",
-    "stages.3.blocks.1"
+    "stages.3.blocks.1",
+    "head.fc"
   ],
   "swin_base_patch4_window7_224.ms_in1k": [
     "layers.0.blocks.0",
@@ -6416,7 +6714,8 @@
     "layers.2.blocks.16",
     "layers.2.blocks.17",
     "layers.3.blocks.0",
-    "layers.3.blocks.1"
+    "layers.3.blocks.1",
+    "head.flatten"
   ],
   "swin_base_patch4_window7_224.ms_in22k": [
     "layers.0.blocks.0",
@@ -6442,7 +6741,8 @@
     "layers.2.blocks.16",
     "layers.2.blocks.17",
     "layers.3.blocks.0",
-    "layers.3.blocks.1"
+    "layers.3.blocks.1",
+    "head.flatten"
   ],
   "swin_base_patch4_window7_224.ms_in22k_ft_in1k": [
     "layers.0.blocks.0",
@@ -6468,7 +6768,8 @@
     "layers.2.blocks.16",
     "layers.2.blocks.17",
     "layers.3.blocks.0",
-    "layers.3.blocks.1"
+    "layers.3.blocks.1",
+    "head.flatten"
   ],
   "swin_base_patch4_window12_384.ms_in1k": [
     "layers.0.blocks.0",
@@ -6494,7 +6795,8 @@
     "layers.2.blocks.16",
     "layers.2.blocks.17",
     "layers.3.blocks.0",
-    "layers.3.blocks.1"
+    "layers.3.blocks.1",
+    "head.flatten"
   ],
   "swin_base_patch4_window12_384.ms_in22k": [
     "layers.0.blocks.0",
@@ -6520,7 +6822,8 @@
     "layers.2.blocks.16",
     "layers.2.blocks.17",
     "layers.3.blocks.0",
-    "layers.3.blocks.1"
+    "layers.3.blocks.1",
+    "head.flatten"
   ],
   "swin_base_patch4_window12_384.ms_in22k_ft_in1k": [
     "layers.0.blocks.0",
@@ -6546,7 +6849,8 @@
     "layers.2.blocks.16",
     "layers.2.blocks.17",
     "layers.3.blocks.0",
-    "layers.3.blocks.1"
+    "layers.3.blocks.1",
+    "head.flatten"
   ],
   "swin_large_patch4_window7_224.ms_in22k": [
     "layers.0.blocks.0",
@@ -6572,7 +6876,8 @@
     "layers.2.blocks.16",
     "layers.2.blocks.17",
     "layers.3.blocks.0",
-    "layers.3.blocks.1"
+    "layers.3.blocks.1",
+    "head.flatten"
   ],
   "swin_large_patch4_window7_224.ms_in22k_ft_in1k": [
     "layers.0.blocks.0",
@@ -6598,7 +6903,8 @@
     "layers.2.blocks.16",
     "layers.2.blocks.17",
     "layers.3.blocks.0",
-    "layers.3.blocks.1"
+    "layers.3.blocks.1",
+    "head.flatten"
   ],
   "swin_large_patch4_window12_384.ms_in22k": [
     "layers.0.blocks.0",
@@ -6624,7 +6930,8 @@
     "layers.2.blocks.16",
     "layers.2.blocks.17",
     "layers.3.blocks.0",
-    "layers.3.blocks.1"
+    "layers.3.blocks.1",
+    "head.flatten"
   ],
   "swin_large_patch4_window12_384.ms_in22k_ft_in1k": [
     "layers.0.blocks.0",
@@ -6650,7 +6957,8 @@
     "layers.2.blocks.16",
     "layers.2.blocks.17",
     "layers.3.blocks.0",
-    "layers.3.blocks.1"
+    "layers.3.blocks.1",
+    "head.flatten"
   ],
   "swin_s3_base_224.ms_in1k": [
     "layers.0.blocks.0",
@@ -6688,7 +6996,8 @@
     "layers.2.blocks.28",
     "layers.2.blocks.29",
     "layers.3.blocks.0",
-    "layers.3.blocks.1"
+    "layers.3.blocks.1",
+    "head.flatten"
   ],
   "swin_s3_small_224.ms_in1k": [
     "layers.0.blocks.0",
@@ -6714,7 +7023,8 @@
     "layers.2.blocks.16",
     "layers.2.blocks.17",
     "layers.3.blocks.0",
-    "layers.3.blocks.1"
+    "layers.3.blocks.1",
+    "head.flatten"
   ],
   "swin_s3_tiny_224.ms_in1k": [
     "layers.0.blocks.0",
@@ -6728,7 +7038,8 @@
     "layers.2.blocks.4",
     "layers.2.blocks.5",
     "layers.3.blocks.0",
-    "layers.3.blocks.1"
+    "layers.3.blocks.1",
+    "head.flatten"
   ],
   "swin_small_patch4_window7_224.ms_in1k": [
     "layers.0.blocks.0",
@@ -6754,7 +7065,8 @@
     "layers.2.blocks.16",
     "layers.2.blocks.17",
     "layers.3.blocks.0",
-    "layers.3.blocks.1"
+    "layers.3.blocks.1",
+    "head.flatten"
   ],
   "swin_small_patch4_window7_224.ms_in22k": [
     "layers.0.blocks.0",
@@ -6780,7 +7092,8 @@
     "layers.2.blocks.16",
     "layers.2.blocks.17",
     "layers.3.blocks.0",
-    "layers.3.blocks.1"
+    "layers.3.blocks.1",
+    "head.flatten"
   ],
   "swin_small_patch4_window7_224.ms_in22k_ft_in1k": [
     "layers.0.blocks.0",
@@ -6806,7 +7119,8 @@
     "layers.2.blocks.16",
     "layers.2.blocks.17",
     "layers.3.blocks.0",
-    "layers.3.blocks.1"
+    "layers.3.blocks.1",
+    "head.flatten"
   ],
   "swin_tiny_patch4_window7_224.ms_in1k": [
     "layers.0.blocks.0",
@@ -6820,7 +7134,8 @@
     "layers.2.blocks.4",
     "layers.2.blocks.5",
     "layers.3.blocks.0",
-    "layers.3.blocks.1"
+    "layers.3.blocks.1",
+    "head.flatten"
   ],
   "swin_tiny_patch4_window7_224.ms_in22k": [
     "layers.0.blocks.0",
@@ -6834,7 +7149,8 @@
     "layers.2.blocks.4",
     "layers.2.blocks.5",
     "layers.3.blocks.0",
-    "layers.3.blocks.1"
+    "layers.3.blocks.1",
+    "head.flatten"
   ],
   "swin_tiny_patch4_window7_224.ms_in22k_ft_in1k": [
     "layers.0.blocks.0",
@@ -6848,7 +7164,8 @@
     "layers.2.blocks.4",
     "layers.2.blocks.5",
     "layers.3.blocks.0",
-    "layers.3.blocks.1"
+    "layers.3.blocks.1",
+    "head.flatten"
   ],
   "swinv2_base_window8_256.ms_in1k": [
     "layers.0.blocks.0",
@@ -6874,7 +7191,8 @@
     "layers.2.blocks.16",
     "layers.2.blocks.17",
     "layers.3.blocks.0",
-    "layers.3.blocks.1"
+    "layers.3.blocks.1",
+    "head.flatten"
   ],
   "swinv2_base_window12_192.ms_in22k": [
     "layers.0.blocks.0",
@@ -6900,7 +7218,8 @@
     "layers.2.blocks.16",
     "layers.2.blocks.17",
     "layers.3.blocks.0",
-    "layers.3.blocks.1"
+    "layers.3.blocks.1",
+    "head.flatten"
   ],
   "swinv2_base_window12to16_192to256.ms_in22k_ft_in1k": [
     "layers.0.blocks.0",
@@ -6926,7 +7245,8 @@
     "layers.2.blocks.16",
     "layers.2.blocks.17",
     "layers.3.blocks.0",
-    "layers.3.blocks.1"
+    "layers.3.blocks.1",
+    "head.flatten"
   ],
   "swinv2_base_window12to24_192to384.ms_in22k_ft_in1k": [
     "layers.0.blocks.0",
@@ -6952,7 +7272,8 @@
     "layers.2.blocks.16",
     "layers.2.blocks.17",
     "layers.3.blocks.0",
-    "layers.3.blocks.1"
+    "layers.3.blocks.1",
+    "head.flatten"
   ],
   "swinv2_base_window16_256.ms_in1k": [
     "layers.0.blocks.0",
@@ -6978,7 +7299,8 @@
     "layers.2.blocks.16",
     "layers.2.blocks.17",
     "layers.3.blocks.0",
-    "layers.3.blocks.1"
+    "layers.3.blocks.1",
+    "head.flatten"
   ],
   "swinv2_cr_small_224.sw_in1k": [
     "stages.0.blocks.0",
@@ -7004,7 +7326,8 @@
     "stages.2.blocks.16",
     "stages.2.blocks.17",
     "stages.3.blocks.0",
-    "stages.3.blocks.1"
+    "stages.3.blocks.1",
+    "head.flatten"
   ],
   "swinv2_cr_small_ns_224.sw_in1k": [
     "stages.0.blocks.0",
@@ -7030,7 +7353,8 @@
     "stages.2.blocks.16",
     "stages.2.blocks.17",
     "stages.3.blocks.0",
-    "stages.3.blocks.1"
+    "stages.3.blocks.1",
+    "head.flatten"
   ],
   "swinv2_cr_tiny_ns_224.sw_in1k": [
     "stages.0.blocks.0",
@@ -7044,7 +7368,8 @@
     "stages.2.blocks.4",
     "stages.2.blocks.5",
     "stages.3.blocks.0",
-    "stages.3.blocks.1"
+    "stages.3.blocks.1",
+    "head.flatten"
   ],
   "swinv2_large_window12_192.ms_in22k": [
     "layers.0.blocks.0",
@@ -7070,7 +7395,8 @@
     "layers.2.blocks.16",
     "layers.2.blocks.17",
     "layers.3.blocks.0",
-    "layers.3.blocks.1"
+    "layers.3.blocks.1",
+    "head.flatten"
   ],
   "swinv2_large_window12to16_192to256.ms_in22k_ft_in1k": [
     "layers.0.blocks.0",
@@ -7096,7 +7422,8 @@
     "layers.2.blocks.16",
     "layers.2.blocks.17",
     "layers.3.blocks.0",
-    "layers.3.blocks.1"
+    "layers.3.blocks.1",
+    "head.flatten"
   ],
   "swinv2_large_window12to24_192to384.ms_in22k_ft_in1k": [
     "layers.0.blocks.0",
@@ -7122,7 +7449,8 @@
     "layers.2.blocks.16",
     "layers.2.blocks.17",
     "layers.3.blocks.0",
-    "layers.3.blocks.1"
+    "layers.3.blocks.1",
+    "head.flatten"
   ],
   "swinv2_small_window8_256.ms_in1k": [
     "layers.0.blocks.0",
@@ -7148,7 +7476,8 @@
     "layers.2.blocks.16",
     "layers.2.blocks.17",
     "layers.3.blocks.0",
-    "layers.3.blocks.1"
+    "layers.3.blocks.1",
+    "head.flatten"
   ],
   "swinv2_small_window16_256.ms_in1k": [
     "layers.0.blocks.0",
@@ -7174,7 +7503,8 @@
     "layers.2.blocks.16",
     "layers.2.blocks.17",
     "layers.3.blocks.0",
-    "layers.3.blocks.1"
+    "layers.3.blocks.1",
+    "head.flatten"
   ],
   "swinv2_tiny_window8_256.ms_in1k": [
     "layers.0.blocks.0",
@@ -7188,7 +7518,8 @@
     "layers.2.blocks.4",
     "layers.2.blocks.5",
     "layers.3.blocks.0",
-    "layers.3.blocks.1"
+    "layers.3.blocks.1",
+    "head.flatten"
   ],
   "swinv2_tiny_window16_256.ms_in1k": [
     "layers.0.blocks.0",
@@ -7202,7 +7533,8 @@
     "layers.2.blocks.4",
     "layers.2.blocks.5",
     "layers.3.blocks.0",
-    "layers.3.blocks.1"
+    "layers.3.blocks.1",
+    "head.flatten"
   ],
   "convnext_atto_ols.a2_in1k": [
     "stages.0.blocks.0",
@@ -7216,7 +7548,8 @@
     "stages.2.blocks.4",
     "stages.2.blocks.5",
     "stages.3.blocks.0",
-    "stages.3.blocks.1"
+    "stages.3.blocks.1",
+    "head.fc"
   ],
   "convnext_base.clip_laion2b": [
     "stages.0.blocks.0",
@@ -7254,7 +7587,8 @@
     "stages.2.blocks.26",
     "stages.3.blocks.0",
     "stages.3.blocks.1",
-    "stages.3.blocks.2"
+    "stages.3.blocks.2",
+    "head.fc"
   ],
   "convnext_base.clip_laion2b_augreg": [
     "stages.0.blocks.0",
@@ -7292,7 +7626,8 @@
     "stages.2.blocks.26",
     "stages.3.blocks.0",
     "stages.3.blocks.1",
-    "stages.3.blocks.2"
+    "stages.3.blocks.2",
+    "head.fc"
   ],
   "convnext_base.clip_laion2b_augreg_ft_in1k": [
     "stages.0.blocks.0",
@@ -7330,7 +7665,8 @@
     "stages.2.blocks.26",
     "stages.3.blocks.0",
     "stages.3.blocks.1",
-    "stages.3.blocks.2"
+    "stages.3.blocks.2",
+    "head.fc"
   ],
   "convnext_base.clip_laion2b_augreg_ft_in12k": [
     "stages.0.blocks.0",
@@ -7368,7 +7704,8 @@
     "stages.2.blocks.26",
     "stages.3.blocks.0",
     "stages.3.blocks.1",
-    "stages.3.blocks.2"
+    "stages.3.blocks.2",
+    "head.fc"
   ],
   "convnext_base.clip_laion2b_augreg_ft_in12k_in1k": [
     "stages.0.blocks.0",
@@ -7406,7 +7743,8 @@
     "stages.2.blocks.26",
     "stages.3.blocks.0",
     "stages.3.blocks.1",
-    "stages.3.blocks.2"
+    "stages.3.blocks.2",
+    "head.fc"
   ],
   "convnext_base.clip_laion2b_augreg_ft_in12k_in1k_384": [
     "stages.0.blocks.0",
@@ -7444,7 +7782,8 @@
     "stages.2.blocks.26",
     "stages.3.blocks.0",
     "stages.3.blocks.1",
-    "stages.3.blocks.2"
+    "stages.3.blocks.2",
+    "head.fc"
   ],
   "convnext_base.clip_laiona": [
     "stages.0.blocks.0",
@@ -7482,7 +7821,8 @@
     "stages.2.blocks.26",
     "stages.3.blocks.0",
     "stages.3.blocks.1",
-    "stages.3.blocks.2"
+    "stages.3.blocks.2",
+    "head.fc"
   ],
   "convnext_base.clip_laiona_320": [
     "stages.0.blocks.0",
@@ -7520,7 +7860,8 @@
     "stages.2.blocks.26",
     "stages.3.blocks.0",
     "stages.3.blocks.1",
-    "stages.3.blocks.2"
+    "stages.3.blocks.2",
+    "head.fc"
   ],
   "convnext_base.clip_laiona_augreg_320": [
     "stages.0.blocks.0",
@@ -7558,7 +7899,8 @@
     "stages.2.blocks.26",
     "stages.3.blocks.0",
     "stages.3.blocks.1",
-    "stages.3.blocks.2"
+    "stages.3.blocks.2",
+    "head.fc"
   ],
   "convnext_base.clip_laiona_augreg_ft_in1k_384": [
     "stages.0.blocks.0",
@@ -7596,7 +7938,8 @@
     "stages.2.blocks.26",
     "stages.3.blocks.0",
     "stages.3.blocks.1",
-    "stages.3.blocks.2"
+    "stages.3.blocks.2",
+    "head.fc"
   ],
   "convnext_base.fb_in1k": [
     "stages.0.blocks.0",
@@ -7634,7 +7977,8 @@
     "stages.2.blocks.26",
     "stages.3.blocks.0",
     "stages.3.blocks.1",
-    "stages.3.blocks.2"
+    "stages.3.blocks.2",
+    "head.fc"
   ],
   "convnext_base.fb_in22k": [
     "stages.0.blocks.0",
@@ -7672,7 +8016,8 @@
     "stages.2.blocks.26",
     "stages.3.blocks.0",
     "stages.3.blocks.1",
-    "stages.3.blocks.2"
+    "stages.3.blocks.2",
+    "head.fc"
   ],
   "convnext_base.fb_in22k_ft_in1k": [
     "stages.0.blocks.0",
@@ -7710,7 +8055,8 @@
     "stages.2.blocks.26",
     "stages.3.blocks.0",
     "stages.3.blocks.1",
-    "stages.3.blocks.2"
+    "stages.3.blocks.2",
+    "head.fc"
   ],
   "convnext_base.fb_in22k_ft_in1k_384": [
     "stages.0.blocks.0",
@@ -7748,7 +8094,8 @@
     "stages.2.blocks.26",
     "stages.3.blocks.0",
     "stages.3.blocks.1",
-    "stages.3.blocks.2"
+    "stages.3.blocks.2",
+    "head.fc"
   ],
   "convnext_femto.d1_in1k": [
     "stages.0.blocks.0",
@@ -7762,7 +8109,8 @@
     "stages.2.blocks.4",
     "stages.2.blocks.5",
     "stages.3.blocks.0",
-    "stages.3.blocks.1"
+    "stages.3.blocks.1",
+    "head.fc"
   ],
   "convnext_femto_ols.d1_in1k": [
     "stages.0.blocks.0",
@@ -7776,7 +8124,8 @@
     "stages.2.blocks.4",
     "stages.2.blocks.5",
     "stages.3.blocks.0",
-    "stages.3.blocks.1"
+    "stages.3.blocks.1",
+    "head.fc"
   ],
   "convnext_large.fb_in1k": [
     "stages.0.blocks.0",
@@ -7814,7 +8163,8 @@
     "stages.2.blocks.26",
     "stages.3.blocks.0",
     "stages.3.blocks.1",
-    "stages.3.blocks.2"
+    "stages.3.blocks.2",
+    "head.fc"
   ],
   "convnext_large.fb_in22k": [
     "stages.0.blocks.0",
@@ -7852,7 +8202,8 @@
     "stages.2.blocks.26",
     "stages.3.blocks.0",
     "stages.3.blocks.1",
-    "stages.3.blocks.2"
+    "stages.3.blocks.2",
+    "head.fc"
   ],
   "convnext_large.fb_in22k_ft_in1k": [
     "stages.0.blocks.0",
@@ -7890,7 +8241,8 @@
     "stages.2.blocks.26",
     "stages.3.blocks.0",
     "stages.3.blocks.1",
-    "stages.3.blocks.2"
+    "stages.3.blocks.2",
+    "head.fc"
   ],
   "convnext_large.fb_in22k_ft_in1k_384": [
     "stages.0.blocks.0",
@@ -7928,7 +8280,8 @@
     "stages.2.blocks.26",
     "stages.3.blocks.0",
     "stages.3.blocks.1",
-    "stages.3.blocks.2"
+    "stages.3.blocks.2",
+    "head.fc"
   ],
   "convnext_large_mlp.clip_laion2b_augreg": [
     "stages.0.blocks.0",
@@ -7966,7 +8319,8 @@
     "stages.2.blocks.26",
     "stages.3.blocks.0",
     "stages.3.blocks.1",
-    "stages.3.blocks.2"
+    "stages.3.blocks.2",
+    "head.fc"
   ],
   "convnext_large_mlp.clip_laion2b_augreg_ft_in1k": [
     "stages.0.blocks.0",
@@ -8004,7 +8358,8 @@
     "stages.2.blocks.26",
     "stages.3.blocks.0",
     "stages.3.blocks.1",
-    "stages.3.blocks.2"
+    "stages.3.blocks.2",
+    "head.fc"
   ],
   "convnext_large_mlp.clip_laion2b_augreg_ft_in1k_384": [
     "stages.0.blocks.0",
@@ -8042,7 +8397,8 @@
     "stages.2.blocks.26",
     "stages.3.blocks.0",
     "stages.3.blocks.1",
-    "stages.3.blocks.2"
+    "stages.3.blocks.2",
+    "head.fc"
   ],
   "convnext_large_mlp.clip_laion2b_augreg_ft_in12k_384": [
     "stages.0.blocks.0",
@@ -8080,7 +8436,8 @@
     "stages.2.blocks.26",
     "stages.3.blocks.0",
     "stages.3.blocks.1",
-    "stages.3.blocks.2"
+    "stages.3.blocks.2",
+    "head.fc"
   ],
   "convnext_large_mlp.clip_laion2b_ft_320": [
     "stages.0.blocks.0",
@@ -8118,7 +8475,8 @@
     "stages.2.blocks.26",
     "stages.3.blocks.0",
     "stages.3.blocks.1",
-    "stages.3.blocks.2"
+    "stages.3.blocks.2",
+    "head.fc"
   ],
   "convnext_large_mlp.clip_laion2b_ft_soup_320": [
     "stages.0.blocks.0",
@@ -8156,7 +8514,8 @@
     "stages.2.blocks.26",
     "stages.3.blocks.0",
     "stages.3.blocks.1",
-    "stages.3.blocks.2"
+    "stages.3.blocks.2",
+    "head.fc"
   ],
   "convnext_large_mlp.clip_laion2b_soup_ft_in12k_320": [
     "stages.0.blocks.0",
@@ -8194,7 +8553,8 @@
     "stages.2.blocks.26",
     "stages.3.blocks.0",
     "stages.3.blocks.1",
-    "stages.3.blocks.2"
+    "stages.3.blocks.2",
+    "head.fc"
   ],
   "convnext_large_mlp.clip_laion2b_soup_ft_in12k_384": [
     "stages.0.blocks.0",
@@ -8232,7 +8592,8 @@
     "stages.2.blocks.26",
     "stages.3.blocks.0",
     "stages.3.blocks.1",
-    "stages.3.blocks.2"
+    "stages.3.blocks.2",
+    "head.fc"
   ],
   "convnext_large_mlp.clip_laion2b_soup_ft_in12k_in1k_320": [
     "stages.0.blocks.0",
@@ -8270,7 +8631,8 @@
     "stages.2.blocks.26",
     "stages.3.blocks.0",
     "stages.3.blocks.1",
-    "stages.3.blocks.2"
+    "stages.3.blocks.2",
+    "head.fc"
   ],
   "convnext_large_mlp.clip_laion2b_soup_ft_in12k_in1k_384": [
     "stages.0.blocks.0",
@@ -8308,7 +8670,8 @@
     "stages.2.blocks.26",
     "stages.3.blocks.0",
     "stages.3.blocks.1",
-    "stages.3.blocks.2"
+    "stages.3.blocks.2",
+    "head.fc"
   ],
   "convnext_nano.d1h_in1k": [
     "stages.0.blocks.0",
@@ -8324,7 +8687,8 @@
     "stages.2.blocks.6",
     "stages.2.blocks.7",
     "stages.3.blocks.0",
-    "stages.3.blocks.1"
+    "stages.3.blocks.1",
+    "head.fc"
   ],
   "convnext_nano.in12k": [
     "stages.0.blocks.0",
@@ -8340,7 +8704,8 @@
     "stages.2.blocks.6",
     "stages.2.blocks.7",
     "stages.3.blocks.0",
-    "stages.3.blocks.1"
+    "stages.3.blocks.1",
+    "head.fc"
   ],
   "convnext_nano.in12k_ft_in1k": [
     "stages.0.blocks.0",
@@ -8356,7 +8721,8 @@
     "stages.2.blocks.6",
     "stages.2.blocks.7",
     "stages.3.blocks.0",
-    "stages.3.blocks.1"
+    "stages.3.blocks.1",
+    "head.fc"
   ],
   "convnext_nano_ols.d1h_in1k": [
     "stages.0.blocks.0",
@@ -8372,7 +8738,8 @@
     "stages.2.blocks.6",
     "stages.2.blocks.7",
     "stages.3.blocks.0",
-    "stages.3.blocks.1"
+    "stages.3.blocks.1",
+    "head.fc"
   ],
   "convnext_pico.d1_in1k": [
     "stages.0.blocks.0",
@@ -8386,7 +8753,8 @@
     "stages.2.blocks.4",
     "stages.2.blocks.5",
     "stages.3.blocks.0",
-    "stages.3.blocks.1"
+    "stages.3.blocks.1",
+    "head.fc"
   ],
   "convnext_pico_ols.d1_in1k": [
     "stages.0.blocks.0",
@@ -8400,7 +8768,8 @@
     "stages.2.blocks.4",
     "stages.2.blocks.5",
     "stages.3.blocks.0",
-    "stages.3.blocks.1"
+    "stages.3.blocks.1",
+    "head.fc"
   ],
   "convnext_small.fb_in1k": [
     "stages.0.blocks.0",
@@ -8438,7 +8807,8 @@
     "stages.2.blocks.26",
     "stages.3.blocks.0",
     "stages.3.blocks.1",
-    "stages.3.blocks.2"
+    "stages.3.blocks.2",
+    "head.fc"
   ],
   "convnext_small.fb_in22k": [
     "stages.0.blocks.0",
@@ -8476,7 +8846,8 @@
     "stages.2.blocks.26",
     "stages.3.blocks.0",
     "stages.3.blocks.1",
-    "stages.3.blocks.2"
+    "stages.3.blocks.2",
+    "head.fc"
   ],
   "convnext_small.fb_in22k_ft_in1k": [
     "stages.0.blocks.0",
@@ -8514,7 +8885,8 @@
     "stages.2.blocks.26",
     "stages.3.blocks.0",
     "stages.3.blocks.1",
-    "stages.3.blocks.2"
+    "stages.3.blocks.2",
+    "head.fc"
   ],
   "convnext_small.fb_in22k_ft_in1k_384": [
     "stages.0.blocks.0",
@@ -8552,7 +8924,8 @@
     "stages.2.blocks.26",
     "stages.3.blocks.0",
     "stages.3.blocks.1",
-    "stages.3.blocks.2"
+    "stages.3.blocks.2",
+    "head.fc"
   ],
   "convnext_small.in12k": [
     "stages.0.blocks.0",
@@ -8590,7 +8963,8 @@
     "stages.2.blocks.26",
     "stages.3.blocks.0",
     "stages.3.blocks.1",
-    "stages.3.blocks.2"
+    "stages.3.blocks.2",
+    "head.fc"
   ],
   "convnext_small.in12k_ft_in1k": [
     "stages.0.blocks.0",
@@ -8628,7 +9002,8 @@
     "stages.2.blocks.26",
     "stages.3.blocks.0",
     "stages.3.blocks.1",
-    "stages.3.blocks.2"
+    "stages.3.blocks.2",
+    "head.fc"
   ],
   "convnext_small.in12k_ft_in1k_384": [
     "stages.0.blocks.0",
@@ -8666,7 +9041,8 @@
     "stages.2.blocks.26",
     "stages.3.blocks.0",
     "stages.3.blocks.1",
-    "stages.3.blocks.2"
+    "stages.3.blocks.2",
+    "head.fc"
   ],
   "convnext_tiny.fb_in1k": [
     "stages.0.blocks.0",
@@ -8686,7 +9062,8 @@
     "stages.2.blocks.8",
     "stages.3.blocks.0",
     "stages.3.blocks.1",
-    "stages.3.blocks.2"
+    "stages.3.blocks.2",
+    "head.fc"
   ],
   "convnext_tiny.fb_in22k": [
     "stages.0.blocks.0",
@@ -8706,7 +9083,8 @@
     "stages.2.blocks.8",
     "stages.3.blocks.0",
     "stages.3.blocks.1",
-    "stages.3.blocks.2"
+    "stages.3.blocks.2",
+    "head.fc"
   ],
   "convnext_tiny.fb_in22k_ft_in1k": [
     "stages.0.blocks.0",
@@ -8726,7 +9104,8 @@
     "stages.2.blocks.8",
     "stages.3.blocks.0",
     "stages.3.blocks.1",
-    "stages.3.blocks.2"
+    "stages.3.blocks.2",
+    "head.fc"
   ],
   "convnext_tiny.fb_in22k_ft_in1k_384": [
     "stages.0.blocks.0",
@@ -8746,7 +9125,8 @@
     "stages.2.blocks.8",
     "stages.3.blocks.0",
     "stages.3.blocks.1",
-    "stages.3.blocks.2"
+    "stages.3.blocks.2",
+    "head.fc"
   ],
   "convnext_tiny.in12k": [
     "stages.0.blocks.0",
@@ -8766,7 +9146,8 @@
     "stages.2.blocks.8",
     "stages.3.blocks.0",
     "stages.3.blocks.1",
-    "stages.3.blocks.2"
+    "stages.3.blocks.2",
+    "head.fc"
   ],
   "convnext_tiny.in12k_ft_in1k": [
     "stages.0.blocks.0",
@@ -8786,7 +9167,8 @@
     "stages.2.blocks.8",
     "stages.3.blocks.0",
     "stages.3.blocks.1",
-    "stages.3.blocks.2"
+    "stages.3.blocks.2",
+    "head.fc"
   ],
   "convnext_tiny.in12k_ft_in1k_384": [
     "stages.0.blocks.0",
@@ -8806,7 +9188,8 @@
     "stages.2.blocks.8",
     "stages.3.blocks.0",
     "stages.3.blocks.1",
-    "stages.3.blocks.2"
+    "stages.3.blocks.2",
+    "head.fc"
   ],
   "convnext_tiny_hnf.a2h_in1k": [
     "stages.0.blocks.0",
@@ -8826,7 +9209,8 @@
     "stages.2.blocks.8",
     "stages.3.blocks.0",
     "stages.3.blocks.1",
-    "stages.3.blocks.2"
+    "stages.3.blocks.2",
+    "head.flatten"
   ],
   "convnext_xlarge.fb_in22k": [
     "stages.0.blocks.0",
@@ -8864,7 +9248,8 @@
     "stages.2.blocks.26",
     "stages.3.blocks.0",
     "stages.3.blocks.1",
-    "stages.3.blocks.2"
+    "stages.3.blocks.2",
+    "head.fc"
   ],
   "convnext_xlarge.fb_in22k_ft_in1k": [
     "stages.0.blocks.0",
@@ -8902,7 +9287,8 @@
     "stages.2.blocks.26",
     "stages.3.blocks.0",
     "stages.3.blocks.1",
-    "stages.3.blocks.2"
+    "stages.3.blocks.2",
+    "head.fc"
   ],
   "convnext_xlarge.fb_in22k_ft_in1k_384": [
     "stages.0.blocks.0",
@@ -8940,7 +9326,8 @@
     "stages.2.blocks.26",
     "stages.3.blocks.0",
     "stages.3.blocks.1",
-    "stages.3.blocks.2"
+    "stages.3.blocks.2",
+    "head.fc"
   ],
   "convnext_xxlarge.clip_laion2b_rewind": [
     "stages.0.blocks.0",
@@ -8982,7 +9369,8 @@
     "stages.2.blocks.29",
     "stages.3.blocks.0",
     "stages.3.blocks.1",
-    "stages.3.blocks.2"
+    "stages.3.blocks.2",
+    "head.fc"
   ],
   "convnext_xxlarge.clip_laion2b_soup": [
     "stages.0.blocks.0",
@@ -9024,7 +9412,8 @@
     "stages.2.blocks.29",
     "stages.3.blocks.0",
     "stages.3.blocks.1",
-    "stages.3.blocks.2"
+    "stages.3.blocks.2",
+    "head.fc"
   ],
   "convnext_xxlarge.clip_laion2b_soup_ft_in1k": [
     "stages.0.blocks.0",
@@ -9066,7 +9455,8 @@
     "stages.2.blocks.29",
     "stages.3.blocks.0",
     "stages.3.blocks.1",
-    "stages.3.blocks.2"
+    "stages.3.blocks.2",
+    "head.fc"
   ],
   "convnext_xxlarge.clip_laion2b_soup_ft_in12k": [
     "stages.0.blocks.0",
@@ -9108,7 +9498,8 @@
     "stages.2.blocks.29",
     "stages.3.blocks.0",
     "stages.3.blocks.1",
-    "stages.3.blocks.2"
+    "stages.3.blocks.2",
+    "head.fc"
   ],
   "convnextv2_atto.fcmae": [
     "stages.0.blocks.0",
@@ -9122,7 +9513,8 @@
     "stages.2.blocks.4",
     "stages.2.blocks.5",
     "stages.3.blocks.0",
-    "stages.3.blocks.1"
+    "stages.3.blocks.1",
+    "head.fc"
   ],
   "convnextv2_atto.fcmae_ft_in1k": [
     "stages.0.blocks.0",
@@ -9136,7 +9528,8 @@
     "stages.2.blocks.4",
     "stages.2.blocks.5",
     "stages.3.blocks.0",
-    "stages.3.blocks.1"
+    "stages.3.blocks.1",
+    "head.fc"
   ],
   "convnextv2_base.fcmae": [
     "stages.0.blocks.0",
@@ -9174,7 +9567,8 @@
     "stages.2.blocks.26",
     "stages.3.blocks.0",
     "stages.3.blocks.1",
-    "stages.3.blocks.2"
+    "stages.3.blocks.2",
+    "head.fc"
   ],
   "convnextv2_base.fcmae_ft_in1k": [
     "stages.0.blocks.0",
@@ -9212,7 +9606,8 @@
     "stages.2.blocks.26",
     "stages.3.blocks.0",
     "stages.3.blocks.1",
-    "stages.3.blocks.2"
+    "stages.3.blocks.2",
+    "head.fc"
   ],
   "convnextv2_base.fcmae_ft_in22k_in1k": [
     "stages.0.blocks.0",
@@ -9250,7 +9645,8 @@
     "stages.2.blocks.26",
     "stages.3.blocks.0",
     "stages.3.blocks.1",
-    "stages.3.blocks.2"
+    "stages.3.blocks.2",
+    "head.fc"
   ],
   "convnextv2_base.fcmae_ft_in22k_in1k_384": [
     "stages.0.blocks.0",
@@ -9288,7 +9684,8 @@
     "stages.2.blocks.26",
     "stages.3.blocks.0",
     "stages.3.blocks.1",
-    "stages.3.blocks.2"
+    "stages.3.blocks.2",
+    "head.fc"
   ],
   "convnextv2_femto.fcmae": [
     "stages.0.blocks.0",
@@ -9302,7 +9699,8 @@
     "stages.2.blocks.4",
     "stages.2.blocks.5",
     "stages.3.blocks.0",
-    "stages.3.blocks.1"
+    "stages.3.blocks.1",
+    "head.fc"
   ],
   "convnextv2_femto.fcmae_ft_in1k": [
     "stages.0.blocks.0",
@@ -9316,7 +9714,8 @@
     "stages.2.blocks.4",
     "stages.2.blocks.5",
     "stages.3.blocks.0",
-    "stages.3.blocks.1"
+    "stages.3.blocks.1",
+    "head.fc"
   ],
   "convnextv2_huge.fcmae": [
     "stages.0.blocks.0",
@@ -9354,7 +9753,8 @@
     "stages.2.blocks.26",
     "stages.3.blocks.0",
     "stages.3.blocks.1",
-    "stages.3.blocks.2"
+    "stages.3.blocks.2",
+    "head.fc"
   ],
   "convnextv2_huge.fcmae_ft_in1k": [
     "stages.0.blocks.0",
@@ -9392,7 +9792,8 @@
     "stages.2.blocks.26",
     "stages.3.blocks.0",
     "stages.3.blocks.1",
-    "stages.3.blocks.2"
+    "stages.3.blocks.2",
+    "head.fc"
   ],
   "convnextv2_huge.fcmae_ft_in22k_in1k_384": [
     "stages.0.blocks.0",
@@ -9430,7 +9831,8 @@
     "stages.2.blocks.26",
     "stages.3.blocks.0",
     "stages.3.blocks.1",
-    "stages.3.blocks.2"
+    "stages.3.blocks.2",
+    "head.fc"
   ],
   "convnextv2_huge.fcmae_ft_in22k_in1k_512": [
     "stages.0.blocks.0",
@@ -9468,7 +9870,8 @@
     "stages.2.blocks.26",
     "stages.3.blocks.0",
     "stages.3.blocks.1",
-    "stages.3.blocks.2"
+    "stages.3.blocks.2",
+    "head.fc"
   ],
   "convnextv2_large.fcmae": [
     "stages.0.blocks.0",
@@ -9506,7 +9909,8 @@
     "stages.2.blocks.26",
     "stages.3.blocks.0",
     "stages.3.blocks.1",
-    "stages.3.blocks.2"
+    "stages.3.blocks.2",
+    "head.fc"
   ],
   "convnextv2_large.fcmae_ft_in1k": [
     "stages.0.blocks.0",
@@ -9544,7 +9948,8 @@
     "stages.2.blocks.26",
     "stages.3.blocks.0",
     "stages.3.blocks.1",
-    "stages.3.blocks.2"
+    "stages.3.blocks.2",
+    "head.fc"
   ],
   "convnextv2_large.fcmae_ft_in22k_in1k": [
     "stages.0.blocks.0",
@@ -9582,7 +9987,8 @@
     "stages.2.blocks.26",
     "stages.3.blocks.0",
     "stages.3.blocks.1",
-    "stages.3.blocks.2"
+    "stages.3.blocks.2",
+    "head.fc"
   ],
   "convnextv2_large.fcmae_ft_in22k_in1k_384": [
     "stages.0.blocks.0",
@@ -9620,7 +10026,8 @@
     "stages.2.blocks.26",
     "stages.3.blocks.0",
     "stages.3.blocks.1",
-    "stages.3.blocks.2"
+    "stages.3.blocks.2",
+    "head.fc"
   ],
   "convnextv2_nano.fcmae": [
     "stages.0.blocks.0",
@@ -9636,7 +10043,8 @@
     "stages.2.blocks.6",
     "stages.2.blocks.7",
     "stages.3.blocks.0",
-    "stages.3.blocks.1"
+    "stages.3.blocks.1",
+    "head.fc"
   ],
   "convnextv2_nano.fcmae_ft_in1k": [
     "stages.0.blocks.0",
@@ -9652,7 +10060,8 @@
     "stages.2.blocks.6",
     "stages.2.blocks.7",
     "stages.3.blocks.0",
-    "stages.3.blocks.1"
+    "stages.3.blocks.1",
+    "head.fc"
   ],
   "convnextv2_nano.fcmae_ft_in22k_in1k": [
     "stages.0.blocks.0",
@@ -9668,7 +10077,8 @@
     "stages.2.blocks.6",
     "stages.2.blocks.7",
     "stages.3.blocks.0",
-    "stages.3.blocks.1"
+    "stages.3.blocks.1",
+    "head.fc"
   ],
   "convnextv2_nano.fcmae_ft_in22k_in1k_384": [
     "stages.0.blocks.0",
@@ -9684,7 +10094,8 @@
     "stages.2.blocks.6",
     "stages.2.blocks.7",
     "stages.3.blocks.0",
-    "stages.3.blocks.1"
+    "stages.3.blocks.1",
+    "head.fc"
   ],
   "convnextv2_pico.fcmae": [
     "stages.0.blocks.0",
@@ -9698,7 +10109,8 @@
     "stages.2.blocks.4",
     "stages.2.blocks.5",
     "stages.3.blocks.0",
-    "stages.3.blocks.1"
+    "stages.3.blocks.1",
+    "head.fc"
   ],
   "convnextv2_pico.fcmae_ft_in1k": [
     "stages.0.blocks.0",
@@ -9712,7 +10124,8 @@
     "stages.2.blocks.4",
     "stages.2.blocks.5",
     "stages.3.blocks.0",
-    "stages.3.blocks.1"
+    "stages.3.blocks.1",
+    "head.fc"
   ],
   "convnextv2_tiny.fcmae": [
     "stages.0.blocks.0",
@@ -9732,7 +10145,8 @@
     "stages.2.blocks.8",
     "stages.3.blocks.0",
     "stages.3.blocks.1",
-    "stages.3.blocks.2"
+    "stages.3.blocks.2",
+    "head.fc"
   ],
   "convnextv2_tiny.fcmae_ft_in1k": [
     "stages.0.blocks.0",
@@ -9752,7 +10166,8 @@
     "stages.2.blocks.8",
     "stages.3.blocks.0",
     "stages.3.blocks.1",
-    "stages.3.blocks.2"
+    "stages.3.blocks.2",
+    "head.fc"
   ],
   "convnextv2_tiny.fcmae_ft_in22k_in1k": [
     "stages.0.blocks.0",
@@ -9772,7 +10187,8 @@
     "stages.2.blocks.8",
     "stages.3.blocks.0",
     "stages.3.blocks.1",
-    "stages.3.blocks.2"
+    "stages.3.blocks.2",
+    "head.fc"
   ],
   "convnextv2_tiny.fcmae_ft_in22k_in1k_384": [
     "stages.0.blocks.0",
@@ -9792,7 +10208,8 @@
     "stages.2.blocks.8",
     "stages.3.blocks.0",
     "stages.3.blocks.1",
-    "stages.3.blocks.2"
+    "stages.3.blocks.2",
+    "head.fc"
   ],
   "levit_128.fb_dist_in1k": [
     "stages.0.blocks.0",
@@ -9806,7 +10223,8 @@
     "stages.2.blocks.0",
     "stages.2.blocks.1",
     "stages.2.blocks.2",
-    "stages.2.blocks.3"
+    "stages.2.blocks.3",
+    "head_dist.linear"
   ],
   "levit_128s.fb_dist_in1k": [
     "stages.0.blocks.0",
@@ -9817,7 +10235,8 @@
     "stages.2.blocks.0",
     "stages.2.blocks.1",
     "stages.2.blocks.2",
-    "stages.2.blocks.3"
+    "stages.2.blocks.3",
+    "head_dist.linear"
   ],
   "levit_192.fb_dist_in1k": [
     "stages.0.blocks.0",
@@ -9831,7 +10250,8 @@
     "stages.2.blocks.0",
     "stages.2.blocks.1",
     "stages.2.blocks.2",
-    "stages.2.blocks.3"
+    "stages.2.blocks.3",
+    "head_dist.linear"
   ],
   "levit_256.fb_dist_in1k": [
     "stages.0.blocks.0",
@@ -9845,7 +10265,8 @@
     "stages.2.blocks.0",
     "stages.2.blocks.1",
     "stages.2.blocks.2",
-    "stages.2.blocks.3"
+    "stages.2.blocks.3",
+    "head_dist.linear"
   ],
   "levit_384.fb_dist_in1k": [
     "stages.0.blocks.0",
@@ -9859,7 +10280,8 @@
     "stages.2.blocks.0",
     "stages.2.blocks.1",
     "stages.2.blocks.2",
-    "stages.2.blocks.3"
+    "stages.2.blocks.3",
+    "head_dist.linear"
   ],
   "levit_conv_128.fb_dist_in1k": [
     "stages.0.blocks.0",
@@ -9873,7 +10295,8 @@
     "stages.2.blocks.0",
     "stages.2.blocks.1",
     "stages.2.blocks.2",
-    "stages.2.blocks.3"
+    "stages.2.blocks.3",
+    "head_dist.linear"
   ],
   "levit_conv_128s.fb_dist_in1k": [
     "stages.0.blocks.0",
@@ -9884,7 +10307,8 @@
     "stages.2.blocks.0",
     "stages.2.blocks.1",
     "stages.2.blocks.2",
-    "stages.2.blocks.3"
+    "stages.2.blocks.3",
+    "head_dist.linear"
   ],
   "levit_conv_192.fb_dist_in1k": [
     "stages.0.blocks.0",
@@ -9898,7 +10322,8 @@
     "stages.2.blocks.0",
     "stages.2.blocks.1",
     "stages.2.blocks.2",
-    "stages.2.blocks.3"
+    "stages.2.blocks.3",
+    "head_dist.linear"
   ],
   "levit_conv_256.fb_dist_in1k": [
     "stages.0.blocks.0",
@@ -9912,7 +10337,8 @@
     "stages.2.blocks.0",
     "stages.2.blocks.1",
     "stages.2.blocks.2",
-    "stages.2.blocks.3"
+    "stages.2.blocks.3",
+    "head_dist.linear"
   ],
   "levit_conv_384.fb_dist_in1k": [
     "stages.0.blocks.0",
@@ -9926,7 +10352,8 @@
     "stages.2.blocks.0",
     "stages.2.blocks.1",
     "stages.2.blocks.2",
-    "stages.2.blocks.3"
+    "stages.2.blocks.3",
+    "head_dist.linear"
   ],
   "maxvit_base_tf_224.in1k": [
     "stages.0.blocks.0",
@@ -9952,7 +10379,8 @@
     "stages.2.blocks.12",
     "stages.2.blocks.13",
     "stages.3.blocks.0",
-    "stages.3.blocks.1"
+    "stages.3.blocks.1",
+    "head.fc"
   ],
   "maxvit_base_tf_224.in21k": [
     "stages.0.blocks.0",
@@ -9978,7 +10406,8 @@
     "stages.2.blocks.12",
     "stages.2.blocks.13",
     "stages.3.blocks.0",
-    "stages.3.blocks.1"
+    "stages.3.blocks.1",
+    "head.fc"
   ],
   "maxvit_base_tf_384.in1k": [
     "stages.0.blocks.0",
@@ -10004,7 +10433,8 @@
     "stages.2.blocks.12",
     "stages.2.blocks.13",
     "stages.3.blocks.0",
-    "stages.3.blocks.1"
+    "stages.3.blocks.1",
+    "head.fc"
   ],
   "maxvit_base_tf_384.in21k_ft_in1k": [
     "stages.0.blocks.0",
@@ -10030,7 +10460,8 @@
     "stages.2.blocks.12",
     "stages.2.blocks.13",
     "stages.3.blocks.0",
-    "stages.3.blocks.1"
+    "stages.3.blocks.1",
+    "head.fc"
   ],
   "maxvit_base_tf_512.in1k": [
     "stages.0.blocks.0",
@@ -10056,7 +10487,8 @@
     "stages.2.blocks.12",
     "stages.2.blocks.13",
     "stages.3.blocks.0",
-    "stages.3.blocks.1"
+    "stages.3.blocks.1",
+    "head.fc"
   ],
   "maxvit_base_tf_512.in21k_ft_in1k": [
     "stages.0.blocks.0",
@@ -10082,7 +10514,8 @@
     "stages.2.blocks.12",
     "stages.2.blocks.13",
     "stages.3.blocks.0",
-    "stages.3.blocks.1"
+    "stages.3.blocks.1",
+    "head.fc"
   ],
   "maxvit_large_tf_224.in1k": [
     "stages.0.blocks.0",
@@ -10108,7 +10541,8 @@
     "stages.2.blocks.12",
     "stages.2.blocks.13",
     "stages.3.blocks.0",
-    "stages.3.blocks.1"
+    "stages.3.blocks.1",
+    "head.fc"
   ],
   "maxvit_large_tf_224.in21k": [
     "stages.0.blocks.0",
@@ -10134,7 +10568,8 @@
     "stages.2.blocks.12",
     "stages.2.blocks.13",
     "stages.3.blocks.0",
-    "stages.3.blocks.1"
+    "stages.3.blocks.1",
+    "head.fc"
   ],
   "maxvit_large_tf_384.in1k": [
     "stages.0.blocks.0",
@@ -10160,7 +10595,8 @@
     "stages.2.blocks.12",
     "stages.2.blocks.13",
     "stages.3.blocks.0",
-    "stages.3.blocks.1"
+    "stages.3.blocks.1",
+    "head.fc"
   ],
   "maxvit_large_tf_384.in21k_ft_in1k": [
     "stages.0.blocks.0",
@@ -10186,7 +10622,8 @@
     "stages.2.blocks.12",
     "stages.2.blocks.13",
     "stages.3.blocks.0",
-    "stages.3.blocks.1"
+    "stages.3.blocks.1",
+    "head.fc"
   ],
   "maxvit_large_tf_512.in1k": [
     "stages.0.blocks.0",
@@ -10212,7 +10649,8 @@
     "stages.2.blocks.12",
     "stages.2.blocks.13",
     "stages.3.blocks.0",
-    "stages.3.blocks.1"
+    "stages.3.blocks.1",
+    "head.fc"
   ],
   "maxvit_large_tf_512.in21k_ft_in1k": [
     "stages.0.blocks.0",
@@ -10238,7 +10676,8 @@
     "stages.2.blocks.12",
     "stages.2.blocks.13",
     "stages.3.blocks.0",
-    "stages.3.blocks.1"
+    "stages.3.blocks.1",
+    "head.fc"
   ],
   "maxvit_nano_rw_256.sw_in1k": [
     "stages.0.blocks.0",
@@ -10247,7 +10686,8 @@
     "stages.2.blocks.0",
     "stages.2.blocks.1",
     "stages.2.blocks.2",
-    "stages.3.blocks.0"
+    "stages.3.blocks.0",
+    "head.flatten"
   ],
   "maxvit_rmlp_base_rw_224.sw_in12k": [
     "stages.0.blocks.0",
@@ -10273,7 +10713,8 @@
     "stages.2.blocks.12",
     "stages.2.blocks.13",
     "stages.3.blocks.0",
-    "stages.3.blocks.1"
+    "stages.3.blocks.1",
+    "head.fc"
   ],
   "maxvit_rmlp_base_rw_224.sw_in12k_ft_in1k": [
     "stages.0.blocks.0",
@@ -10299,7 +10740,8 @@
     "stages.2.blocks.12",
     "stages.2.blocks.13",
     "stages.3.blocks.0",
-    "stages.3.blocks.1"
+    "stages.3.blocks.1",
+    "head.fc"
   ],
   "maxvit_rmlp_base_rw_384.sw_in12k_ft_in1k": [
     "stages.0.blocks.0",
@@ -10325,7 +10767,8 @@
     "stages.2.blocks.12",
     "stages.2.blocks.13",
     "stages.3.blocks.0",
-    "stages.3.blocks.1"
+    "stages.3.blocks.1",
+    "head.fc"
   ],
   "maxvit_rmlp_nano_rw_256.sw_in1k": [
     "stages.0.blocks.0",
@@ -10334,7 +10777,8 @@
     "stages.2.blocks.0",
     "stages.2.blocks.1",
     "stages.2.blocks.2",
-    "stages.3.blocks.0"
+    "stages.3.blocks.0",
+    "head.flatten"
   ],
   "maxvit_rmlp_pico_rw_256.sw_in1k": [
     "stages.0.blocks.0",
@@ -10347,7 +10791,8 @@
     "stages.2.blocks.3",
     "stages.2.blocks.4",
     "stages.3.blocks.0",
-    "stages.3.blocks.1"
+    "stages.3.blocks.1",
+    "head.flatten"
   ],
   "maxvit_rmlp_small_rw_224.sw_in1k": [
     "stages.0.blocks.0",
@@ -10360,7 +10805,8 @@
     "stages.2.blocks.3",
     "stages.2.blocks.4",
     "stages.3.blocks.0",
-    "stages.3.blocks.1"
+    "stages.3.blocks.1",
+    "head.flatten"
   ],
   "maxvit_rmlp_tiny_rw_256.sw_in1k": [
     "stages.0.blocks.0",
@@ -10373,7 +10819,8 @@
     "stages.2.blocks.3",
     "stages.2.blocks.4",
     "stages.3.blocks.0",
-    "stages.3.blocks.1"
+    "stages.3.blocks.1",
+    "head.flatten"
   ],
   "maxvit_small_tf_224.in1k": [
     "stages.0.blocks.0",
@@ -10386,7 +10833,8 @@
     "stages.2.blocks.3",
     "stages.2.blocks.4",
     "stages.3.blocks.0",
-    "stages.3.blocks.1"
+    "stages.3.blocks.1",
+    "head.fc"
   ],
   "maxvit_small_tf_384.in1k": [
     "stages.0.blocks.0",
@@ -10399,7 +10847,8 @@
     "stages.2.blocks.3",
     "stages.2.blocks.4",
     "stages.3.blocks.0",
-    "stages.3.blocks.1"
+    "stages.3.blocks.1",
+    "head.fc"
   ],
   "maxvit_small_tf_512.in1k": [
     "stages.0.blocks.0",
@@ -10412,7 +10861,8 @@
     "stages.2.blocks.3",
     "stages.2.blocks.4",
     "stages.3.blocks.0",
-    "stages.3.blocks.1"
+    "stages.3.blocks.1",
+    "head.fc"
   ],
   "maxvit_tiny_rw_224.sw_in1k": [
     "stages.0.blocks.0",
@@ -10425,7 +10875,8 @@
     "stages.2.blocks.3",
     "stages.2.blocks.4",
     "stages.3.blocks.0",
-    "stages.3.blocks.1"
+    "stages.3.blocks.1",
+    "head.flatten"
   ],
   "maxvit_tiny_tf_224.in1k": [
     "stages.0.blocks.0",
@@ -10438,7 +10889,8 @@
     "stages.2.blocks.3",
     "stages.2.blocks.4",
     "stages.3.blocks.0",
-    "stages.3.blocks.1"
+    "stages.3.blocks.1",
+    "head.fc"
   ],
   "maxvit_tiny_tf_384.in1k": [
     "stages.0.blocks.0",
@@ -10451,7 +10903,8 @@
     "stages.2.blocks.3",
     "stages.2.blocks.4",
     "stages.3.blocks.0",
-    "stages.3.blocks.1"
+    "stages.3.blocks.1",
+    "head.fc"
   ],
   "maxvit_tiny_tf_512.in1k": [
     "stages.0.blocks.0",
@@ -10464,7 +10917,8 @@
     "stages.2.blocks.3",
     "stages.2.blocks.4",
     "stages.3.blocks.0",
-    "stages.3.blocks.1"
+    "stages.3.blocks.1",
+    "head.fc"
   ],
   "maxvit_xlarge_tf_224.in21k": [
     "stages.0.blocks.0",
@@ -10490,7 +10944,8 @@
     "stages.2.blocks.12",
     "stages.2.blocks.13",
     "stages.3.blocks.0",
-    "stages.3.blocks.1"
+    "stages.3.blocks.1",
+    "head.fc"
   ],
   "maxvit_xlarge_tf_384.in21k_ft_in1k": [
     "stages.0.blocks.0",
@@ -10516,7 +10971,8 @@
     "stages.2.blocks.12",
     "stages.2.blocks.13",
     "stages.3.blocks.0",
-    "stages.3.blocks.1"
+    "stages.3.blocks.1",
+    "head.fc"
   ],
   "maxvit_xlarge_tf_512.in21k_ft_in1k": [
     "stages.0.blocks.0",
@@ -10542,7 +10998,8 @@
     "stages.2.blocks.12",
     "stages.2.blocks.13",
     "stages.3.blocks.0",
-    "stages.3.blocks.1"
+    "stages.3.blocks.1",
+    "head.fc"
   ],
   "maxxvit_rmlp_nano_rw_256.sw_in1k": [
     "stages.0.blocks.0",
@@ -10551,7 +11008,8 @@
     "stages.2.blocks.0",
     "stages.2.blocks.1",
     "stages.2.blocks.2",
-    "stages.3.blocks.0"
+    "stages.3.blocks.0",
+    "head.flatten"
   ],
   "maxxvit_rmlp_small_rw_256.sw_in1k": [
     "stages.0.blocks.0",
@@ -10564,7 +11022,8 @@
     "stages.2.blocks.3",
     "stages.2.blocks.4",
     "stages.3.blocks.0",
-    "stages.3.blocks.1"
+    "stages.3.blocks.1",
+    "head.flatten"
   ],
   "maxxvitv2_nano_rw_256.sw_in1k": [
     "stages.0.blocks.0",
@@ -10573,7 +11032,8 @@
     "stages.2.blocks.0",
     "stages.2.blocks.1",
     "stages.2.blocks.2",
-    "stages.3.blocks.0"
+    "stages.3.blocks.0",
+    "head.flatten"
   ],
   "maxxvitv2_rmlp_base_rw_224.sw_in12k": [
     "stages.0.blocks.0",
@@ -10597,7 +11057,8 @@
     "stages.2.blocks.10",
     "stages.2.blocks.11",
     "stages.3.blocks.0",
-    "stages.3.blocks.1"
+    "stages.3.blocks.1",
+    "head.flatten"
   ],
   "maxxvitv2_rmlp_base_rw_224.sw_in12k_ft_in1k": [
     "stages.0.blocks.0",
@@ -10621,7 +11082,8 @@
     "stages.2.blocks.10",
     "stages.2.blocks.11",
     "stages.3.blocks.0",
-    "stages.3.blocks.1"
+    "stages.3.blocks.1",
+    "head.flatten"
   ],
   "maxxvitv2_rmlp_base_rw_384.sw_in12k_ft_in1k": [
     "stages.0.blocks.0",
@@ -10645,19 +11107,22 @@
     "stages.2.blocks.10",
     "stages.2.blocks.11",
     "stages.3.blocks.0",
-    "stages.3.blocks.1"
+    "stages.3.blocks.1",
+    "head.flatten"
   ],
   "resnet10t.c3_in1k": [
     "layer1.0",
     "layer2.0",
     "layer3.0",
-    "layer4.0"
+    "layer4.0",
+    "fc"
   ],
   "resnet14t.c3_in1k": [
     "layer1.0",
     "layer2.0",
     "layer3.0",
-    "layer4.0"
+    "layer4.0",
+    "fc"
   ],
   "resnet18.a1_in1k": [
     "layer1.0",
@@ -10667,7 +11132,8 @@
     "layer3.0",
     "layer3.1",
     "layer4.0",
-    "layer4.1"
+    "layer4.1",
+    "fc"
   ],
   "resnet18.a2_in1k": [
     "layer1.0",
@@ -10677,7 +11143,8 @@
     "layer3.0",
     "layer3.1",
     "layer4.0",
-    "layer4.1"
+    "layer4.1",
+    "fc"
   ],
   "resnet18.a3_in1k": [
     "layer1.0",
@@ -10687,7 +11154,8 @@
     "layer3.0",
     "layer3.1",
     "layer4.0",
-    "layer4.1"
+    "layer4.1",
+    "fc"
   ],
   "resnet18.fb_ssl_yfcc100m_ft_in1k": [
     "layer1.0",
@@ -10697,7 +11165,8 @@
     "layer3.0",
     "layer3.1",
     "layer4.0",
-    "layer4.1"
+    "layer4.1",
+    "fc"
   ],
   "resnet18.fb_swsl_ig1b_ft_in1k": [
     "layer1.0",
@@ -10707,7 +11176,8 @@
     "layer3.0",
     "layer3.1",
     "layer4.0",
-    "layer4.1"
+    "layer4.1",
+    "fc"
   ],
   "resnet18.gluon_in1k": [
     "layer1.0",
@@ -10717,7 +11187,8 @@
     "layer3.0",
     "layer3.1",
     "layer4.0",
-    "layer4.1"
+    "layer4.1",
+    "fc"
   ],
   "resnet18.tv_in1k": [
     "layer1.0",
@@ -10727,7 +11198,8 @@
     "layer3.0",
     "layer3.1",
     "layer4.0",
-    "layer4.1"
+    "layer4.1",
+    "fc"
   ],
   "resnet18d.ra2_in1k": [
     "layer1.0",
@@ -10737,7 +11209,8 @@
     "layer3.0",
     "layer3.1",
     "layer4.0",
-    "layer4.1"
+    "layer4.1",
+    "fc"
   ],
   "resnet26.bt_in1k": [
     "layer1.0",
@@ -10747,7 +11220,8 @@
     "layer3.0",
     "layer3.1",
     "layer4.0",
-    "layer4.1"
+    "layer4.1",
+    "fc"
   ],
   "resnet26d.bt_in1k": [
     "layer1.0",
@@ -10757,7 +11231,8 @@
     "layer3.0",
     "layer3.1",
     "layer4.0",
-    "layer4.1"
+    "layer4.1",
+    "fc"
   ],
   "resnet26t.ra2_in1k": [
     "layer1.0",
@@ -10767,10 +11242,15 @@
     "layer3.0",
     "layer3.1",
     "layer4.0",
-    "layer4.1"
+    "layer4.1",
+    "fc"
   ],
-  "resnet32ts.ra2_in1k": [],
-  "resnet33ts.ra2_in1k": [],
+  "resnet32ts.ra2_in1k": [
+    "head.flatten"
+  ],
+  "resnet33ts.ra2_in1k": [
+    "head.flatten"
+  ],
   "resnet34.a1_in1k": [
     "layer1.0",
     "layer1.1",
@@ -10787,7 +11267,8 @@
     "layer3.5",
     "layer4.0",
     "layer4.1",
-    "layer4.2"
+    "layer4.2",
+    "fc"
   ],
   "resnet34.a2_in1k": [
     "layer1.0",
@@ -10805,7 +11286,8 @@
     "layer3.5",
     "layer4.0",
     "layer4.1",
-    "layer4.2"
+    "layer4.2",
+    "fc"
   ],
   "resnet34.a3_in1k": [
     "layer1.0",
@@ -10823,7 +11305,8 @@
     "layer3.5",
     "layer4.0",
     "layer4.1",
-    "layer4.2"
+    "layer4.2",
+    "fc"
   ],
   "resnet34.bt_in1k": [
     "layer1.0",
@@ -10841,7 +11324,8 @@
     "layer3.5",
     "layer4.0",
     "layer4.1",
-    "layer4.2"
+    "layer4.2",
+    "fc"
   ],
   "resnet34.gluon_in1k": [
     "layer1.0",
@@ -10859,7 +11343,8 @@
     "layer3.5",
     "layer4.0",
     "layer4.1",
-    "layer4.2"
+    "layer4.2",
+    "fc"
   ],
   "resnet34.tv_in1k": [
     "layer1.0",
@@ -10877,7 +11362,8 @@
     "layer3.5",
     "layer4.0",
     "layer4.1",
-    "layer4.2"
+    "layer4.2",
+    "fc"
   ],
   "resnet34d.ra2_in1k": [
     "layer1.0",
@@ -10895,7 +11381,8 @@
     "layer3.5",
     "layer4.0",
     "layer4.1",
-    "layer4.2"
+    "layer4.2",
+    "fc"
   ],
   "resnet50.a1_in1k": [
     "layer1.0",
@@ -10913,7 +11400,8 @@
     "layer3.5",
     "layer4.0",
     "layer4.1",
-    "layer4.2"
+    "layer4.2",
+    "fc"
   ],
   "resnet50.a1h_in1k": [
     "layer1.0",
@@ -10931,7 +11419,8 @@
     "layer3.5",
     "layer4.0",
     "layer4.1",
-    "layer4.2"
+    "layer4.2",
+    "fc"
   ],
   "resnet50.a2_in1k": [
     "layer1.0",
@@ -10949,7 +11438,8 @@
     "layer3.5",
     "layer4.0",
     "layer4.1",
-    "layer4.2"
+    "layer4.2",
+    "fc"
   ],
   "resnet50.a3_in1k": [
     "layer1.0",
@@ -10967,7 +11457,8 @@
     "layer3.5",
     "layer4.0",
     "layer4.1",
-    "layer4.2"
+    "layer4.2",
+    "fc"
   ],
   "resnet50.am_in1k": [
     "layer1.0",
@@ -10985,7 +11476,8 @@
     "layer3.5",
     "layer4.0",
     "layer4.1",
-    "layer4.2"
+    "layer4.2",
+    "fc"
   ],
   "resnet50.b1k_in1k": [
     "layer1.0",
@@ -11003,7 +11495,8 @@
     "layer3.5",
     "layer4.0",
     "layer4.1",
-    "layer4.2"
+    "layer4.2",
+    "fc"
   ],
   "resnet50.b2k_in1k": [
     "layer1.0",
@@ -11021,7 +11514,8 @@
     "layer3.5",
     "layer4.0",
     "layer4.1",
-    "layer4.2"
+    "layer4.2",
+    "fc"
   ],
   "resnet50.bt_in1k": [
     "layer1.0",
@@ -11039,7 +11533,8 @@
     "layer3.5",
     "layer4.0",
     "layer4.1",
-    "layer4.2"
+    "layer4.2",
+    "fc"
   ],
   "resnet50.c1_in1k": [
     "layer1.0",
@@ -11057,7 +11552,8 @@
     "layer3.5",
     "layer4.0",
     "layer4.1",
-    "layer4.2"
+    "layer4.2",
+    "fc"
   ],
   "resnet50.c2_in1k": [
     "layer1.0",
@@ -11075,7 +11571,8 @@
     "layer3.5",
     "layer4.0",
     "layer4.1",
-    "layer4.2"
+    "layer4.2",
+    "fc"
   ],
   "resnet50.d_in1k": [
     "layer1.0",
@@ -11093,7 +11590,8 @@
     "layer3.5",
     "layer4.0",
     "layer4.1",
-    "layer4.2"
+    "layer4.2",
+    "fc"
   ],
   "resnet50.fb_ssl_yfcc100m_ft_in1k": [
     "layer1.0",
@@ -11111,7 +11609,8 @@
     "layer3.5",
     "layer4.0",
     "layer4.1",
-    "layer4.2"
+    "layer4.2",
+    "fc"
   ],
   "resnet50.fb_swsl_ig1b_ft_in1k": [
     "layer1.0",
@@ -11129,7 +11628,8 @@
     "layer3.5",
     "layer4.0",
     "layer4.1",
-    "layer4.2"
+    "layer4.2",
+    "fc"
   ],
   "resnet50.gluon_in1k": [
     "layer1.0",
@@ -11147,7 +11647,8 @@
     "layer3.5",
     "layer4.0",
     "layer4.1",
-    "layer4.2"
+    "layer4.2",
+    "fc"
   ],
   "resnet50.ra_in1k": [
     "layer1.0",
@@ -11165,7 +11666,8 @@
     "layer3.5",
     "layer4.0",
     "layer4.1",
-    "layer4.2"
+    "layer4.2",
+    "fc"
   ],
   "resnet50.ram_in1k": [
     "layer1.0",
@@ -11183,7 +11685,8 @@
     "layer3.5",
     "layer4.0",
     "layer4.1",
-    "layer4.2"
+    "layer4.2",
+    "fc"
   ],
   "resnet50.tv2_in1k": [
     "layer1.0",
@@ -11201,7 +11704,8 @@
     "layer3.5",
     "layer4.0",
     "layer4.1",
-    "layer4.2"
+    "layer4.2",
+    "fc"
   ],
   "resnet50.tv_in1k": [
     "layer1.0",
@@ -11219,7 +11723,8 @@
     "layer3.5",
     "layer4.0",
     "layer4.1",
-    "layer4.2"
+    "layer4.2",
+    "fc"
   ],
   "resnet50_gn.a1h_in1k": [
     "layer1.0",
@@ -11237,7 +11742,8 @@
     "layer3.5",
     "layer4.0",
     "layer4.1",
-    "layer4.2"
+    "layer4.2",
+    "fc"
   ],
   "resnet50c.gluon_in1k": [
     "layer1.0",
@@ -11255,7 +11761,8 @@
     "layer3.5",
     "layer4.0",
     "layer4.1",
-    "layer4.2"
+    "layer4.2",
+    "fc"
   ],
   "resnet50d.a1_in1k": [
     "layer1.0",
@@ -11273,7 +11780,8 @@
     "layer3.5",
     "layer4.0",
     "layer4.1",
-    "layer4.2"
+    "layer4.2",
+    "fc"
   ],
   "resnet50d.a2_in1k": [
     "layer1.0",
@@ -11291,7 +11799,8 @@
     "layer3.5",
     "layer4.0",
     "layer4.1",
-    "layer4.2"
+    "layer4.2",
+    "fc"
   ],
   "resnet50d.a3_in1k": [
     "layer1.0",
@@ -11309,7 +11818,8 @@
     "layer3.5",
     "layer4.0",
     "layer4.1",
-    "layer4.2"
+    "layer4.2",
+    "fc"
   ],
   "resnet50d.gluon_in1k": [
     "layer1.0",
@@ -11327,7 +11837,8 @@
     "layer3.5",
     "layer4.0",
     "layer4.1",
-    "layer4.2"
+    "layer4.2",
+    "fc"
   ],
   "resnet50d.ra2_in1k": [
     "layer1.0",
@@ -11345,7 +11856,8 @@
     "layer3.5",
     "layer4.0",
     "layer4.1",
-    "layer4.2"
+    "layer4.2",
+    "fc"
   ],
   "resnet50s.gluon_in1k": [
     "layer1.0",
@@ -11363,10 +11875,15 @@
     "layer3.5",
     "layer4.0",
     "layer4.1",
-    "layer4.2"
+    "layer4.2",
+    "fc"
   ],
-  "resnet51q.ra2_in1k": [],
-  "resnet61q.ra2_in1k": [],
+  "resnet51q.ra2_in1k": [
+    "head.flatten"
+  ],
+  "resnet61q.ra2_in1k": [
+    "head.flatten"
+  ],
   "resnet101.a1_in1k": [
     "layer1.0",
     "layer1.1",
@@ -11400,7 +11917,8 @@
     "layer3.22",
     "layer4.0",
     "layer4.1",
-    "layer4.2"
+    "layer4.2",
+    "fc"
   ],
   "resnet101.a1h_in1k": [
     "layer1.0",
@@ -11435,7 +11953,8 @@
     "layer3.22",
     "layer4.0",
     "layer4.1",
-    "layer4.2"
+    "layer4.2",
+    "fc"
   ],
   "resnet101.a2_in1k": [
     "layer1.0",
@@ -11470,7 +11989,8 @@
     "layer3.22",
     "layer4.0",
     "layer4.1",
-    "layer4.2"
+    "layer4.2",
+    "fc"
   ],
   "resnet101.a3_in1k": [
     "layer1.0",
@@ -11505,7 +12025,8 @@
     "layer3.22",
     "layer4.0",
     "layer4.1",
-    "layer4.2"
+    "layer4.2",
+    "fc"
   ],
   "resnet101.gluon_in1k": [
     "layer1.0",
@@ -11540,7 +12061,8 @@
     "layer3.22",
     "layer4.0",
     "layer4.1",
-    "layer4.2"
+    "layer4.2",
+    "fc"
   ],
   "resnet101.tv2_in1k": [
     "layer1.0",
@@ -11575,7 +12097,8 @@
     "layer3.22",
     "layer4.0",
     "layer4.1",
-    "layer4.2"
+    "layer4.2",
+    "fc"
   ],
   "resnet101.tv_in1k": [
     "layer1.0",
@@ -11610,7 +12133,8 @@
     "layer3.22",
     "layer4.0",
     "layer4.1",
-    "layer4.2"
+    "layer4.2",
+    "fc"
   ],
   "resnet101c.gluon_in1k": [
     "layer1.0",
@@ -11645,7 +12169,8 @@
     "layer3.22",
     "layer4.0",
     "layer4.1",
-    "layer4.2"
+    "layer4.2",
+    "fc"
   ],
   "resnet101d.gluon_in1k": [
     "layer1.0",
@@ -11680,7 +12205,8 @@
     "layer3.22",
     "layer4.0",
     "layer4.1",
-    "layer4.2"
+    "layer4.2",
+    "fc"
   ],
   "resnet101d.ra2_in1k": [
     "layer1.0",
@@ -11715,7 +12241,8 @@
     "layer3.22",
     "layer4.0",
     "layer4.1",
-    "layer4.2"
+    "layer4.2",
+    "fc"
   ],
   "resnet101s.gluon_in1k": [
     "layer1.0",
@@ -11750,7 +12277,8 @@
     "layer3.22",
     "layer4.0",
     "layer4.1",
-    "layer4.2"
+    "layer4.2",
+    "fc"
   ],
   "resnet152.a1_in1k": [
     "layer1.0",
@@ -11802,7 +12330,8 @@
     "layer3.35",
     "layer4.0",
     "layer4.1",
-    "layer4.2"
+    "layer4.2",
+    "fc"
   ],
   "resnet152.a1h_in1k": [
     "layer1.0",
@@ -11854,7 +12383,8 @@
     "layer3.35",
     "layer4.0",
     "layer4.1",
-    "layer4.2"
+    "layer4.2",
+    "fc"
   ],
   "resnet152.a2_in1k": [
     "layer1.0",
@@ -11906,7 +12436,8 @@
     "layer3.35",
     "layer4.0",
     "layer4.1",
-    "layer4.2"
+    "layer4.2",
+    "fc"
   ],
   "resnet152.a3_in1k": [
     "layer1.0",
@@ -11958,7 +12489,8 @@
     "layer3.35",
     "layer4.0",
     "layer4.1",
-    "layer4.2"
+    "layer4.2",
+    "fc"
   ],
   "resnet152.gluon_in1k": [
     "layer1.0",
@@ -12010,7 +12542,8 @@
     "layer3.35",
     "layer4.0",
     "layer4.1",
-    "layer4.2"
+    "layer4.2",
+    "fc"
   ],
   "resnet152.tv2_in1k": [
     "layer1.0",
@@ -12062,7 +12595,8 @@
     "layer3.35",
     "layer4.0",
     "layer4.1",
-    "layer4.2"
+    "layer4.2",
+    "fc"
   ],
   "resnet152.tv_in1k": [
     "layer1.0",
@@ -12114,7 +12648,8 @@
     "layer3.35",
     "layer4.0",
     "layer4.1",
-    "layer4.2"
+    "layer4.2",
+    "fc"
   ],
   "resnet152c.gluon_in1k": [
     "layer1.0",
@@ -12166,7 +12701,8 @@
     "layer3.35",
     "layer4.0",
     "layer4.1",
-    "layer4.2"
+    "layer4.2",
+    "fc"
   ],
   "resnet152d.gluon_in1k": [
     "layer1.0",
@@ -12218,7 +12754,8 @@
     "layer3.35",
     "layer4.0",
     "layer4.1",
-    "layer4.2"
+    "layer4.2",
+    "fc"
   ],
   "resnet152d.ra2_in1k": [
     "layer1.0",
@@ -12270,7 +12807,8 @@
     "layer3.35",
     "layer4.0",
     "layer4.1",
-    "layer4.2"
+    "layer4.2",
+    "fc"
   ],
   "resnet152s.gluon_in1k": [
     "layer1.0",
@@ -12322,7 +12860,8 @@
     "layer3.35",
     "layer4.0",
     "layer4.1",
-    "layer4.2"
+    "layer4.2",
+    "fc"
   ],
   "resnet200d.ra2_in1k": [
     "layer1.0",
@@ -12390,7 +12929,8 @@
     "layer3.35",
     "layer4.0",
     "layer4.1",
-    "layer4.2"
+    "layer4.2",
+    "fc"
   ],
   "resnetaa50.a1h_in1k": [
     "layer1.0",
@@ -12408,7 +12948,8 @@
     "layer3.5",
     "layer4.0",
     "layer4.1",
-    "layer4.2"
+    "layer4.2",
+    "fc"
   ],
   "resnetaa50d.d_in12k": [
     "layer1.0",
@@ -12426,7 +12967,8 @@
     "layer3.5",
     "layer4.0",
     "layer4.1",
-    "layer4.2"
+    "layer4.2",
+    "fc"
   ],
   "resnetaa50d.sw_in12k": [
     "layer1.0",
@@ -12444,7 +12986,8 @@
     "layer3.5",
     "layer4.0",
     "layer4.1",
-    "layer4.2"
+    "layer4.2",
+    "fc"
   ],
   "resnetaa50d.sw_in12k_ft_in1k": [
     "layer1.0",
@@ -12462,7 +13005,8 @@
     "layer3.5",
     "layer4.0",
     "layer4.1",
-    "layer4.2"
+    "layer4.2",
+    "fc"
   ],
   "resnetaa101d.sw_in12k": [
     "layer1.0",
@@ -12497,7 +13041,8 @@
     "layer3.22",
     "layer4.0",
     "layer4.1",
-    "layer4.2"
+    "layer4.2",
+    "fc"
   ],
   "resnetaa101d.sw_in12k_ft_in1k": [
     "layer1.0",
@@ -12532,7 +13077,8 @@
     "layer3.22",
     "layer4.0",
     "layer4.1",
-    "layer4.2"
+    "layer4.2",
+    "fc"
   ],
   "resnetblur50.bt_in1k": [
     "layer1.0",
@@ -12550,7 +13096,8 @@
     "layer3.5",
     "layer4.0",
     "layer4.1",
-    "layer4.2"
+    "layer4.2",
+    "fc"
   ],
   "resnetrs50.tf_in1k": [
     "layer1.0",
@@ -12568,7 +13115,8 @@
     "layer3.5",
     "layer4.0",
     "layer4.1",
-    "layer4.2"
+    "layer4.2",
+    "fc"
   ],
   "resnetrs101.tf_in1k": [
     "layer1.0",
@@ -12603,7 +13151,8 @@
     "layer3.22",
     "layer4.0",
     "layer4.1",
-    "layer4.2"
+    "layer4.2",
+    "fc"
   ],
   "resnetrs152.tf_in1k": [
     "layer1.0",
@@ -12655,7 +13204,8 @@
     "layer3.35",
     "layer4.0",
     "layer4.1",
-    "layer4.2"
+    "layer4.2",
+    "fc"
   ],
   "resnetrs200.tf_in1k": [
     "layer1.0",
@@ -12723,7 +13273,8 @@
     "layer3.35",
     "layer4.0",
     "layer4.1",
-    "layer4.2"
+    "layer4.2",
+    "fc"
   ],
   "resnetrs270.tf_in1k": [
     "layer1.0",
@@ -12815,7 +13366,8 @@
     "layer4.0",
     "layer4.1",
     "layer4.2",
-    "layer4.3"
+    "layer4.3",
+    "fc"
   ],
   "resnetrs350.tf_in1k": [
     "layer1.0",
@@ -12933,7 +13485,8 @@
     "layer4.0",
     "layer4.1",
     "layer4.2",
-    "layer4.3"
+    "layer4.3",
+    "fc"
   ],
   "resnetrs420.tf_in1k": [
     "layer1.0",
@@ -13074,19 +13627,22 @@
     "layer4.0",
     "layer4.1",
     "layer4.2",
-    "layer4.3"
+    "layer4.3",
+    "fc"
   ],
   "resnet10t": [
     "layer1.0",
     "layer2.0",
     "layer3.0",
-    "layer4.0"
+    "layer4.0",
+    "fc"
   ],
   "resnet14t": [
     "layer1.0",
     "layer2.0",
     "layer3.0",
-    "layer4.0"
+    "layer4.0",
+    "fc"
   ],
   "resnet18": [
     "layer1.0",
@@ -13096,7 +13652,8 @@
     "layer3.0",
     "layer3.1",
     "layer4.0",
-    "layer4.1"
+    "layer4.1",
+    "fc"
   ],
   "resnet18d": [
     "layer1.0",
@@ -13106,7 +13663,8 @@
     "layer3.0",
     "layer3.1",
     "layer4.0",
-    "layer4.1"
+    "layer4.1",
+    "fc"
   ],
   "resnet26": [
     "layer1.0",
@@ -13116,7 +13674,8 @@
     "layer3.0",
     "layer3.1",
     "layer4.0",
-    "layer4.1"
+    "layer4.1",
+    "fc"
   ],
   "resnet26d": [
     "layer1.0",
@@ -13126,7 +13685,8 @@
     "layer3.0",
     "layer3.1",
     "layer4.0",
-    "layer4.1"
+    "layer4.1",
+    "fc"
   ],
   "resnet26t": [
     "layer1.0",
@@ -13136,10 +13696,15 @@
     "layer3.0",
     "layer3.1",
     "layer4.0",
-    "layer4.1"
+    "layer4.1",
+    "fc"
   ],
-  "resnet32ts": [],
-  "resnet33ts": [],
+  "resnet32ts": [
+    "head.flatten"
+  ],
+  "resnet33ts": [
+    "head.flatten"
+  ],
   "resnet34": [
     "layer1.0",
     "layer1.1",
@@ -13156,7 +13721,8 @@
     "layer3.5",
     "layer4.0",
     "layer4.1",
-    "layer4.2"
+    "layer4.2",
+    "fc"
   ],
   "resnet34d": [
     "layer1.0",
@@ -13174,7 +13740,8 @@
     "layer3.5",
     "layer4.0",
     "layer4.1",
-    "layer4.2"
+    "layer4.2",
+    "fc"
   ],
   "resnet50": [
     "layer1.0",
@@ -13192,10 +13759,15 @@
     "layer3.5",
     "layer4.0",
     "layer4.1",
-    "layer4.2"
+    "layer4.2",
+    "fc"
   ],
-  "resnet50_clip": [],
-  "resnet50_clip_gap": [],
+  "resnet50_clip": [
+    "head.proj"
+  ],
+  "resnet50_clip_gap": [
+    "head.flatten"
+  ],
   "resnet50_gn": [
     "layer1.0",
     "layer1.1",
@@ -13212,9 +13784,12 @@
     "layer3.5",
     "layer4.0",
     "layer4.1",
-    "layer4.2"
+    "layer4.2",
+    "fc"
   ],
-  "resnet50_mlp": [],
+  "resnet50_mlp": [
+    "head.fc"
+  ],
   "resnet50c": [
     "layer1.0",
     "layer1.1",
@@ -13231,7 +13806,8 @@
     "layer3.5",
     "layer4.0",
     "layer4.1",
-    "layer4.2"
+    "layer4.2",
+    "fc"
   ],
   "resnet50d": [
     "layer1.0",
@@ -13249,7 +13825,8 @@
     "layer3.5",
     "layer4.0",
     "layer4.1",
-    "layer4.2"
+    "layer4.2",
+    "fc"
   ],
   "resnet50s": [
     "layer1.0",
@@ -13267,7 +13844,8 @@
     "layer3.5",
     "layer4.0",
     "layer4.1",
-    "layer4.2"
+    "layer4.2",
+    "fc"
   ],
   "resnet50t": [
     "layer1.0",
@@ -13285,16 +13863,33 @@
     "layer3.5",
     "layer4.0",
     "layer4.1",
-    "layer4.2"
+    "layer4.2",
+    "fc"
   ],
-  "resnet50x4_clip": [],
-  "resnet50x4_clip_gap": [],
-  "resnet50x16_clip": [],
-  "resnet50x16_clip_gap": [],
-  "resnet50x64_clip": [],
-  "resnet50x64_clip_gap": [],
-  "resnet51q": [],
-  "resnet61q": [],
+  "resnet50x4_clip": [
+    "head.proj"
+  ],
+  "resnet50x4_clip_gap": [
+    "head.flatten"
+  ],
+  "resnet50x16_clip": [
+    "head.proj"
+  ],
+  "resnet50x16_clip_gap": [
+    "head.flatten"
+  ],
+  "resnet50x64_clip": [
+    "head.proj"
+  ],
+  "resnet50x64_clip_gap": [
+    "head.flatten"
+  ],
+  "resnet51q": [
+    "head.flatten"
+  ],
+  "resnet61q": [
+    "head.flatten"
+  ],
   "resnet101": [
     "layer1.0",
     "layer1.1",
@@ -13328,10 +13923,15 @@
     "layer3.22",
     "layer4.0",
     "layer4.1",
-    "layer4.2"
+    "layer4.2",
+    "fc"
   ],
-  "resnet101_clip": [],
-  "resnet101_clip_gap": [],
+  "resnet101_clip": [
+    "head.proj"
+  ],
+  "resnet101_clip_gap": [
+    "head.flatten"
+  ],
   "resnet101c": [
     "layer1.0",
     "layer1.1",
@@ -13365,7 +13965,8 @@
     "layer3.22",
     "layer4.0",
     "layer4.1",
-    "layer4.2"
+    "layer4.2",
+    "fc"
   ],
   "resnet101d": [
     "layer1.0",
@@ -13400,7 +14001,8 @@
     "layer3.22",
     "layer4.0",
     "layer4.1",
-    "layer4.2"
+    "layer4.2",
+    "fc"
   ],
   "resnet101s": [
     "layer1.0",
@@ -13435,7 +14037,8 @@
     "layer3.22",
     "layer4.0",
     "layer4.1",
-    "layer4.2"
+    "layer4.2",
+    "fc"
   ],
   "resnet152": [
     "layer1.0",
@@ -13487,7 +14090,8 @@
     "layer3.35",
     "layer4.0",
     "layer4.1",
-    "layer4.2"
+    "layer4.2",
+    "fc"
   ],
   "resnet152c": [
     "layer1.0",
@@ -13539,7 +14143,8 @@
     "layer3.35",
     "layer4.0",
     "layer4.1",
-    "layer4.2"
+    "layer4.2",
+    "fc"
   ],
   "resnet152d": [
     "layer1.0",
@@ -13591,7 +14196,8 @@
     "layer3.35",
     "layer4.0",
     "layer4.1",
-    "layer4.2"
+    "layer4.2",
+    "fc"
   ],
   "resnet152s": [
     "layer1.0",
@@ -13643,7 +14249,8 @@
     "layer3.35",
     "layer4.0",
     "layer4.1",
-    "layer4.2"
+    "layer4.2",
+    "fc"
   ],
   "resnet200": [
     "layer1.0",
@@ -13711,7 +14318,8 @@
     "layer3.35",
     "layer4.0",
     "layer4.1",
-    "layer4.2"
+    "layer4.2",
+    "fc"
   ],
   "resnet200d": [
     "layer1.0",
@@ -13779,7 +14387,8 @@
     "layer3.35",
     "layer4.0",
     "layer4.1",
-    "layer4.2"
+    "layer4.2",
+    "fc"
   ],
   "resnetaa34d": [
     "layer1.0",
@@ -13797,7 +14406,8 @@
     "layer3.5",
     "layer4.0",
     "layer4.1",
-    "layer4.2"
+    "layer4.2",
+    "fc"
   ],
   "resnetaa50": [
     "layer1.0",
@@ -13815,7 +14425,8 @@
     "layer3.5",
     "layer4.0",
     "layer4.1",
-    "layer4.2"
+    "layer4.2",
+    "fc"
   ],
   "resnetaa50d": [
     "layer1.0",
@@ -13833,7 +14444,8 @@
     "layer3.5",
     "layer4.0",
     "layer4.1",
-    "layer4.2"
+    "layer4.2",
+    "fc"
   ],
   "resnetaa101d": [
     "layer1.0",
@@ -13868,7 +14480,8 @@
     "layer3.22",
     "layer4.0",
     "layer4.1",
-    "layer4.2"
+    "layer4.2",
+    "fc"
   ],
   "resnetblur18": [
     "layer1.0",
@@ -13878,7 +14491,8 @@
     "layer3.0",
     "layer3.1",
     "layer4.0",
-    "layer4.1"
+    "layer4.1",
+    "fc"
   ],
   "resnetblur50": [
     "layer1.0",
@@ -13896,7 +14510,8 @@
     "layer3.5",
     "layer4.0",
     "layer4.1",
-    "layer4.2"
+    "layer4.2",
+    "fc"
   ],
   "resnetblur50d": [
     "layer1.0",
@@ -13914,7 +14529,8 @@
     "layer3.5",
     "layer4.0",
     "layer4.1",
-    "layer4.2"
+    "layer4.2",
+    "fc"
   ],
   "resnetblur101d": [
     "layer1.0",
@@ -13949,7 +14565,8 @@
     "layer3.22",
     "layer4.0",
     "layer4.1",
-    "layer4.2"
+    "layer4.2",
+    "fc"
   ],
   "resnetrs50": [
     "layer1.0",
@@ -13967,7 +14584,8 @@
     "layer3.5",
     "layer4.0",
     "layer4.1",
-    "layer4.2"
+    "layer4.2",
+    "fc"
   ],
   "resnetrs101": [
     "layer1.0",
@@ -14002,7 +14620,8 @@
     "layer3.22",
     "layer4.0",
     "layer4.1",
-    "layer4.2"
+    "layer4.2",
+    "fc"
   ],
   "resnetrs152": [
     "layer1.0",
@@ -14054,7 +14673,8 @@
     "layer3.35",
     "layer4.0",
     "layer4.1",
-    "layer4.2"
+    "layer4.2",
+    "fc"
   ],
   "resnetrs200": [
     "layer1.0",
@@ -14122,7 +14742,8 @@
     "layer3.35",
     "layer4.0",
     "layer4.1",
-    "layer4.2"
+    "layer4.2",
+    "fc"
   ],
   "resnetrs270": [
     "layer1.0",
@@ -14214,7 +14835,8 @@
     "layer4.0",
     "layer4.1",
     "layer4.2",
-    "layer4.3"
+    "layer4.3",
+    "fc"
   ],
   "resnetrs350": [
     "layer1.0",
@@ -14332,7 +14954,8 @@
     "layer4.0",
     "layer4.1",
     "layer4.2",
-    "layer4.3"
+    "layer4.3",
+    "fc"
   ],
   "resnetrs420": [
     "layer1.0",
@@ -14473,9 +15096,12 @@
     "layer4.0",
     "layer4.1",
     "layer4.2",
-    "layer4.3"
+    "layer4.3",
+    "fc"
   ],
-  "resnext26ts": [],
+  "resnext26ts": [
+    "head.flatten"
+  ],
   "resnext50_32x4d": [
     "layer1.0",
     "layer1.1",
@@ -14492,7 +15118,8 @@
     "layer3.5",
     "layer4.0",
     "layer4.1",
-    "layer4.2"
+    "layer4.2",
+    "fc"
   ],
   "resnext50d_32x4d": [
     "layer1.0",
@@ -14510,7 +15137,8 @@
     "layer3.5",
     "layer4.0",
     "layer4.1",
-    "layer4.2"
+    "layer4.2",
+    "fc"
   ],
   "resnext101_32x4d": [
     "layer1.0",
@@ -14545,7 +15173,8 @@
     "layer3.22",
     "layer4.0",
     "layer4.1",
-    "layer4.2"
+    "layer4.2",
+    "fc"
   ],
   "resnext101_32x8d": [
     "layer1.0",
@@ -14580,7 +15209,8 @@
     "layer3.22",
     "layer4.0",
     "layer4.1",
-    "layer4.2"
+    "layer4.2",
+    "fc"
   ],
   "resnext101_32x16d": [
     "layer1.0",
@@ -14615,7 +15245,8 @@
     "layer3.22",
     "layer4.0",
     "layer4.1",
-    "layer4.2"
+    "layer4.2",
+    "fc"
   ],
   "resnext101_32x32d": [
     "layer1.0",
@@ -14650,7 +15281,8 @@
     "layer3.22",
     "layer4.0",
     "layer4.1",
-    "layer4.2"
+    "layer4.2",
+    "fc"
   ],
   "resnext101_64x4d": [
     "layer1.0",
@@ -14685,7 +15317,8 @@
     "layer3.22",
     "layer4.0",
     "layer4.1",
-    "layer4.2"
+    "layer4.2",
+    "fc"
   ],
   "resnetv2_50.a1h_in1k": [
     "stages.0.blocks.0",
@@ -14703,7 +15336,8 @@
     "stages.2.blocks.5",
     "stages.3.blocks.0",
     "stages.3.blocks.1",
-    "stages.3.blocks.2"
+    "stages.3.blocks.2",
+    "head.flatten"
   ],
   "resnetv2_50d_evos.ah_in1k": [
     "stages.0.blocks.0",
@@ -14721,7 +15355,8 @@
     "stages.2.blocks.5",
     "stages.3.blocks.0",
     "stages.3.blocks.1",
-    "stages.3.blocks.2"
+    "stages.3.blocks.2",
+    "head.flatten"
   ],
   "resnetv2_50d_gn.ah_in1k": [
     "stages.0.blocks.0",
@@ -14739,7 +15374,8 @@
     "stages.2.blocks.5",
     "stages.3.blocks.0",
     "stages.3.blocks.1",
-    "stages.3.blocks.2"
+    "stages.3.blocks.2",
+    "head.flatten"
   ],
   "resnetv2_50x1_bit.goog_distilled_in1k": [
     "stages.0.blocks.0",
@@ -14757,7 +15393,8 @@
     "stages.2.blocks.5",
     "stages.3.blocks.0",
     "stages.3.blocks.1",
-    "stages.3.blocks.2"
+    "stages.3.blocks.2",
+    "head.flatten"
   ],
   "resnetv2_50x1_bit.goog_in21k": [
     "stages.0.blocks.0",
@@ -14775,7 +15412,8 @@
     "stages.2.blocks.5",
     "stages.3.blocks.0",
     "stages.3.blocks.1",
-    "stages.3.blocks.2"
+    "stages.3.blocks.2",
+    "head.flatten"
   ],
   "resnetv2_50x1_bit.goog_in21k_ft_in1k": [
     "stages.0.blocks.0",
@@ -14793,7 +15431,8 @@
     "stages.2.blocks.5",
     "stages.3.blocks.0",
     "stages.3.blocks.1",
-    "stages.3.blocks.2"
+    "stages.3.blocks.2",
+    "head.flatten"
   ],
   "resnetv2_50x3_bit.goog_in21k": [
     "stages.0.blocks.0",
@@ -14811,7 +15450,8 @@
     "stages.2.blocks.5",
     "stages.3.blocks.0",
     "stages.3.blocks.1",
-    "stages.3.blocks.2"
+    "stages.3.blocks.2",
+    "head.flatten"
   ],
   "resnetv2_50x3_bit.goog_in21k_ft_in1k": [
     "stages.0.blocks.0",
@@ -14829,7 +15469,8 @@
     "stages.2.blocks.5",
     "stages.3.blocks.0",
     "stages.3.blocks.1",
-    "stages.3.blocks.2"
+    "stages.3.blocks.2",
+    "head.flatten"
   ],
   "resnetv2_101.a1h_in1k": [
     "stages.0.blocks.0",
@@ -14864,7 +15505,8 @@
     "stages.2.blocks.22",
     "stages.3.blocks.0",
     "stages.3.blocks.1",
-    "stages.3.blocks.2"
+    "stages.3.blocks.2",
+    "head.flatten"
   ],
   "resnetv2_101x1_bit.goog_in21k": [
     "stages.0.blocks.0",
@@ -14899,7 +15541,8 @@
     "stages.2.blocks.22",
     "stages.3.blocks.0",
     "stages.3.blocks.1",
-    "stages.3.blocks.2"
+    "stages.3.blocks.2",
+    "head.flatten"
   ],
   "resnetv2_101x1_bit.goog_in21k_ft_in1k": [
     "stages.0.blocks.0",
@@ -14934,7 +15577,8 @@
     "stages.2.blocks.22",
     "stages.3.blocks.0",
     "stages.3.blocks.1",
-    "stages.3.blocks.2"
+    "stages.3.blocks.2",
+    "head.flatten"
   ],
   "resnetv2_101x3_bit.goog_in21k": [
     "stages.0.blocks.0",
@@ -14969,7 +15613,8 @@
     "stages.2.blocks.22",
     "stages.3.blocks.0",
     "stages.3.blocks.1",
-    "stages.3.blocks.2"
+    "stages.3.blocks.2",
+    "head.flatten"
   ],
   "resnetv2_101x3_bit.goog_in21k_ft_in1k": [
     "stages.0.blocks.0",
@@ -15004,7 +15649,8 @@
     "stages.2.blocks.22",
     "stages.3.blocks.0",
     "stages.3.blocks.1",
-    "stages.3.blocks.2"
+    "stages.3.blocks.2",
+    "head.flatten"
   ],
   "resnetv2_152x2_bit.goog_in21k": [
     "stages.0.blocks.0",
@@ -15056,7 +15702,8 @@
     "stages.2.blocks.35",
     "stages.3.blocks.0",
     "stages.3.blocks.1",
-    "stages.3.blocks.2"
+    "stages.3.blocks.2",
+    "head.flatten"
   ],
   "resnetv2_152x2_bit.goog_in21k_ft_in1k": [
     "stages.0.blocks.0",
@@ -15108,7 +15755,8 @@
     "stages.2.blocks.35",
     "stages.3.blocks.0",
     "stages.3.blocks.1",
-    "stages.3.blocks.2"
+    "stages.3.blocks.2",
+    "head.flatten"
   ],
   "resnetv2_152x2_bit.goog_teacher_in21k_ft_in1k": [
     "stages.0.blocks.0",
@@ -15160,7 +15808,8 @@
     "stages.2.blocks.35",
     "stages.3.blocks.0",
     "stages.3.blocks.1",
-    "stages.3.blocks.2"
+    "stages.3.blocks.2",
+    "head.flatten"
   ],
   "resnetv2_152x2_bit.goog_teacher_in21k_ft_in1k_384": [
     "stages.0.blocks.0",
@@ -15212,7 +15861,8 @@
     "stages.2.blocks.35",
     "stages.3.blocks.0",
     "stages.3.blocks.1",
-    "stages.3.blocks.2"
+    "stages.3.blocks.2",
+    "head.flatten"
   ],
   "resnetv2_152x4_bit.goog_in21k": [
     "stages.0.blocks.0",
@@ -15264,7 +15914,8 @@
     "stages.2.blocks.35",
     "stages.3.blocks.0",
     "stages.3.blocks.1",
-    "stages.3.blocks.2"
+    "stages.3.blocks.2",
+    "head.flatten"
   ],
   "resnetv2_152x4_bit.goog_in21k_ft_in1k": [
     "stages.0.blocks.0",
@@ -15316,7 +15967,8 @@
     "stages.2.blocks.35",
     "stages.3.blocks.0",
     "stages.3.blocks.1",
-    "stages.3.blocks.2"
+    "stages.3.blocks.2",
+    "head.flatten"
   ],
   "resnetv2_18": [
     "stages.0.blocks.0",
@@ -15326,7 +15978,8 @@
     "stages.2.blocks.0",
     "stages.2.blocks.1",
     "stages.3.blocks.0",
-    "stages.3.blocks.1"
+    "stages.3.blocks.1",
+    "head.flatten"
   ],
   "resnetv2_18d": [
     "stages.0.blocks.0",
@@ -15336,7 +15989,8 @@
     "stages.2.blocks.0",
     "stages.2.blocks.1",
     "stages.3.blocks.0",
-    "stages.3.blocks.1"
+    "stages.3.blocks.1",
+    "head.flatten"
   ],
   "resnetv2_34": [
     "stages.0.blocks.0",
@@ -15354,7 +16008,8 @@
     "stages.2.blocks.5",
     "stages.3.blocks.0",
     "stages.3.blocks.1",
-    "stages.3.blocks.2"
+    "stages.3.blocks.2",
+    "head.flatten"
   ],
   "resnetv2_34d": [
     "stages.0.blocks.0",
@@ -15372,7 +16027,8 @@
     "stages.2.blocks.5",
     "stages.3.blocks.0",
     "stages.3.blocks.1",
-    "stages.3.blocks.2"
+    "stages.3.blocks.2",
+    "head.flatten"
   ],
   "resnetv2_50": [
     "stages.0.blocks.0",
@@ -15390,7 +16046,8 @@
     "stages.2.blocks.5",
     "stages.3.blocks.0",
     "stages.3.blocks.1",
-    "stages.3.blocks.2"
+    "stages.3.blocks.2",
+    "head.flatten"
   ],
   "resnetv2_50d": [
     "stages.0.blocks.0",
@@ -15408,7 +16065,8 @@
     "stages.2.blocks.5",
     "stages.3.blocks.0",
     "stages.3.blocks.1",
-    "stages.3.blocks.2"
+    "stages.3.blocks.2",
+    "head.flatten"
   ],
   "resnetv2_50d_evos": [
     "stages.0.blocks.0",
@@ -15426,7 +16084,8 @@
     "stages.2.blocks.5",
     "stages.3.blocks.0",
     "stages.3.blocks.1",
-    "stages.3.blocks.2"
+    "stages.3.blocks.2",
+    "head.flatten"
   ],
   "resnetv2_50d_frn": [
     "stages.0.blocks.0",
@@ -15444,7 +16103,8 @@
     "stages.2.blocks.5",
     "stages.3.blocks.0",
     "stages.3.blocks.1",
-    "stages.3.blocks.2"
+    "stages.3.blocks.2",
+    "head.flatten"
   ],
   "resnetv2_50d_gn": [
     "stages.0.blocks.0",
@@ -15462,7 +16122,8 @@
     "stages.2.blocks.5",
     "stages.3.blocks.0",
     "stages.3.blocks.1",
-    "stages.3.blocks.2"
+    "stages.3.blocks.2",
+    "head.flatten"
   ],
   "resnetv2_50t": [
     "stages.0.blocks.0",
@@ -15480,7 +16141,8 @@
     "stages.2.blocks.5",
     "stages.3.blocks.0",
     "stages.3.blocks.1",
-    "stages.3.blocks.2"
+    "stages.3.blocks.2",
+    "head.flatten"
   ],
   "resnetv2_50x1_bit": [
     "stages.0.blocks.0",
@@ -15498,7 +16160,8 @@
     "stages.2.blocks.5",
     "stages.3.blocks.0",
     "stages.3.blocks.1",
-    "stages.3.blocks.2"
+    "stages.3.blocks.2",
+    "head.flatten"
   ],
   "resnetv2_50x3_bit": [
     "stages.0.blocks.0",
@@ -15516,7 +16179,8 @@
     "stages.2.blocks.5",
     "stages.3.blocks.0",
     "stages.3.blocks.1",
-    "stages.3.blocks.2"
+    "stages.3.blocks.2",
+    "head.flatten"
   ],
   "resnetv2_101": [
     "stages.0.blocks.0",
@@ -15551,7 +16215,8 @@
     "stages.2.blocks.22",
     "stages.3.blocks.0",
     "stages.3.blocks.1",
-    "stages.3.blocks.2"
+    "stages.3.blocks.2",
+    "head.flatten"
   ],
   "resnetv2_101d": [
     "stages.0.blocks.0",
@@ -15586,7 +16251,8 @@
     "stages.2.blocks.22",
     "stages.3.blocks.0",
     "stages.3.blocks.1",
-    "stages.3.blocks.2"
+    "stages.3.blocks.2",
+    "head.flatten"
   ],
   "resnetv2_101x1_bit": [
     "stages.0.blocks.0",
@@ -15621,7 +16287,8 @@
     "stages.2.blocks.22",
     "stages.3.blocks.0",
     "stages.3.blocks.1",
-    "stages.3.blocks.2"
+    "stages.3.blocks.2",
+    "head.flatten"
   ],
   "resnetv2_101x3_bit": [
     "stages.0.blocks.0",
@@ -15656,7 +16323,8 @@
     "stages.2.blocks.22",
     "stages.3.blocks.0",
     "stages.3.blocks.1",
-    "stages.3.blocks.2"
+    "stages.3.blocks.2",
+    "head.flatten"
   ],
   "resnetv2_152": [
     "stages.0.blocks.0",
@@ -15708,7 +16376,8 @@
     "stages.2.blocks.35",
     "stages.3.blocks.0",
     "stages.3.blocks.1",
-    "stages.3.blocks.2"
+    "stages.3.blocks.2",
+    "head.flatten"
   ],
   "resnetv2_152d": [
     "stages.0.blocks.0",
@@ -15760,7 +16429,8 @@
     "stages.2.blocks.35",
     "stages.3.blocks.0",
     "stages.3.blocks.1",
-    "stages.3.blocks.2"
+    "stages.3.blocks.2",
+    "head.flatten"
   ],
   "resnetv2_152x2_bit": [
     "stages.0.blocks.0",
@@ -15812,7 +16482,8 @@
     "stages.2.blocks.35",
     "stages.3.blocks.0",
     "stages.3.blocks.1",
-    "stages.3.blocks.2"
+    "stages.3.blocks.2",
+    "head.flatten"
   ],
   "resnetv2_152x4_bit": [
     "stages.0.blocks.0",
@@ -15864,6 +16535,7 @@
     "stages.2.blocks.35",
     "stages.3.blocks.0",
     "stages.3.blocks.1",
-    "stages.3.blocks.2"
+    "stages.3.blocks.2",
+    "head.flatten"
   ]
 }

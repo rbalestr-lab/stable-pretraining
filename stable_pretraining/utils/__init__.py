@@ -40,6 +40,7 @@ from .inspection_utils import (
     get_required_fn_parameters,
 )
 from .error_handling import with_hf_retry_ratelimit
+from .read_csv_logger import CSVLogAutoSummarizer
 from .nn_modules import (
     BatchNorm1dNoBias,
     EMA,
@@ -101,4 +102,5 @@ __all__ = [
     "get_data_from_batch_or_outputs",
     "with_hf_retry_ratelimit",
     "load_hparams_from_ckpt",
+    "CSVLogAutoSummarizer",
 ]

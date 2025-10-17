@@ -416,14 +416,224 @@ TORCHVISION_EMBEDDINGS["vit_l_32"] = TORCHVISION_EMBEDDINGS["vit_l_16"]
 TORCHVISION_EMBEDDINGS["wide_resnet50_2"] = TORCHVISION_EMBEDDINGS["resnet50"]
 
 
+def _get_last_submodule_full_name(model):
+    # named_modules() yields (full_name, module) pairs in definition order
+    for name, module in model.named_modules():
+        last_name, _ = name, module
+    return last_name
+
+
 def _retreive_timm_modules(args):
     name, parent_name = args
     import timm
     from stable_pretraining.backbone.utils import get_children_modules
 
-    return get_children_modules(
-        timm.create_model(name), parent_name=parent_name, partial_match=True
+    model = timm.create_model(name)
+    internals = get_children_modules(model, parent_name=parent_name, partial_match=True)
+    last = _get_last_submodule_full_name(model)
+    return internals + [last]
+
+
+def _generate_hf_embeddings_factory():
+    from tqdm import tqdm
+    import os
+    import json
+    from multiprocessing import Pool
+
+    hf_embedding = {}
+    names = [
+        "vit_base_mci_224",
+        "vit_base_patch8_224",
+        "vit_base_patch14_dinov2",
+        "vit_base_patch14_reg4_dinov2",
+        "vit_base_patch16_18x2_224",
+        "vit_base_patch16_224",
+        "vit_base_patch16_224_miil",
+        "vit_base_patch16_384",
+        "vit_base_patch16_clip_224",
+        "vit_base_patch16_clip_384",
+        "vit_base_patch16_clip_quickgelu_224",
+        "vit_base_patch16_gap_224",
+        "vit_base_patch16_plus_240",
+        "vit_base_patch16_plus_clip_240",
+        "vit_base_patch16_reg4_gap_256",
+        "vit_base_patch16_rope_224",
+        "vit_base_patch16_rope_ape_224",
+        "vit_base_patch16_rope_mixed_224",
+        "vit_base_patch16_rope_mixed_ape_224",
+        "vit_base_patch16_rope_reg1_gap_256",
+        "vit_base_patch16_rpn_224",
+        "vit_base_patch16_siglip_224",
+        "vit_base_patch16_siglip_256",
+        "vit_base_patch16_siglip_384",
+        "vit_base_patch16_siglip_512",
+        "vit_base_patch16_siglip_gap_224",
+        "vit_base_patch16_siglip_gap_256",
+        "vit_base_patch16_siglip_gap_384",
+        "vit_base_patch16_siglip_gap_512",
+        "vit_base_patch16_xp_224",
+        "vit_base_patch32_224",
+        "vit_base_patch32_384",
+        "vit_base_patch32_clip_224",
+        "vit_base_patch32_clip_256",
+        "vit_base_patch32_clip_384",
+        "vit_base_patch32_clip_448",
+        "vit_base_patch32_clip_quickgelu_224",
+        "vit_base_patch32_plus_256",
+        "vit_base_patch32_siglip_256",
+        "vit_base_patch32_siglip_gap_256",
+        "vit_base_r26_s32_224",
+        "vit_base_r50_s16_224",
+        "vit_base_r50_s16_384",
+        "vit_base_resnet26d_224",
+        "vit_base_resnet50d_224",
+        "vit_betwixt_patch16_gap_256",
+        "vit_betwixt_patch16_reg1_gap_256",
+        "vit_betwixt_patch16_reg4_gap_256",
+        "vit_betwixt_patch16_reg4_gap_384",
+        "vit_betwixt_patch16_rope_reg4_gap_256",
+        "vit_betwixt_patch32_clip_224",
+        "vit_giant_patch14_224",
+        "vit_giant_patch14_clip_224",
+        "vit_giant_patch14_dinov2",
+        "vit_giant_patch14_reg4_dinov2",
+        "vit_giant_patch16_gap_224",
+        "vit_giantopt_patch16_siglip_256",
+        "vit_giantopt_patch16_siglip_384",
+        "vit_giantopt_patch16_siglip_gap_256",
+        "vit_giantopt_patch16_siglip_gap_384",
+        "vit_gigantic_patch14_224",
+        "vit_gigantic_patch14_clip_224",
+        "vit_gigantic_patch14_clip_quickgelu_224",
+        "vit_huge_patch14_224",
+        "vit_huge_patch14_clip_224",
+        "vit_huge_patch14_clip_336",
+        "vit_huge_patch14_clip_378",
+        "vit_huge_patch14_clip_quickgelu_224",
+        "vit_huge_patch14_clip_quickgelu_378",
+        "vit_huge_patch14_gap_224",
+        "vit_huge_patch14_xp_224",
+        "vit_huge_patch16_gap_448",
+        "vit_intern300m_patch14_448",
+        "vit_large_patch14_224",
+        "vit_large_patch14_clip_224",
+        "vit_large_patch14_clip_336",
+        "vit_large_patch14_clip_quickgelu_224",
+        "vit_large_patch14_clip_quickgelu_336",
+        "vit_large_patch14_dinov2",
+        "vit_large_patch14_reg4_dinov2",
+        "vit_large_patch14_xp_224",
+        "vit_large_patch16_224",
+        "vit_large_patch16_384",
+        "vit_large_patch16_rope_224",
+        "vit_large_patch16_rope_ape_224",
+        "vit_large_patch16_rope_mixed_224",
+        "vit_large_patch16_rope_mixed_ape_224",
+        "vit_large_patch16_siglip_256",
+        "vit_large_patch16_siglip_384",
+        "vit_large_patch16_siglip_512",
+        "vit_large_patch16_siglip_gap_256",
+        "vit_large_patch16_siglip_gap_384",
+        "vit_large_patch16_siglip_gap_512",
+        "vit_large_patch32_224",
+        "vit_large_patch32_384",
+        "vit_large_r50_s32_224",
+        "vit_large_r50_s32_384",
+        "vit_little_patch16_reg1_gap_256",
+        "vit_little_patch16_reg4_gap_256",
+        "vit_medium_patch16_clip_224",
+        "vit_medium_patch16_gap_240",
+        "vit_medium_patch16_gap_256",
+        "vit_medium_patch16_gap_384",
+        "vit_medium_patch16_reg1_gap_256",
+        "vit_medium_patch16_reg4_gap_256",
+        "vit_medium_patch16_rope_reg1_gap_256",
+        "vit_medium_patch32_clip_224",
+        "vit_mediumd_patch16_reg4_gap_256",
+        "vit_mediumd_patch16_reg4_gap_384",
+        "vit_mediumd_patch16_rope_reg1_gap_256",
+        "vit_pe_core_base_patch16_224",
+        "vit_pe_core_gigantic_patch14_448",
+        "vit_pe_core_large_patch14_336",
+        "vit_pe_core_small_patch16_384",
+        "vit_pe_core_tiny_patch16_384",
+        "vit_pe_lang_gigantic_patch14_448",
+        "vit_pe_lang_large_patch14_448",
+        "vit_pe_spatial_base_patch16_512",
+        "vit_pe_spatial_gigantic_patch14_448",
+        "vit_pe_spatial_large_patch14_448",
+        "vit_pe_spatial_small_patch16_512",
+        "vit_pe_spatial_tiny_patch16_512",
+        "vit_pwee_patch16_reg1_gap_256",
+        "vit_relpos_base_patch16_224",
+        "vit_relpos_base_patch16_cls_224",
+        "vit_relpos_base_patch16_clsgap_224",
+        "vit_relpos_base_patch16_plus_240",
+        "vit_relpos_base_patch16_rpn_224",
+        "vit_relpos_base_patch32_plus_rpn_256",
+        "vit_relpos_medium_patch16_224",
+        "vit_relpos_medium_patch16_cls_224",
+        "vit_relpos_medium_patch16_rpn_224",
+        "vit_relpos_small_patch16_224",
+        "vit_relpos_small_patch16_rpn_224",
+        "vit_small_patch8_224",
+        "vit_small_patch14_dinov2",
+        "vit_small_patch14_reg4_dinov2",
+        "vit_small_patch16_18x2_224",
+        "vit_small_patch16_36x1_224",
+        "vit_small_patch16_224",
+        "vit_small_patch16_384",
+        "vit_small_patch16_rope_224",
+        "vit_small_patch16_rope_ape_224",
+        "vit_small_patch16_rope_mixed_224",
+        "vit_small_patch16_rope_mixed_ape_224",
+        "vit_small_patch32_224",
+        "vit_small_patch32_384",
+        "vit_small_r26_s32_224",
+        "vit_small_r26_s32_384",
+        "vit_small_resnet26d_224",
+        "vit_small_resnet50d_s16_224",
+        "vit_so150m2_patch16_reg1_gap_256",
+        "vit_so150m2_patch16_reg1_gap_384",
+        "vit_so150m2_patch16_reg1_gap_448",
+        "vit_so150m_patch16_reg4_gap_256",
+        "vit_so150m_patch16_reg4_gap_384",
+        "vit_so150m_patch16_reg4_map_256",
+        "vit_so400m_patch14_siglip_224",
+        "vit_so400m_patch14_siglip_378",
+        "vit_so400m_patch14_siglip_384",
+        "vit_so400m_patch14_siglip_gap_224",
+        "vit_so400m_patch14_siglip_gap_378",
+        "vit_so400m_patch14_siglip_gap_384",
+        "vit_so400m_patch14_siglip_gap_448",
+        "vit_so400m_patch14_siglip_gap_896",
+        "vit_so400m_patch16_siglip_256",
+        "vit_so400m_patch16_siglip_384",
+        "vit_so400m_patch16_siglip_512",
+        "vit_so400m_patch16_siglip_gap_256",
+        "vit_so400m_patch16_siglip_gap_384",
+        "vit_so400m_patch16_siglip_gap_512",
+        "vit_srelpos_medium_patch16_224",
+        "vit_srelpos_small_patch16_224",
+        "vit_tiny_patch16_224",
+        "vit_tiny_patch16_384",
+        "vit_tiny_r_s16_p8_224",
+        "vit_tiny_r_s16_p8_384",
+        "vit_wee_patch16_reg1_gap_256",
+        "vit_xsmall_patch16_clip_224",
+    ]
+    names = [(n, "blocks") for n in names]
+    results = list(
+        tqdm(
+            Pool(30).imap(_retreive_timm_modules, names), total=len(names), desc="vits"
+        )
     )
+    for name, result in zip(names, results):
+        hf_embedding[name[0]] = result
+
+    path = Path(os.path.abspath(__file__))
+    with open(path.parent.parent / "assets/static_timm.json", "w") as f:
+        json.dump(hf_embedding, f, indent=2)
 
 
 def _generate_timm_embeddings_factory():
@@ -1234,6 +1444,7 @@ def _generate_timm_embeddings_factory():
 
 if __name__ == "__main__":
     _generate_timm_embeddings_factory()
+    _generate_hf_embeddings_factory()
 
     # last 3 blocks
     import stable_pretraining as spt
