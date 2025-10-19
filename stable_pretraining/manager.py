@@ -186,8 +186,8 @@ class Manager(submitit.helpers.Checkpointable):
                 for i, callback in enumerate(callbacks):
                     if not callable(callback):
                         continue
-                    assert ["pl_module"] == get_required_fn_parameters(callback)
-                    callbacks[i] = callback(pl_module=self.instantiated_module)
+                    assert ["module"] == get_required_fn_parameters(callback)
+                    callbacks[i] = callback(module=self.instantiated_module)
                 logging.info("\t● callbacks instantiated ✅")
                 del self.trainer.callbacks
 
