@@ -251,8 +251,8 @@ class Module(pl.LightningModule):
                         gradient_clip_algorithm=clip_algo,
                     )
 
-                # Step using raw optimizer to bypass Lightning's scaler.update()
-                scaler.step(opt.optimizer)
+                # Step optimizer (scaler must use same object as unscale_)
+                scaler.step(opt)
                 zero_grad_opts.append(opt)
 
                 # Step scheduler
