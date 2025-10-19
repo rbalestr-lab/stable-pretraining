@@ -206,39 +206,96 @@ class Module(pl.LightningModule):
         # Compute gradients once for the joint loss
         self.manual_backward(state["loss"])
 
+        # Check if using AMP with multiple optimizers
+        # Lightning's precision plugin calls scaler.update() after EACH optimizer,
+        # but PyTorch requires it to be called ONCE after ALL optimizers step.
+        # We handle this manually when using AMP with multiple optimizers.
+        use_amp = (
+            hasattr(self.trainer.precision_plugin, "scaler")
+            and self.trainer.precision_plugin.scaler is not None
+        )
+        use_manual_scaler = use_amp and len(optimizers) > 1
+
         zero_grad_opts = []
-        # Stepping and gradient clipping at accumulation boundary
-        for idx, opt in enumerate(optimizers):
-            name = self._optimizer_names[idx]
-            # in case module has no optimizer, special case
-            # Honor per-optimizer frequency if available
-            if (batch_idx + 1) % self._optimizer_frequencies[name] != 0:
-                continue
 
-            # Clip gradients for this optimizer then step
-            clip_val = getattr(
-                self.trainer, "gradient_clip_val_", self.trainer.gradient_clip_val
-            )
-            clip_algo = getattr(
-                self.trainer,
-                "gradient_clip_algorithm_",
-                self.trainer.gradient_clip_algorithm,
-            )
+        if use_manual_scaler:
+            # Manual scaler handling for multiple optimizers with AMP
+            scaler = self.trainer.precision_plugin.scaler
 
-            if clip_val is not None and clip_val > 0:
-                self.clip_gradients(
-                    opt,
-                    gradient_clip_val=clip_val,
-                    gradient_clip_algorithm=clip_algo,
+            # Collect optimizers that will step this iteration
+            optimizers_to_step = []
+            for idx, opt in enumerate(optimizers):
+                name = self._optimizer_names[idx]
+                if (batch_idx + 1) % self._optimizer_frequencies[name] == 0:
+                    optimizers_to_step.append((idx, opt))
+
+            # Unscale all optimizers before clipping/stepping
+            for idx, opt in optimizers_to_step:
+                scaler.unscale_(opt)
+
+            # Clip gradients and step each optimizer
+            for idx, opt in optimizers_to_step:
+                clip_val = getattr(
+                    self.trainer, "gradient_clip_val_", self.trainer.gradient_clip_val
                 )
-            opt.step()
-            zero_grad_opts.append(opt)
-            # Step its scheduler if it exists
-            if schedulers[idx] is not None:
-                assert schedulers[idx].optimizer == opt.optimizer
-                schedulers[idx].step()
+                clip_algo = getattr(
+                    self.trainer,
+                    "gradient_clip_algorithm_",
+                    self.trainer.gradient_clip_algorithm,
+                )
 
-        # zero grad what's needed
+                if clip_val is not None and clip_val > 0:
+                    self.clip_gradients(
+                        opt,
+                        gradient_clip_val=clip_val,
+                        gradient_clip_algorithm=clip_algo,
+                    )
+
+                # Step using raw optimizer to bypass Lightning's scaler.update()
+                scaler.step(opt.optimizer)
+                zero_grad_opts.append(opt)
+
+                # Step scheduler
+                if schedulers[idx] is not None:
+                    assert schedulers[idx].optimizer == opt.optimizer
+                    schedulers[idx].step()
+
+            # Update scaler ONCE after all optimizers have stepped
+            if len(optimizers_to_step) > 0:
+                scaler.update()
+
+        else:
+            # Normal path: single optimizer or no AMP
+            # Lightning's precision plugin handles scaler correctly
+            for idx, opt in enumerate(optimizers):
+                name = self._optimizer_names[idx]
+                if (batch_idx + 1) % self._optimizer_frequencies[name] != 0:
+                    continue
+
+                clip_val = getattr(
+                    self.trainer, "gradient_clip_val_", self.trainer.gradient_clip_val
+                )
+                clip_algo = getattr(
+                    self.trainer,
+                    "gradient_clip_algorithm_",
+                    self.trainer.gradient_clip_algorithm,
+                )
+
+                if clip_val is not None and clip_val > 0:
+                    self.clip_gradients(
+                        opt,
+                        gradient_clip_val=clip_val,
+                        gradient_clip_algorithm=clip_algo,
+                    )
+
+                opt.step()  # Lightning-wrapped, handles scaler automatically
+                zero_grad_opts.append(opt)
+
+                if schedulers[idx] is not None:
+                    assert schedulers[idx].optimizer == opt.optimizer
+                    schedulers[idx].step()
+
+        # Zero grad for optimizers that stepped
         for opt in zero_grad_opts:
             opt.zero_grad(set_to_none=True)
         return state
