@@ -23,8 +23,8 @@ import subprocess
 import pytest
 import yaml
 import torch
-import pytorch_lightning as pl
-from pytorch_lightning import LightningModule, Trainer
+import lightning as pl
+from lightning.pytorch import LightningModule, Trainer
 from torch.utils.data import DataLoader, TensorDataset
 
 from stable_pretraining.callbacks import EnvironmentDumpCallback  # Update import path
