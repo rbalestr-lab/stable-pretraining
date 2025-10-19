@@ -148,10 +148,16 @@ def instantiate_from_config(cfg: Union[dict, omegaconf.DictConfig]) -> Any:
         otherwise returns instantiated config dict
     """
     from stable_pretraining.manager import Manager
+    import torch
 
     # Convert to DictConfig if needed
     if isinstance(cfg, dict):
         cfg = omegaconf.OmegaConf.create(cfg)
+
+    # Set matmul precision if specified (must be done before Trainer instantiation)
+    if "matmul_precision" in cfg and cfg.matmul_precision is not None:
+        torch.set_float32_matmul_precision(cfg.matmul_precision)
+        rank_zero_warn(f"Set float32 matmul precision to: {cfg.matmul_precision}")
 
     # Instantiate all components
     components = recursive_instantiate(cfg)
