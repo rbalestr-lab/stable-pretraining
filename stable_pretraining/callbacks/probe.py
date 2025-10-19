@@ -6,7 +6,7 @@ import torchmetrics
 from lightning.pytorch import LightningModule
 from loguru import logger as logging
 import types
-from ..utils import get_data_from_batch_or_outputs
+from ..utils import get_data_from_batch_or_outputs, detach_tensors
 
 from .utils import TrainableCallback
 
@@ -126,7 +126,9 @@ class OnlineProbe(TrainableCallback):
                 assert callback.target is None
                 assert callback.input is None
                 assert callback.loss_fn is None
-                return callback.module(batch, outputs, self)
+                return callback.module(
+                    detach_tensors(batch), detach_tensors(outputs), self
+                )
             else:
                 x = get_data_from_batch_or_outputs(
                     callback.input, batch, outputs, caller_name=callback.name
@@ -140,13 +142,8 @@ class OnlineProbe(TrainableCallback):
                         f"Callback {callback.name} missing {callback.input} or {callback.target}"
                     )
 
-                if type(x) is list:
-                    _x = [i.detach() for i in x]
-                elif type(x) is dict:
-                    _x = {k: v.detach() for k, v in x.items()}
-                else:
-                    _x = x.detach()
-                preds = callback.module(_x)
+                preds = callback.module(detach_tensors(x))
+                y = detach_tensors(y)
 
             prediction_key = f"{callback.name}_preds"
             assert prediction_key not in batch
