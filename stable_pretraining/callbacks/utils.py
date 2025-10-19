@@ -212,6 +212,11 @@ class TrainableCallback(Callback):
                 hasattr(trainer.precision_plugin, "scaler")
                 and trainer.precision_plugin.scaler is not None
             ):
+                # Must unscale gradients before stepping to register optimizer with scaler
+                # and check for inf/NaN. The main module's optimizer_step already called
+                # scaler.update(), but the scaler can handle multiple optimizers as long
+                # as each calls unscale_() before step().
+                trainer.precision_plugin.scaler.unscale_(self.optimizer)
                 trainer.precision_plugin.scaler.step(self.optimizer)
             else:
                 self.optimizer.step()
