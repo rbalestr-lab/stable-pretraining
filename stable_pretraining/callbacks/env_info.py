@@ -12,8 +12,8 @@ import threading
 import time
 
 import torch
-import pytorch_lightning as pl
-from pytorch_lightning.callbacks import Callback
+import lightning as pl
+from lightning.pytorch.callbacks import Callback
 from loguru import logger
 
 
