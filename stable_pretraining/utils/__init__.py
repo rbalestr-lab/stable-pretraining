@@ -8,7 +8,7 @@ configuration management.
 
 # Import from submodules for backward compatibility
 
-from .batch_utils import get_data_from_batch_or_outputs
+from .batch_utils import get_data_from_batch_or_outputs, detach_tensors
 from .config import (
     adapt_resnet_for_lowres,
     execute_from_config,
@@ -53,6 +53,7 @@ from .nn_modules import (
 from .visualization import format_df_to_latex
 
 __all__ = [
+    "detach_tensors",
     # autograd
     "MyReLU",
     "OrderedCovariance",
