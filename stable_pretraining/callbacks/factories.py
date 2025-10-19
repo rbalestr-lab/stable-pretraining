@@ -1,5 +1,6 @@
 from .checkpoint_sklearn import SklearnCheckpoint, WandbCheckpoint
 from .trainer_info import LoggingCallback, ModuleSummary, TrainerInfo, SLURMInfo
+from .env_info import EnvironmentDumpCallback
 
 
 def default():
@@ -14,6 +15,7 @@ def default():
     callbacks = [
         # RichProgressBar(),
         LoggingCallback(),
+        EnvironmentDumpCallback(),
         TrainerInfo(),
         SklearnCheckpoint(),
         WandbCheckpoint(),
