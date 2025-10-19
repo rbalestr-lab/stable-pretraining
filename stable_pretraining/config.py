@@ -1,10 +1,10 @@
 """Configuration classes specifying default parameters for stable-SSL."""
 
-import logging
 from typing import Any, Union
 
 import hydra
 import omegaconf
+from lightning.pytorch.utilities.rank_zero import rank_zero_warn
 
 
 def collapse_nested_dict(
@@ -111,7 +111,7 @@ def recursive_instantiate(
                 else:
                     instantiated[key] = cfg[key]
             except Exception as e:
-                logging.warning(f"Could not instantiate {key}: {e}")
+                rank_zero_warn(f"Could not instantiate {key}: {e}")
                 instantiated[key] = cfg[key]
 
     # Second pass: instantiate remaining components
@@ -126,7 +126,7 @@ def recursive_instantiate(
                 else:
                     instantiated[key] = value
             except Exception as e:
-                logging.warning(f"Could not instantiate {key}: {e}")
+                rank_zero_warn(f"Could not instantiate {key}: {e}")
                 instantiated[key] = value
 
     return instantiated
