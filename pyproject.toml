@@ -15,6 +15,7 @@ dependencies = [
     "torchmetrics",
     "lightning",
     "hydra-core",
+    "omegaconf",
     "loguru",
     "tabulate",
     "pandas",
