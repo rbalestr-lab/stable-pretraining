@@ -86,7 +86,10 @@ def recursive_instantiate(
                 ):
                     # Special handling for Module to resolve forward function
                     if key == "module" and "forward" in cfg[key]:
-                        module_cfg = dict(cfg[key])
+                        # Resolve interpolations before converting to dict to handle root-level references
+                        module_cfg = omegaconf.OmegaConf.to_container(
+                            cfg[key], resolve=True
+                        )
                         # Import the forward function if it's a string reference
                         if isinstance(module_cfg["forward"], str):
                             parts = module_cfg["forward"].rsplit(".", 1)
