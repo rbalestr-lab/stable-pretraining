@@ -186,7 +186,7 @@ class Module(pl.LightningModule):
         optimizers = self.optimizers()
         # there are NO optimizers either from main or callbacks, no need to stay here!
         if isinstance(optimizers, pl.pytorch.core.optimizer._MockOptimizer):
-            return
+            return state
         elif not isinstance(optimizers, (list, tuple)):
             optimizers = [optimizers]
 
