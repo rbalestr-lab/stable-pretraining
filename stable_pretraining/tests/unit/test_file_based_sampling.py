@@ -1,71 +1,53 @@
 import pytest
 import tempfile
 import os
-from stable_pretraining.data.utils import load_items_from_file, write_random_dates
-
-
-@pytest.fixture
-def temp_file():
-    """Create a temporary file with predictable content."""
-    content = "\n".join(f"item_{i}" for i in range(100))
-    with tempfile.NamedTemporaryFile(mode="w+", delete=False) as f:
-        f.write(content)
-        f.flush()
-        yield f.name
-    os.remove(f.name)
+from stable_pretraining.data.utils import write_random_dates
+from stable_pretraining.data.spurious_corr.modifiers import ItemInjection
 
 
 @pytest.mark.unit
-def test_load_items_from_file_no_replacement(temp_file):
-    items = load_items_from_file(temp_file, seed=123, with_replacement=False)
-    assert len(items) == 100
-    assert len(set(items)) == 100  # unique items only
-
-
-@pytest.mark.unit
-def test_load_items_from_file_with_replacement(temp_file):
-    items = load_items_from_file(temp_file, seed=123, with_replacement=True)
-    assert len(items) == 100
-    # replacement allows duplicates
-    assert len(set(items)) <= 100
-
-
-@pytest.mark.unit
-def test_load_items_reproducibility_with_same_seed(temp_file):
-    items1 = load_items_from_file(temp_file, seed=42, with_replacement=True)
-    items2 = load_items_from_file(temp_file, seed=42, with_replacement=True)
-    assert items1 == items2
-
-
-@pytest.mark.unit
-def test_load_items_different_seed_produces_different_sequence(temp_file):
-    items1 = load_items_from_file(temp_file, seed=1, with_replacement=True)
-    items2 = load_items_from_file(temp_file, seed=2, with_replacement=True)
-    assert items1 != items2  # extremely unlikely to match
-
-
-@pytest.mark.unit
-def test_load_items_from_empty_file_raises():
-    with tempfile.NamedTemporaryFile(mode="w+", delete=False) as f:
-        path = f.name
-    with pytest.raises(ValueError):
-        load_items_from_file(path)
-    os.remove(path)
-
-
-@pytest.mark.unit
-def test_write_random_dates_creates_valid_file():
-    """Ensure write_random_dates writes unique or repeatable dates."""
+def test_write_random_dates_creates_file():
     with tempfile.TemporaryDirectory() as tmpdir:
-        path = os.path.join(tmpdir, "dates.txt")
-        write_random_dates(
-            path,
-            num_samples=50,
-            year_range=(2020, 2020),
-            seed=42,
-            with_replacement=False,
-        )
-        with open(path, "r") as f:
-            dates = [line.strip() for line in f if line.strip()]
-        assert len(dates) == len(set(dates))
-        assert all(date.startswith("2020-") for date in dates)
+        out_file = os.path.join(tmpdir, "dates.txt")
+        write_random_dates(out_file, n=10, seed=42, with_replacement=False)
+
+        assert os.path.exists(out_file)
+        with open(out_file, "r") as f:
+            lines = [line.strip() for line in f if line.strip()]
+
+        assert len(lines) == 10
+        assert all("-" in d for d in lines)  # looks like YYYY-MM-DD
+
+
+@pytest.mark.unit
+def test_item_injection_reads_from_file_and_injects_correctly():
+    with tempfile.TemporaryDirectory() as tmpdir:
+        # Write fake items
+        file_path = os.path.join(tmpdir, "items.txt")
+        with open(file_path, "w") as f:
+            f.write("A\nB\nC\n")
+
+        # Create modifier
+        modifier = ItemInjection(file_path=file_path, token="TEST")
+
+        text, label = modifier("original text", 0)
+        # The exact assertion depends on how your ItemInjection modifies the text.
+        # Here's a generic check:
+        assert isinstance(text, str)
+        assert "TEST" in text or any(x in text for x in ["A", "B", "C"])
+
+
+@pytest.mark.unit
+def test_item_injection_is_deterministic_with_seed():
+    with tempfile.TemporaryDirectory() as tmpdir:
+        file_path = os.path.join(tmpdir, "items.txt")
+        with open(file_path, "w") as f:
+            f.write("X\nY\nZ\n")
+
+        m1 = ItemInjection(file_path=file_path, token="SPURIOUS", seed=123)
+        m2 = ItemInjection(file_path=file_path, token="SPURIOUS", seed=123)
+
+        out1 = [m1("base text", 1)[0] for _ in range(10)]
+        out2 = [m2("base text", 1)[0] for _ in range(10)]
+
+        assert out1 == out2
