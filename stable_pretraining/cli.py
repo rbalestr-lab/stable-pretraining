@@ -8,7 +8,14 @@ import argparse
 
 
 def find_config_file(config_spec):
-    """Find config file from path or name."""
+    """Find config file from path or name.
+
+    Args:
+        config_spec (str): Path or name of the config file.
+
+    Returns:
+        tuple[str, str]: Tuple of (config_path, config_name) or (None, None) if not found.
+    """
     config_path = Path(config_spec)
 
     if config_path.exists():
@@ -26,7 +33,14 @@ def find_config_file(config_spec):
 
 
 def needs_multirun(overrides):
-    """Detect if multirun mode is needed."""
+    """Detect if multirun mode is needed.
+
+    Args:
+        overrides (list): List of command-line overrides.
+
+    Returns:
+        bool: True if multirun mode is needed, False otherwise.
+    """
     if not overrides:
         return False
 
@@ -42,7 +56,14 @@ def needs_multirun(overrides):
 
 
 def run_command(args):
-    """Execute experiment with the specified config."""
+    """Execute experiment with the specified config.
+
+    Args:
+        args: Parsed command-line arguments containing config and overrides.
+
+    Raises:
+        SystemExit: If config file not found or subprocess fails.
+    """
     config_spec = args.config
     overrides = args.overrides
 
@@ -85,7 +106,10 @@ def run_command(args):
 
 
 def main():
-    """Main entry point for the spt CLI."""
+    """Main entry point for the spt CLI.
+
+    Parses command-line arguments and runs the experiment with the specified config.
+    """
     parser = argparse.ArgumentParser(
         prog="spt",
         description="Stable SSL Training CLI",
