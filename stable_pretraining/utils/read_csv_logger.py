@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import List, Dict, Optional, Any, Union
+from typing import List, Dict, Optional, Any
 import pandas as pd
 import yaml
 from loguru import logger
@@ -34,20 +34,23 @@ class CSVLogAutoSummarizer:
 
     def __init__(
         self,
-        base_dir: Union[str, Path],
+        agg: Optional[callable] = None,
         monitor_keys: Optional[List[str]] = None,
         include_globs: Optional[List[str]] = None,
         exclude_globs: Optional[List[str]] = None,
         max_workers: Optional[int] = 10,
     ):
-        self.base_dir = Path(base_dir)
+        self.agg = agg
         self.monitor_keys = monitor_keys
         self.include_globs = include_globs or []
         self.exclude_globs = exclude_globs or []
         self.max_workers = max_workers
 
-    def collect(self) -> pd.DataFrame:
+    def collect(self, base_dir) -> pd.DataFrame:
         """Discover, summarize, and aggregate all runs into a DataFrame.
+
+        Args:
+        base_dir: Root directory to search for metrics files.
 
         Returns:
             pd.DataFrame: One row per selected metrics source (per file or per run root),
@@ -57,6 +60,29 @@ class CSVLogAutoSummarizer:
             - config.optimizer.lr, override.0 (or override as joined string), hparams.seed
             Also includes 'metrics_path' and 'run_root'.
         """
+        if type(base_dir) not in [list, tuple]:
+            base_dir = [base_dir]
+
+        dfs = []
+        for b in base_dir:
+            dfs.append(self._single_collect(b))
+        return pd.concat(dfs, ignore_index=True)
+
+    def _single_collect(self, base_dir) -> pd.DataFrame:
+        """Discover, summarize, and aggregate all runs into a DataFrame.
+
+        Args:
+        base_dir: Root directory to search for metrics files.
+
+        Returns:
+            pd.DataFrame: One row per selected metrics source (per file or per run root),
+            with flattened columns such as:
+            - last.val_accuracy
+            - best.val_loss, best.val_loss.step, best.val_loss.epoch
+            - config.optimizer.lr, override.0 (or override as joined string), hparams.seed
+            Also includes 'metrics_path' and 'run_root'.
+        """
+        self.base_dir = Path(base_dir)
         metrics_files = self._find_metrics_files()
         run_root_to_files: Dict[Path, List[Path]] = {}
         for f in tqdm(metrics_files, desc="compiling root paths"):
@@ -120,6 +146,8 @@ class CSVLogAutoSummarizer:
             return None
         df = pd.concat(dfs, ignore_index=True)
         df["root"] = root
+        if self.agg is not None:
+            return self.agg(df)
         return df
 
     # ----------------------------
