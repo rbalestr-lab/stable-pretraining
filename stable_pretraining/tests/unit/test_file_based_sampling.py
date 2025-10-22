@@ -2,7 +2,7 @@ import pytest
 import tempfile
 import os
 from stable_pretraining.data.utils import write_random_dates
-from stable_pretraining.data.spurious_corr.modifiers import ItemInjection
+from stable_pretraining.data.spurious_corr.transforms import ItemInjection
 
 
 @pytest.mark.unit
