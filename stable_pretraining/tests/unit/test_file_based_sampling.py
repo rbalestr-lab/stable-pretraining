@@ -28,7 +28,7 @@ def test_item_injection_reads_from_file_and_injects_correctly():
             f.write("A\nB\nC\n")
 
         # Create modifier
-        modifier = ItemInjection(file_path=file_path, token="TEST")
+        modifier = ItemInjection.from_file(file_path, seed=42)
 
         text, label = modifier("original text", 0)
         # The exact assertion depends on how your ItemInjection modifies the text.
@@ -44,8 +44,8 @@ def test_item_injection_is_deterministic_with_seed():
         with open(file_path, "w") as f:
             f.write("X\nY\nZ\n")
 
-        m1 = ItemInjection(file_path=file_path, token="SPURIOUS", seed=123)
-        m2 = ItemInjection(file_path=file_path, token="SPURIOUS", seed=123)
+        m1 = ItemInjection.from_file(file_path, seed=42)
+        m2 = ItemInjection.from_file(file_path, seed=42)
 
         out1 = [m1("base text", 1)[0] for _ in range(10)]
         out2 = [m2("base text", 1)[0] for _ in range(10)]
