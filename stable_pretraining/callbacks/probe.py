@@ -6,7 +6,7 @@ import torchmetrics
 from lightning.pytorch import LightningModule
 from loguru import logger as logging
 import types
-from ..utils import get_data_from_batch_or_outputs
+from ..utils import get_data_from_batch_or_outputs, detach_tensors
 
 from .utils import TrainableCallback
 
@@ -74,6 +74,8 @@ class OnlineProbe(TrainableCallback):
             Union[str, dict, partial, torch.optim.lr_scheduler.LRScheduler]
         ] = None,
         accumulate_grad_batches: int = 1,
+        gradient_clip_val: float = None,
+        gradient_clip_algorithm: str = "norm",
         metrics: Optional[Union[dict, tuple, list, torchmetrics.Metric]] = None,
     ) -> None:
         # Initialize base class
@@ -93,6 +95,8 @@ class OnlineProbe(TrainableCallback):
             optimizer=optimizer,
             scheduler=scheduler,
             accumulate_grad_batches=accumulate_grad_batches,
+            gradient_clip_val=gradient_clip_val,
+            gradient_clip_algorithm=gradient_clip_algorithm,
         )
         logging.info(f"Initialized {self.name}")
         logging.info(f"  - Input: {input}")
@@ -140,13 +144,8 @@ class OnlineProbe(TrainableCallback):
                         f"Callback {callback.name} missing {callback.input} or {callback.target}"
                     )
 
-                if type(x) is list:
-                    _x = [i.detach() for i in x]
-                elif type(x) is dict:
-                    _x = {k: v.detach() for k, v in x.items()}
-                else:
-                    _x = x.detach()
-                preds = callback.module(_x)
+                preds = callback.module(detach_tensors(x))
+                y = detach_tensors(y)
 
             prediction_key = f"{callback.name}_preds"
             assert prediction_key not in batch

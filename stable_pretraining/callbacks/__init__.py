@@ -14,6 +14,7 @@ from .embedding_cache import EmbeddingCache
 from .earlystop import EpochMilestones
 from .wd_schedule import WeightDecayUpdater
 from .cleanup import CleanUpCallback
+from .env_info import EnvironmentDumpCallback
 
 __all__ = [
     OnlineProbe,
@@ -36,4 +37,5 @@ __all__ = [
     EpochMilestones,
     WeightDecayUpdater,
     CleanUpCallback,
+    EnvironmentDumpCallback,
 ]

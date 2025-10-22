@@ -2,6 +2,7 @@
 Version 0.1
 -----------
 
+- Added `matmul_precision` config parameter to control TensorFloat-32 (TF32) precision on Ampere and newer GPUs.
 - Base trainer offering the basic functionalities of stable-SSL (logging, checkpointing, data loading etc).
 - Template trainers for supervised and self-supervised learning (general joint embedding, JEPA, and teacher student models).
 - Examples of self-supervised learning methods : SimCLR, Barlow Twins, VicReg, DINO, MoCo, SimSiam.

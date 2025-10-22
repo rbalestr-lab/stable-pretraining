@@ -8,6 +8,127 @@ import numpy as np
 import torch
 from matplotlib.collections import LineCollection
 from matplotlib.patches import Rectangle
+import pandas as pd
+
+
+def latex_escape(s):
+    """Escape LaTeX special characters in a string."""
+    if not isinstance(s, str):
+        return s
+    # Order matters: backslash first!
+    s = s.replace("\\", r"\textbackslash{}")
+    s = s.replace("&", r"\&")
+    s = s.replace("%", r"\%")
+    s = s.replace("$", r"\$")
+    s = s.replace("#", r"\#")
+    s = s.replace("_", r"\_")
+    s = s.replace("{", r"\{")
+    s = s.replace("}", r"\}")
+    s = s.replace("~", r"\textasciitilde{}")
+    s = s.replace("^", r"\textasciicircum{}")
+    return s
+
+
+def escape_labels(idx_or_cols):
+    """Recursively escape all labels in a pandas Index or MultiIndex."""
+    if isinstance(idx_or_cols, pd.MultiIndex):
+        new_tuples = []
+        for tup in idx_or_cols:
+            new_tuples.append(tuple(latex_escape(x) for x in tup))
+        new_names = [
+            latex_escape(n) if n is not None else None for n in idx_or_cols.names
+        ]
+        return pd.MultiIndex.from_tuples(new_tuples, names=new_names)
+    else:
+        return pd.Index(
+            [latex_escape(x) for x in idx_or_cols],
+            name=latex_escape(idx_or_cols.name) if idx_or_cols.name else None,
+        )
+
+
+def format_df_to_latex(
+    df,
+    caption=None,
+    label=None,
+    bold="row",  # 'row', 'col', 'overall', or None
+    na_rep="–",
+    sort_index=False,
+    sort_columns=False,
+    column_format=None,
+    position="htbp",
+    escape_headers=True,
+    show_percent_symbol=False,
+    unit_annotation="caption",  # 'caption', 'columns', or None
+):
+    """Format a MultiIndex DataFrame for LaTeX export with percent formatting (no % symbol).
+
+    Escapes LaTeX special characters in all headers if escape_headers=True.
+    """
+    df = df.copy()
+    if sort_index:
+        df = df.sort_index()
+    if sort_columns:
+        df = df.sort_index(axis=1)
+    # Optionally annotate units in caption or columns
+    cap = caption
+    if not show_percent_symbol:
+        if unit_annotation == "caption":
+            cap = (caption or "") + " (All values are percentages)"
+        elif unit_annotation == "columns":
+            # Add " (%)" to the last column level name
+            if isinstance(df.columns, pd.MultiIndex):
+                new_names = list(df.columns.names)
+                new_names[-1] = (new_names[-1] or "") + " (%)"
+                df.columns = pd.MultiIndex.from_tuples(df.columns, names=new_names)
+            else:
+                df.columns = [str(c) + " (%)" for c in df.columns]
+    # Escape headers if requested
+    if escape_headers:
+        df.index = escape_labels(df.index)
+        df.columns = escape_labels(df.columns)
+        styler_escape = False
+    else:
+        styler_escape = True
+
+    # Formatter: percent with 2 decimals, handle NaN, with or without %
+    def percent_or_plain(x, show_symbol=show_percent_symbol):
+        if pd.isna(x):
+            return na_rep
+        val = f"{x * 100:.2f}"
+        return f"{val}\\%" if show_symbol else val
+
+    styler = df.style.format(
+        lambda x: percent_or_plain(x, show_percent_symbol),
+        na_rep=na_rep,
+        escape=styler_escape,
+    )
+    # Bolding logic (using LaTeX property mapping, not literal \textbf{})
+    if bold == "row":
+        styler = styler.highlight_max(axis=1, props="font-weight: bold;")
+    elif bold == "col":
+        styler = styler.highlight_max(axis=0, props="font-weight: bold;")
+    elif bold == "overall":
+        max_val = np.nanmax(df.values)
+
+        def bold_overall(val):
+            return (
+                "font-weight: bold;"
+                if np.isclose(val, max_val, equal_nan=False)
+                else ""
+            )
+
+        styler = styler.applymap(bold_overall)
+    # else: no bolding
+    latex = styler.to_latex(
+        hrules=True,
+        caption=cap,
+        label=label,
+        column_format=column_format,
+        position=position,
+        multicol_align="c",
+        environment=None,
+    )
+    return latex
 
 
 def _make_image(x):

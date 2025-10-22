@@ -7,8 +7,8 @@ configuration management.
 """
 
 # Import from submodules for backward compatibility
-
-from .batch_utils import get_data_from_batch_or_outputs
+from .gdrive_utils import GDriveUploader
+from .batch_utils import get_data_from_batch_or_outputs, detach_tensors
 from .config import (
     adapt_resnet_for_lowres,
     execute_from_config,
@@ -50,8 +50,11 @@ from .nn_modules import (
     OrderedQueue,
     UnsortedQueue,
 )
+from .visualization import format_df_to_latex
 
 __all__ = [
+    "detach_tensors",
+    "GDriveUploader",
     # autograd
     "MyReLU",
     "OrderedCovariance",
@@ -103,4 +106,5 @@ __all__ = [
     "with_hf_retry_ratelimit",
     "load_hparams_from_ckpt",
     "CSVLogAutoSummarizer",
+    "format_df_to_latex",
 ]

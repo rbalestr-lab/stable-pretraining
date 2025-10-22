@@ -32,6 +32,8 @@ class TrainableCallback(Callback):
             Union[str, dict, partial, torch.optim.lr_scheduler.LRScheduler]
         ] = None,
         accumulate_grad_batches: int = 1,
+        gradient_clip_val: float = None,
+        gradient_clip_algorithm: str = "norm",
     ):
         """Initialize base callback with optimizer/scheduler configuration.
 
@@ -41,10 +43,14 @@ class TrainableCallback(Callback):
             optimizer: Optimizer configuration. If None, inherits from main module.
             scheduler: Scheduler configuration. If None, inherits from main module.
             accumulate_grad_batches: Number of batches to accumulate gradients.
+            gradient_clip_val: Value to clip the gradient (default None).
+            gradient_clip_algorithm: Algorithm to clip the gradient (default `norm`).
         """
         super().__init__()
         self.name = name
         self.accumulate_grad_batches = accumulate_grad_batches
+        self.gradient_clip_val = gradient_clip_val
+        self.gradient_clip_algorithm = gradient_clip_algorithm
 
         # Store configurations
         self._optimizer_config = optimizer
@@ -96,13 +102,23 @@ class TrainableCallback(Callback):
                 schedulers = []
             else:
                 optimizers, schedulers = outputs
-            assert callback.name not in self._optimizer_index_by_name
+            # assert callback.name not in self._optimizer_name_to_index
             assert callback.name not in self._optimizer_frequencies
-            assert callback.name not in self._optimizer_names
-            self._optimizer_index_by_name[callback.name] = len(self._optimizer_names)
-            self._optimizer_names.append(callback.name)
+            # assert callback.name not in self._optimizer_names
+            assert callback.name not in self._optimizer_gradient_clip_val
+            assert callback.name not in self._optimizer_gradient_clip_algorithm
+            assert len(optimizers) not in self._optimizer_index_to_name
+            self._optimizer_index_to_name[len(optimizers)] = callback.name
+            # self._optimizer_name_to_index[callback.name] = len(self._optimizer_names)
+            # self._optimizer_names.append(callback.name)
             self._optimizer_frequencies[callback.name] = (
                 callback.accumulate_grad_batches
+            )
+            self._optimizer_gradient_clip_val[callback.name] = (
+                callback.gradient_clip_val
+            )
+            self._optimizer_gradient_clip_algorithm[callback.name] = (
+                callback.gradient_clip_algorithm
             )
             optimizers.append(callback.setup_optimizer(self))
             schedulers.append(callback.setup_scheduler(optimizers[-1], self))

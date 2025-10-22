@@ -9,6 +9,7 @@ from loguru import logger as logging
 from omegaconf import DictConfig
 from tabulate import tabulate
 from pathlib import Path
+from prettytable import PrettyTable
 
 from .optim import create_optimizer, create_scheduler
 
@@ -125,11 +126,6 @@ class Module(pl.LightningModule):
                 "No metrics configuration provided - automatic metric tracking is disabled."
             )
 
-        # Internal optimizer metadata filled in configure_optimizers
-        self._optimizer_names = None
-        self._optimizer_index_by_name = None
-        self._optimizer_frequencies = None
-
     def forward(self, *args, **kwargs):
         raise NotImplementedError("The forward() method must be implemented.")
 
@@ -186,7 +182,7 @@ class Module(pl.LightningModule):
         optimizers = self.optimizers()
         # there are NO optimizers either from main or callbacks, no need to stay here!
         if isinstance(optimizers, pl.pytorch.core.optimizer._MockOptimizer):
-            return
+            return state
         elif not isinstance(optimizers, (list, tuple)):
             optimizers = [optimizers]
 
@@ -209,23 +205,14 @@ class Module(pl.LightningModule):
         zero_grad_opts = []
         # Stepping and gradient clipping at accumulation boundary
         for idx, opt in enumerate(optimizers):
-            name = self._optimizer_names[idx]
-            # in case module has no optimizer, special case
+            name = self._optimizer_index_to_name[idx]
             # Honor per-optimizer frequency if available
             if (batch_idx + 1) % self._optimizer_frequencies[name] != 0:
                 continue
 
-            # Clip gradients for this optimizer then step
-            clip_val = getattr(
-                self.trainer, "gradient_clip_val_", self.trainer.gradient_clip_val
-            )
-            clip_algo = getattr(
-                self.trainer,
-                "gradient_clip_algorithm_",
-                self.trainer.gradient_clip_algorithm,
-            )
-
-            if clip_val is not None and clip_val > 0:
+            clip_val = self._optimizer_gradient_clip_val[name]
+            clip_algo = self._optimizer_gradient_clip_algorithm[name]
+            if clip_val is not None:
                 self.clip_gradients(
                     opt,
                     gradient_clip_val=clip_val,
@@ -242,6 +229,53 @@ class Module(pl.LightningModule):
         for opt in zero_grad_opts:
             opt.zero_grad(set_to_none=True)
         return state
+
+    def on_train_start(self):
+        logging.info("Double checking optimizers!")
+        optimizers = self.optimizers()
+        logging.info(f"`self.optimizers() gave us {len(optimizers)} optimizers")
+        for i in range(len(optimizers)):
+            # check if optimizer i is named and well setup
+            if i not in self._optimizer_index_to_name:
+                name = f"default_{i}"
+                self._optimizer_index_to_name[i] = name
+            name = self._optimizer_index_to_name[i]
+            if name not in self._optimizer_gradient_clip_val:
+                logging.warning(f"No clip val found for optimizer {name}")
+                clip_val = getattr(
+                    self.trainer, "gradient_clip_val_", self.trainer.gradient_clip_val
+                )
+                logging.warning(f"-> we will use the Trainer's value of {clip_val}")
+                self._optimizer_gradient_clip_val[name] = clip_val
+            if name not in self._optimizer_gradient_clip_algorithm:
+                logging.warning(f"No clip algorithm found for optimizer {name}")
+                clip_algo = getattr(
+                    self.trainer,
+                    "gradient_clip_algorithm_",
+                    self.trainer.gradient_clip_algorithm,
+                )
+                logging.warning(f"-> we will use the Trainer's value of {clip_algo}")
+                self._optimizer_gradient_clip_algorithm[name] = clip_algo
+            if name not in self._optimizer_frequencies:
+                freq = getattr(self.trainer, "accumulate_grad_batches", 1)
+                freq = getattr(self.trainer, "accumulate_grad_batches_", freq)
+                freq = max(int(freq), 1)
+                # config priority
+                freq = self.optim.get("frequency", freq)
+                self._optimizer_frequencies[name] = int(freq)
+
+        table = PrettyTable()
+        # 2. Define the column headers.
+        table.field_names = ["Opt. Index", "Opt. name", "opt", "clip val.", "clip alg."]
+        for i in range(len(optimizers)):
+            name = self._optimizer_index_to_name[i]
+            row = [str(i), name, type(optimizers[i]).__name__]
+            row.append(str(self._optimizer_gradient_clip_val[name]))
+            row.append(str(self._optimizer_gradient_clip_algorithm[name]))
+            table.add_row(row)
+        logging.success(
+            "We are done checking your optimizers! Here is the summary:\n{}", table
+        )
 
     def validation_step(self, batch, batch_idx):
         return self.forward(batch, stage="validate")
@@ -431,9 +465,10 @@ class Module(pl.LightningModule):
         """
         logging.info("Configuring optimizers and learning rate schedulers...")
 
-        self._optimizer_index_by_name = {}
-        self._optimizer_names = []
+        self._optimizer_index_to_name = {}
         self._optimizer_frequencies = {}
+        self._optimizer_gradient_clip_val = {}
+        self._optimizer_gradient_clip_algorithm = {}
 
         # Early exit for disabled optimization
         if hasattr(self, "optim") and not self.optim:
@@ -471,23 +506,6 @@ class Module(pl.LightningModule):
 
             logging.info(
                 f"Configured {opt.__class__.__name__} optimizer with {sched_name} scheduler."
-            )
-
-            # Track names/frequencies for training_step
-            self._optimizer_names.append("default")
-            self._optimizer_index_by_name["default"] = 0
-            accum = max(
-                int(
-                    getattr(
-                        self.trainer,
-                        "accumulate_grad_batches_",
-                        getattr(self.trainer, "accumulate_grad_batches", 1),
-                    )
-                ),
-                1,
-            )
-            self._optimizer_frequencies["default"] = int(
-                self.optim.get("frequency", accum)
             )
 
             # Build scheduler config dict for Lightning
@@ -546,7 +564,7 @@ class Module(pl.LightningModule):
 
             # Track names and frequencies aligned to optimizer order
             self._optimizer_names.append(name)
-            self._optimizer_index_by_name[name] = len(optimizers) - 1
+            self._optimizer_name_to_index[name] = len(optimizers) - 1
             self._optimizer_frequencies[name] = int(config.get("frequency", 1))
 
         return optimizers, schedulers

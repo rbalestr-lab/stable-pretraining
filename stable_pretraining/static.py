@@ -908,14 +908,14 @@ def _generate_timm_embeddings_factory():
         "convnext_zepto_rms",
         "convnext_zepto_rms_ols",
         "convnextv2_atto",
-        "convnextv2_base",
         "convnextv2_femto",
+        "convnextv2_pico",
+        "convnextv2_nano",
+        "convnextv2_tiny",
+        "convnextv2_small",
+        "convnextv2_base",
         "convnextv2_huge",
         "convnextv2_large",
-        "convnextv2_nano",
-        "convnextv2_pico",
-        "convnextv2_small",
-        "convnextv2_tiny",
     ]
     names = [(n, "blocks") for n in names]
     results = list(

@@ -1,5 +1,5 @@
 import lightning as pl
-from typing import Union, Iterable
+from typing import Union
 from loguru import logger as logging
 import numpy as np
 import torchmetrics
@@ -49,35 +49,66 @@ class EpochMilestones(pl.Callback):
 
     def __init__(
         self,
-        metric_name: Union[Iterable[str], str],
         milestones: dict[int, float],
+        monitor: Union[list[str], str] = None,
+        contains: str = None,
         direction: str = "max",
         after_validation: bool = True,
+        strict: bool = True,
     ):
+        if monitor is None and contains is None:
+            raise ValueError("`monitor` and `contains` can't both be None")
         super().__init__()
-        if type(metric_name) is str:
-            metric_name = [metric_name]
-        self.metric_name = metric_name
+        if type(monitor) is str:
+            monitor = [monitor]
+        if type(contains) is str:
+            contains = [contains]
+
+        self.monitor = monitor
+        self.contains = contains
+        self.strict = strict
         self.milestones = milestones
         self.direction = direction
         self.after_validation = after_validation
 
     def _check_condition(self, trainer):
         # Get the current epoch
+        metrics = trainer.callback_metrics
         epoch = trainer.current_epoch
+        # Select metrics by exact or substring match
+        if self.monitor:
+            matched = {m: metrics.get(m) for m in self.monitor}
+        else:
+            matched = {
+                k: v
+                for contain in self.contains
+                for k, v in metrics.items()
+                if contain in k
+            }
+        # Sanity check: verify presence
+        if trainer.sanity_checking:
+            logging.info("Sanity checking EpochMilstones...")
+            logging.info(f"We matched {len(matched)} metrics!")
+            if not matched:
+                msg = f"No metrics found for monitor='{self.monitor}' contains='{self.contains}' in callback_metrics: {list(metrics.keys())}"
+                if self.strict:
+                    raise RuntimeError(msg)
+                else:
+                    logging.warning(msg)
+            logging.info(
+                f"Sanity check passed, congrats! We will use {self.milestones}..."
+            )
+            return
         if epoch not in self.milestones:
             logging.info(f"EpochMilestones: {epoch=} is not in milestones, skipping...")
             return
         logging.info(f"EpochMilestones: {epoch=} is in milestones, checking condition!")
         # Retrieve the metric from the logged metrics
-        metrics = trainer.callback_metrics
-        values = [metrics.get(name) for name in self.metric_name]
+        values = list(matched.values())
         # Stop training if the metric is not greater than min_value
         if self.direction == "max":
             final = np.max([to_scalar(x) for x in values])
-            logging.info(
-                f"EpochMilestones: Maximum value among {self.metric_name} is {final}"
-            )
+            logging.info(f"EpochMilestones: Maximum value is {final}")
             if final < self.milestones[epoch]:
                 logging.warning(
                     f"EpochMilestones: Value {final} below threshold"
@@ -91,9 +122,7 @@ class EpochMilestones(pl.Callback):
                 )
         else:
             final = np.min([to_scalar(x) for x in values])
-            logging.info(
-                f"EpochMilestones: Minimum value among {self.metric_name} is {final}"
-            )
+            logging.info(f"EpochMilestones: Minimum value is {final}")
             if final > self.milestones[epoch]:
                 logging.warning(
                     f"EpochMilestones: Value {final} above threshold"
@@ -106,12 +135,12 @@ class EpochMilestones(pl.Callback):
                     f" {self.milestones[epoch]}... Yayy!"
                 )
 
-    def on_training_end(self, trainer, pl_module):
+    def on_training_epoch_end(self, trainer, pl_module):
         if self.after_validation:
             return
         self._check_condition(trainer)
 
-    def on_validation_end(self, trainer, pl_module):
+    def on_validation_epoch_end(self, trainer, pl_module):
         if not self.after_validation:
             return
         self._check_condition(trainer)

@@ -21,8 +21,19 @@ Usage:
 
 import hydra
 from omegaconf import DictConfig, OmegaConf
+from lightning.pytorch.utilities.rank_zero import rank_zero_only
 
 from .config import instantiate_from_config
+
+
+@rank_zero_only
+def print_config(cfg: DictConfig) -> None:
+    """Print configuration only on rank 0."""
+    print("=" * 80)
+    print("Configuration:")
+    print("=" * 80)
+    print(OmegaConf.to_yaml(cfg))
+    print("=" * 80)
 
 
 @hydra.main(version_base="1.3", config_path=None, config_name=None)
@@ -32,12 +43,8 @@ def main(cfg: DictConfig) -> None:
     Args:
         cfg: Hydra configuration dictionary containing all experiment parameters
     """
-    # Print configuration for debugging
-    print("=" * 80)
-    print("Configuration:")
-    print("=" * 80)
-    print(OmegaConf.to_yaml(cfg))
-    print("=" * 80)
+    # Print configuration for debugging (only on rank 0)
+    print_config(cfg)
 
     # Instantiate and run
     manager = instantiate_from_config(cfg)

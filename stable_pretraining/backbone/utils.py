@@ -412,19 +412,25 @@ def from_torchvision(model_name, low_resolution=False, **kwargs):
             - "ConvMixer"
         low_resolution (bool, optional): Whether to adapt the resolution of the model (for CIFAR typically).
             By default False.
-        **kwargs: Additional keyword arguments for the model.
+        **kwargs: Additional keyword arguments for the model. Special handling:
+            - in_channels (int): Number of input channels. If provided for ResNet models, the first
+              conv layer will be modified to accept this many channels. Default is 3.
 
     Returns:
         torch.nn.Module: The neural network model.
     """
+    # Extract in_channels before passing to torchvision (which doesn't accept it)
+    in_channels = kwargs.pop("in_channels", 3)
+
     try:
         model = torchvision.models.__dict__[model_name](**kwargs)
     except KeyError:
         raise ValueError(f"Unknown model: {model_name}.")
 
-    if low_resolution:  # reduce resolution, for instance for CIFAR
-        if "resnet" in model_name:
-            in_channels = kwargs.get("in_channels", 3)
+    # Modify conv1 for custom number of input channels and/or low resolution
+    if "resnet" in model_name and (in_channels != 3 or low_resolution):
+        if low_resolution:
+            # Low resolution: smaller kernel, stride=1, no maxpool (for CIFAR)
             model.conv1 = nn.Conv2d(
                 in_channels,
                 64,
@@ -435,7 +441,17 @@ def from_torchvision(model_name, low_resolution=False, **kwargs):
             )
             model.maxpool = nn.Identity()
         else:
-            logging.warning(f"Cannot adapt resolution for model: {model_name}.")
+            # Full resolution: keep original kernel/stride, just change in_channels
+            model.conv1 = nn.Conv2d(
+                in_channels,
+                64,
+                kernel_size=(7, 7),
+                stride=(2, 2),
+                padding=(3, 3),
+                bias=False,
+            )
+    elif low_resolution and "resnet" not in model_name:
+        logging.warning(f"Cannot adapt resolution for model: {model_name}.")
 
     # Handle num_classes parameter as documented
     num_classes = kwargs.get("num_classes", None)

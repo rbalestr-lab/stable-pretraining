@@ -1,10 +1,10 @@
 """Configuration classes specifying default parameters for stable-SSL."""
 
-import logging
 from typing import Any, Union
 
 import hydra
 import omegaconf
+from lightning.pytorch.utilities.rank_zero import rank_zero_warn
 
 
 def collapse_nested_dict(
@@ -86,7 +86,10 @@ def recursive_instantiate(
                 ):
                     # Special handling for Module to resolve forward function
                     if key == "module" and "forward" in cfg[key]:
-                        module_cfg = dict(cfg[key])
+                        # Resolve interpolations before converting to dict to handle root-level references
+                        module_cfg = omegaconf.OmegaConf.to_container(
+                            cfg[key], resolve=True
+                        )
                         # Import the forward function if it's a string reference
                         if isinstance(module_cfg["forward"], str):
                             parts = module_cfg["forward"].rsplit(".", 1)
@@ -111,7 +114,7 @@ def recursive_instantiate(
                 else:
                     instantiated[key] = cfg[key]
             except Exception as e:
-                logging.warning(f"Could not instantiate {key}: {e}")
+                rank_zero_warn(f"Could not instantiate {key}: {e}")
                 instantiated[key] = cfg[key]
 
     # Second pass: instantiate remaining components
@@ -126,7 +129,7 @@ def recursive_instantiate(
                 else:
                     instantiated[key] = value
             except Exception as e:
-                logging.warning(f"Could not instantiate {key}: {e}")
+                rank_zero_warn(f"Could not instantiate {key}: {e}")
                 instantiated[key] = value
 
     return instantiated
@@ -148,10 +151,16 @@ def instantiate_from_config(cfg: Union[dict, omegaconf.DictConfig]) -> Any:
         otherwise returns instantiated config dict
     """
     from stable_pretraining.manager import Manager
+    import torch
 
     # Convert to DictConfig if needed
     if isinstance(cfg, dict):
         cfg = omegaconf.OmegaConf.create(cfg)
+
+    # Set matmul precision if specified (must be done before Trainer instantiation)
+    if "matmul_precision" in cfg and cfg.matmul_precision is not None:
+        torch.set_float32_matmul_precision(cfg.matmul_precision)
+        rank_zero_warn(f"Set float32 matmul precision to: {cfg.matmul_precision}")
 
     # Instantiate all components
     components = recursive_instantiate(cfg)

@@ -9,6 +9,7 @@ import logging
 import sys
 
 from loguru import logger
+from omegaconf import OmegaConf
 
 # Handle optional dependencies early
 try:
@@ -96,6 +97,9 @@ __all__ = [
     "__url__",
     "__version__",
 ]
+
+# Register OmegaConf resolvers
+OmegaConf.register_new_resolver("eval", eval)
 
 # Setup logging
 
