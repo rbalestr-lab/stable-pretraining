@@ -134,9 +134,18 @@ class Module(pl.LightningModule):
     ):
         """Override to globally exclude callback-related parameters.
 
-        Excludes parameters that belong to `self.callbacks_modules` or `self.callbacks_metrics`.
+        Excludes parameters that belong to ``self.callbacks_modules`` or ``self.callbacks_metrics``.
         This prevents accidental optimization of callback/metric internals, even if external code
-        calls `self.parameters()` or `self.named_parameters()` directly.
+        calls ``self.parameters()`` or ``self.named_parameters()`` directly.
+
+        Args:
+            with_callbacks (bool, optional): If False, excludes callback parameters. Defaults to True.
+            prefix (str, optional): Prefix to prepend to parameter names. Defaults to "".
+            recurse (bool, optional): If True, yields parameters of this module and all submodules.
+                If False, yields only direct parameters. Defaults to True.
+
+        Yields:
+            tuple[str, torch.nn.Parameter]: Name and parameter pairs.
         """
         if with_callbacks:
             logging.warning(
@@ -150,7 +159,16 @@ class Module(pl.LightningModule):
             yield name, param
 
     def parameters(self, with_callbacks=True, recurse: bool = True):
-        """Override to route through the filtered `named_parameters` implementation."""
+        """Override to route through the filtered ``named_parameters`` implementation.
+
+        Args:
+            with_callbacks (bool, optional): If False, excludes callback parameters. Defaults to True.
+            recurse (bool, optional): If True, yields parameters of this module and all submodules.
+                If False, yields only direct parameters. Defaults to True.
+
+        Yields:
+            torch.nn.Parameter: Module parameters.
+        """
         for _, param in self.named_parameters(with_callbacks, recurse=recurse):
             yield param
 
@@ -287,7 +305,15 @@ class Module(pl.LightningModule):
         return self.forward(batch, stage="predict")
 
     def _get_scheduler_name(self, scheduler_config, scheduler_instance=None):
-        """Extract scheduler name from various config formats."""
+        """Extract scheduler name from various config formats.
+
+        Args:
+            scheduler_config: Scheduler configuration (str, dict, partial, or class).
+            scheduler_instance (optional): Instantiated scheduler instance. Defaults to None.
+
+        Returns:
+            str: Name of the scheduler.
+        """
         if isinstance(scheduler_config, str):
             return scheduler_config
         elif isinstance(scheduler_config, dict):
@@ -300,7 +326,16 @@ class Module(pl.LightningModule):
             return "Unknown"
 
     def _build_scheduler_config(self, scheduler, config, name=None):
-        """Build scheduler config dict for Lightning."""
+        """Build scheduler config dict for Lightning.
+
+        Args:
+            scheduler: The instantiated scheduler.
+            config (dict): Configuration dict containing interval, frequency, etc.
+            name (str, optional): Name for the scheduler. Defaults to None.
+
+        Returns:
+            dict: Scheduler configuration dict compatible with Lightning.
+        """
         scheduler_dict = {
             "scheduler": scheduler,
             "interval": config.get("interval", "step"),

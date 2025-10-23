@@ -2,7 +2,21 @@ from torch import nn
 
 
 class ConvMixer(nn.Module):
-    """ConvMixer model from :cite:`trockman2022patches`."""
+    """ConvMixer model.
+
+    A simple and efficient convolutional architecture that operates directly on patches.
+
+    Args:
+        in_channels (int, optional): Number of input channels. Defaults to 3.
+        num_classes (int, optional): Number of output classes. Defaults to 10.
+        dim (int, optional): Hidden dimension size. Defaults to 64.
+        depth (int, optional): Number of ConvMixer blocks. Defaults to 6.
+        kernel_size (int, optional): Kernel size for depthwise convolution. Defaults to 9.
+        patch_size (int, optional): Patch embedding size. Defaults to 7.
+
+    Note:
+        Introduced in :cite:`trockman2022patches`.
+    """
 
     def __init__(
         self,
@@ -43,7 +57,14 @@ class ConvMixer(nn.Module):
         self.fc = nn.Linear(dim, num_classes)
 
     def forward(self, xb):
-        """Forward pass."""
+        """Forward pass through the ConvMixer model.
+
+        Args:
+            xb (torch.Tensor): Input tensor of shape (batch_size, in_channels, height, width).
+
+        Returns:
+            torch.Tensor: Output logits of shape (batch_size, num_classes).
+        """
         out = self.conv1(xb)
         for a, b in zip(self.blocks_a, self.blocks_b):
             out = out + a(out)

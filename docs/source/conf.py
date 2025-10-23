@@ -48,6 +48,8 @@ extensions = [
 ]
 
 autosummary_generate = True
+napoleon_google_docstring = True
+napoleon_numpy_docstring = True
 
 copybutton_exclude = ".linenos, .gp"
 
