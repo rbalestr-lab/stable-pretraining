@@ -8,10 +8,21 @@ def test_spurious_text_injection_deterministic_same_idx(tmp_path):
     src_path = tmp_path / "spurious.txt"
     src_path.write_text("RED\nGREEN\nBLUE\n")
 
+    src_path2 = tmp_path / "spurious2.txt"
+    src_path2.write_text("RED\nGREEN\nBLUE\n")
+
     text = "deterministic spurious injection test"
-    transform = SpuriousTextInjection(
+    transform1 = SpuriousTextInjection(
         text_key="text",
         file_path=str(src_path),
+        location="random",
+        token_proportion=0.5,
+        seed=123,
+    )
+
+    transform2 = SpuriousTextInjection(
+        text_key="text",
+        file_path=str(src_path2),
         location="random",
         token_proportion=0.5,
         seed=123,
@@ -20,8 +31,8 @@ def test_spurious_text_injection_deterministic_same_idx(tmp_path):
     sample1 = {"text": text, "label": "A", "idx": 5}
     sample2 = {"text": text, "label": "A", "idx": 5}
 
-    out1 = transform(sample1)
-    out2 = transform(sample2)
+    out1 = transform1(sample1)
+    out2 = transform2(sample2)
 
     assert out1["text"] == out2["text"], "Same idx should produce identical injection"
     assert out1["label"] == out2["label"]
