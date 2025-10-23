@@ -2,7 +2,7 @@ import pytest
 import tempfile
 import os
 from stable_pretraining.data.utils import write_random_dates
-from stable_pretraining.data.transforms import ItemInjection
+from stable_pretraining.data.transforms import SpuriousTextInjection
 
 
 @pytest.mark.unit
@@ -20,34 +20,55 @@ def test_write_random_dates_creates_file():
 
 
 @pytest.mark.unit
-def test_item_injection_reads_from_file_and_injects_correctly():
+def test_spurious_text_injection_reads_from_file_and_injects_correctly():
     with tempfile.TemporaryDirectory() as tmpdir:
-        # Write fake items
-        file_path = os.path.join(tmpdir, "items.txt")
+        # Create fake spurious tokens file
+        file_path = os.path.join(tmpdir, "tokens.txt")
         with open(file_path, "w") as f:
             f.write("A\nB\nC\n")
 
-        # Create modifier
-        modifier = ItemInjection.from_file(file_path, seed=42)
+        # Create transform
+        transform = SpuriousTextInjection(
+            text_key="text",
+            source=file_path,
+            location="random",
+            token_proportion=0.5,
+            seed=42,
+        )
 
-        text, label = modifier("original text", 0)
-        # The exact assertion depends on how your ItemInjection modifies the text.
-        # Here's a generic check:
-        assert isinstance(text, str)
-        assert "TEST" in text or any(x in text for x in ["A", "B", "C"])
+        sample = {"text": "original text", "label": 0}
+        output = transform(sample)
+
+        assert isinstance(output["text"], str)
+        assert output["text"] != "original text"
+        assert any(tok in output["text"] for tok in ["A", "B", "C"])
 
 
 @pytest.mark.unit
-def test_item_injection_is_deterministic_with_seed():
+def test_spurious_text_injection_is_deterministic_with_seed():
     with tempfile.TemporaryDirectory() as tmpdir:
-        file_path = os.path.join(tmpdir, "items.txt")
+        file_path = os.path.join(tmpdir, "tokens.txt")
         with open(file_path, "w") as f:
             f.write("X\nY\nZ\n")
 
-        m1 = ItemInjection.from_file(file_path, seed=42)
-        m2 = ItemInjection.from_file(file_path, seed=42)
+        # Create two transforms with the same seed
+        t1 = SpuriousTextInjection(
+            text_key="text",
+            source=file_path,
+            location="end",
+            token_proportion=0.5,
+            seed=123,
+        )
+        t2 = SpuriousTextInjection(
+            text_key="text",
+            source=file_path,
+            location="end",
+            token_proportion=0.5,
+            seed=123,
+        )
 
-        out1 = [m1("base text", 1)[0] for _ in range(10)]
-        out2 = [m2("base text", 1)[0] for _ in range(10)]
+        sample = {"text": "base text", "label": 1}
+        outputs1 = [t1(sample)["text"] for _ in range(5)]
+        outputs2 = [t2(sample)["text"] for _ in range(5)]
 
-        assert out1 == out2
+        assert outputs1 == outputs2, "Should produce identical results with same seed"
