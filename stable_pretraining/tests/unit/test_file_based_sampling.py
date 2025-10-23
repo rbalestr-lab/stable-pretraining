@@ -30,7 +30,7 @@ def test_spurious_text_injection_reads_from_file_and_injects_correctly():
         # Create transform
         transform = SpuriousTextInjection(
             text_key="text",
-            source=file_path,
+            file_path=file_path,
             location="random",
             token_proportion=0.5,
             seed=42,
@@ -54,14 +54,14 @@ def test_spurious_text_injection_is_deterministic_with_seed():
         # Create two transforms with the same seed
         t1 = SpuriousTextInjection(
             text_key="text",
-            source=file_path,
+            file_path=file_path,
             location="end",
             token_proportion=0.5,
             seed=123,
         )
         t2 = SpuriousTextInjection(
             text_key="text",
-            source=file_path,
+            file_path=file_path,
             location="end",
             token_proportion=0.5,
             seed=123,

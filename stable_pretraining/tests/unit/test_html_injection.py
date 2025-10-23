@@ -9,7 +9,11 @@ def test_html_injection_deterministic_same_idx(tmp_path):
 
     # Create deterministic injection transform
     modifier = HTMLInjection(
-        file_path=str(tag_path), location="random", token_proportion=0.5, seed=123
+        file_path=str(tag_path),
+        text_key="text",
+        location="random",
+        token_proportion=0.5,
+        seed=123,
     )
 
     # Two samples with the same idx should yield identical results
@@ -29,7 +33,11 @@ def test_html_injection_deterministic_different_idx(tmp_path):
     tag_path.write_text("<x> </x>\n")
 
     modifier = HTMLInjection(
-        file_path=str(tag_path), location="random", token_proportion=0.5, seed=123
+        file_path=str(tag_path),
+        text_key="text",
+        location="random",
+        token_proportion=0.5,
+        seed=123,
     )
 
     # Two samples with different idx should yield different results
@@ -52,10 +60,18 @@ def test_html_injection_deterministic_reproducibility_across_runs(tmp_path):
     sample = {"text": "check reproducibility", "label": "lbl", "idx": 42}
 
     modifier1 = HTMLInjection(
-        file_path=str(tag_path), location="random", token_proportion=0.5, seed=777
+        file_path=str(tag_path),
+        text_key="text",
+        location="random",
+        token_proportion=0.5,
+        seed=777,
     )
     modifier2 = HTMLInjection(
-        file_path=str(tag_path), location="random", token_proportion=0.5, seed=777
+        file_path=str(tag_path),
+        text_key="text",
+        location="random",
+        token_proportion=0.5,
+        seed=777,
     )
 
     out1 = modifier1(sample)

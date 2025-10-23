@@ -11,7 +11,7 @@ def test_spurious_text_injection_deterministic_same_idx(tmp_path):
     text = "deterministic spurious injection test"
     transform = SpuriousTextInjection(
         text_key="text",
-        source=str(src_path),
+        file_path=str(src_path),
         location="random",
         token_proportion=0.5,
         seed=123,
@@ -35,7 +35,7 @@ def test_spurious_text_injection_deterministic_different_idx(tmp_path):
     text = "check for idx-dependent difference"
     transform = SpuriousTextInjection(
         text_key="text",
-        source=str(src_path),
+        file_path=str(src_path),
         location="random",
         token_proportion=0.5,
         seed=321,
@@ -60,14 +60,14 @@ def test_spurious_text_injection_reproducibility_across_runs(tmp_path):
 
     transform1 = SpuriousTextInjection(
         text_key="text",
-        source=str(src_path),
+        file_path=str(src_path),
         location="end",
         token_proportion=0.25,
         seed=999,
     )
     transform2 = SpuriousTextInjection(
         text_key="text",
-        source=str(src_path),
+        file_path=str(src_path),
         location="end",
         token_proportion=0.25,
         seed=999,
@@ -89,7 +89,7 @@ def test_spurious_text_injection_with_addsampleidx(tmp_path):
     add_idx = AddSampleIdx()
     transform = SpuriousTextInjection(
         text_key="text",
-        source=str(src_path),
+        file_path=str(src_path),
         location="beginning",
         token_proportion=0.3,
         seed=777,
