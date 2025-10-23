@@ -46,12 +46,13 @@ def test_spurious_text_injection_reads_from_file_and_injects_correctly():
 
 @pytest.mark.unit
 def test_spurious_text_injection_is_deterministic_with_seed():
-    # Create two transforms with the same seed
+    # Create one file with spurious tokens
     with tempfile.TemporaryDirectory() as tmpdir:
         file_path = os.path.join(tmpdir, "tokens.txt")
         with open(file_path, "w") as f:
             f.write("X\nY\nZ\n")
 
+        # Create two transforms reading from the same file
         t1 = SpuriousTextInjection(
             text_key="text",
             file_path=file_path,
@@ -59,11 +60,6 @@ def test_spurious_text_injection_is_deterministic_with_seed():
             token_proportion=0.5,
             seed=123,
         )
-    with tempfile.TemporaryDirectory() as tmpdir:
-        file_path = os.path.join(tmpdir, "tokens.txt")
-        with open(file_path, "w") as f2:
-            f2.write("X\nY\nZ\n")
-
         t2 = SpuriousTextInjection(
             text_key="text",
             file_path=file_path,
@@ -72,8 +68,8 @@ def test_spurious_text_injection_is_deterministic_with_seed():
             seed=123,
         )
 
-    sample = {"text": "base text", "label": 1}
-    outputs1 = [t1(sample)["text"] for _ in range(5)]
-    outputs2 = [t2(sample)["text"] for _ in range(5)]
+        sample = {"text": "base text", "label": 1}
+        outputs1 = [t1(sample)["text"] for _ in range(5)]
+        outputs2 = [t2(sample)["text"] for _ in range(5)]
 
-    assert outputs1 == outputs2, "Should produce identical results with same seed"
+        assert outputs1 == outputs2, "Should produce identical results with same seed"
