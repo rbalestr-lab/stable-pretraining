@@ -68,8 +68,9 @@ def test_spurious_text_injection_is_deterministic_with_seed():
             seed=123,
         )
 
-        sample = {"text": "base text", "label": 1}
-        outputs1 = [t1(sample)["text"] for _ in range(5)]
-        outputs2 = [t2(sample)["text"] for _ in range(5)]
+        sample1 = {"text": "base text", "label": 1}
+        sample2 = {"text": "base text", "label": 1}
+        outputs1 = [t1(sample1)["text"] for _ in range(5)]
+        outputs2 = [t2(sample2)["text"] for _ in range(5)]
 
         assert outputs1 == outputs2, "Should produce identical results with same seed"
