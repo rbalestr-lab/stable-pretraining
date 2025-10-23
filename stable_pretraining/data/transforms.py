@@ -16,6 +16,8 @@ from torchvision.transforms import v2
 from torchvision.transforms.functional import InterpolationMode
 from torchvision.transforms.v2 import functional as F
 from torchvision.transforms.v2._utils import query_chw
+from torchvision.io import read_image
+from torchvision.transforms.functional import resize
 
 from stable_pretraining.data.masking import multi_block_mask
 
@@ -971,6 +973,9 @@ class RandomMask(Transform):
 #             sample[self.new_key] = sample[self.label_key]
 #         return sample
 
+# -------------------------------------------------------------------------------------------------------------
+# Spurious Text Transforms
+
 
 class AddSampleIdx(Transform):
     """Add an "idx" key each sample to allow for deterministic injection."""
@@ -1249,4 +1254,188 @@ class HTMLInjection(Transform):
         else:
             x[self.text_key] = self._inject_at_level(text, self.level, rng)
 
+        return x
+
+
+# -------------------------------------------------------------------------------------------------------------
+# Spurious Image Transforms
+
+
+class AddPatch(Transform):
+    """Add a solid color patch to an image at a fixed position.
+
+    Args:
+        patch_size (float): Fraction of image width/height for the patch (0 < patch_size ≤ 1).
+        color (Tuple[float, float, float]): RGB values in [0, 1].
+        position (str): Where to place the patch: 'top_left_corner', 'top_right_corner',
+                        'bottom_left_corner', 'bottom_right_corner', 'center'.
+    """
+
+    def __init__(
+        self,
+        patch_size: float = 0.1,
+        color: Tuple[float, float, float] = (1.0, 0.0, 0.0),
+        position: str = "bottom_right_corner",
+    ):
+        super().__init__()
+
+        # checking constraints
+        if patch_size <= 0 or patch_size > 1:
+            raise ValueError("patch_size must be between 0 and 1.")
+
+        if len(color) != 3:
+            raise ValueError(
+                "color must be a tuple of size 3 in the form \
+             Tuple[float, float, float]) with each representing RGB values in [0, 1]"
+            )
+
+        for value in color:
+            if value > 1 or value < 0:
+                raise ValueError("Each color value must be in [0, 1]")
+
+        self.patch_size = patch_size
+        self.color = color
+        self.position = position
+
+    def __call__(self, x: Dict[str, torch.Tensor]) -> Dict[str, torch.Tensor]:
+        img = self.nested_get(x, "image")
+        _, H, W = img.shape
+
+        patch_h = int(H * self.patch_size)
+        patch_w = int(W * self.patch_size)
+
+        # Create a colored patch
+        patch = torch.zeros((3, patch_h, patch_w), device=img.device)
+        patch[0] = self.color[0]
+        patch[1] = self.color[1]
+        patch[2] = self.color[2]
+
+        img = img.clone()
+        if self.position == "top_left_corner":
+            img[:, :patch_h, :patch_w] = patch
+        elif self.position == "top_right_corner":
+            img[:, :patch_h, -patch_w:] = patch
+        elif self.position == "bottom_left_corner":
+            img[:, -patch_h:, :patch_w] = patch
+        elif self.position == "bottom_right_corner":
+            img[:, -patch_h:, -patch_w:] = patch
+        elif self.position == "center":
+            center_y, center_x = H // 2, W // 2
+            img[
+                :,
+                center_y - patch_h // 2 : center_y + patch_h // 2,
+                center_x - patch_w // 2 : center_x + patch_w // 2,
+            ] = patch
+        else:
+            raise ValueError(
+                f"Invalid position: {self.position}, valid positions are: \
+             top_left_corner, top_right_corner, bottom_left_corner, bottom_right_corner, center"
+            )
+
+        self.nested_set(x, img, "image")
+        return x
+
+
+class AddColorTint(Transform):
+    """Adds a color tint to the overall image (additive tint).
+
+    Args:
+        tint (Tuple[float, float, float]): RGB representation of the tint that will be applied to the overall image
+        alpha (Float): mixing ratio for how much to blend the new color with the existing image
+    """
+
+    def __init__(
+        self, tint: Tuple[float, float, float] = (1.0, 0.8, 0.8), alpha: float = 0.3
+    ):
+        super().__init__()
+        self.tint = torch.tensor(tint).view(3, 1, 1)
+        self.alpha = alpha
+
+    def __call__(self, x):
+        img = self.nested_get(x, "image")
+        img = torch.clamp(img * (1 - self.alpha) + self.tint * self.alpha, 0, 1)
+        self.nested_set(x, img, "image")
+        return x
+
+
+class AddBorder(Transform):
+    """Adds a border around an image.
+
+    Args:
+        thickness (Float): how thick the border around the image will be
+        color (Tuple[float, float, float]): RGB representation of the color of the border
+    """
+
+    def __init__(
+        self, thickness: float = 0.05, color: Tuple[float, float, float] = (0, 1, 0)
+    ):
+        super().__init__()
+        self.thickness = thickness
+        self.color = color
+
+    def __call__(self, x):
+        img = self.nested_get(x, "image").clone()
+        _, H, W = img.shape
+
+        # scale to match image size
+        t = int(min(H, W) * self.thickness)
+        color_tensor = torch.tensor(self.color, device=img.device).view(3, 1, 1)
+
+        img[:, :t, :] = color_tensor
+        img[:, -t:, :] = color_tensor
+        img[:, :, :t] = color_tensor
+        img[:, :, -t:] = color_tensor
+        self.nested_set(x, img, "image")
+
+        return x
+
+
+class AddWatermark(Transform):
+    """Overlay another image (logo, emoji, etc.) onto the base image.
+
+    Args:
+        watermark_path (str): Path to the watermark image (e.g. 'smile.png').
+        size (float): Fraction of base image size to scale watermark.
+        position (str): One of ['top_left', 'top_right', 'bottom_left', 'bottom_right', 'center'].
+        alpha (float): Opacity of watermark (0-1).
+    """
+
+    def __init__(self, watermark_path, size=0.2, position="bottom_right", alpha=0.8):
+        super().__init__()
+        # [C,H,W] tensor in [0,1]
+        self.watermark = read_image(watermark_path).float() / 255.0
+        self.size = size
+        self.position = position
+        self.alpha = alpha
+
+    def __call__(self, x):
+        img = self.nested_get(x, "image").clone()
+        _, H, W = img.shape
+
+        # Resize watermark
+        w_h, w_w = self.watermark.shape[1:]
+        target_h = int(H * self.size)
+        target_w = int(w_w / w_h * target_h)
+        wm = resize(self.watermark, [target_h, target_w])
+
+        # Compute position
+        if self.position == "top_left":
+            y0, x0 = 0, 0
+        elif self.position == "top_right":
+            y0, x0 = 0, W - target_w
+        elif self.position == "bottom_left":
+            y0, x0 = H - target_h, 0
+        elif self.position == "bottom_right":
+            y0, x0 = H - target_h, W - target_w
+        elif self.position == "center":
+            y0, x0 = (H - target_h) // 2, (W - target_w) // 2
+        else:
+            raise ValueError(f"Unknown position: {self.position}")
+
+        background_region = img[:, y0 : y0 + target_h, x0 : x0 + target_w]
+        img[:, y0 : y0 + target_h, x0 : x0 + target_w] = (
+            background_region * (1 - self.alpha) + wm * self.alpha
+        )
+
+        self.nested_set(x, img, "image")
         return x
