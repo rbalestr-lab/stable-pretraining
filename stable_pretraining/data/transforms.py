@@ -1101,8 +1101,8 @@ class SpuriousTextInjection(Transform):
 
         # Deterministic RNG per call
         if self.base_seed is not None:
-            # Derive a deterministic RNG for this call
-            rng = random.Random(self.base_seed)
+            idx = x.get("idx", 0)
+            rng = random.Random(self.base_seed + idx)
         else:
             rng = random.Random()
 
