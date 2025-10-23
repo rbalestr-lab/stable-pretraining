@@ -1073,12 +1073,21 @@ class SpuriousTextInjection(Transform):
         self.location = location
         self.token_proportion = token_proportion
         self.base_seed = seed
+        # store RNG per idx
+        self.rngs = {}
+
         with open(file_path, "r", encoding="utf-8") as f:
             self.items = [line.strip() for line in f if line.strip()]
 
         assert self.items, f"No valid lines found in {file_path}"
         assert 0 <= self.token_proportion <= 1, "token_proportion must be in [0, 1]"
         assert self.location in {"beginning", "random", "end"}
+
+    def _get_rng(self, idx):
+        if idx not in self.rngs:
+            seed = self.base_seed + idx if self.base_seed is not None else None
+            self.rngs[idx] = random.Random(seed)
+        return self.rngs[idx]
 
     def _inject(self, text: str, rng: random.Random) -> str:
         words = text.split()
@@ -1102,7 +1111,7 @@ class SpuriousTextInjection(Transform):
         # Deterministic RNG per call
         if self.base_seed is not None:
             idx = x.get("idx", 0)
-            rng = random.Random(self.base_seed + idx)
+            rng = self._get_rng(idx)
         else:
             rng = random.Random()
 
