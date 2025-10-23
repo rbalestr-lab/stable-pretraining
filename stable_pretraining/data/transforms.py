@@ -1072,8 +1072,7 @@ class SpuriousTextInjection(Transform):
         self.text_key = text_key
         self.location = location
         self.token_proportion = token_proportion
-        self.rng = random.Random(seed)
-
+        self.base_seed = seed
         with open(file_path, "r", encoding="utf-8") as f:
             self.items = [line.strip() for line in f if line.strip()]
 
@@ -1081,11 +1080,11 @@ class SpuriousTextInjection(Transform):
         assert 0 <= self.token_proportion <= 1, "token_proportion must be in [0, 1]"
         assert self.location in {"beginning", "random", "end"}
 
-    def _inject(self, text: str) -> str:
+    def _inject(self, text: str, rng: random.Random) -> str:
         words = text.split()
         num_tokens = len(words)
         num_to_inject = max(1, int(num_tokens * self.token_proportion))
-        injections = [self.rng.choice(self.items) for _ in range(num_to_inject)]
+        injections = [rng.choice(self.items) for _ in range(num_to_inject)]
 
         if self.location == "beginning":
             words = injections + words
@@ -1093,13 +1092,21 @@ class SpuriousTextInjection(Transform):
             words = words + injections
         elif self.location == "random":
             for inj in injections:
-                pos = self.rng.randint(0, len(words))
+                pos = rng.randint(0, len(words))
                 words.insert(pos, inj)
         return " ".join(words)
 
     def __call__(self, x: dict) -> dict:
         text = x[self.text_key]
-        x[self.text_key] = self._inject(text)
+
+        # Deterministic RNG per call
+        if self.base_seed is not None:
+            # Derive a deterministic RNG for this call
+            rng = random.Random(self.base_seed)
+        else:
+            rng = random.Random()
+
+        x[self.text_key] = self._inject(text, rng)
         return x
 
 
