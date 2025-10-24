@@ -69,7 +69,7 @@ module = spt.Module(
     simclr_loss=spt.losses.NTXEntLoss(temperature=0.5),
     optim={
         "optimizer": {"type": "Adam", "lr": 0.001},
-        "scheduler": {"type": "CosineAnnealing"},
+        "scheduler": {"type": "CosineAnnealingLR"},
         "interval": "epoch"
     }
 )
