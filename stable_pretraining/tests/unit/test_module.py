@@ -4,8 +4,8 @@ from stable_pretraining.losses import NTXEntLoss
 from stable_pretraining.data import DataModule
 import torch.nn as nn
 import torch
-from torch import nn
 from lightning.pytorch import Trainer
+
 
 @pytest.mark.unit
 def test_module_initialization():
@@ -21,16 +21,18 @@ def test_module_initialization():
         optim={
             "optimizer": {"type": "Adam", "lr": 0.001},
             "scheduler": {"type": "CosineAnnealing"},
-            "interval": "epoch"
-        }
+            "interval": "epoch",
+        },
     )
 
     assert module is not None
 
+
 @pytest.mark.integration
 def test_module_integration():
     """Integration test for the Module class with multiple optimizers.
-    trainer.fit() is called to ensure configure_optimizers work as expected."""
+    trainer.fit() is called to ensure configure_optimizers work as expected.
+    """
     # Define simple backbone and projector
     backbone = nn.Linear(1, 1)  # Simple nn.Module with a single parameter
     projector = nn.Linear(1, 1)  # Simple nn.Module with a single parameter
@@ -42,9 +44,15 @@ def test_module_integration():
         forward=forward.simclr_forward,  # Or byol_forward, vicreg_forward, etc.
         simclr_loss=NTXEntLoss(temperature=0.5),
         optim={
-        "backbone_opt": {"modules": "backbone", "optimizer": {"type": "AdamW", "lr": 1e-3}},
-        "projector_opt": {"modules": "projector", "optimizer": {"type": "AdamW", "lr": 1e-3}},
-        }
+            "backbone_opt": {
+                "modules": "backbone",
+                "optimizer": {"type": "AdamW", "lr": 1e-3},
+            },
+            "projector_opt": {
+                "modules": "projector",
+                "optimizer": {"type": "AdamW", "lr": 1e-3},
+            },
+        },
     )
 
     # Define dummy data loaders
