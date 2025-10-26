@@ -598,8 +598,6 @@ class Module(pl.LightningModule):
             )
 
             # Track names and frequencies aligned to optimizer order
-            self._optimizer_names.append(name)
-            self._optimizer_name_to_index[name] = len(optimizers) - 1
             self._optimizer_frequencies[name] = int(config.get("frequency", 1))
 
         return optimizers, schedulers
