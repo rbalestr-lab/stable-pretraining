@@ -31,6 +31,7 @@ def test_module_initialization():
 @pytest.mark.integration
 def test_module_integration():
     """Integration test for the Module class with multiple optimizers.
+
     trainer.fit() is called to ensure configure_optimizers work as expected.
     """
     # Define simple backbone and projector
