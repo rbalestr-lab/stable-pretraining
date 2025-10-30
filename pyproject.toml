@@ -67,7 +67,7 @@ visualization = [
 # Extra dataset support
 datasets = [
     "datasets",  # HuggingFace datasets
-    "pyarrow>=15.0.0",  # Required for datasets compatibility
+    "pyarrow==20.0.0",  # Required for datasets compatibility
     "minari[hdf5]>=0.5.3",  # Reinforcement learning datasets
 ]
 
