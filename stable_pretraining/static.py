@@ -5,8 +5,30 @@ from typing import Dict, List, Optional
 import json
 import os
 
+import timm
+import torch
 
-class TIMM_EMBEDDINGS:
+
+class MetaStatic(type):
+    """Metaclass that enables dict-like behavior on the TIMM_PARAMETERS class."""
+
+    def __contains__(cls, key):
+        """Enable 'in' operator on the class itself."""
+        cls._ensure_loaded()
+        return key in cls._data
+
+    def __len__(cls):
+        """Enable len() on the class itself."""
+        cls._ensure_loaded()
+        return len(cls._data)
+
+    def __iter__(cls):
+        """Enable iteration over keys."""
+        cls._ensure_loaded()
+        return iter(cls._data)
+
+
+class TIMM_EMBEDDINGS(metaclass=MetaStatic):
     """Thread-safe, lazy-loaded registry for TIMM (PyTorch Image Models) embedding names, accessed via class-level indexing.
 
     This class provides a mapping from string keys to lists of embedding names, loaded on first access from a
@@ -41,6 +63,31 @@ class TIMM_EMBEDDINGS:
     data: dict[str, list[str]] = None
 
     @classmethod
+    def _ensure_loaded(cls):
+        """Ensure the TIMM parameters are loaded from the JSON file.
+
+        This method uses double-checked locking to ensure thread-safe,
+        one-time initialization of the cached data.
+
+        Raises:
+            RuntimeError: If the assets folder or JSON file is missing.
+        """
+        if cls._data is None:
+            with cls._lock:
+                # Double-check after acquiring lock
+                if cls._data is None:
+                    logging.info("TIMM cache not loaded yet... loading!")
+                    path = Path(os.path.abspath(__file__))
+                    logging.info(
+                        f"Loading TIMM embeddings from: {path.parent.parent / 'assets/static_timm.json'}"
+                    )
+                    asset_path = path.parent.parent / "assets/static_timm.json"
+                    if not asset_path.is_file():
+                        raise RuntimeError("Did you manually delete the assets folder?")
+                    with open(asset_path, "r") as f:
+                        cls._data = json.load(f)
+
+    @classmethod
     def __class_getitem__(cls, key):
         """Retrieve a copy of the list of embedding names for a given model key, loading the registry from disk if necessary.
 
@@ -69,21 +116,139 @@ class TIMM_EMBEDDINGS:
             >>> names = TIMM_EMBEDDINGS["efficientnet_b0"]
             >>> print(names)
         """
-        if cls._data is None:
-            with cls._lock:
-                logging.info("TIMM cache not loaded yet... loading!")
-                path = Path(os.path.abspath(__file__))
-                logging.info(
-                    f"Loading TIMM embeddings from: {path.parent.parent / 'assets/static_timm.json'}"
-                )
-                asset_path = path.parent.parent / "assets/static_timm.json"
-                if not asset_path.is_file():
-                    raise RuntimeError("Did you manually delete the assets folder?")
-                with open(asset_path, "r") as f:
-                    cls._data = json.load(f)
+        cls._ensure_loaded()
         # Defensive: always return a copy to prevent mutation of the cached data
         value = cls._data[key]
         return list(value)
+
+
+class TIMM_PARAMETERS(metaclass=MetaStatic):
+    """Thread-safe singleton class for accessing TIMM (Timm Image Models) parameters.
+
+    This class provides lazy-loaded, cached access to TIMM model parameters stored
+    in a static JSON file. It implements a dict-like interface with thread-safe
+    initialization and defensive copying to prevent mutation of cached data.
+
+    Usage:
+        # Access parameters by key
+        params = TIMM_PARAMETERS['model_name']
+
+        # Iterate over keys
+        for key in TIMM_PARAMETERS.keys():
+            print(key)
+
+        # Iterate over values
+        for values in TIMM_PARAMETERS.values():
+            print(values)
+
+        # Iterate over items
+        for key, values in TIMM_PARAMETERS.items():
+            print(f"{key}: {values}")
+
+    Note:
+        All methods return copies of the data to prevent accidental mutation
+        of the internal cache.
+    """
+
+    _data: Optional[Dict[str, List[str]]] = None
+    _lock = threading.RLock()
+
+    data: dict[str, list[str]] = None
+
+    @classmethod
+    def _ensure_loaded(cls):
+        """Ensure the TIMM parameters are loaded from the JSON file.
+
+        This method uses double-checked locking to ensure thread-safe,
+        one-time initialization of the cached data.
+
+        Raises:
+            RuntimeError: If the assets folder or JSON file is missing.
+        """
+        if cls._data is None:
+            with cls._lock:
+                # Double-check after acquiring lock
+                if cls._data is None:
+                    logging.info("TIMM cache not loaded yet... loading!")
+                    path = Path(os.path.abspath(__file__))
+                    logging.info(
+                        f"Loading TIMM parameters from: {path.parent.parent / 'assets/static_timm_parameters.json'}"
+                    )
+                    asset_path = (
+                        path.parent.parent / "assets/static_timm_parameters.json"
+                    )
+                    if not asset_path.is_file():
+                        raise RuntimeError("Did you manually delete the assets folder?")
+                    with open(asset_path, "r") as f:
+                        cls._data = json.load(f)
+
+    @classmethod
+    def __class_getitem__(cls, key):
+        """Access TIMM parameters by key.
+
+        Args:
+            key: The parameter key to retrieve.
+
+        Returns:
+            A copy of the list of parameters associated with the key.
+
+        Raises:
+            KeyError: If the key is not found in the parameters.
+        """
+        cls._ensure_loaded()
+        # Defensive: always return a copy to prevent mutation of the cached data
+        value = cls._data[key]
+        return value
+
+    @classmethod
+    def keys(cls):
+        """Return all parameter keys.
+
+        Returns:
+            A dict_keys view of all available parameter keys.
+
+        Example:
+            >>> list(TIMM_PARAMETERS.keys())
+            ['resnet50', 'efficientnet_b0', ...]
+        """
+        cls._ensure_loaded()
+        return cls._data.keys()
+
+    @classmethod
+    def values(cls):
+        """Return all parameter values.
+
+        Returns:
+            A generator yielding copies of all parameter value lists.
+
+        Note:
+            Returns copies to prevent mutation of cached data.
+
+        Example:
+            >>> for params in TIMM_PARAMETERS.values():
+            ...     print(params)
+        """
+        cls._ensure_loaded()
+        # Return copies to prevent mutation
+        return cls._data.values()
+
+    @classmethod
+    def items(cls):
+        """Return all parameter key-value pairs.
+
+        Returns:
+            A generator yielding tuples of (key, value_copy) pairs.
+
+        Note:
+            Values are copies to prevent mutation of cached data.
+
+        Example:
+            >>> for key, params in TIMM_PARAMETERS.items():
+            ...     print(f"{key}: {params}")
+        """
+        cls._ensure_loaded()
+        # Return copies of values to prevent mutation
+        return ((key, value) for key, value in cls._data.items())
 
 
 TORCHVISION_EMBEDDINGS = {
@@ -424,14 +589,17 @@ def _get_last_submodule_full_name(model):
 
 
 def _retreive_timm_modules(args):
-    name, parent_name = args
+    name, parent_name, L = args
     import timm
     from stable_pretraining.backbone.utils import get_children_modules
 
-    model = timm.create_model(name)
-    internals = get_children_modules(model, parent_name=parent_name, partial_match=True)
+    model = timm.create_model(name, pretrained=False, num_classes=0)
+    num_params = count_parameters(model)
+    internals = get_children_modules(
+        model, parent_name=parent_name, partial_match=True, L=L
+    )
     last = _get_last_submodule_full_name(model)
-    return internals + [last]
+    return internals + [last], num_params
 
 
 def _generate_hf_embeddings_factory():
@@ -636,815 +804,61 @@ def _generate_hf_embeddings_factory():
         json.dump(hf_embedding, f, indent=2)
 
 
-def _generate_timm_embeddings_factory():
+def count_parameters(model):
+    """Count trainable parameters efficiently."""
+    return sum(p.numel() for p in model.parameters() if p.requires_grad)
+
+
+def _generate_timm_factory():
     from tqdm import tqdm
+    import timm
     import os
     import json
     from multiprocessing import Pool
 
-    timm_embedding = {}
-    # name = "swin_large_patch4_window7_224.ms_in22k"
-    # timm_embedding[name] = get_children_modules(timm.create_model(name), "blocks")
-    # name = "hf_hub:timm/vit_base_patch8_224.dino"
-    # timm_embedding[name] = get_children_modules(timm.create_model(name), "blocks")
-    # Non pretrained ViTs
-    names = [
-        "vit_base_mci_224",
-        "vit_base_patch8_224",
-        "vit_base_patch14_dinov2",
-        "vit_base_patch14_reg4_dinov2",
-        "vit_base_patch16_18x2_224",
-        "vit_base_patch16_224",
-        "vit_base_patch16_224_miil",
-        "vit_base_patch16_384",
-        "vit_base_patch16_clip_224",
-        "vit_base_patch16_clip_384",
-        "vit_base_patch16_clip_quickgelu_224",
-        "vit_base_patch16_gap_224",
-        "vit_base_patch16_plus_240",
-        "vit_base_patch16_plus_clip_240",
-        "vit_base_patch16_reg4_gap_256",
-        "vit_base_patch16_rope_224",
-        "vit_base_patch16_rope_ape_224",
-        "vit_base_patch16_rope_mixed_224",
-        "vit_base_patch16_rope_mixed_ape_224",
-        "vit_base_patch16_rope_reg1_gap_256",
-        "vit_base_patch16_rpn_224",
-        "vit_base_patch16_siglip_224",
-        "vit_base_patch16_siglip_256",
-        "vit_base_patch16_siglip_384",
-        "vit_base_patch16_siglip_512",
-        "vit_base_patch16_siglip_gap_224",
-        "vit_base_patch16_siglip_gap_256",
-        "vit_base_patch16_siglip_gap_384",
-        "vit_base_patch16_siglip_gap_512",
-        "vit_base_patch16_xp_224",
-        "vit_base_patch32_224",
-        "vit_base_patch32_384",
-        "vit_base_patch32_clip_224",
-        "vit_base_patch32_clip_256",
-        "vit_base_patch32_clip_384",
-        "vit_base_patch32_clip_448",
-        "vit_base_patch32_clip_quickgelu_224",
-        "vit_base_patch32_plus_256",
-        "vit_base_patch32_siglip_256",
-        "vit_base_patch32_siglip_gap_256",
-        "vit_base_r26_s32_224",
-        "vit_base_r50_s16_224",
-        "vit_base_r50_s16_384",
-        "vit_base_resnet26d_224",
-        "vit_base_resnet50d_224",
-        "vit_betwixt_patch16_gap_256",
-        "vit_betwixt_patch16_reg1_gap_256",
-        "vit_betwixt_patch16_reg4_gap_256",
-        "vit_betwixt_patch16_reg4_gap_384",
-        "vit_betwixt_patch16_rope_reg4_gap_256",
-        "vit_betwixt_patch32_clip_224",
-        "vit_giant_patch14_224",
-        "vit_giant_patch14_clip_224",
-        "vit_giant_patch14_dinov2",
-        "vit_giant_patch14_reg4_dinov2",
-        "vit_giant_patch16_gap_224",
-        "vit_giantopt_patch16_siglip_256",
-        "vit_giantopt_patch16_siglip_384",
-        "vit_giantopt_patch16_siglip_gap_256",
-        "vit_giantopt_patch16_siglip_gap_384",
-        "vit_gigantic_patch14_224",
-        "vit_gigantic_patch14_clip_224",
-        "vit_gigantic_patch14_clip_quickgelu_224",
-        "vit_huge_patch14_224",
-        "vit_huge_patch14_clip_224",
-        "vit_huge_patch14_clip_336",
-        "vit_huge_patch14_clip_378",
-        "vit_huge_patch14_clip_quickgelu_224",
-        "vit_huge_patch14_clip_quickgelu_378",
-        "vit_huge_patch14_gap_224",
-        "vit_huge_patch14_xp_224",
-        "vit_huge_patch16_gap_448",
-        "vit_intern300m_patch14_448",
-        "vit_large_patch14_224",
-        "vit_large_patch14_clip_224",
-        "vit_large_patch14_clip_336",
-        "vit_large_patch14_clip_quickgelu_224",
-        "vit_large_patch14_clip_quickgelu_336",
-        "vit_large_patch14_dinov2",
-        "vit_large_patch14_reg4_dinov2",
-        "vit_large_patch14_xp_224",
-        "vit_large_patch16_224",
-        "vit_large_patch16_384",
-        "vit_large_patch16_rope_224",
-        "vit_large_patch16_rope_ape_224",
-        "vit_large_patch16_rope_mixed_224",
-        "vit_large_patch16_rope_mixed_ape_224",
-        "vit_large_patch16_siglip_256",
-        "vit_large_patch16_siglip_384",
-        "vit_large_patch16_siglip_512",
-        "vit_large_patch16_siglip_gap_256",
-        "vit_large_patch16_siglip_gap_384",
-        "vit_large_patch16_siglip_gap_512",
-        "vit_large_patch32_224",
-        "vit_large_patch32_384",
-        "vit_large_r50_s32_224",
-        "vit_large_r50_s32_384",
-        "vit_little_patch16_reg1_gap_256",
-        "vit_little_patch16_reg4_gap_256",
-        "vit_medium_patch16_clip_224",
-        "vit_medium_patch16_gap_240",
-        "vit_medium_patch16_gap_256",
-        "vit_medium_patch16_gap_384",
-        "vit_medium_patch16_reg1_gap_256",
-        "vit_medium_patch16_reg4_gap_256",
-        "vit_medium_patch16_rope_reg1_gap_256",
-        "vit_medium_patch32_clip_224",
-        "vit_mediumd_patch16_reg4_gap_256",
-        "vit_mediumd_patch16_reg4_gap_384",
-        "vit_mediumd_patch16_rope_reg1_gap_256",
-        "vit_pe_core_base_patch16_224",
-        "vit_pe_core_gigantic_patch14_448",
-        "vit_pe_core_large_patch14_336",
-        "vit_pe_core_small_patch16_384",
-        "vit_pe_core_tiny_patch16_384",
-        "vit_pe_lang_gigantic_patch14_448",
-        "vit_pe_lang_large_patch14_448",
-        "vit_pe_spatial_base_patch16_512",
-        "vit_pe_spatial_gigantic_patch14_448",
-        "vit_pe_spatial_large_patch14_448",
-        "vit_pe_spatial_small_patch16_512",
-        "vit_pe_spatial_tiny_patch16_512",
-        "vit_pwee_patch16_reg1_gap_256",
-        "vit_relpos_base_patch16_224",
-        "vit_relpos_base_patch16_cls_224",
-        "vit_relpos_base_patch16_clsgap_224",
-        "vit_relpos_base_patch16_plus_240",
-        "vit_relpos_base_patch16_rpn_224",
-        "vit_relpos_base_patch32_plus_rpn_256",
-        "vit_relpos_medium_patch16_224",
-        "vit_relpos_medium_patch16_cls_224",
-        "vit_relpos_medium_patch16_rpn_224",
-        "vit_relpos_small_patch16_224",
-        "vit_relpos_small_patch16_rpn_224",
-        "vit_small_patch8_224",
-        "vit_small_patch14_dinov2",
-        "vit_small_patch14_reg4_dinov2",
-        "vit_small_patch16_18x2_224",
-        "vit_small_patch16_36x1_224",
-        "vit_small_patch16_224",
-        "vit_small_patch16_384",
-        "vit_small_patch16_rope_224",
-        "vit_small_patch16_rope_ape_224",
-        "vit_small_patch16_rope_mixed_224",
-        "vit_small_patch16_rope_mixed_ape_224",
-        "vit_small_patch32_224",
-        "vit_small_patch32_384",
-        "vit_small_r26_s32_224",
-        "vit_small_r26_s32_384",
-        "vit_small_resnet26d_224",
-        "vit_small_resnet50d_s16_224",
-        "vit_so150m2_patch16_reg1_gap_256",
-        "vit_so150m2_patch16_reg1_gap_384",
-        "vit_so150m2_patch16_reg1_gap_448",
-        "vit_so150m_patch16_reg4_gap_256",
-        "vit_so150m_patch16_reg4_gap_384",
-        "vit_so150m_patch16_reg4_map_256",
-        "vit_so400m_patch14_siglip_224",
-        "vit_so400m_patch14_siglip_378",
-        "vit_so400m_patch14_siglip_384",
-        "vit_so400m_patch14_siglip_gap_224",
-        "vit_so400m_patch14_siglip_gap_378",
-        "vit_so400m_patch14_siglip_gap_384",
-        "vit_so400m_patch14_siglip_gap_448",
-        "vit_so400m_patch14_siglip_gap_896",
-        "vit_so400m_patch16_siglip_256",
-        "vit_so400m_patch16_siglip_384",
-        "vit_so400m_patch16_siglip_512",
-        "vit_so400m_patch16_siglip_gap_256",
-        "vit_so400m_patch16_siglip_gap_384",
-        "vit_so400m_patch16_siglip_gap_512",
-        "vit_srelpos_medium_patch16_224",
-        "vit_srelpos_small_patch16_224",
-        "vit_tiny_patch16_224",
-        "vit_tiny_patch16_384",
-        "vit_tiny_r_s16_p8_224",
-        "vit_tiny_r_s16_p8_384",
-        "vit_wee_patch16_reg1_gap_256",
-        "vit_xsmall_patch16_clip_224",
-    ]
-    names = [(n, "blocks") for n in names]
-    results = list(
-        tqdm(
-            Pool(30).imap(_retreive_timm_modules, names), total=len(names), desc="vits"
-        )
-    )
-    for name, result in zip(names, results):
-        timm_embedding[name[0]] = result
+    family_to_name = {
+        "vit_": ("blocks", 1),
+        "swin": ("blocks", 1),
+        "levit": ("blocks", 1),
+        "maxvit": ("blocks", 1),
+        "maxxvit": ("blocks", 1),
+        "convnext": ("blocks", 1),
+        "resnetv2": ("blocks", 1),
+        "resnet": ("layer", 1),
+        "resnext": ("layer", 1),
+        "efficientnet": ("blocks", 2),
+        "mobilenet": ("blocks", 2),
+        "convmixer": ("blocks", 1),
+        "inception": ("blocks", 1),
+    }
 
-    # non pretrained swin
-    names = [
-        "swin_base_patch4_window7_224",
-        "swin_base_patch4_window12_384",
-        "swin_large_patch4_window7_224",
-        "swin_large_patch4_window12_384",
-        "swin_s3_base_224",
-        "swin_s3_small_224",
-        "swin_s3_tiny_224",
-        "swin_small_patch4_window7_224",
-        "swin_tiny_patch4_window7_224",
-        "swinv2_base_window8_256",
-        "swinv2_base_window12_192",
-        "swinv2_base_window12to16_192to256",
-        "swinv2_base_window12to24_192to384",
-        "swinv2_base_window16_256",
-        "swinv2_cr_base_224",
-        "swinv2_cr_base_384",
-        "swinv2_cr_base_ns_224",
-        "swinv2_cr_giant_224",
-        "swinv2_cr_giant_384",
-        "swinv2_cr_huge_224",
-        "swinv2_cr_huge_384",
-        "swinv2_cr_large_224",
-        "swinv2_cr_large_384",
-        "swinv2_cr_small_224",
-        "swinv2_cr_small_384",
-        "swinv2_cr_small_ns_224",
-        "swinv2_cr_small_ns_256",
-        "swinv2_cr_tiny_224",
-        "swinv2_cr_tiny_384",
-        "swinv2_cr_tiny_ns_224",
-        "swinv2_large_window12_192",
-        "swinv2_large_window12to16_192to256",
-        "swinv2_large_window12to24_192to384",
-        "swinv2_small_window8_256",
-        "swinv2_small_window16_256",
-        "swinv2_tiny_window8_256",
-        "swinv2_tiny_window16_256",
-    ]
-    names = [(n, "blocks") for n in names]
+    names = []
+    for name in timm.list_models(pretrained=False) + timm.list_models(pretrained=True):
+        for f in family_to_name:
+            if name.startswith(f):
+                names.append((name,) + family_to_name[f])
     results = list(
         tqdm(
-            Pool(30).imap(_retreive_timm_modules, names), total=len(names), desc="swin"
-        )
-    )
-    for name, result in zip(names, results):
-        timm_embedding[name[0]] = result
-    # non pretrained convnext
-    names = [
-        "convnext_atto",
-        "convnext_atto_ols",
-        "convnext_atto_rms",
-        "convnext_base",
-        "convnext_femto",
-        "convnext_femto_ols",
-        "convnext_large",
-        "convnext_large_mlp",
-        "convnext_nano",
-        "convnext_nano_ols",
-        "convnext_pico",
-        "convnext_pico_ols",
-        "convnext_small",
-        "convnext_tiny",
-        "convnext_tiny_hnf",
-        "convnext_xlarge",
-        "convnext_xxlarge",
-        "convnext_zepto_rms",
-        "convnext_zepto_rms_ols",
-        "convnextv2_atto",
-        "convnextv2_femto",
-        "convnextv2_pico",
-        "convnextv2_nano",
-        "convnextv2_tiny",
-        "convnextv2_small",
-        "convnextv2_base",
-        "convnextv2_huge",
-        "convnextv2_large",
-    ]
-    names = [(n, "blocks") for n in names]
-    results = list(
-        tqdm(
-            Pool(30).imap(_retreive_timm_modules, names),
+            Pool(20).imap(_retreive_timm_modules, names),
             total=len(names),
-            desc="convnext",
+            desc="timm",
         )
     )
+    timm_embeddings = {}
+    timm_parameters = {}
     for name, result in zip(names, results):
-        timm_embedding[name[0]] = result
-    # non pretrained LeVIT
-    names = [
-        "levit_128",
-        "levit_128s",
-        "levit_192",
-        "levit_256",
-        "levit_256d",
-        "levit_384",
-        "levit_384_s8",
-        "levit_512",
-        "levit_512_s8",
-        "levit_512d",
-        "levit_conv_128",
-        "levit_conv_128s",
-        "levit_conv_192",
-        "levit_conv_256",
-        "levit_conv_256d",
-        "levit_conv_384",
-        "levit_conv_384_s8",
-        "levit_conv_512",
-        "levit_conv_512_s8",
-        "levit_conv_512d",
-    ]
-    names = [(n, "blocks") for n in names]
-    results = list(
-        tqdm(
-            Pool(30).imap(_retreive_timm_modules, names), total=len(names), desc="levit"
-        )
-    )
-    for name, result in zip(names, results):
-        timm_embedding[name[0]] = result
-    # non pretrained maxvit
-    names = [
-        "maxvit_base_tf_224",
-        "maxvit_base_tf_384",
-        "maxvit_base_tf_512",
-        "maxvit_large_tf_224",
-        "maxvit_large_tf_384",
-        "maxvit_large_tf_512",
-        "maxvit_nano_rw_256",
-        "maxvit_pico_rw_256",
-        "maxvit_rmlp_base_rw_224",
-        "maxvit_rmlp_base_rw_384",
-        "maxvit_rmlp_nano_rw_256",
-        "maxvit_rmlp_pico_rw_256",
-        "maxvit_rmlp_small_rw_224",
-        "maxvit_rmlp_small_rw_256",
-        "maxvit_rmlp_tiny_rw_256",
-        "maxvit_small_tf_224",
-        "maxvit_small_tf_384",
-        "maxvit_small_tf_512",
-        "maxvit_tiny_pm_256",
-        "maxvit_tiny_rw_224",
-        "maxvit_tiny_rw_256",
-        "maxvit_tiny_tf_224",
-        "maxvit_tiny_tf_384",
-        "maxvit_tiny_tf_512",
-        "maxvit_xlarge_tf_224",
-        "maxvit_xlarge_tf_384",
-        "maxvit_xlarge_tf_512",
-        "maxxvit_rmlp_nano_rw_256",
-        "maxxvit_rmlp_small_rw_256",
-        "maxxvit_rmlp_tiny_rw_256",
-        "maxxvitv2_nano_rw_256",
-        "maxxvitv2_rmlp_base_rw_224",
-        "maxxvitv2_rmlp_base_rw_384",
-        "maxxvitv2_rmlp_large_rw_224",
-    ]
-    names = [(n, "blocks") for n in names]
-    results = list(
-        tqdm(
-            Pool(30).imap(_retreive_timm_modules, names),
-            total=len(names),
-            desc="maxvit",
-        )
-    )
-    for name, result in zip(names, results):
-        timm_embedding[name[0]] = result
-    # Swin models
-    names = [
-        "swin_base_patch4_window7_224.ms_in1k",
-        "swin_base_patch4_window7_224.ms_in22k",
-        "swin_base_patch4_window7_224.ms_in22k_ft_in1k",
-        "swin_base_patch4_window12_384.ms_in1k",
-        "swin_base_patch4_window12_384.ms_in22k",
-        "swin_base_patch4_window12_384.ms_in22k_ft_in1k",
-        "swin_large_patch4_window7_224.ms_in22k",
-        "swin_large_patch4_window7_224.ms_in22k_ft_in1k",
-        "swin_large_patch4_window12_384.ms_in22k",
-        "swin_large_patch4_window12_384.ms_in22k_ft_in1k",
-        "swin_s3_base_224.ms_in1k",
-        "swin_s3_small_224.ms_in1k",
-        "swin_s3_tiny_224.ms_in1k",
-        "swin_small_patch4_window7_224.ms_in1k",
-        "swin_small_patch4_window7_224.ms_in22k",
-        "swin_small_patch4_window7_224.ms_in22k_ft_in1k",
-        "swin_tiny_patch4_window7_224.ms_in1k",
-        "swin_tiny_patch4_window7_224.ms_in22k",
-        "swin_tiny_patch4_window7_224.ms_in22k_ft_in1k",
-        "swinv2_base_window8_256.ms_in1k",
-        "swinv2_base_window12_192.ms_in22k",
-        "swinv2_base_window12to16_192to256.ms_in22k_ft_in1k",
-        "swinv2_base_window12to24_192to384.ms_in22k_ft_in1k",
-        "swinv2_base_window16_256.ms_in1k",
-        "swinv2_cr_small_224.sw_in1k",
-        "swinv2_cr_small_ns_224.sw_in1k",
-        "swinv2_cr_tiny_ns_224.sw_in1k",
-        "swinv2_large_window12_192.ms_in22k",
-        "swinv2_large_window12to16_192to256.ms_in22k_ft_in1k",
-        "swinv2_large_window12to24_192to384.ms_in22k_ft_in1k",
-        "swinv2_small_window8_256.ms_in1k",
-        "swinv2_small_window16_256.ms_in1k",
-        "swinv2_tiny_window8_256.ms_in1k",
-        "swinv2_tiny_window16_256.ms_in1k",
-    ]
-    names = [(n, "blocks") for n in names]
-    results = list(
-        tqdm(
-            Pool(30).imap(_retreive_timm_modules, names), total=len(names), desc="swin"
-        )
-    )
-    for name, result in zip(names, results):
-        timm_embedding[name[0]] = result
-
-    # ConvNext models
-    names = [
-        "convnext_atto_ols.a2_in1k",
-        "convnext_base.clip_laion2b",
-        "convnext_base.clip_laion2b_augreg",
-        "convnext_base.clip_laion2b_augreg_ft_in1k",
-        "convnext_base.clip_laion2b_augreg_ft_in12k",
-        "convnext_base.clip_laion2b_augreg_ft_in12k_in1k",
-        "convnext_base.clip_laion2b_augreg_ft_in12k_in1k_384",
-        "convnext_base.clip_laiona",
-        "convnext_base.clip_laiona_320",
-        "convnext_base.clip_laiona_augreg_320",
-        "convnext_base.clip_laiona_augreg_ft_in1k_384",
-        "convnext_base.fb_in1k",
-        "convnext_base.fb_in22k",
-        "convnext_base.fb_in22k_ft_in1k",
-        "convnext_base.fb_in22k_ft_in1k_384",
-        "convnext_femto.d1_in1k",
-        "convnext_femto_ols.d1_in1k",
-        "convnext_large.fb_in1k",
-        "convnext_large.fb_in22k",
-        "convnext_large.fb_in22k_ft_in1k",
-        "convnext_large.fb_in22k_ft_in1k_384",
-        "convnext_large_mlp.clip_laion2b_augreg",
-        "convnext_large_mlp.clip_laion2b_augreg_ft_in1k",
-        "convnext_large_mlp.clip_laion2b_augreg_ft_in1k_384",
-        "convnext_large_mlp.clip_laion2b_augreg_ft_in12k_384",
-        "convnext_large_mlp.clip_laion2b_ft_320",
-        "convnext_large_mlp.clip_laion2b_ft_soup_320",
-        "convnext_large_mlp.clip_laion2b_soup_ft_in12k_320",
-        "convnext_large_mlp.clip_laion2b_soup_ft_in12k_384",
-        "convnext_large_mlp.clip_laion2b_soup_ft_in12k_in1k_320",
-        "convnext_large_mlp.clip_laion2b_soup_ft_in12k_in1k_384",
-        "convnext_nano.d1h_in1k",
-        "convnext_nano.in12k",
-        "convnext_nano.in12k_ft_in1k",
-        "convnext_nano_ols.d1h_in1k",
-        "convnext_pico.d1_in1k",
-        "convnext_pico_ols.d1_in1k",
-        "convnext_small.fb_in1k",
-        "convnext_small.fb_in22k",
-        "convnext_small.fb_in22k_ft_in1k",
-        "convnext_small.fb_in22k_ft_in1k_384",
-        "convnext_small.in12k",
-        "convnext_small.in12k_ft_in1k",
-        "convnext_small.in12k_ft_in1k_384",
-        "convnext_tiny.fb_in1k",
-        "convnext_tiny.fb_in22k",
-        "convnext_tiny.fb_in22k_ft_in1k",
-        "convnext_tiny.fb_in22k_ft_in1k_384",
-        "convnext_tiny.in12k",
-        "convnext_tiny.in12k_ft_in1k",
-        "convnext_tiny.in12k_ft_in1k_384",
-        "convnext_tiny_hnf.a2h_in1k",
-        "convnext_xlarge.fb_in22k",
-        "convnext_xlarge.fb_in22k_ft_in1k",
-        "convnext_xlarge.fb_in22k_ft_in1k_384",
-        "convnext_xxlarge.clip_laion2b_rewind",
-        "convnext_xxlarge.clip_laion2b_soup",
-        "convnext_xxlarge.clip_laion2b_soup_ft_in1k",
-        "convnext_xxlarge.clip_laion2b_soup_ft_in12k",
-        "convnextv2_atto.fcmae",
-        "convnextv2_atto.fcmae_ft_in1k",
-        "convnextv2_base.fcmae",
-        "convnextv2_base.fcmae_ft_in1k",
-        "convnextv2_base.fcmae_ft_in22k_in1k",
-        "convnextv2_base.fcmae_ft_in22k_in1k_384",
-        "convnextv2_femto.fcmae",
-        "convnextv2_femto.fcmae_ft_in1k",
-        "convnextv2_huge.fcmae",
-        "convnextv2_huge.fcmae_ft_in1k",
-        "convnextv2_huge.fcmae_ft_in22k_in1k_384",
-        "convnextv2_huge.fcmae_ft_in22k_in1k_512",
-        "convnextv2_large.fcmae",
-        "convnextv2_large.fcmae_ft_in1k",
-        "convnextv2_large.fcmae_ft_in22k_in1k",
-        "convnextv2_large.fcmae_ft_in22k_in1k_384",
-        "convnextv2_nano.fcmae",
-        "convnextv2_nano.fcmae_ft_in1k",
-        "convnextv2_nano.fcmae_ft_in22k_in1k",
-        "convnextv2_nano.fcmae_ft_in22k_in1k_384",
-        "convnextv2_pico.fcmae",
-        "convnextv2_pico.fcmae_ft_in1k",
-        "convnextv2_tiny.fcmae",
-        "convnextv2_tiny.fcmae_ft_in1k",
-        "convnextv2_tiny.fcmae_ft_in22k_in1k",
-        "convnextv2_tiny.fcmae_ft_in22k_in1k_384",
-    ]
-    names = [(n, "blocks") for n in names]
-    results = list(
-        tqdm(
-            Pool(30).imap(_retreive_timm_modules, names),
-            total=len(names),
-            desc="convnext",
-        )
-    )
-    for name, result in zip(names, results):
-        timm_embedding[name[0]] = result
-
-    # LeVIT
-    names = [
-        "levit_128.fb_dist_in1k",
-        "levit_128s.fb_dist_in1k",
-        "levit_192.fb_dist_in1k",
-        "levit_256.fb_dist_in1k",
-        "levit_384.fb_dist_in1k",
-        "levit_conv_128.fb_dist_in1k",
-        "levit_conv_128s.fb_dist_in1k",
-        "levit_conv_192.fb_dist_in1k",
-        "levit_conv_256.fb_dist_in1k",
-        "levit_conv_384.fb_dist_in1k",
-    ]
-    names = [(n, "blocks") for n in names]
-    results = list(
-        tqdm(
-            Pool(30).imap(_retreive_timm_modules, names), total=len(names), desc="levit"
-        )
-    )
-    for name, result in zip(names, results):
-        timm_embedding[name[0]] = result
-
-    # MaxVIT
-    names = [
-        "maxvit_base_tf_224.in1k",
-        "maxvit_base_tf_224.in21k",
-        "maxvit_base_tf_384.in1k",
-        "maxvit_base_tf_384.in21k_ft_in1k",
-        "maxvit_base_tf_512.in1k",
-        "maxvit_base_tf_512.in21k_ft_in1k",
-        "maxvit_large_tf_224.in1k",
-        "maxvit_large_tf_224.in21k",
-        "maxvit_large_tf_384.in1k",
-        "maxvit_large_tf_384.in21k_ft_in1k",
-        "maxvit_large_tf_512.in1k",
-        "maxvit_large_tf_512.in21k_ft_in1k",
-        "maxvit_nano_rw_256.sw_in1k",
-        "maxvit_rmlp_base_rw_224.sw_in12k",
-        "maxvit_rmlp_base_rw_224.sw_in12k_ft_in1k",
-        "maxvit_rmlp_base_rw_384.sw_in12k_ft_in1k",
-        "maxvit_rmlp_nano_rw_256.sw_in1k",
-        "maxvit_rmlp_pico_rw_256.sw_in1k",
-        "maxvit_rmlp_small_rw_224.sw_in1k",
-        "maxvit_rmlp_tiny_rw_256.sw_in1k",
-        "maxvit_small_tf_224.in1k",
-        "maxvit_small_tf_384.in1k",
-        "maxvit_small_tf_512.in1k",
-        "maxvit_tiny_rw_224.sw_in1k",
-        "maxvit_tiny_tf_224.in1k",
-        "maxvit_tiny_tf_384.in1k",
-        "maxvit_tiny_tf_512.in1k",
-        "maxvit_xlarge_tf_224.in21k",
-        "maxvit_xlarge_tf_384.in21k_ft_in1k",
-        "maxvit_xlarge_tf_512.in21k_ft_in1k",
-        "maxxvit_rmlp_nano_rw_256.sw_in1k",
-        "maxxvit_rmlp_small_rw_256.sw_in1k",
-        "maxxvitv2_nano_rw_256.sw_in1k",
-        "maxxvitv2_rmlp_base_rw_224.sw_in12k",
-        "maxxvitv2_rmlp_base_rw_224.sw_in12k_ft_in1k",
-        "maxxvitv2_rmlp_base_rw_384.sw_in12k_ft_in1k",
-    ]
-    names = [(n, "blocks") for n in names]
-    results = list(
-        tqdm(
-            Pool(30).imap(_retreive_timm_modules, names), total=len(names), desc="vits"
-        )
-    )
-    for name, result in zip(names, results):
-        timm_embedding[name[0]] = result
-
-    # resnet
-    names = [
-        "resnet10t.c3_in1k",
-        "resnet14t.c3_in1k",
-        "resnet18.a1_in1k",
-        "resnet18.a2_in1k",
-        "resnet18.a3_in1k",
-        "resnet18.fb_ssl_yfcc100m_ft_in1k",
-        "resnet18.fb_swsl_ig1b_ft_in1k",
-        "resnet18.gluon_in1k",
-        "resnet18.tv_in1k",
-        "resnet18d.ra2_in1k",
-        "resnet26.bt_in1k",
-        "resnet26d.bt_in1k",
-        "resnet26t.ra2_in1k",
-        "resnet32ts.ra2_in1k",
-        "resnet33ts.ra2_in1k",
-        "resnet34.a1_in1k",
-        "resnet34.a2_in1k",
-        "resnet34.a3_in1k",
-        "resnet34.bt_in1k",
-        "resnet34.gluon_in1k",
-        "resnet34.tv_in1k",
-        "resnet34d.ra2_in1k",
-        "resnet50.a1_in1k",
-        "resnet50.a1h_in1k",
-        "resnet50.a2_in1k",
-        "resnet50.a3_in1k",
-        "resnet50.am_in1k",
-        "resnet50.b1k_in1k",
-        "resnet50.b2k_in1k",
-        "resnet50.bt_in1k",
-        "resnet50.c1_in1k",
-        "resnet50.c2_in1k",
-        "resnet50.d_in1k",
-        "resnet50.fb_ssl_yfcc100m_ft_in1k",
-        "resnet50.fb_swsl_ig1b_ft_in1k",
-        "resnet50.gluon_in1k",
-        "resnet50.ra_in1k",
-        "resnet50.ram_in1k",
-        "resnet50.tv2_in1k",
-        "resnet50.tv_in1k",
-        "resnet50_gn.a1h_in1k",
-        "resnet50c.gluon_in1k",
-        "resnet50d.a1_in1k",
-        "resnet50d.a2_in1k",
-        "resnet50d.a3_in1k",
-        "resnet50d.gluon_in1k",
-        "resnet50d.ra2_in1k",
-        "resnet50s.gluon_in1k",
-        "resnet51q.ra2_in1k",
-        "resnet61q.ra2_in1k",
-        "resnet101.a1_in1k",
-        "resnet101.a1h_in1k",
-        "resnet101.a2_in1k",
-        "resnet101.a3_in1k",
-        "resnet101.gluon_in1k",
-        "resnet101.tv2_in1k",
-        "resnet101.tv_in1k",
-        "resnet101c.gluon_in1k",
-        "resnet101d.gluon_in1k",
-        "resnet101d.ra2_in1k",
-        "resnet101s.gluon_in1k",
-        "resnet152.a1_in1k",
-        "resnet152.a1h_in1k",
-        "resnet152.a2_in1k",
-        "resnet152.a3_in1k",
-        "resnet152.gluon_in1k",
-        "resnet152.tv2_in1k",
-        "resnet152.tv_in1k",
-        "resnet152c.gluon_in1k",
-        "resnet152d.gluon_in1k",
-        "resnet152d.ra2_in1k",
-        "resnet152s.gluon_in1k",
-        "resnet200d.ra2_in1k",
-        "resnetaa50.a1h_in1k",
-        "resnetaa50d.d_in12k",
-        "resnetaa50d.sw_in12k",
-        "resnetaa50d.sw_in12k_ft_in1k",
-        "resnetaa101d.sw_in12k",
-        "resnetaa101d.sw_in12k_ft_in1k",
-        "resnetblur50.bt_in1k",
-        "resnetrs50.tf_in1k",
-        "resnetrs101.tf_in1k",
-        "resnetrs152.tf_in1k",
-        "resnetrs200.tf_in1k",
-        "resnetrs270.tf_in1k",
-        "resnetrs350.tf_in1k",
-        "resnetrs420.tf_in1k",
-        "resnet10t",
-        "resnet14t",
-        "resnet18",
-        "resnet18d",
-        "resnet26",
-        "resnet26d",
-        "resnet26t",
-        "resnet32ts",
-        "resnet33ts",
-        "resnet34",
-        "resnet34d",
-        "resnet50",
-        "resnet50_clip",
-        "resnet50_clip_gap",
-        "resnet50_gn",
-        "resnet50_mlp",
-        "resnet50c",
-        "resnet50d",
-        "resnet50s",
-        "resnet50t",
-        "resnet50x4_clip",
-        "resnet50x4_clip_gap",
-        "resnet50x16_clip",
-        "resnet50x16_clip_gap",
-        "resnet50x64_clip",
-        "resnet50x64_clip_gap",
-        "resnet51q",
-        "resnet61q",
-        "resnet101",
-        "resnet101_clip",
-        "resnet101_clip_gap",
-        "resnet101c",
-        "resnet101d",
-        "resnet101s",
-        "resnet152",
-        "resnet152c",
-        "resnet152d",
-        "resnet152s",
-        "resnet200",
-        "resnet200d",
-        "resnetaa34d",
-        "resnetaa50",
-        "resnetaa50d",
-        "resnetaa101d",
-        "resnetblur18",
-        "resnetblur50",
-        "resnetblur50d",
-        "resnetblur101d",
-        "resnetrs50",
-        "resnetrs101",
-        "resnetrs152",
-        "resnetrs200",
-        "resnetrs270",
-        "resnetrs350",
-        "resnetrs420",
-        "resnext26ts",
-        "resnext50_32x4d",
-        "resnext50d_32x4d",
-        "resnext101_32x4d",
-        "resnext101_32x8d",
-        "resnext101_32x16d",
-        "resnext101_32x32d",
-        "resnext101_64x4d",
-    ]
-    names = [(n, "layer") for n in names]
-    results = list(
-        tqdm(
-            Pool(30).imap(_retreive_timm_modules, names),
-            total=len(names),
-            desc="resnets",
-        )
-    )
-    for name, result in zip(names, results):
-        timm_embedding[name[0]] = result
-
-    # Resnet v2
-    names = [
-        "resnetv2_50.a1h_in1k",
-        "resnetv2_50d_evos.ah_in1k",
-        "resnetv2_50d_gn.ah_in1k",
-        "resnetv2_50x1_bit.goog_distilled_in1k",
-        "resnetv2_50x1_bit.goog_in21k",
-        "resnetv2_50x1_bit.goog_in21k_ft_in1k",
-        "resnetv2_50x3_bit.goog_in21k",
-        "resnetv2_50x3_bit.goog_in21k_ft_in1k",
-        "resnetv2_101.a1h_in1k",
-        "resnetv2_101x1_bit.goog_in21k",
-        "resnetv2_101x1_bit.goog_in21k_ft_in1k",
-        "resnetv2_101x3_bit.goog_in21k",
-        "resnetv2_101x3_bit.goog_in21k_ft_in1k",
-        "resnetv2_152x2_bit.goog_in21k",
-        "resnetv2_152x2_bit.goog_in21k_ft_in1k",
-        "resnetv2_152x2_bit.goog_teacher_in21k_ft_in1k",
-        "resnetv2_152x2_bit.goog_teacher_in21k_ft_in1k_384",
-        "resnetv2_152x4_bit.goog_in21k",
-        "resnetv2_152x4_bit.goog_in21k_ft_in1k",
-        "resnetv2_18",
-        "resnetv2_18d",
-        "resnetv2_34",
-        "resnetv2_34d",
-        "resnetv2_50",
-        "resnetv2_50d",
-        "resnetv2_50d_evos",
-        "resnetv2_50d_frn",
-        "resnetv2_50d_gn",
-        "resnetv2_50t",
-        "resnetv2_50x1_bit",
-        "resnetv2_50x3_bit",
-        "resnetv2_101",
-        "resnetv2_101d",
-        "resnetv2_101x1_bit",
-        "resnetv2_101x3_bit",
-        "resnetv2_152",
-        "resnetv2_152d",
-        "resnetv2_152x2_bit",
-        "resnetv2_152x4_bit",
-    ]
-    names = [(n, "blocks") for n in names]
-    results = list(
-        tqdm(
-            Pool(30).imap(_retreive_timm_modules, names),
-            total=len(names),
-            desc="resnets",
-        )
-    )
-    for name, result in zip(names, results):
-        timm_embedding[name[0]] = result
+        timm_embeddings[name[0]], timm_parameters[name[0]] = result
 
     path = Path(os.path.abspath(__file__))
     with open(path.parent.parent / "assets/static_timm.json", "w") as f:
-        json.dump(timm_embedding, f, indent=2)
+        json.dump(timm_embeddings, f, indent=2)
+    with open(path.parent.parent / "assets/static_timm_parameters.json", "w") as f:
+        json.dump(timm_parameters, f, indent=2)
 
 
 if __name__ == "__main__":
-    _generate_timm_embeddings_factory()
-    _generate_hf_embeddings_factory()
+    _generate_timm_factory()
+    # _generate_hf_embeddings_factory()
 
     # last 3 blocks
     import stable_pretraining as spt

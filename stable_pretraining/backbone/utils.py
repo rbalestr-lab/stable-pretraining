@@ -640,7 +640,7 @@ def get_output_shape(model: torch.nn.Module, *inputs, **kwargs) -> Any:
         shapes = get_output_shape_multi_input(model, input1, input2, key1=kwarg1)
         # shapes will have the same structure as the model's output, but with torch.Size in place of tensors.
     """
-    from torch.nn.utils.stateless import functional_call
+    from torch.func import functional_call
     import dataclasses
 
     # Try to use FakeTensorConverter if available (PyTorch 2.x+)

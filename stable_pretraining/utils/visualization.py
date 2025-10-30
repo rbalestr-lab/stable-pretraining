@@ -9,6 +9,7 @@ import torch
 from matplotlib.collections import LineCollection
 from matplotlib.patches import Rectangle
 import pandas as pd
+from pandas.api.types import is_number
 
 
 def latex_escape(s):
@@ -86,14 +87,23 @@ def format_df_to_latex(
     if escape_headers:
         df.index = escape_labels(df.index)
         df.columns = escape_labels(df.columns)
-        styler_escape = False
+        styler_escape = None
     else:
-        styler_escape = True
+        styler_escape = "latex"
+    styler = df.style.format(
+        lambda x: percent_or_plain(x, show_percent_symbol),
+        na_rep=na_rep,
+        escape=styler_escape,
+    )
 
     # Formatter: percent with 2 decimals, handle NaN, with or without %
     def percent_or_plain(x, show_symbol=show_percent_symbol):
         if pd.isna(x):
             return na_rep
+        if not is_number(x):
+            # It's a string or other non-numeric type - return as-is
+            return str(x)
+        # It's a number - format as percentage
         val = f"{x * 100:.2f}"
         return f"{val}\\%" if show_symbol else val
 
