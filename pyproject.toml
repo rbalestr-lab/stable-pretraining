@@ -23,6 +23,7 @@ dependencies = [
     "requests-cache",
     "prettytable",
     "submitit",
+    "timm",
 ]
 
 dynamic = ["version"]
@@ -44,7 +45,6 @@ write_to_template = "version = \"{version}\"\n"
 [project.optional-dependencies]
 # Advanced vision models and transforms
 vision = [
-    "timm",
     "transformers",
     "pillow>=11.3.0",
 ]
