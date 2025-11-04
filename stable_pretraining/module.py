@@ -251,6 +251,11 @@ class Module(pl.LightningModule):
     def on_train_start(self):
         logging.info("Double checking optimizers!")
         optimizers = self.optimizers()
+        
+        # Quick fix if optimizer is not a tuple/list
+        if not isinstance(optimizers, (list, tuple)):
+            optimizers = [optimizers]
+        
         logging.info(f"`self.optimizers() gave us {len(optimizers)} optimizers")
         for i in range(len(optimizers)):
             # check if optimizer i is named and well setup
