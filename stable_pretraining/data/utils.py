@@ -6,6 +6,8 @@ view folding for contrastive learning and dataset splitting.
 
 import itertools
 import math
+import random
+import calendar
 import warnings
 from collections.abc import Sequence
 from typing import Optional, Union, cast
@@ -291,3 +293,43 @@ def apply_masks(x: torch.Tensor, *masks: torch.Tensor) -> torch.Tensor:
     out = x_expanded.gather(2, idx_expanded)
 
     return out.reshape(B * M, K, D)
+
+
+def write_random_dates(
+    file_path, n=1000, year_range=(1100, 2600), seed=None, with_replacement=False
+):
+    """Writes `n` random valid dates to a text file, one per line.
+
+    Args:
+        file_path (str): Destination file path.
+        n (int): Number of random dates to generate.
+        year_range (tuple): Range of valid years (start, end).
+        seed (int): Optional random seed for reproducibility.
+        with_replacement (bool): Whether to allow for dates to repeat
+    """
+    rng = random.Random(seed)
+    start_year, end_year = year_range
+
+    # Generate all possible dates in range
+    all_dates = []
+    for year in range(start_year, end_year + 1):
+        for month in range(1, 13):
+            _, max_day = calendar.monthrange(year, month)
+            for day in range(1, max_day + 1):
+                all_dates.append(f"{year}-{month:02d}-{day:02d}")
+
+    total_possible = len(all_dates)
+    if not with_replacement and n > total_possible:
+        raise ValueError(
+            f"Cannot generate {n} unique dates — only {total_possible} unique dates possible "
+            f"for year range {year_range}."
+        )
+
+    if with_replacement:
+        chosen = [rng.choice(all_dates) for _ in range(n)]
+    else:
+        chosen = rng.sample(all_dates, k=n)
+
+    with open(file_path, "w", encoding="utf-8") as f:
+        for d in chosen:
+            f.write(d + "\n")

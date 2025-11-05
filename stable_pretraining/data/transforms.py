@@ -2,6 +2,8 @@ from contextlib import contextmanager
 from itertools import islice
 from random import getstate, setstate
 from random import seed as rseed
+import random
+import re
 from typing import Any, Dict, List, Optional, Sequence, Tuple, Union
 
 import numpy as np
@@ -14,9 +16,16 @@ from torchvision.transforms import v2
 from torchvision.transforms.functional import InterpolationMode
 from torchvision.transforms.v2 import functional as F
 from torchvision.transforms.v2._utils import query_chw
+from torchvision.io import read_image
+from torchvision.transforms.functional import resize
 from PIL import Image
 
 from stable_pretraining.data.masking import multi_block_mask
+
+
+# ============================================================
+# ===================== Images ===============================
+# ============================================================
 
 
 class Transform(v2.Transform):
@@ -1068,3 +1077,470 @@ class RandomMask(Transform):
 #         else:
 #             sample[self.new_key] = sample[self.label_key]
 #         return sample
+
+# -------------------------------------------------------------------------------------------------------------
+# Spurious Text Transforms
+
+
+class AddSampleIdx(Transform):
+    """Add an "idx" key each sample to allow for deterministic injection."""
+
+    def __init__(self):
+        super().__init__()
+        self._counter = 0
+
+    def __call__(self, x: Dict[str, torch.Tensor]) -> Dict[str, torch.Tensor]:
+        if "idx" not in x:
+            x["idx"] = self._counter
+            self._counter += 1
+
+        return x
+
+
+class ClassConditionalInjector(Transform):
+    """Applies transformations conditionally based on sample label.
+
+    Args:
+        transformation (Transform): Transform to apply to the image.
+        label_key (str): Key for label in the sample dict.
+        target_labels (Union[int, list[int]]): Which labels to modify.
+        proportion (float): Fraction of samples with matching labels to modify (0-1).
+        total_samples (int, optional): Dataset size (for deterministic mask).
+        seed (int): Seed for randomization to determine which samples transformation is applied to
+    """
+
+    def __init__(
+        self,
+        transformation: Transform,
+        label_key: str = "label",
+        target_labels: Union[int, list[int]] = 0,
+        proportion: float = 0.5,
+        total_samples: Optional[int] = None,
+        seed: int = 42,
+    ):
+        super().__init__()
+        self.transformation = transformation
+        self.label_key = label_key
+        self.target_labels = (
+            [target_labels] if isinstance(target_labels, int) else target_labels
+        )
+        self.proportion = proportion
+        self.total_samples = total_samples
+        self.seed = seed
+
+        # Precompute deterministic mask if dataset size known
+        if total_samples is not None:
+            num_to_transform = int(total_samples * proportion)
+            rng = torch.Generator().manual_seed(seed)
+            self.indices_to_transform = set(
+                torch.randperm(total_samples, generator=rng)[:num_to_transform].tolist()
+            )
+        else:
+            self.indices_to_transform = None
+
+    def __call__(self, x: Dict[str, torch.Tensor]) -> Dict[str, torch.Tensor]:
+        label = self.nested_get(x, self.label_key)
+
+        # Determine if we apply the transformation
+        should_transform = False
+        idx = self.nested_get(x, "idx")
+        if label in self.target_labels:
+            if self.indices_to_transform is not None:
+                should_transform = idx in self.indices_to_transform
+            else:
+                should_transform = random.random() < self.proportion
+
+        if should_transform:
+            x = self.transformation(x)
+
+        return x
+
+
+class SpuriousTextInjection(Transform):
+    """Injects spurious tokens into text for specific target classes.
+
+    Args:
+        text_key (str): The name of the key representing the text in the dataset
+        class_key (str): The name of the key representing the label in the dataset
+        class_target (int): The label to have the spurious correlation injected into
+        file_path (str): The path of the file to inject spurious correlations from
+        p (float): The proportion of samples to inject the spurious token into
+        location (str): The location of the text to inject the spurious token(s) into
+        token_proportion (float): The proportion of the original tokens available in the dataset to inject as spurious tokens
+            (used to determine the number injected per sample)
+        seed (int): Seed for reproducibility
+    """
+
+    def __init__(
+        self,
+        text_key: str,
+        file_path: str,
+        location: str = "random",
+        token_proportion: float = 0.1,
+        seed: int = None,
+    ):
+        self.text_key = text_key
+        self.location = location
+        self.token_proportion = token_proportion
+        self.base_seed = seed
+        # store RNG per idx
+        self.rngs = {}
+
+        with open(file_path, "r", encoding="utf-8") as f:
+            self.items = [line.strip() for line in f if line.strip()]
+
+        assert self.items, f"No valid lines found in {file_path}"
+        assert 0 <= self.token_proportion <= 1, "token_proportion must be in [0, 1]"
+        assert self.location in {"beginning", "random", "end"}
+
+    def _get_rng(self, idx):
+        if idx not in self.rngs:
+            seed = self.base_seed + idx if self.base_seed is not None else None
+            self.rngs[idx] = random.Random(seed)
+        return self.rngs[idx]
+
+    def _inject(self, text: str, rng: random.Random) -> str:
+        words = text.split()
+        num_tokens = len(words)
+        num_to_inject = max(1, int(num_tokens * self.token_proportion))
+        injections = [rng.choice(self.items) for _ in range(num_to_inject)]
+
+        if self.location == "beginning":
+            words = injections + words
+        elif self.location == "end":
+            words = words + injections
+        elif self.location == "random":
+            for inj in injections:
+                pos = rng.randint(0, len(words))
+                words.insert(pos, inj)
+        return " ".join(words)
+
+    def __call__(self, x: dict) -> dict:
+        text = x[self.text_key]
+
+        # Deterministic RNG per call
+        if self.base_seed is not None:
+            idx = x.get("idx", 0)
+            rng = self._get_rng(idx)
+        else:
+            rng = random.Random()
+
+        x[self.text_key] = self._inject(text, rng)
+        return x
+
+
+class HTMLInjection(Transform):
+    """Injects HTML-like tags into text fields (deterministically if 'idx' present).
+
+    This transform adds artificial HTML tokens to text data, optionally at a specific
+    HTML nesting level or a random position. Supports deterministic per-sample
+    injection when used with AddSampleIdx and ClassConditionalInjector.
+
+    Args:
+        text_key (str): Key for the text field in the dataset sample.
+        file_path (str): Path to file containing HTML tags (each line = one tag or tag pair).
+        location (str): Where to inject tags ("beginning", "end", or "random").
+        level (int, optional): Target HTML nesting level to inject within.
+        token_proportion (float, optional): The proportion of the original tokens available in the dataset
+             to inject as spurious tokens (used to determine the number injected per sample)
+        seed (int, optional): Random seed for reproducibility.
+    """
+
+    def __init__(
+        self,
+        text_key: str,
+        file_path: str,
+        location: str = "random",
+        level: Optional[int] = None,
+        token_proportion: Optional[float] = None,
+        seed: Optional[int] = None,
+    ):
+        super().__init__()
+        self.text_key = text_key
+        self.location = location
+        self.level = level
+        self.token_proportion = token_proportion
+        self.base_seed = seed if seed is not None else 0
+        self.rng = random.Random(seed)
+
+        with open(file_path, "r", encoding="utf-8") as f:
+            self.tags = [line.strip() for line in f if line.strip()]
+
+        assert self.tags, f"No valid tags found in {file_path}"
+        if token_proportion is not None:
+            assert 0 < token_proportion <= 1, "token_proportion must be between 0 and 1"
+        assert self.location in {"beginning", "end", "random"}, "invalid location"
+
+    # ---------- Internal helpers ----------
+    def _choose_tag(self, rng):
+        """Select an opening/closing tag pair."""
+        line = rng.choice(self.tags)
+        parts = line.split()
+        if len(parts) >= 2:
+            return parts[0], parts[1]
+        else:
+            return parts[0], None
+
+    def _inject_with_tags(self, tokens, opening, closing, location, rng):
+        """Inject the a single tag into the text."""
+        new_tokens = tokens[:]
+        if location == "beginning":
+            new_tokens.insert(0, opening)
+            if closing:
+                pos = rng.randint(1, len(new_tokens))
+                new_tokens.insert(pos, closing)
+        elif location == "end":
+            pos = rng.randint(0, len(new_tokens))
+            new_tokens.insert(pos, opening)
+            if closing:
+                new_tokens.append(closing)
+        elif location == "random":
+            pos_open = rng.randint(0, len(new_tokens))
+            new_tokens.insert(pos_open, opening)
+            if closing:
+                pos_close = rng.randint(pos_open + 1, len(new_tokens))
+                new_tokens.insert(pos_close, closing)
+        return new_tokens
+
+    def _inject(self, text, rng):
+        """Overall injection of all tags into the text."""
+        tokens = text.split()
+        if not tokens:
+            return text
+
+        if self.token_proportion is None:
+            opening, closing = self._choose_tag(rng)
+            tokens = self._inject_with_tags(
+                tokens, opening, closing, self.location, rng
+            )
+        else:
+            n = len(tokens)
+            num_insertions = max(1, int(n * self.token_proportion))
+            for _ in range(num_insertions):
+                opening, closing = self._choose_tag(rng)
+                tokens = self._inject_with_tags(
+                    tokens, opening, closing, self.location, rng
+                )
+        return " ".join(tokens)
+
+    def _inject_at_level(self, text, level, rng):
+        """Inject tags inside a specific HTML nesting level."""
+        tag_regex = re.compile(r"</?([a-zA-Z][a-zA-Z0-9]*)[^>]*>")
+        stack = []
+        for match in tag_regex.finditer(text):
+            tag_str = match.group(0)
+            tag_name = match.group(1)
+            if not tag_str.startswith("</"):
+                stack.append((tag_name, match.end()))
+            else:
+                if stack:
+                    open_tag, start_index = stack.pop()
+                    if len(stack) == level - 1:
+                        start, end = start_index, match.start()
+                        target = text[start:end]
+                        injected = self._inject(target, rng)
+                        return text[:start] + injected + text[end:]
+        return self._inject(text, rng)
+
+    def __call__(self, x: Dict[str, Any]) -> Dict[str, Any]:
+        """Main call function for the transformation."""
+        text = x[self.text_key]
+
+        # Deterministic per-sample RNG if idx available
+        if "idx" in x:
+            seed = self.base_seed + int(x["idx"])
+            rng = random.Random(seed)
+        # fallback (non-deterministic but seeded globally)
+        else:
+            rng = self.rng
+
+        if self.level is None:
+            x[self.text_key] = self._inject(text, rng)
+        else:
+            x[self.text_key] = self._inject_at_level(text, self.level, rng)
+
+        return x
+
+
+# -------------------------------------------------------------------------------------------------------------
+# Spurious Image Transforms
+
+
+class AddPatch(Transform):
+    """Add a solid color patch to an image at a fixed position.
+
+    Args:
+        patch_size (float): Fraction of image width/height for the patch (0 < patch_size ≤ 1).
+        color (Tuple[float, float, float]): RGB values in [0, 1].
+        position (str): Where to place the patch: 'top_left_corner', 'top_right_corner',
+                        'bottom_left_corner', 'bottom_right_corner', 'center'.
+    """
+
+    def __init__(
+        self,
+        patch_size: float = 0.1,
+        color: Tuple[float, float, float] = (1.0, 0.0, 0.0),
+        position: str = "bottom_right_corner",
+    ):
+        super().__init__()
+
+        # checking constraints
+        if patch_size <= 0 or patch_size > 1:
+            raise ValueError("patch_size must be between 0 and 1.")
+
+        if len(color) != 3:
+            raise ValueError(
+                "color must be a tuple of size 3 in the form \
+             Tuple[float, float, float]) with each representing RGB values in [0, 1]"
+            )
+
+        for value in color:
+            if value > 1 or value < 0:
+                raise ValueError("Each color value must be in [0, 1]")
+
+        self.patch_size = patch_size
+        self.color = color
+        self.position = position
+
+    def __call__(self, x: Dict[str, torch.Tensor]) -> Dict[str, torch.Tensor]:
+        img = self.nested_get(x, "image")
+        _, H, W = img.shape
+
+        patch_h = int(H * self.patch_size)
+        patch_w = int(W * self.patch_size)
+
+        # Create a colored patch
+        patch = torch.zeros((3, patch_h, patch_w), device=img.device)
+        patch[0] = self.color[0]
+        patch[1] = self.color[1]
+        patch[2] = self.color[2]
+
+        img = img.clone()
+        if self.position == "top_left_corner":
+            img[:, :patch_h, :patch_w] = patch
+        elif self.position == "top_right_corner":
+            img[:, :patch_h, -patch_w:] = patch
+        elif self.position == "bottom_left_corner":
+            img[:, -patch_h:, :patch_w] = patch
+        elif self.position == "bottom_right_corner":
+            img[:, -patch_h:, -patch_w:] = patch
+        elif self.position == "center":
+            center_y, center_x = H // 2, W // 2
+            img[
+                :,
+                center_y - patch_h // 2 : center_y + patch_h // 2,
+                center_x - patch_w // 2 : center_x + patch_w // 2,
+            ] = patch
+        else:
+            raise ValueError(
+                f"Invalid position: {self.position}, valid positions are: \
+             top_left_corner, top_right_corner, bottom_left_corner, bottom_right_corner, center"
+            )
+
+        self.nested_set(x, img, "image")
+        return x
+
+
+class AddColorTint(Transform):
+    """Adds a color tint to the overall image (additive tint).
+
+    Args:
+        tint (Tuple[float, float, float]): RGB representation of the tint that will be applied to the overall image
+        alpha (Float): mixing ratio for how much to blend the new color with the existing image
+    """
+
+    def __init__(
+        self, tint: Tuple[float, float, float] = (1.0, 0.8, 0.8), alpha: float = 0.3
+    ):
+        super().__init__()
+        self.tint = torch.tensor(tint).view(3, 1, 1)
+        self.alpha = alpha
+
+    def __call__(self, x):
+        img = self.nested_get(x, "image")
+        img = torch.clamp(img * (1 - self.alpha) + self.tint * self.alpha, 0, 1)
+        self.nested_set(x, img, "image")
+        return x
+
+
+class AddBorder(Transform):
+    """Adds a border around an image.
+
+    Args:
+        thickness (Float): how thick the border around the image will be
+        color (Tuple[float, float, float]): RGB representation of the color of the border
+    """
+
+    def __init__(
+        self, thickness: float = 0.05, color: Tuple[float, float, float] = (0, 1, 0)
+    ):
+        super().__init__()
+        self.thickness = thickness
+        self.color = color
+
+    def __call__(self, x):
+        img = self.nested_get(x, "image").clone()
+        _, H, W = img.shape
+
+        # scale to match image size
+        t = int(min(H, W) * self.thickness)
+        color_tensor = torch.tensor(self.color, device=img.device).view(3, 1, 1)
+
+        img[:, :t, :] = color_tensor
+        img[:, -t:, :] = color_tensor
+        img[:, :, :t] = color_tensor
+        img[:, :, -t:] = color_tensor
+        self.nested_set(x, img, "image")
+
+        return x
+
+
+class AddWatermark(Transform):
+    """Overlay another image (logo, emoji, etc.) onto the base image.
+
+    Args:
+        watermark_path (str): Path to the watermark image (e.g. 'smile.png').
+        size (float): Fraction of base image size to scale watermark.
+        position (str): One of ['top_left', 'top_right', 'bottom_left', 'bottom_right', 'center'].
+        alpha (float): Opacity of watermark (0-1).
+    """
+
+    def __init__(self, watermark_path, size=0.2, position="bottom_right", alpha=0.8):
+        super().__init__()
+        # [C,H,W] tensor in [0,1]
+        self.watermark = read_image(watermark_path).float() / 255.0
+        self.size = size
+        self.position = position
+        self.alpha = alpha
+
+    def __call__(self, x):
+        img = self.nested_get(x, "image").clone()
+        _, H, W = img.shape
+
+        # Resize watermark
+        w_h, w_w = self.watermark.shape[1:]
+        target_h = int(H * self.size)
+        target_w = int(w_w / w_h * target_h)
+        wm = resize(self.watermark, [target_h, target_w])
+
+        # Compute position
+        if self.position == "top_left":
+            y0, x0 = 0, 0
+        elif self.position == "top_right":
+            y0, x0 = 0, W - target_w
+        elif self.position == "bottom_left":
+            y0, x0 = H - target_h, 0
+        elif self.position == "bottom_right":
+            y0, x0 = H - target_h, W - target_w
+        elif self.position == "center":
+            y0, x0 = (H - target_h) // 2, (W - target_w) // 2
+        else:
+            raise ValueError(f"Unknown position: {self.position}")
+
+        background_region = img[:, y0 : y0 + target_h, x0 : x0 + target_w]
+        img[:, y0 : y0 + target_h, x0 : x0 + target_w] = (
+            background_region * (1 - self.alpha) + wm * self.alpha
+        )
+
+        self.nested_set(x, img, "image")
+        return x

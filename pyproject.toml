@@ -71,6 +71,7 @@ datasets = [
     "datasets",  # HuggingFace datasets
     "pyarrow==20.0.0",  # Required for datasets compatibility
     "minari[hdf5]>=0.5.3",  # Reinforcement learning datasets
+    "termcolor", # Visualizing spurious correlations
 ]
 
 # Additional utilities
