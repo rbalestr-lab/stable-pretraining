@@ -40,8 +40,8 @@ class TrainableCallback(Callback):
         Args:
             module: spt.Module.
             name: Unique identifier for this callback instance.
-            optimizer: Optimizer configuration. If None, inherits from main module.
-            scheduler: Scheduler configuration. If None, inherits from main module.
+            optimizer: Optimizer configuration. If None, uses default LARS.
+            scheduler: Scheduler configuration. If None, uses default ConstantLR.
             accumulate_grad_batches: Number of batches to accumulate gradients.
             gradient_clip_val: Value to clip the gradient (default None).
             gradient_clip_algorithm: Algorithm to clip the gradient (default `norm`).
@@ -131,9 +131,9 @@ class TrainableCallback(Callback):
         )
 
     def setup_optimizer(self, pl_module: LightningModule) -> None:
-        """Initialize optimizer with inheritance from main module if needed."""
+        """Initialize optimizer with default LARS if not specified."""
         if self._optimizer_config is None:
-            # Try to inherit from main module's optimizer config
+            # Use default LARS optimizer for SSL linear probes
             logging.info(f"{self.name}: No optimizer given, using default LARS")
             return LARS(
                 self.module.parameters(),
@@ -148,10 +148,10 @@ class TrainableCallback(Callback):
         return create_optimizer(self.module.parameters(), self._optimizer_config)
 
     def setup_scheduler(self, optimizer, pl_module: LightningModule) -> None:
-        """Initialize scheduler with inheritance from main module if needed."""
+        """Initialize scheduler with default ConstantLR if not specified."""
         if self._scheduler_config is None:
-            # Fallback to ConstantLR
-            logging.info(f"{self.name}:No optimizer given, using default ConstantLR")
+            # Use default ConstantLR scheduler
+            logging.info(f"{self.name}: No scheduler given, using default ConstantLR")
             return torch.optim.lr_scheduler.ConstantLR(optimizer, factor=1.0)
         logging.info(f"{self.name}: Use explicitly provided scheduler")
         return create_scheduler(optimizer, self._scheduler_config, module=pl_module)

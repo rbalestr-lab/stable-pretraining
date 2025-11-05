@@ -41,13 +41,14 @@ class OnlineProbe(TrainableCallback):
             - dict: {"type": "AdamW", "lr": 1e-3, ...}
             - partial: pre-configured optimizer factory
             - optimizer instance or callable
-            - None: inherits from main Module's optimizer config (default)
+            - None: uses LARS(lr=0.1, clip_lr=True, eta=0.02, exclude_bias_n_norm=True,
+              weight_decay=0), which is the standard for SSL linear probes (default)
         scheduler: Learning rate scheduler configuration. Can be:
             - str: scheduler name (e.g., "CosineAnnealingLR", "StepLR")
             - dict: {"type": "CosineAnnealingLR", "T_max": 1000, ...}
             - partial: pre-configured scheduler factory
             - scheduler instance or callable
-            - None: inherits from main Module's scheduler config (default)
+            - None: uses ConstantLR(factor=1.0), maintaining constant learning rate (default)
         accumulate_grad_batches: Number of batches to accumulate gradients before
             optimizer step. Default is 1 (no accumulation).
         metrics: Metrics to track during training/validation. Can be dict, list, tuple,
