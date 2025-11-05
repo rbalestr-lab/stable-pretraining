@@ -241,11 +241,15 @@ class Module(pl.LightningModule):
                     gradient_clip_val=clip_val,
                     gradient_clip_algorithm=clip_algo,
                 )
-            opt.step()
+            # Use precision plugin for proper AMP handling with multiple optimizers
+            base_opt = getattr(opt, "optimizer", opt)
+            self.trainer.precision_plugin.optimizer_step(
+                optimizer=base_opt, model=self, closure=lambda: None
+            )
             zero_grad_opts.append(opt)
             # Step its scheduler if it exists
             if schedulers[idx] is not None:
-                assert schedulers[idx].optimizer == opt.optimizer
+                assert getattr(schedulers[idx], "optimizer", None) is base_opt
                 schedulers[idx].step()
 
         # zero grad what's needed
