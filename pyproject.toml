@@ -24,7 +24,8 @@ dependencies = [
     "prettytable",
     "submitit",
     "timm",
-    "zstandard"
+    "zstandard",
+    "typer"
 ]
 
 dynamic = ["version"]

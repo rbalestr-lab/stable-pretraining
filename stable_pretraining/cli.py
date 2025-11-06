@@ -114,7 +114,7 @@ def dump_csv_logs(
     dir: str = typer.Argument(..., help="Input CSV file directory"),
     output_name: str = typer.Argument(..., help="Base name for compressed output"),
     agg: str = typer.Argument(
-        default="max", help="Aggregation method: 'max' or 'last'"
+        default="all", help="Aggregation method: 'max' or 'last' or 'all'"
     ),
 ):
     """Compress CSV logs to the smallest possible format with aggregation."""
@@ -133,7 +133,7 @@ def dump_csv_logs(
         typer.echo(f"❌ Error: '{dir}' is not a directory", err=True)
         raise typer.Exit(code=1)
 
-    if agg not in ["max", "last"]:
+    if agg not in ["max", "last", "all"]:
         typer.echo(
             f"❌ Error: Invalid aggregation '{agg}'. Use 'max' or 'last'", err=True
         )
@@ -157,8 +157,16 @@ def dump_csv_logs(
         """Take the last row."""
         return df.iloc[[-1]].copy()
 
-    # Select aggregation function
-    agg_func = _agg_max if agg == "max" else _agg_last
+    def _agg_all(df: pd.DataFrame) -> pd.DataFrame:
+        """Take the last row."""
+        return df
+
+    if agg == "max":
+        agg_func = _agg_max
+    elif agg == "last":
+        agg_func = _agg_last
+    else:
+        agg_func = _agg_all
 
     # ========== Process Data ==========
     try:
