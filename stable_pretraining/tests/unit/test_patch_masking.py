@@ -111,7 +111,6 @@ def test_patch_masking_fill_value_mean(monkeypatch):
         drop_ratio=drop_ratio,
         source="image",
         target="masked_image",
-        mask_key="patch_mask",
         fill_value=None,
     )
     out = transform(sample)

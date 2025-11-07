@@ -446,7 +446,8 @@ class TestHelperMethods:
 
     def test_add_extra_tokens(self, masked_vit):
         """Test _add_extra_tokens method."""
-        x = torch.randn(2, 10, 768)
+        embed_dim = masked_vit.vit.embed_dim
+        x = torch.randn(2, 10, embed_dim)
         x_with_tokens = masked_vit._add_extra_tokens(x)
 
         num_extra = masked_vit._get_num_extra_tokens()

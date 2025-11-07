@@ -557,8 +557,10 @@ class TestEdgeCases:
         """Test that empty list raises appropriate error."""
         agg = TensorAggregator(["cls", "mean"])
 
-        # torch.cat on empty list raises RuntimeError
-        with pytest.raises(RuntimeError, match="expected a non-empty list"):
+        # torch.cat on empty list raises RuntimeError or ValueError depending on PyTorch version
+        with pytest.raises(
+            (RuntimeError, ValueError), match="expected a non-empty list"
+        ):
             agg([])
 
     def test_wrong_input_type_raises_error(self):
