@@ -1,0 +1,664 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../../../../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>stable_pretraining.data.sampler &#8212; stable-pretraining 0.1.dev1+g8d0b48cc3.d20251109 documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../../../_static/styles/theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="../../../../_static/styles/bootstrap.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="../../../../_static/styles/pydata-sphinx-theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+
+  
+  <link href="../../../../_static/vendor/fontawesome/6.5.2/css/all.min.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../_static/vendor/fontawesome/6.5.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../_static/vendor/fontawesome/6.5.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../_static/vendor/fontawesome/6.5.2/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=8f2a1f02" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/styles/sphinx-book-theme.css?v=eba8b062" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/sg_gallery.css?v=d2d258e8" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/sg_gallery-binder.css?v=f4aeca0c" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../../../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b" />
+<link rel="preload" as="script" href="../../../../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
+  <script src="../../../../_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+    <script src="../../../../_static/documentation_options.js?v=eff7c767"></script>
+    <script src="../../../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../../_static/scripts/sphinx-book-theme.js?v=887ef09a"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = '_modules/stable_pretraining/data/sampler';</script>
+    <link rel="index" title="Index" href="../../../../genindex/" />
+    <link rel="search" title="Search" href="../../../../search/" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-primary-sidebar-checkbox"/>
+  <label class="overlay overlay-primary" for="pst-primary-sidebar-checkbox"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-secondary-sidebar-checkbox"/>
+  <label class="overlay overlay-secondary" for="pst-secondary-sidebar-checkbox"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="../../../../search/"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search..."
+         aria-label="Search..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+        
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+    
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../../../../">
+  
+  
+  
+  
+  
+  
+    <p class="title logo__title">stable-pretraining 0.1.dev1+g8d0b48cc3.d20251109 documentation</p>
+  
+</a></div>
+        <div class="sidebar-primary-item">
+
+ <script>
+ document.write(`
+   <button class="btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script></div>
+        <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item navbar-nav active">
+        <p aria-level="2" class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../../../">stable-pretraining</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../releases/">Releases</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../contributing/">Contributing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../bibliography/">Bibliography</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">API</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../../../api/backbone/">stable_pretraining.backbone</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.backbone.MLP/">MLP</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.backbone.Resnet9/">Resnet9</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.backbone.ConvMixer/">ConvMixer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.backbone.from_timm/">from_timm</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.backbone.from_torchvision/">from_torchvision</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.backbone.set_embedding_dim/">set_embedding_dim</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.backbone.TeacherStudentWrapper/">TeacherStudentWrapper</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.backbone.EvalOnly/">EvalOnly</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.backbone.mae/">mae</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../../../api/data/">stable_pretraining.data</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.data.DataModule/">DataModule</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.data.Collator/">Collator</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.data.Dataset/">Dataset</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.data.FromTorchDataset/">FromTorchDataset</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.data.HFDataset/">HFDataset</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.data.Subset/">Subset</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.data.GMM/">GMM</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.data.MinariStepsDataset/">MinariStepsDataset</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.data.MinariEpisodeDataset/">MinariEpisodeDataset</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.data.swiss_roll/">swiss_roll</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.data.generate_perlin_noise_2d/">generate_perlin_noise_2d</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.data.perlin_noise_3d/">perlin_noise_3d</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.data.Categorical/">Categorical</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.data.ExponentialMixtureNoiseModel/">ExponentialMixtureNoiseModel</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.data.ExponentialNormalNoiseModel/">ExponentialNormalNoiseModel</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.data.RepeatedRandomSampler/">RepeatedRandomSampler</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.data.SupervisedBatchSampler/">SupervisedBatchSampler</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.data.RandomBatchSampler/">RandomBatchSampler</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.data.fold_views/">fold_views</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.data.random_split/">random_split</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.data.download/">download</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.data.bulk_download/">bulk_download</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.data.transforms/">stable_pretraining.data.transforms</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.data.dataset_stats/">stable_pretraining.data.dataset_stats</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.data.synthetic_data/">stable_pretraining.data.synthetic_data</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/forward/">stable_pretraining.forward</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../../../api/losses/">stable_pretraining.losses</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.losses.NTXEntLoss/">NTXEntLoss</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.losses.NegativeCosineSimilarity/">NegativeCosineSimilarity</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.losses.VICRegLoss/">VICRegLoss</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.losses.BarlowTwinsLoss/">BarlowTwinsLoss</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../../../api/manager/">stable_pretraining.manager</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.manager.Manager/">Manager</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../../../api/module/">stable_pretraining.module</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.module.Module/">Module</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../../../api/monitors/">stable_pretraining.callbacks</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.callbacks.OnlineProbe/">OnlineProbe</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.callbacks.OnlineKNN/">OnlineKNN</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.callbacks.OnlineWriter/">OnlineWriter</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.callbacks.RankMe/">RankMe</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.callbacks.LiDAR/">LiDAR</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.callbacks.EarlyStopping/">EarlyStopping</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.callbacks.TrainerInfo/">TrainerInfo</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.callbacks.LoggingCallback/">LoggingCallback</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.callbacks.ModuleSummary/">ModuleSummary</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.callbacks.SklearnCheckpoint/">SklearnCheckpoint</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.callbacks.ImageRetrieval/">ImageRetrieval</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../../../api/optim/">stable_pretraining.optim</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.optim.LARS/">LARS</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.optim.CosineDecayer/">CosineDecayer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.optim.LinearWarmup/">LinearWarmup</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.optim.LinearWarmupCosineAnnealing/">LinearWarmupCosineAnnealing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.optim.LinearWarmupCyclicAnnealing/">LinearWarmupCyclicAnnealing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.optim.LinearWarmupThreeStepsAnnealing/">LinearWarmupThreeStepsAnnealing</a></li>
+</ul>
+</details></li>
+</ul>
+
+    </div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+
+<div class="sbt-scroll-pixel-helper"></div>
+
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item"><button class="sidebar-toggle primary-toggle btn btn-sm" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <span class="fa-solid fa-bars"></span>
+</button></div>
+      
+    </div>
+  
+  
+    <div class="header-article-items__end">
+      
+        <div class="header-article-item">
+
+<div class="article-header-buttons">
+
+
+
+<button onclick="toggleFullScreen()"
+  class="btn btn-sm btn-fullscreen-button"
+  title="Fullscreen mode"
+  data-bs-placement="bottom" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-expand"></i>
+  </span>
+
+</button>
+
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"></i>
+  </button>
+`);
+</script>
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm pst-navbar-icon search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+  </button>
+`);
+</script>
+
+</div></div>
+      
+    </div>
+  
+</div>
+</div>
+              
+              
+
+<div id="jb-print-docs-body" class="onlyprint">
+    <h1></h1>
+    <!-- Table of contents -->
+    <div id="print-main-content">
+        <div id="jb-print-toc">
+            
+        </div>
+    </div>
+</div>
+
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <h1>Source code for stable_pretraining.data.sampler</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">math</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Iterable</span><span class="p">,</span> <span class="n">Iterator</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Union</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">torch.distributed</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">dist</span>
+
+
+<div class="viewcode-block" id="RepeatedRandomSampler">
+<a class="viewcode-back" href="../../../../stable_pretraining.data/#stable_pretraining.data.RepeatedRandomSampler">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">RepeatedRandomSampler</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">DistributedSampler</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Sampler that repeats each dataset index consecutively for multi-view learning.</span>
+
+<span class="sd">    IMPORTANT: This sampler repeats each index n_views times in a row, creating</span>
+<span class="sd">    sequences like [0,0,0,0, 1,1,1,1, 2,2,2,2, ...] for n_views=4. This means:</span>
+<span class="sd">    - The DataLoader will load the SAME image multiple times consecutively</span>
+<span class="sd">    - Each repeated index goes through the transform pipeline separately</span>
+<span class="sd">    - BATCH SIZE: The batch_size in DataLoader refers to total augmented samples.</span>
+<span class="sd">      For example: batch_size=128 with n_views=8 means only 16 unique images,</span>
+<span class="sd">      each appearing 8 times with different augmentations</span>
+
+<span class="sd">    Designed to work with RoundRobinMultiViewTransform which uses a counter to apply different</span>
+<span class="sd">    augmentations to each repeated occurrence of the same image.</span>
+
+<span class="sd">    Example behavior with n_views=3:</span>
+<span class="sd">        Dataset indices: [0, 1, 2, 3, 4]</span>
+<span class="sd">        Sampler output:  [0,0,0, 1,1,1, 2,2,2, 3,3,3, 4,4,4]</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        data_source (Dataset): dataset to sample from</span>
+<span class="sd">        n_views (int): number of times to repeat each index consecutively, default=1</span>
+<span class="sd">        replacement (bool): samples are drawn on-demand with replacement if ``True``, default=``False``</span>
+<span class="sd">        seed (int): random seed for shuffling</span>
+<span class="sd">        pass_view_idx (bool): whether to pass the view index to the dataset getitem</span>
+
+<span class="sd">    Note: For an alternative approach that loads each image once, consider using</span>
+<span class="sd">    MultiViewTransform with a standard sampler.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">data_source_or_len</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">],</span>
+        <span class="n">n_views</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+        <span class="n">replacement</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">seed</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+        <span class="n">pass_view_idx</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">data_source_or_len</span><span class="p">)</span> <span class="ow">is</span> <span class="nb">int</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_data_source_len</span> <span class="o">=</span> <span class="n">data_source_or_len</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_data_source_len</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">data_source_or_len</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">replacement</span> <span class="o">=</span> <span class="n">replacement</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">n_views</span> <span class="o">=</span> <span class="n">n_views</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">seed</span> <span class="o">=</span> <span class="n">seed</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pass_view_idx</span> <span class="o">=</span> <span class="n">pass_view_idx</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">epoch</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="k">if</span> <span class="n">dist</span><span class="o">.</span><span class="n">is_available</span><span class="p">()</span> <span class="ow">and</span> <span class="n">dist</span><span class="o">.</span><span class="n">is_initialized</span><span class="p">():</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">num_replicas</span> <span class="o">=</span> <span class="n">dist</span><span class="o">.</span><span class="n">get_world_size</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">rank</span> <span class="o">=</span> <span class="n">dist</span><span class="o">.</span><span class="n">get_rank</span><span class="p">()</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">rank</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_replicas</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">rank</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;Invalid rank </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">rank</span><span class="si">}</span><span class="s2">, rank should be in the interval [0, </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">num_replicas</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">1</span><span class="si">}</span><span class="s2">]&quot;</span>
+                <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">num_replicas</span> <span class="o">=</span> <span class="mi">1</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">rank</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data_source_len</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_replicas</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>  <span class="c1"># type: ignore[arg-type]</span>
+            <span class="c1"># Split to nearest available length that is evenly divisible.</span>
+            <span class="c1"># This is to ensure each rank receives the same amount of data when</span>
+            <span class="c1"># using this Sampler.</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">num_samples</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span>
+                <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_data_source_len</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_replicas</span><span class="p">)</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_replicas</span>  <span class="c1"># type: ignore[arg-type]</span>
+            <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">num_samples</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data_source_len</span> <span class="o">//</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_replicas</span>  <span class="c1"># type: ignore[arg-type]</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">replacement</span><span class="p">,</span> <span class="nb">bool</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;replacement should be a boolean value, but got replacement=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">replacement</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_samples</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_views</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__iter__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterator</span><span class="p">[</span><span class="nb">int</span><span class="p">]:</span>
+        <span class="n">n</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data_source_len</span>
+        <span class="n">g</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">Generator</span><span class="p">()</span>
+        <span class="n">g</span><span class="o">.</span><span class="n">manual_seed</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">seed</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">epoch</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">replacement</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">()</span>
+            <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num_samples</span> <span class="o">//</span> <span class="mi">32</span><span class="p">):</span>
+                <span class="k">yield from</span> <span class="n">torch</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span>
+                    <span class="n">high</span><span class="o">=</span><span class="n">n</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="mi">32</span><span class="p">,),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">int64</span><span class="p">,</span> <span class="n">generator</span><span class="o">=</span><span class="n">g</span>
+                <span class="p">)</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+            <span class="k">yield from</span> <span class="n">torch</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span>
+                <span class="n">high</span><span class="o">=</span><span class="n">n</span><span class="p">,</span>
+                <span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num_samples</span> <span class="o">%</span> <span class="mi">32</span><span class="p">,),</span>
+                <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">int64</span><span class="p">,</span>
+                <span class="n">generator</span><span class="o">=</span><span class="n">g</span><span class="p">,</span>
+            <span class="p">)</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">overall_slice</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">randperm</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">generator</span><span class="o">=</span><span class="n">g</span><span class="p">)</span>
+            <span class="n">rank_slice</span> <span class="o">=</span> <span class="n">overall_slice</span><span class="p">[</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">rank</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_samples</span> <span class="p">:</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rank</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_samples</span>
+            <span class="p">]</span>
+            <span class="n">indices</span> <span class="o">=</span> <span class="n">rank_slice</span><span class="o">.</span><span class="n">repeat_interleave</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_views</span><span class="p">)</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">pass_view_idx</span><span class="p">:</span>
+                <span class="k">yield from</span> <span class="n">indices</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">indices</span> <span class="o">=</span> <span class="p">[(</span><span class="n">idx</span><span class="p">,</span> <span class="n">v</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_views</span><span class="p">)</span> <span class="k">for</span> <span class="n">v</span><span class="p">,</span> <span class="n">idx</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">indices</span><span class="p">)]</span>
+                <span class="k">yield from</span> <span class="n">indices</span></div>
+
+
+
+<div class="viewcode-block" id="SupervisedBatchSampler">
+<a class="viewcode-back" href="../../../../stable_pretraining.data/#stable_pretraining.data.SupervisedBatchSampler">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">SupervisedBatchSampler</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">Sampler</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]]):</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Wraps another sampler to yield a mini-batch of indices.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        sampler (Sampler or Iterable): Base sampler. Can be any iterable object</span>
+<span class="sd">        batch_size (int): Size of mini-batch.</span>
+<span class="sd">        drop_last (bool): If ``True``, the sampler will drop the last batch if</span>
+<span class="sd">            its size would be less than ``batch_size``</span>
+
+<span class="sd">    Example:</span>
+<span class="sd">        &gt;&gt;&gt; list(</span>
+<span class="sd">        ...     BatchSampler(</span>
+<span class="sd">        ...         SequentialSampler(range(10)), batch_size=3, drop_last=False</span>
+<span class="sd">        ...     )</span>
+<span class="sd">        ... )</span>
+<span class="sd">        [[0, 1, 2], [3, 4, 5], [6, 7, 8], [9]]</span>
+<span class="sd">        &gt;&gt;&gt; list(</span>
+<span class="sd">        ...     BatchSampler(SequentialSampler(range(10)), batch_size=3, drop_last=True)</span>
+<span class="sd">        ... )</span>
+<span class="sd">        [[0, 1, 2], [3, 4, 5], [6, 7, 8]]</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">batch_size</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+        <span class="n">n_views</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+        <span class="n">targets_or_dataset</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">Dataset</span><span class="p">,</span> <span class="nb">list</span><span class="p">],</span>
+        <span class="o">*</span><span class="n">args</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="p">(</span>
+            <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">batch_size</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span>
+            <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">batch_size</span><span class="p">,</span> <span class="nb">bool</span><span class="p">)</span>
+            <span class="ow">or</span> <span class="n">batch_size</span> <span class="o">&lt;=</span> <span class="mi">0</span>
+        <span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;batch_size should be a positive integer value, but got batch_size=</span><span class="si">{</span><span class="n">batch_size</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">n_views</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">n_views</span><span class="p">,</span> <span class="nb">bool</span><span class="p">)</span> <span class="ow">or</span> <span class="n">n_views</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;n_views should be a positive integer value, but got n_views=</span><span class="si">{</span><span class="n">n_views</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span> <span class="o">=</span> <span class="n">batch_size</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">n_views</span> <span class="o">=</span> <span class="n">n_views</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">targets_or_dataset</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">Dataset</span><span class="p">):</span>
+            <span class="n">targets</span> <span class="o">=</span> <span class="n">targets_or_dataset</span><span class="o">.</span><span class="n">targets</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">targets</span> <span class="o">=</span> <span class="n">targets_or_dataset</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_length</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">targets</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">batches</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">unique_targets</span><span class="p">,</span> <span class="n">counts</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">targets</span><span class="p">,</span> <span class="n">return_counts</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">prior</span> <span class="o">=</span> <span class="n">counts</span> <span class="o">/</span> <span class="n">counts</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">label</span> <span class="ow">in</span> <span class="n">unique_targets</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">batches</span><span class="p">[</span><span class="n">label</span><span class="o">.</span><span class="n">item</span><span class="p">()]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">flatnonzero</span><span class="p">(</span><span class="n">targets</span> <span class="o">==</span> <span class="n">label</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__iter__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterator</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]]:</span>
+        <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">)):</span>
+            <span class="n">n_parents</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span> <span class="o">//</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_views</span>
+            <span class="n">parents</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span>
+                <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">batches</span><span class="o">.</span><span class="n">keys</span><span class="p">()),</span> <span class="n">size</span><span class="o">=</span><span class="n">n_parents</span><span class="p">,</span> <span class="n">replace</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">p</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">prior</span>
+            <span class="p">)</span>
+            <span class="n">indices</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">parents</span><span class="p">:</span>
+                <span class="n">indices</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span>
+                    <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">batches</span><span class="p">[</span><span class="n">p</span><span class="p">],</span> <span class="n">size</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">n_views</span><span class="p">,</span> <span class="n">replace</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+                <span class="p">)</span>
+            <span class="n">indices</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">indices</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+            <span class="k">yield</span> <span class="n">indices</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="c1"># Can only be called if self.sampler has __len__ implemented</span>
+        <span class="c1"># We cannot enforce this condition, so we turn off typechecking for the</span>
+        <span class="c1"># implementation below.</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_length</span> <span class="o">//</span> <span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span> <span class="o">//</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_views</span></div>
+
+
+
+<div class="viewcode-block" id="RandomBatchSampler">
+<a class="viewcode-back" href="../../../../stable_pretraining.data/#stable_pretraining.data.RandomBatchSampler">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">RandomBatchSampler</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">Sampler</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]]):</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Wraps another sampler to yield a mini-batch of indices.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        sampler (Sampler or Iterable): Base sampler. Can be any iterable object</span>
+<span class="sd">        batch_size (int): Size of mini-batch.</span>
+<span class="sd">        drop_last (bool): If ``True``, the sampler will drop the last batch if</span>
+<span class="sd">            its size would be less than ``batch_size``</span>
+
+<span class="sd">    Example:</span>
+<span class="sd">        &gt;&gt;&gt; list(</span>
+<span class="sd">        ...     BatchSampler(</span>
+<span class="sd">        ...         SequentialSampler(range(10)), batch_size=3, drop_last=False</span>
+<span class="sd">        ...     )</span>
+<span class="sd">        ... )</span>
+<span class="sd">        [[0, 1, 2], [3, 4, 5], [6, 7, 8], [9]]</span>
+<span class="sd">        &gt;&gt;&gt; list(</span>
+<span class="sd">        ...     BatchSampler(SequentialSampler(range(10)), batch_size=3, drop_last=True)</span>
+<span class="sd">        ... )</span>
+<span class="sd">        [[0, 1, 2], [3, 4, 5], [6, 7, 8]]</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">batch_size</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+        <span class="n">length_or_dataset</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">Dataset</span><span class="p">,</span> <span class="nb">int</span><span class="p">],</span>
+        <span class="o">*</span><span class="n">args</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="p">(</span>
+            <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">batch_size</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span>
+            <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">batch_size</span><span class="p">,</span> <span class="nb">bool</span><span class="p">)</span>
+            <span class="ow">or</span> <span class="n">batch_size</span> <span class="o">&lt;=</span> <span class="mi">0</span>
+        <span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;batch_size should be a positive integer value, but got batch_size=</span><span class="si">{</span><span class="n">batch_size</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span> <span class="o">=</span> <span class="n">batch_size</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">length_or_dataset</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">Dataset</span><span class="p">):</span>
+            <span class="n">length_or_dataset</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">length_or_dataset</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_length</span> <span class="o">=</span> <span class="n">length_or_dataset</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__iter__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterator</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]]:</span>
+        <span class="n">perm</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">permutation</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_length</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">)):</span>
+            <span class="k">yield</span> <span class="n">perm</span><span class="p">[</span><span class="n">i</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span> <span class="p">:</span> <span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span><span class="p">]</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="c1"># Can only be called if self.sampler has __len__ implemented</span>
+        <span class="c1"># We cannot enforce this condition, so we turn off typechecking for the</span>
+        <span class="c1"># implementation below.</span>
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sampler</span><span class="p">)</span> <span class="o">//</span> <span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span> <span class="o">//</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_views</span></div>
+
+</pre></div>
+
+                </article>
+              
+
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+<div class="bd-footer-content__inner container">
+  
+  <div class="footer-item">
+    
+<p class="component-author">
+By stable-pretraining team
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+
+  <p class="copyright">
+    
+      © Copyright 2024, stable-pretraining team.
+      <br/>
+    
+  </p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+</div>
+          </footer>
+        
+
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../../../../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b"></script>
+<script src="../../../../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+  <footer class="bd-footer">
+  </footer>
+  </body>
+</html>

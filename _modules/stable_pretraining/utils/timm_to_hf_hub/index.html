@@ -1,0 +1,694 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../../../../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>stable_pretraining.utils.timm_to_hf_hub &#8212; stable-pretraining 0.1.dev1+g8d0b48cc3.d20251109 documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../../../_static/styles/theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="../../../../_static/styles/bootstrap.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="../../../../_static/styles/pydata-sphinx-theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+
+  
+  <link href="../../../../_static/vendor/fontawesome/6.5.2/css/all.min.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../_static/vendor/fontawesome/6.5.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../_static/vendor/fontawesome/6.5.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../_static/vendor/fontawesome/6.5.2/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=8f2a1f02" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/styles/sphinx-book-theme.css?v=eba8b062" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/sg_gallery.css?v=d2d258e8" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/sg_gallery-binder.css?v=f4aeca0c" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../../../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b" />
+<link rel="preload" as="script" href="../../../../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
+  <script src="../../../../_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+    <script src="../../../../_static/documentation_options.js?v=eff7c767"></script>
+    <script src="../../../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../../_static/scripts/sphinx-book-theme.js?v=887ef09a"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = '_modules/stable_pretraining/utils/timm_to_hf_hub';</script>
+    <link rel="index" title="Index" href="../../../../genindex/" />
+    <link rel="search" title="Search" href="../../../../search/" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-primary-sidebar-checkbox"/>
+  <label class="overlay overlay-primary" for="pst-primary-sidebar-checkbox"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-secondary-sidebar-checkbox"/>
+  <label class="overlay overlay-secondary" for="pst-secondary-sidebar-checkbox"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="../../../../search/"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search..."
+         aria-label="Search..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+        
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+    
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../../../../">
+  
+  
+  
+  
+  
+  
+    <p class="title logo__title">stable-pretraining 0.1.dev1+g8d0b48cc3.d20251109 documentation</p>
+  
+</a></div>
+        <div class="sidebar-primary-item">
+
+ <script>
+ document.write(`
+   <button class="btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script></div>
+        <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item navbar-nav active">
+        <p aria-level="2" class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../../../">stable-pretraining</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../releases/">Releases</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../contributing/">Contributing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../bibliography/">Bibliography</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">API</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../../../api/backbone/">stable_pretraining.backbone</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.backbone.MLP/">MLP</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.backbone.Resnet9/">Resnet9</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.backbone.ConvMixer/">ConvMixer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.backbone.from_timm/">from_timm</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.backbone.from_torchvision/">from_torchvision</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.backbone.set_embedding_dim/">set_embedding_dim</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.backbone.TeacherStudentWrapper/">TeacherStudentWrapper</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.backbone.EvalOnly/">EvalOnly</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.backbone.mae/">mae</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../../../api/data/">stable_pretraining.data</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.data.DataModule/">DataModule</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.data.Collator/">Collator</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.data.Dataset/">Dataset</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.data.FromTorchDataset/">FromTorchDataset</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.data.HFDataset/">HFDataset</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.data.Subset/">Subset</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.data.GMM/">GMM</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.data.MinariStepsDataset/">MinariStepsDataset</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.data.MinariEpisodeDataset/">MinariEpisodeDataset</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.data.swiss_roll/">swiss_roll</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.data.generate_perlin_noise_2d/">generate_perlin_noise_2d</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.data.perlin_noise_3d/">perlin_noise_3d</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.data.Categorical/">Categorical</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.data.ExponentialMixtureNoiseModel/">ExponentialMixtureNoiseModel</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.data.ExponentialNormalNoiseModel/">ExponentialNormalNoiseModel</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.data.RepeatedRandomSampler/">RepeatedRandomSampler</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.data.SupervisedBatchSampler/">SupervisedBatchSampler</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.data.RandomBatchSampler/">RandomBatchSampler</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.data.fold_views/">fold_views</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.data.random_split/">random_split</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.data.download/">download</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.data.bulk_download/">bulk_download</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.data.transforms/">stable_pretraining.data.transforms</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.data.dataset_stats/">stable_pretraining.data.dataset_stats</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.data.synthetic_data/">stable_pretraining.data.synthetic_data</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/forward/">stable_pretraining.forward</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../../../api/losses/">stable_pretraining.losses</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.losses.NTXEntLoss/">NTXEntLoss</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.losses.NegativeCosineSimilarity/">NegativeCosineSimilarity</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.losses.VICRegLoss/">VICRegLoss</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.losses.BarlowTwinsLoss/">BarlowTwinsLoss</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../../../api/manager/">stable_pretraining.manager</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.manager.Manager/">Manager</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../../../api/module/">stable_pretraining.module</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.module.Module/">Module</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../../../api/monitors/">stable_pretraining.callbacks</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.callbacks.OnlineProbe/">OnlineProbe</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.callbacks.OnlineKNN/">OnlineKNN</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.callbacks.OnlineWriter/">OnlineWriter</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.callbacks.RankMe/">RankMe</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.callbacks.LiDAR/">LiDAR</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.callbacks.EarlyStopping/">EarlyStopping</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.callbacks.TrainerInfo/">TrainerInfo</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.callbacks.LoggingCallback/">LoggingCallback</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.callbacks.ModuleSummary/">ModuleSummary</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.callbacks.SklearnCheckpoint/">SklearnCheckpoint</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.callbacks.ImageRetrieval/">ImageRetrieval</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../../../api/optim/">stable_pretraining.optim</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.optim.LARS/">LARS</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.optim.CosineDecayer/">CosineDecayer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.optim.LinearWarmup/">LinearWarmup</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.optim.LinearWarmupCosineAnnealing/">LinearWarmupCosineAnnealing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.optim.LinearWarmupCyclicAnnealing/">LinearWarmupCyclicAnnealing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.optim.LinearWarmupThreeStepsAnnealing/">LinearWarmupThreeStepsAnnealing</a></li>
+</ul>
+</details></li>
+</ul>
+
+    </div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+
+<div class="sbt-scroll-pixel-helper"></div>
+
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item"><button class="sidebar-toggle primary-toggle btn btn-sm" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <span class="fa-solid fa-bars"></span>
+</button></div>
+      
+    </div>
+  
+  
+    <div class="header-article-items__end">
+      
+        <div class="header-article-item">
+
+<div class="article-header-buttons">
+
+
+
+<button onclick="toggleFullScreen()"
+  class="btn btn-sm btn-fullscreen-button"
+  title="Fullscreen mode"
+  data-bs-placement="bottom" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-expand"></i>
+  </span>
+
+</button>
+
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"></i>
+  </button>
+`);
+</script>
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm pst-navbar-icon search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+  </button>
+`);
+</script>
+
+</div></div>
+      
+    </div>
+  
+</div>
+</div>
+              
+              
+
+<div id="jb-print-docs-body" class="onlyprint">
+    <h1></h1>
+    <!-- Table of contents -->
+    <div id="print-main-content">
+        <div id="jb-print-toc">
+            
+        </div>
+    </div>
+</div>
+
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <h1>Source code for stable_pretraining.utils.timm_to_hf_hub</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">timm</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Tuple</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">huggingface_hub</span><span class="w"> </span><span class="kn">import</span> <span class="n">HfFolder</span><span class="p">,</span> <span class="n">create_repo</span><span class="p">,</span> <span class="n">upload_folder</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">transformers</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">ViTConfig</span><span class="p">,</span>
+    <span class="n">ViTModel</span><span class="p">,</span>
+    <span class="n">DeiTConfig</span><span class="p">,</span>
+    <span class="n">DeiTModel</span><span class="p">,</span>
+    <span class="n">SwinConfig</span><span class="p">,</span>
+    <span class="n">SwinModel</span><span class="p">,</span>
+    <span class="n">ConvNextConfig</span><span class="p">,</span>
+    <span class="n">ConvNextModel</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">safetensors.torch</span>
+
+
+<div class="viewcode-block" id="push_timm_to_hf">
+<a class="viewcode-back" href="../../../../stable_pretraining.utils/#stable_pretraining.utils.timm_to_hf_hub.push_timm_to_hf">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">push_timm_to_hf</span><span class="p">(</span>
+    <span class="n">model_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">model</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">,</span>
+    <span class="n">repo_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">hf_token</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">private</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">validate</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="n">batch_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span>
+    <span class="n">atol</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1e-4</span><span class="p">,</span>
+    <span class="n">rtol</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1e-4</span><span class="p">,</span>
+    <span class="n">device</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">strict</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="n">family_map</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;vit&quot;</span><span class="p">:</span> <span class="p">(</span><span class="n">ViTConfig</span><span class="p">,</span> <span class="n">ViTModel</span><span class="p">),</span>
+        <span class="s2">&quot;deit&quot;</span><span class="p">:</span> <span class="p">(</span><span class="n">DeiTConfig</span><span class="p">,</span> <span class="n">DeiTModel</span><span class="p">),</span>
+        <span class="s2">&quot;swin&quot;</span><span class="p">:</span> <span class="p">(</span><span class="n">SwinConfig</span><span class="p">,</span> <span class="n">SwinModel</span><span class="p">),</span>
+        <span class="s2">&quot;convnext&quot;</span><span class="p">:</span> <span class="p">(</span><span class="n">ConvNextConfig</span><span class="p">,</span> <span class="n">ConvNextModel</span><span class="p">),</span>
+    <span class="p">}</span>
+    <span class="n">hf_token</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">hf_token</span> <span class="ow">or</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;HUGGINGFACE_HUB_TOKEN&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="n">HfFolder</span><span class="o">.</span><span class="n">get_token</span><span class="p">()</span>
+    <span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">hf_token</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
+            <span class="s2">&quot;Hugging Face token not found. Pass hf_token or set HUGGINGFACE_HUB_TOKEN.&quot;</span>
+        <span class="p">)</span>
+
+    <span class="n">family</span> <span class="o">=</span> <span class="nb">next</span><span class="p">((</span><span class="n">fam</span> <span class="k">for</span> <span class="n">fam</span> <span class="ow">in</span> <span class="n">family_map</span> <span class="k">if</span> <span class="n">fam</span> <span class="ow">in</span> <span class="n">model_name</span><span class="o">.</span><span class="n">lower</span><span class="p">()),</span> <span class="kc">None</span><span class="p">)</span>
+    <span class="n">repo_url</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;https://huggingface.co/</span><span class="si">{</span><span class="n">repo_id</span><span class="si">}</span><span class="s2">&quot;</span>
+    <span class="n">local_dir</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;./</span><span class="si">{</span><span class="n">repo_id</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;__&#39;</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
+    <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">local_dir</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">create_repo</span><span class="p">(</span><span class="n">repo_id</span><span class="p">,</span> <span class="n">token</span><span class="o">=</span><span class="n">hf_token</span><span class="p">,</span> <span class="n">private</span><span class="o">=</span><span class="n">private</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Repo creation warning: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Model card (README)</span>
+    <span class="n">readme</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;&quot;&quot;---</span>
+<span class="s2">tags:</span>
+<span class="s2">- timm</span>
+<span class="s2">- vision</span>
+<span class="s2">- </span><span class="si">{</span><span class="n">family</span><span class="w"> </span><span class="ow">or</span><span class="w"> </span><span class="s2">&quot;custom&quot;</span><span class="si">}</span>
+<span class="s2">license: apache-2.0</span>
+<span class="s2">---</span>
+
+<span class="s2"># Model: </span><span class="si">{</span><span class="n">repo_id</span><span class="si">}</span>
+<span class="s2">- TIMM model: `</span><span class="si">{</span><span class="n">model_name</span><span class="si">}</span><span class="s2">`</span>
+<span class="s2">- TIMM version: </span><span class="si">{</span><span class="n">timm</span><span class="o">.</span><span class="n">__version__</span><span class="si">}</span>
+<span class="s2">- Architecture: </span><span class="si">{</span><span class="n">family</span><span class="w"> </span><span class="ow">or</span><span class="w"> </span><span class="s2">&quot;custom&quot;</span><span class="si">}</span>
+<span class="s2">- Converted: </span><span class="si">{</span><span class="s2">&quot;Transformers&quot;</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="n">family</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="s2">&quot;PyTorch&quot;</span><span class="si">}</span>
+<span class="s2">- Example usage:</span>
+<span class="s2">```python</span>
+<span class="s2">from transformers import AutoModel, AutoImageProcessor</span>
+<span class="s2">model = AutoModel.from_pretrained(&quot;</span><span class="si">{</span><span class="n">repo_id</span><span class="si">}</span><span class="s2">&quot;, trust_remote_code=True)</span>
+<span class="s2">processor = AutoImageProcessor.from_pretrained(&quot;</span><span class="si">{</span><span class="n">repo_id</span><span class="si">}</span><span class="s2">&quot;)&quot;&quot;&quot;</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">local_dir</span><span class="si">}</span><span class="s2">/README.md&quot;</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+        <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">readme</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">family</span><span class="p">:</span>
+        <span class="n">config_cls</span><span class="p">,</span> <span class="n">model_cls</span> <span class="o">=</span> <span class="n">family_map</span><span class="p">[</span><span class="n">family</span><span class="p">]</span>
+        <span class="n">image_size</span> <span class="o">=</span> <span class="n">_normalize_img_size</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="s2">&quot;img_size&quot;</span><span class="p">,</span> <span class="mi">224</span><span class="p">))</span>
+        <span class="n">in_chans</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="s2">&quot;in_chans&quot;</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+        <span class="n">num_labels</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="s2">&quot;num_classes&quot;</span><span class="p">,</span> <span class="mi">1000</span><span class="p">)</span>
+        <span class="n">config</span> <span class="o">=</span> <span class="n">config_cls</span><span class="p">(</span>
+            <span class="n">image_size</span><span class="o">=</span><span class="n">image_size</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">image_size</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)</span> <span class="k">else</span> <span class="n">image_size</span><span class="p">,</span>
+            <span class="n">num_channels</span><span class="o">=</span><span class="n">in_chans</span><span class="p">,</span>
+            <span class="n">num_labels</span><span class="o">=</span><span class="n">num_labels</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">hf_model</span> <span class="o">=</span> <span class="n">model_cls</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">hf_model</span><span class="o">.</span><span class="n">load_state_dict</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">state_dict</span><span class="p">(),</span> <span class="n">strict</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;State dict mapping failed: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="n">family</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="k">if</span> <span class="n">family</span> <span class="ow">and</span> <span class="n">validate</span><span class="p">:</span>
+            <span class="n">_validate_timm_vs_hf</span><span class="p">(</span>
+                <span class="n">timm_model</span><span class="o">=</span><span class="n">model</span><span class="p">,</span>
+                <span class="n">hf_model</span><span class="o">=</span><span class="n">hf_model</span><span class="p">,</span>
+                <span class="n">family</span><span class="o">=</span><span class="n">family</span><span class="p">,</span>
+                <span class="n">batch_size</span><span class="o">=</span><span class="n">batch_size</span><span class="p">,</span>
+                <span class="n">atol</span><span class="o">=</span><span class="n">atol</span><span class="p">,</span>
+                <span class="n">rtol</span><span class="o">=</span><span class="n">rtol</span><span class="p">,</span>
+                <span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">,</span>
+                <span class="n">strict</span><span class="o">=</span><span class="n">strict</span><span class="p">,</span>
+            <span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">family</span><span class="p">:</span>
+            <span class="n">safetensors</span><span class="o">.</span><span class="n">torch</span><span class="o">.</span><span class="n">save_file</span><span class="p">(</span>
+                <span class="n">hf_model</span><span class="o">.</span><span class="n">state_dict</span><span class="p">(),</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">local_dir</span><span class="si">}</span><span class="s2">/model.safetensors&quot;</span>
+            <span class="p">)</span>
+            <span class="n">hf_model</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">save_pretrained</span><span class="p">(</span><span class="n">local_dir</span><span class="p">)</span>
+            <span class="n">_save_image_processor</span><span class="p">(</span><span class="n">local_dir</span><span class="p">,</span> <span class="n">image_size</span><span class="p">,</span> <span class="n">family</span><span class="p">)</span>
+            <span class="n">upload_folder</span><span class="p">(</span>
+                <span class="n">repo_id</span><span class="o">=</span><span class="n">repo_id</span><span class="p">,</span>
+                <span class="n">folder_path</span><span class="o">=</span><span class="n">local_dir</span><span class="p">,</span>
+                <span class="n">token</span><span class="o">=</span><span class="n">hf_token</span><span class="p">,</span>
+                <span class="n">commit_message</span><span class="o">=</span><span class="s2">&quot;Push TIMM-converted model&quot;</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="k">return</span> <span class="n">repo_url</span>
+
+    <span class="n">torch</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">state_dict</span><span class="p">(),</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">local_dir</span><span class="si">}</span><span class="s2">/pytorch_model.bin&quot;</span><span class="p">)</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">local_dir</span><span class="si">}</span><span class="s2">/model_type.txt&quot;</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+        <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;TIMM model: </span><span class="si">{</span><span class="n">model_name</span><span class="si">}</span><span class="se">\n</span><span class="s2">No direct Transformers conversion available.</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="p">)</span>
+    <span class="n">upload_folder</span><span class="p">(</span>
+        <span class="n">repo_id</span><span class="o">=</span><span class="n">repo_id</span><span class="p">,</span>
+        <span class="n">folder_path</span><span class="o">=</span><span class="n">local_dir</span><span class="p">,</span>
+        <span class="n">token</span><span class="o">=</span><span class="n">hf_token</span><span class="p">,</span>
+        <span class="n">commit_message</span><span class="o">=</span><span class="s2">&quot;Push plain TIMM PyTorch model&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span>
+        <span class="sa">f</span><span class="s2">&quot;WARNING: </span><span class="si">{</span><span class="n">model_name</span><span class="si">}</span><span class="s2"> not natively supported for Transformers conversion. Uploaded as PyTorch weights.&quot;</span>
+    <span class="p">)</span>
+    <span class="k">return</span> <span class="n">repo_url</span></div>
+
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_normalize_img_size</span><span class="p">(</span><span class="n">img_size</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]:</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">img_size</span><span class="p">,</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)):</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">img_size</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="n">img_size</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="nb">int</span><span class="p">(</span><span class="n">img_size</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+        <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="n">img_size</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="nb">int</span><span class="p">(</span><span class="n">img_size</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="n">img_size</span><span class="p">),</span> <span class="nb">int</span><span class="p">(</span><span class="n">img_size</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_validate_timm_vs_hf</span><span class="p">(</span>
+    <span class="n">timm_model</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">,</span>
+    <span class="n">hf_model</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">,</span>
+    <span class="n">family</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">batch_size</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="n">atol</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+    <span class="n">rtol</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+    <span class="n">device</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
+    <span class="n">strict</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
+<span class="p">):</span>
+    <span class="n">device</span> <span class="o">=</span> <span class="n">device</span> <span class="ow">or</span> <span class="p">(</span><span class="s2">&quot;cuda&quot;</span> <span class="k">if</span> <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">is_available</span><span class="p">()</span> <span class="k">else</span> <span class="s2">&quot;cpu&quot;</span><span class="p">)</span>
+    <span class="n">timm_model</span> <span class="o">=</span> <span class="n">timm_model</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">)</span><span class="o">.</span><span class="n">eval</span><span class="p">()</span>
+    <span class="n">hf_model</span> <span class="o">=</span> <span class="n">hf_model</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">)</span><span class="o">.</span><span class="n">eval</span><span class="p">()</span>
+
+    <span class="n">torch</span><span class="o">.</span><span class="n">manual_seed</span><span class="p">(</span><span class="mi">42</span><span class="p">)</span>
+    <span class="n">img_size</span> <span class="o">=</span> <span class="n">_normalize_img_size</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="n">timm_model</span><span class="p">,</span> <span class="s2">&quot;img_size&quot;</span><span class="p">,</span> <span class="mi">224</span><span class="p">))</span>
+    <span class="n">h</span><span class="p">,</span> <span class="n">w</span> <span class="o">=</span> <span class="n">img_size</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span><span class="n">batch_size</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="n">h</span><span class="p">,</span> <span class="n">w</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+
+    <span class="n">mean</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">([</span><span class="mf">0.485</span><span class="p">,</span> <span class="mf">0.456</span><span class="p">,</span> <span class="mf">0.406</span><span class="p">],</span> <span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span><span class="o">.</span><span class="n">view</span><span class="p">(</span>
+        <span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span>
+    <span class="p">)</span>
+    <span class="n">std</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">([</span><span class="mf">0.229</span><span class="p">,</span> <span class="mf">0.224</span><span class="p">,</span> <span class="mf">0.225</span><span class="p">],</span> <span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span><span class="o">.</span><span class="n">view</span><span class="p">(</span>
+        <span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span>
+    <span class="p">)</span>
+    <span class="n">x_norm</span> <span class="o">=</span> <span class="p">(</span><span class="n">x</span> <span class="o">-</span> <span class="n">mean</span><span class="p">)</span> <span class="o">/</span> <span class="n">std</span>
+
+    <span class="k">with</span> <span class="n">torch</span><span class="o">.</span><span class="n">no_grad</span><span class="p">():</span>
+        <span class="n">feats_timm</span> <span class="o">=</span> <span class="n">_extract_features_timm</span><span class="p">(</span><span class="n">timm_model</span><span class="p">,</span> <span class="n">x_norm</span><span class="p">,</span> <span class="n">family</span><span class="p">)</span>
+        <span class="n">feats_hf</span> <span class="o">=</span> <span class="n">_extract_features_hf</span><span class="p">(</span><span class="n">hf_model</span><span class="p">,</span> <span class="n">x_norm</span><span class="p">,</span> <span class="n">family</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">feats_timm</span><span class="o">.</span><span class="n">shape</span> <span class="o">!=</span> <span class="n">feats_hf</span><span class="o">.</span><span class="n">shape</span><span class="p">:</span>
+        <span class="n">min_last</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">feats_timm</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">feats_hf</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+        <span class="n">feats_timm</span> <span class="o">=</span> <span class="n">feats_timm</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="p">:</span><span class="n">min_last</span><span class="p">]</span>
+        <span class="n">feats_hf</span> <span class="o">=</span> <span class="n">feats_hf</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="p">:</span><span class="n">min_last</span><span class="p">]</span>
+
+    <span class="n">cos_sim</span><span class="p">,</span> <span class="n">max_abs_diff</span> <span class="o">=</span> <span class="n">_compare_tensors</span><span class="p">(</span><span class="n">feats_timm</span><span class="p">,</span> <span class="n">feats_hf</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span>
+        <span class="sa">f</span><span class="s2">&quot;[Sanity Check] Cosine similarity: </span><span class="si">{</span><span class="n">cos_sim</span><span class="si">:</span><span class="s2">.6f</span><span class="si">}</span><span class="s2">, Max abs diff: </span><span class="si">{</span><span class="n">max_abs_diff</span><span class="si">:</span><span class="s2">.6g</span><span class="si">}</span><span class="s2">&quot;</span>
+    <span class="p">)</span>
+    <span class="n">thresh</span> <span class="o">=</span> <span class="n">atol</span> <span class="o">+</span> <span class="n">rtol</span> <span class="o">*</span> <span class="n">feats_timm</span><span class="o">.</span><span class="n">abs</span><span class="p">()</span><span class="o">.</span><span class="n">max</span><span class="p">()</span><span class="o">.</span><span class="n">item</span><span class="p">()</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">cos_sim</span> <span class="o">&gt;=</span> <span class="mf">0.999</span> <span class="ow">or</span> <span class="n">max_abs_diff</span> <span class="o">&lt;=</span> <span class="n">thresh</span><span class="p">):</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;Sanity check failed: cosine=</span><span class="si">{</span><span class="n">cos_sim</span><span class="si">:</span><span class="s2">.6f</span><span class="si">}</span><span class="s2">, max_abs_diff=</span><span class="si">{</span><span class="n">max_abs_diff</span><span class="si">:</span><span class="s2">.6g</span><span class="si">}</span><span class="s2">, thresh=</span><span class="si">{</span><span class="n">thresh</span><span class="si">:</span><span class="s2">.6g</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="k">if</span> <span class="n">strict</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;WARNING:&quot;</span><span class="p">,</span> <span class="n">msg</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_extract_features_timm</span><span class="p">(</span>
+    <span class="n">model</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">family</span><span class="p">:</span> <span class="nb">str</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">family</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;vit&quot;</span><span class="p">,</span> <span class="s2">&quot;deit&quot;</span><span class="p">):</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">forward_features</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">out</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+            <span class="k">if</span> <span class="s2">&quot;cls_token&quot;</span> <span class="ow">in</span> <span class="n">out</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">out</span><span class="p">[</span><span class="s2">&quot;cls_token&quot;</span><span class="p">]</span>
+            <span class="k">if</span> <span class="s2">&quot;x&quot;</span> <span class="ow">in</span> <span class="n">out</span> <span class="ow">and</span> <span class="n">out</span><span class="p">[</span><span class="s2">&quot;x&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">out</span><span class="p">[</span><span class="s2">&quot;x&quot;</span><span class="p">][:,</span> <span class="mi">0</span><span class="p">]</span>
+            <span class="k">if</span> <span class="s2">&quot;x_norm_cls&quot;</span> <span class="ow">in</span> <span class="n">out</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">out</span><span class="p">[</span><span class="s2">&quot;x_norm_cls&quot;</span><span class="p">]</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;Unexpected forward_features dict for ViT/DeiT.&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">out</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span> <span class="k">if</span> <span class="n">out</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">3</span> <span class="k">else</span> <span class="n">out</span>
+    <span class="k">elif</span> <span class="n">family</span> <span class="o">==</span> <span class="s2">&quot;swin&quot;</span><span class="p">:</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">forward_features</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">out</span><span class="p">,</span> <span class="nb">dict</span><span class="p">)</span> <span class="ow">and</span> <span class="s2">&quot;x&quot;</span> <span class="ow">in</span> <span class="n">out</span><span class="p">:</span>
+            <span class="n">tokens</span> <span class="o">=</span> <span class="n">out</span><span class="p">[</span><span class="s2">&quot;x&quot;</span><span class="p">]</span>
+            <span class="k">return</span> <span class="n">tokens</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">out</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span> <span class="k">if</span> <span class="n">out</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">3</span> <span class="k">else</span> <span class="n">out</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">])</span>
+    <span class="k">elif</span> <span class="n">family</span> <span class="o">==</span> <span class="s2">&quot;convnext&quot;</span><span class="p">:</span>
+        <span class="n">features</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">forward_features</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">features</span><span class="p">,</span> <span class="nb">dict</span><span class="p">)</span> <span class="ow">and</span> <span class="s2">&quot;x&quot;</span> <span class="ow">in</span> <span class="n">features</span><span class="p">:</span>
+            <span class="n">features</span> <span class="o">=</span> <span class="n">features</span><span class="p">[</span><span class="s2">&quot;x&quot;</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">features</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">])</span>
+    <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Sanity check not implemented for </span><span class="si">{</span><span class="n">family</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_extract_features_hf</span><span class="p">(</span>
+    <span class="n">model</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">family</span><span class="p">:</span> <span class="nb">str</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">family</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;vit&quot;</span><span class="p">,</span> <span class="s2">&quot;deit&quot;</span><span class="p">):</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="n">model</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">out</span><span class="o">.</span><span class="n">last_hidden_state</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span>
+    <span class="k">elif</span> <span class="n">family</span> <span class="o">==</span> <span class="s2">&quot;swin&quot;</span><span class="p">:</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="n">model</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">out</span><span class="p">,</span> <span class="s2">&quot;pooler_output&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">out</span><span class="o">.</span><span class="n">pooler_output</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">out</span><span class="o">.</span><span class="n">pooler_output</span>
+        <span class="k">return</span> <span class="n">out</span><span class="o">.</span><span class="n">last_hidden_state</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">family</span> <span class="o">==</span> <span class="s2">&quot;convnext&quot;</span><span class="p">:</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="n">model</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">out</span><span class="p">,</span> <span class="s2">&quot;pooler_output&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">out</span><span class="o">.</span><span class="n">pooler_output</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">out</span><span class="o">.</span><span class="n">pooler_output</span>
+        <span class="k">return</span> <span class="n">out</span><span class="o">.</span><span class="n">last_hidden_state</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">])</span>
+    <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Sanity check not implemented for </span><span class="si">{</span><span class="n">family</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_compare_tensors</span><span class="p">(</span><span class="n">a</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">b</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
+    <span class="n">a</span> <span class="o">=</span> <span class="n">a</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="n">a</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">float</span><span class="p">()</span><span class="o">.</span><span class="n">cpu</span><span class="p">()</span>
+    <span class="n">b</span> <span class="o">=</span> <span class="n">b</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="n">b</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">float</span><span class="p">()</span><span class="o">.</span><span class="n">cpu</span><span class="p">()</span>
+    <span class="n">cos</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">functional</span><span class="o">.</span><span class="n">cosine_similarity</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">cos</span><span class="o">.</span><span class="n">mean</span><span class="p">()),</span> <span class="nb">float</span><span class="p">((</span><span class="n">a</span> <span class="o">-</span> <span class="n">b</span><span class="p">)</span><span class="o">.</span><span class="n">abs</span><span class="p">()</span><span class="o">.</span><span class="n">max</span><span class="p">())</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_save_image_processor</span><span class="p">(</span>
+    <span class="n">local_dir</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">img_size</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">],</span> <span class="n">family</span><span class="p">:</span> <span class="nb">str</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="n">h</span><span class="p">,</span> <span class="n">w</span> <span class="o">=</span> <span class="n">img_size</span>
+    <span class="n">image_mean</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.485</span><span class="p">,</span> <span class="mf">0.456</span><span class="p">,</span> <span class="mf">0.406</span><span class="p">]</span>
+    <span class="n">image_std</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.229</span><span class="p">,</span> <span class="mf">0.224</span><span class="p">,</span> <span class="mf">0.225</span><span class="p">]</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
+
+        <span class="n">proc_cfg</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;_class_name&quot;</span><span class="p">:</span> <span class="s2">&quot;AutoImageProcessor&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;do_resize&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s2">&quot;size&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;height&quot;</span><span class="p">:</span> <span class="n">h</span><span class="p">,</span> <span class="s2">&quot;width&quot;</span><span class="p">:</span> <span class="n">w</span><span class="p">},</span>
+            <span class="s2">&quot;do_center_crop&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="s2">&quot;do_normalize&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s2">&quot;image_mean&quot;</span><span class="p">:</span> <span class="n">image_mean</span><span class="p">,</span>
+            <span class="s2">&quot;image_std&quot;</span><span class="p">:</span> <span class="n">image_std</span><span class="p">,</span>
+        <span class="p">}</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">local_dir</span><span class="p">,</span> <span class="s2">&quot;preprocessor_config.json&quot;</span><span class="p">),</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">proc_cfg</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Image processor fallback save warning: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="n">timm_model_name</span> <span class="o">=</span> <span class="s2">&quot;vit_base_patch16_224&quot;</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">timm</span><span class="o">.</span><span class="n">create_model</span><span class="p">(</span><span class="n">timm_model_name</span><span class="p">,</span> <span class="n">pretrained</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">repo_id</span> <span class="o">=</span> <span class="s2">&quot;your-username/my-vit-base-patch16-224&quot;</span>
+    <span class="n">url</span> <span class="o">=</span> <span class="n">push_timm_to_hf</span><span class="p">(</span>
+        <span class="n">timm_model_name</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">repo_id</span><span class="p">,</span> <span class="n">private</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">validate</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">strict</span><span class="o">=</span><span class="kc">False</span>
+    <span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Model pushed to: </span><span class="si">{</span><span class="n">url</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+
+                </article>
+              
+
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+<div class="bd-footer-content__inner container">
+  
+  <div class="footer-item">
+    
+<p class="component-author">
+By stable-pretraining team
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+
+  <p class="copyright">
+    
+      © Copyright 2024, stable-pretraining team.
+      <br/>
+    
+  </p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+</div>
+          </footer>
+        
+
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../../../../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b"></script>
+<script src="../../../../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+  <footer class="bd-footer">
+  </footer>
+  </body>
+</html>

@@ -1,0 +1,1013 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../../../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>stable_pretraining.manager &#8212; stable-pretraining 0.1.dev1+g8d0b48cc3.d20251109 documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../../_static/styles/theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="../../../_static/styles/bootstrap.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+
+  
+  <link href="../../../_static/vendor/fontawesome/6.5.2/css/all.min.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../../../_static/vendor/fontawesome/6.5.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../_static/vendor/fontawesome/6.5.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../_static/vendor/fontawesome/6.5.2/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=8f2a1f02" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/styles/sphinx-book-theme.css?v=eba8b062" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery.css?v=d2d258e8" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-binder.css?v=f4aeca0c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b" />
+<link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
+  <script src="../../../_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+    <script src="../../../_static/documentation_options.js?v=eff7c767"></script>
+    <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/scripts/sphinx-book-theme.js?v=887ef09a"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = '_modules/stable_pretraining/manager';</script>
+    <link rel="index" title="Index" href="../../../genindex/" />
+    <link rel="search" title="Search" href="../../../search/" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-primary-sidebar-checkbox"/>
+  <label class="overlay overlay-primary" for="pst-primary-sidebar-checkbox"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-secondary-sidebar-checkbox"/>
+  <label class="overlay overlay-secondary" for="pst-secondary-sidebar-checkbox"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="../../../search/"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search..."
+         aria-label="Search..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+        
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+    
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../../../">
+  
+  
+  
+  
+  
+  
+    <p class="title logo__title">stable-pretraining 0.1.dev1+g8d0b48cc3.d20251109 documentation</p>
+  
+</a></div>
+        <div class="sidebar-primary-item">
+
+ <script>
+ document.write(`
+   <button class="btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script></div>
+        <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item navbar-nav active">
+        <p aria-level="2" class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../../">stable-pretraining</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../releases/">Releases</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../contributing/">Contributing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../bibliography/">Bibliography</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">API</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../../api/backbone/">stable_pretraining.backbone</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../api/gen_modules/stable_pretraining.backbone.MLP/">MLP</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../api/gen_modules/stable_pretraining.backbone.Resnet9/">Resnet9</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../api/gen_modules/stable_pretraining.backbone.ConvMixer/">ConvMixer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../api/gen_modules/stable_pretraining.backbone.from_timm/">from_timm</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../api/gen_modules/stable_pretraining.backbone.from_torchvision/">from_torchvision</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../api/gen_modules/stable_pretraining.backbone.set_embedding_dim/">set_embedding_dim</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../api/gen_modules/stable_pretraining.backbone.TeacherStudentWrapper/">TeacherStudentWrapper</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../api/gen_modules/stable_pretraining.backbone.EvalOnly/">EvalOnly</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../api/gen_modules/stable_pretraining.backbone.mae/">mae</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../../api/data/">stable_pretraining.data</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../api/gen_modules/stable_pretraining.data.DataModule/">DataModule</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../api/gen_modules/stable_pretraining.data.Collator/">Collator</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../api/gen_modules/stable_pretraining.data.Dataset/">Dataset</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../api/gen_modules/stable_pretraining.data.FromTorchDataset/">FromTorchDataset</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../api/gen_modules/stable_pretraining.data.HFDataset/">HFDataset</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../api/gen_modules/stable_pretraining.data.Subset/">Subset</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../api/gen_modules/stable_pretraining.data.GMM/">GMM</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../api/gen_modules/stable_pretraining.data.MinariStepsDataset/">MinariStepsDataset</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../api/gen_modules/stable_pretraining.data.MinariEpisodeDataset/">MinariEpisodeDataset</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../api/gen_modules/stable_pretraining.data.swiss_roll/">swiss_roll</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../api/gen_modules/stable_pretraining.data.generate_perlin_noise_2d/">generate_perlin_noise_2d</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../api/gen_modules/stable_pretraining.data.perlin_noise_3d/">perlin_noise_3d</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../api/gen_modules/stable_pretraining.data.Categorical/">Categorical</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../api/gen_modules/stable_pretraining.data.ExponentialMixtureNoiseModel/">ExponentialMixtureNoiseModel</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../api/gen_modules/stable_pretraining.data.ExponentialNormalNoiseModel/">ExponentialNormalNoiseModel</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../api/gen_modules/stable_pretraining.data.RepeatedRandomSampler/">RepeatedRandomSampler</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../api/gen_modules/stable_pretraining.data.SupervisedBatchSampler/">SupervisedBatchSampler</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../api/gen_modules/stable_pretraining.data.RandomBatchSampler/">RandomBatchSampler</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../api/gen_modules/stable_pretraining.data.fold_views/">fold_views</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../api/gen_modules/stable_pretraining.data.random_split/">random_split</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../api/gen_modules/stable_pretraining.data.download/">download</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../api/gen_modules/stable_pretraining.data.bulk_download/">bulk_download</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../api/gen_modules/stable_pretraining.data.transforms/">stable_pretraining.data.transforms</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../api/gen_modules/stable_pretraining.data.dataset_stats/">stable_pretraining.data.dataset_stats</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../api/gen_modules/stable_pretraining.data.synthetic_data/">stable_pretraining.data.synthetic_data</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/forward/">stable_pretraining.forward</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../../api/losses/">stable_pretraining.losses</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../api/gen_modules/stable_pretraining.losses.NTXEntLoss/">NTXEntLoss</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../api/gen_modules/stable_pretraining.losses.NegativeCosineSimilarity/">NegativeCosineSimilarity</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../api/gen_modules/stable_pretraining.losses.VICRegLoss/">VICRegLoss</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../api/gen_modules/stable_pretraining.losses.BarlowTwinsLoss/">BarlowTwinsLoss</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../../api/manager/">stable_pretraining.manager</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../api/gen_modules/stable_pretraining.manager.Manager/">Manager</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../../api/module/">stable_pretraining.module</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../api/gen_modules/stable_pretraining.module.Module/">Module</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../../api/monitors/">stable_pretraining.callbacks</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../api/gen_modules/stable_pretraining.callbacks.OnlineProbe/">OnlineProbe</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../api/gen_modules/stable_pretraining.callbacks.OnlineKNN/">OnlineKNN</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../api/gen_modules/stable_pretraining.callbacks.OnlineWriter/">OnlineWriter</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../api/gen_modules/stable_pretraining.callbacks.RankMe/">RankMe</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../api/gen_modules/stable_pretraining.callbacks.LiDAR/">LiDAR</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../api/gen_modules/stable_pretraining.callbacks.EarlyStopping/">EarlyStopping</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../api/gen_modules/stable_pretraining.callbacks.TrainerInfo/">TrainerInfo</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../api/gen_modules/stable_pretraining.callbacks.LoggingCallback/">LoggingCallback</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../api/gen_modules/stable_pretraining.callbacks.ModuleSummary/">ModuleSummary</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../api/gen_modules/stable_pretraining.callbacks.SklearnCheckpoint/">SklearnCheckpoint</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../api/gen_modules/stable_pretraining.callbacks.ImageRetrieval/">ImageRetrieval</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../../api/optim/">stable_pretraining.optim</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../api/gen_modules/stable_pretraining.optim.LARS/">LARS</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../api/gen_modules/stable_pretraining.optim.CosineDecayer/">CosineDecayer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../api/gen_modules/stable_pretraining.optim.LinearWarmup/">LinearWarmup</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../api/gen_modules/stable_pretraining.optim.LinearWarmupCosineAnnealing/">LinearWarmupCosineAnnealing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../api/gen_modules/stable_pretraining.optim.LinearWarmupCyclicAnnealing/">LinearWarmupCyclicAnnealing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../api/gen_modules/stable_pretraining.optim.LinearWarmupThreeStepsAnnealing/">LinearWarmupThreeStepsAnnealing</a></li>
+</ul>
+</details></li>
+</ul>
+
+    </div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+
+<div class="sbt-scroll-pixel-helper"></div>
+
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item"><button class="sidebar-toggle primary-toggle btn btn-sm" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <span class="fa-solid fa-bars"></span>
+</button></div>
+      
+    </div>
+  
+  
+    <div class="header-article-items__end">
+      
+        <div class="header-article-item">
+
+<div class="article-header-buttons">
+
+
+
+<button onclick="toggleFullScreen()"
+  class="btn btn-sm btn-fullscreen-button"
+  title="Fullscreen mode"
+  data-bs-placement="bottom" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-expand"></i>
+  </span>
+
+</button>
+
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"></i>
+  </button>
+`);
+</script>
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm pst-navbar-icon search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+  </button>
+`);
+</script>
+
+</div></div>
+      
+    </div>
+  
+</div>
+</div>
+              
+              
+
+<div id="jb-print-docs-body" class="onlyprint">
+    <h1></h1>
+    <!-- Table of contents -->
+    <div id="print-main-content">
+        <div id="jb-print-toc">
+            
+        </div>
+    </div>
+</div>
+
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <h1>Source code for stable_pretraining.manager</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">copy</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">signal</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">datetime</span><span class="w"> </span><span class="kn">import</span> <span class="n">timedelta</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Union</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">hydra</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">lightning</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">lightning</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pl</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">submitit</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">lightning.pytorch.callbacks</span><span class="w"> </span><span class="kn">import</span> <span class="n">ModelCheckpoint</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">lightning.pytorch.utilities.rank_zero</span><span class="w"> </span><span class="kn">import</span> <span class="n">rank_zero_only</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">loguru</span><span class="w"> </span><span class="kn">import</span> <span class="n">logger</span> <span class="k">as</span> <span class="n">logging</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">omegaconf</span><span class="w"> </span><span class="kn">import</span> <span class="n">DictConfig</span><span class="p">,</span> <span class="n">OmegaConf</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">WANDB_AVAILABLE</span>
+
+<span class="k">if</span> <span class="n">WANDB_AVAILABLE</span><span class="p">:</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">wandb</span>
+<span class="k">else</span><span class="p">:</span>
+    <span class="n">wandb</span> <span class="o">=</span> <span class="kc">None</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_required_fn_parameters</span>
+
+
+<div class="viewcode-block" id="print_logger_info">
+<a class="viewcode-back" href="../../../stable_pretraining/#stable_pretraining.manager.print_logger_info">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">print_logger_info</span><span class="p">(</span><span class="n">logger</span><span class="p">):</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">logger</span><span class="p">,</span> <span class="n">lightning</span><span class="o">.</span><span class="n">pytorch</span><span class="o">.</span><span class="n">loggers</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">DummyLogger</span><span class="p">):</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;📈📈📈 DummyLogger setup 📈📈📈&quot;</span><span class="p">)</span>
+
+    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">logger</span><span class="p">,</span> <span class="n">lightning</span><span class="o">.</span><span class="n">pytorch</span><span class="o">.</span><span class="n">loggers</span><span class="o">.</span><span class="n">tensorboard</span><span class="o">.</span><span class="n">TensorBoardLogger</span><span class="p">):</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;📈📈📈 TensorBoardLogger setup 📈📈📈&quot;</span><span class="p">)</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;📈📈📈 root_dir=</span><span class="si">{</span><span class="n">logger</span><span class="o">.</span><span class="n">root_dir</span><span class="si">}</span><span class="s2"> 📈📈📈&quot;</span><span class="p">)</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;📈📈📈 save_dir=</span><span class="si">{</span><span class="n">logger</span><span class="o">.</span><span class="n">save_dir</span><span class="si">}</span><span class="s2"> 📈📈📈&quot;</span><span class="p">)</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;📈📈📈 log_dir=</span><span class="si">{</span><span class="n">logger</span><span class="o">.</span><span class="n">log_dir</span><span class="si">}</span><span class="s2"> 📈📈📈&quot;</span><span class="p">)</span>
+
+    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">logger</span><span class="p">,</span> <span class="n">lightning</span><span class="o">.</span><span class="n">pytorch</span><span class="o">.</span><span class="n">loggers</span><span class="o">.</span><span class="n">csv_logs</span><span class="o">.</span><span class="n">CSVLogger</span><span class="p">):</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;📈📈📈 CSVLogger setup 📈📈📈&quot;</span><span class="p">)</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;📈📈📈 root_dir=</span><span class="si">{</span><span class="n">logger</span><span class="o">.</span><span class="n">root_dir</span><span class="si">}</span><span class="s2"> 📈📈📈&quot;</span><span class="p">)</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;📈📈📈 save_dir=</span><span class="si">{</span><span class="n">logger</span><span class="o">.</span><span class="n">save_dir</span><span class="si">}</span><span class="s2"> 📈📈📈&quot;</span><span class="p">)</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;📈📈📈 log_dir=</span><span class="si">{</span><span class="n">logger</span><span class="o">.</span><span class="n">log_dir</span><span class="si">}</span><span class="s2"> 📈📈📈&quot;</span><span class="p">)</span>
+
+    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">logger</span><span class="p">,</span> <span class="n">lightning</span><span class="o">.</span><span class="n">pytorch</span><span class="o">.</span><span class="n">loggers</span><span class="o">.</span><span class="n">wandb</span><span class="o">.</span><span class="n">WandbLogger</span><span class="p">):</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;📈📈📈 WandbLogger setup 📈📈📈&quot;</span><span class="p">)</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;📈📈📈 init=</span><span class="si">{</span><span class="n">logger</span><span class="o">.</span><span class="n">_wandb_init</span><span class="si">}</span><span class="s2"> 📈📈📈&quot;</span><span class="p">)</span>
+
+    <span class="k">elif</span> <span class="n">logger</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;📈📈📈 No logger used! 📈📈📈&quot;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;📈📈📈 Unrecogniezed logger! 📈📈📈&quot;</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="print_signal_info">
+<a class="viewcode-back" href="../../../stable_pretraining/#stable_pretraining.manager.print_signal_info">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">print_signal_info</span><span class="p">():</span>
+    <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2">● 👂👂👂 SIGNALS HANDLERS 👂👂👂&quot;</span><span class="p">)</span>
+    <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\t\t</span><span class="s2">- SIGUSR1: `</span><span class="si">{</span><span class="n">signal</span><span class="o">.</span><span class="n">getsignal</span><span class="p">(</span><span class="n">signal</span><span class="o">.</span><span class="n">SIGUSR1</span><span class="p">)</span><span class="si">}</span><span class="s2">`&quot;</span><span class="p">)</span>
+    <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\t\t</span><span class="s2">- SIGUSR2: `</span><span class="si">{</span><span class="n">signal</span><span class="o">.</span><span class="n">getsignal</span><span class="p">(</span><span class="n">signal</span><span class="o">.</span><span class="n">SIGUSR2</span><span class="p">)</span><span class="si">}</span><span class="s2">`&quot;</span><span class="p">)</span>
+    <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\t\t</span><span class="s2">- SIGCONT: `</span><span class="si">{</span><span class="n">signal</span><span class="o">.</span><span class="n">getsignal</span><span class="p">(</span><span class="n">signal</span><span class="o">.</span><span class="n">SIGCONT</span><span class="p">)</span><span class="si">}</span><span class="s2">`&quot;</span><span class="p">)</span>
+    <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\t\t</span><span class="s2">- SIGTERM: `</span><span class="si">{</span><span class="n">signal</span><span class="o">.</span><span class="n">getsignal</span><span class="p">(</span><span class="n">signal</span><span class="o">.</span><span class="n">SIGTERM</span><span class="p">)</span><span class="si">}</span><span class="s2">`&quot;</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="Manager">
+<a class="viewcode-back" href="../../../stable_pretraining/#stable_pretraining.manager.Manager">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">Manager</span><span class="p">(</span><span class="n">submitit</span><span class="o">.</span><span class="n">helpers</span><span class="o">.</span><span class="n">Checkpointable</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Manages training with logging, scheduling, and checkpointing support.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        trainer (Union[dict, DictConfig, pl.Trainer]): PyTorch Lightning trainer configuration or instance.</span>
+<span class="sd">        module (Union[dict, DictConfig, pl.LightningModule]): Lightning module configuration or instance.</span>
+<span class="sd">        data (Union[dict, DictConfig, pl.LightningDataModule]): Data module configuration or instance.</span>
+<span class="sd">        seed (int, optional): Random seed for reproducibility. Defaults to None.</span>
+<span class="sd">        ckpt_path (str, optional): Path to checkpoint for resuming training. Defaults to &quot;last&quot;.</span>
+<span class="sd">        compile (bool, optional): Should we compile the given module. Defaults to False.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">trainer</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">dict</span><span class="p">,</span> <span class="n">DictConfig</span><span class="p">,</span> <span class="n">pl</span><span class="o">.</span><span class="n">Trainer</span><span class="p">],</span>
+        <span class="n">module</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">dict</span><span class="p">,</span> <span class="n">DictConfig</span><span class="p">,</span> <span class="n">pl</span><span class="o">.</span><span class="n">LightningModule</span><span class="p">],</span>
+        <span class="n">data</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">dict</span><span class="p">,</span> <span class="n">DictConfig</span><span class="p">,</span> <span class="n">pl</span><span class="o">.</span><span class="n">LightningDataModule</span><span class="p">],</span>
+        <span class="n">seed</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">ckpt_path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="nb">compile</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="k">if</span> <span class="n">seed</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                <span class="s2">&quot;User didn&#39;t specify seed, runs won&#39;t be exactly reproducible!&quot;</span>
+            <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">compile</span> <span class="o">=</span> <span class="nb">compile</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_register_trainer</span><span class="p">(</span><span class="n">trainer</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_register_module</span><span class="p">(</span><span class="n">module</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_register_data</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">seed</span> <span class="o">=</span> <span class="n">seed</span>
+        <span class="k">if</span> <span class="n">ckpt_path</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">ckpt_path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">ckpt_path</span><span class="p">)</span><span class="o">.</span><span class="n">with_suffix</span><span class="p">(</span><span class="s2">&quot;.ckpt&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">resolve</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ckpt_path</span> <span class="o">=</span> <span class="n">ckpt_path</span>
+
+<div class="viewcode-block" id="Manager.init_and_sync_wandb">
+<a class="viewcode-back" href="../../../stable_pretraining/#stable_pretraining.manager.Manager.init_and_sync_wandb">[docs]</a>
+    <span class="nd">@rank_zero_only</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">init_and_sync_wandb</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Handles some utilities for WandB.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_trainer</span><span class="o">.</span><span class="n">logger</span><span class="p">,</span> <span class="n">lightning</span><span class="o">.</span><span class="n">pytorch</span><span class="o">.</span><span class="n">loggers</span><span class="o">.</span><span class="n">wandb</span><span class="o">.</span><span class="n">WandbLogger</span>
+        <span class="p">):</span>
+            <span class="k">return</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;📈📈📈 Using Wandb 📈📈📈&quot;</span><span class="p">)</span>
+        <span class="n">exp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_trainer</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">experiment</span>
+
+        <span class="k">if</span> <span class="n">exp</span><span class="o">.</span><span class="n">offline</span><span class="p">:</span>
+            <span class="n">previous_run</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wandb_previous_dir</span><span class="p">()</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\t\t</span><span class="s2">Found a previous run (</span><span class="si">{</span><span class="n">previous_run</span><span class="si">}</span><span class="s2">), reusing config&quot;</span><span class="p">)</span>
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">previous_run</span> <span class="o">/</span> <span class="s2">&quot;files/wandb-config.json&quot;</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+                <span class="n">last_config</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+            <span class="c1"># at most last_config has an extra `ckpt_path`</span>
+            <span class="n">exp</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">last_config</span><span class="p">)</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\t\t</span><span class="s2">reloaded!&quot;</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">WANDB_AVAILABLE</span> <span class="ow">and</span> <span class="n">wandb</span><span class="o">.</span><span class="n">run</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">wandb</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">keys</span><span class="p">()):</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\t\t</span><span class="s2">a Wandb™ config is provided, not uploading Hydra&#39;s:&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2">Wandb&#39;s config is empty, trying to use Hydra&#39;s 📤&quot;</span><span class="p">)</span>
+            <span class="n">config</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">trainer</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+                <span class="n">config</span><span class="p">[</span><span class="s2">&quot;trainer&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">OmegaConf</span><span class="o">.</span><span class="n">to_container</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">trainer</span><span class="p">,</span> <span class="n">resolve</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">module</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+                <span class="n">config</span><span class="p">[</span><span class="s2">&quot;module&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">OmegaConf</span><span class="o">.</span><span class="n">to_container</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">module</span><span class="p">,</span> <span class="n">resolve</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+                <span class="n">config</span><span class="p">[</span><span class="s2">&quot;data&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">OmegaConf</span><span class="o">.</span><span class="n">to_container</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">resolve</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">config</span><span class="p">:</span>
+                <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+                    <span class="s2">&quot;</span><span class="se">\t</span><span class="s2">Everything already instantiated, nothing is added to config!&quot;</span>
+                <span class="p">)</span>
+                <span class="k">return</span>
+            <span class="n">config</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">json_normalize</span><span class="p">(</span><span class="n">config</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s2">&quot;.&quot;</span><span class="p">)</span>
+            <span class="n">config</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">to_dict</span><span class="p">(</span><span class="n">orient</span><span class="o">=</span><span class="s2">&quot;records&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+                <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\t\t</span><span class="s2">flattening one level of Hydra&#39;s config) 📤&quot;</span><span class="p">)</span>
+                <span class="n">valid</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">keys</span><span class="p">()):</span>
+                    <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">config</span><span class="p">[</span><span class="n">k</span><span class="p">])</span> <span class="ow">is</span> <span class="nb">list</span><span class="p">:</span>
+                        <span class="n">valid</span> <span class="o">=</span> <span class="kc">False</span>
+                        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">config</span><span class="p">[</span><span class="n">k</span><span class="p">]):</span>
+                            <span class="n">config</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">k</span><span class="si">}</span><span class="s2">.</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">j</span>
+                        <span class="k">del</span> <span class="n">config</span><span class="p">[</span><span class="n">k</span><span class="p">]</span>
+                <span class="n">config</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">json_normalize</span><span class="p">(</span><span class="n">config</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s2">&quot;.&quot;</span><span class="p">)</span>
+                <span class="n">config</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">to_dict</span><span class="p">(</span><span class="n">orient</span><span class="o">=</span><span class="s2">&quot;records&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="k">if</span> <span class="n">valid</span><span class="p">:</span>
+                    <span class="k">break</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2">Final Hydra&#39;s config has </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">config</span><span class="p">)</span><span class="si">}</span><span class="s2"> items) 📤&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">WANDB_AVAILABLE</span> <span class="ow">and</span> <span class="n">wandb</span><span class="o">.</span><span class="n">run</span><span class="p">:</span>
+                <span class="n">wandb</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">config</span><span class="p">)</span></div>
+
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">instantiated_module</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">module</span><span class="p">,</span> <span class="n">pl</span><span class="o">.</span><span class="n">LightningModule</span><span class="p">):</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2">● instantiating pl_module...&quot;</span><span class="p">)</span>
+            <span class="c1"># with self._trainer.init_module():</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_instantiated_module</span> <span class="o">=</span> <span class="n">hydra</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">instantiate</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">module</span><span class="p">,</span> <span class="n">_convert_</span><span class="o">=</span><span class="s2">&quot;object&quot;</span>
+            <span class="p">)</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2">● module instantiated ✅&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_instantiated_module</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">module</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_instantiated_module</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">instantiated_data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">pl</span><span class="o">.</span><span class="n">LightningDataModule</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_instantiated_data</span> <span class="o">=</span> <span class="n">hydra</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">instantiate</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">_convert_</span><span class="o">=</span><span class="s2">&quot;object&quot;</span><span class="p">,</span> <span class="n">_recursive_</span><span class="o">=</span><span class="kc">False</span>
+            <span class="p">)</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2">● data instantiated ✅&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_instantiated_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_instantiated_data</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;📁📁📁 CURRENT WORKING DIR: </span><span class="si">{</span><span class="n">Path</span><span class="p">()</span><span class="o">.</span><span class="n">resolve</span><span class="p">()</span><span class="si">}</span><span class="s2"> 📁📁📁&quot;</span><span class="p">)</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;🌱🌱🌱 SEEDING EVERYTHING with </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">seed</span><span class="si">=}</span><span class="s2"> 🌱🌱🌱&quot;</span><span class="p">)</span>
+        <span class="n">pl</span><span class="o">.</span><span class="n">seed_everything</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">seed</span><span class="p">,</span> <span class="n">workers</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">trainer</span><span class="p">,</span> <span class="n">pl</span><span class="o">.</span><span class="n">Trainer</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_trainer</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">trainer</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="s2">&quot;callbacks&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">trainer</span><span class="p">:</span>
+                <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2">● instantiating callbacks...&quot;</span><span class="p">)</span>
+                <span class="n">callbacks</span> <span class="o">=</span> <span class="n">hydra</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">instantiate</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">trainer</span><span class="o">.</span><span class="n">callbacks</span><span class="p">,</span> <span class="n">_convert_</span><span class="o">=</span><span class="s2">&quot;object&quot;</span>
+                <span class="p">)</span>
+                <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">callback</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">callbacks</span><span class="p">):</span>
+                    <span class="k">if</span> <span class="ow">not</span> <span class="nb">callable</span><span class="p">(</span><span class="n">callback</span><span class="p">):</span>
+                        <span class="k">continue</span>
+                    <span class="k">assert</span> <span class="p">[</span><span class="s2">&quot;module&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="n">get_required_fn_parameters</span><span class="p">(</span><span class="n">callback</span><span class="p">)</span>
+                    <span class="n">callbacks</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">callback</span><span class="p">(</span><span class="n">module</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">instantiated_module</span><span class="p">)</span>
+                <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2">● callbacks instantiated ✅&quot;</span><span class="p">)</span>
+                <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">trainer</span><span class="o">.</span><span class="n">callbacks</span>
+
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">callbacks</span> <span class="o">=</span> <span class="p">[]</span>
+
+            <span class="c1"># we use the following partial to give our init callbacks manually since otherwise</span>
+            <span class="c1"># hydra instantiate throws an error</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_trainer</span> <span class="o">=</span> <span class="n">hydra</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">instantiate</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">trainer</span><span class="p">,</span> <span class="n">_convert_</span><span class="o">=</span><span class="s2">&quot;object&quot;</span><span class="p">,</span> <span class="n">_partial_</span><span class="o">=</span><span class="kc">True</span>
+            <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_trainer</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_trainer</span><span class="p">(</span><span class="n">callbacks</span><span class="o">=</span><span class="n">callbacks</span><span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_trainer</span><span class="p">,</span> <span class="n">pl</span><span class="o">.</span><span class="n">Trainer</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;`trainer` should be a Trainer&quot;</span><span class="p">)</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2">● trainer instantiated ✅&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Auto-detect TeacherStudentWrapper and add callback if needed</span>
+        <span class="c1"># This runs AFTER trainer is set up, regardless of how it was created</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">.callbacks.teacher_student</span><span class="w"> </span><span class="kn">import</span> <span class="n">TeacherStudentCallback</span>
+
+        <span class="n">needs_teacher_student</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">for</span> <span class="n">module</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">instantiated_module</span><span class="o">.</span><span class="n">modules</span><span class="p">():</span>
+            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="s2">&quot;update_teacher&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="s2">&quot;teacher&quot;</span><span class="p">):</span>
+                <span class="n">needs_teacher_student</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="k">break</span>
+
+        <span class="k">if</span> <span class="n">needs_teacher_student</span><span class="p">:</span>
+            <span class="c1"># Check if TeacherStudentCallback is already in the list</span>
+            <span class="n">has_ts_callback</span> <span class="o">=</span> <span class="nb">any</span><span class="p">(</span>
+                <span class="nb">isinstance</span><span class="p">(</span><span class="n">cb</span><span class="p">,</span> <span class="n">TeacherStudentCallback</span><span class="p">)</span> <span class="k">for</span> <span class="n">cb</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_trainer</span><span class="o">.</span><span class="n">callbacks</span>
+            <span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">has_ts_callback</span><span class="p">:</span>
+                <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+                    <span class="s2">&quot;</span><span class="se">\t</span><span class="s2">● Auto-detected TeacherStudentWrapper, adding TeacherStudentCallback ✅&quot;</span>
+                <span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_trainer</span><span class="o">.</span><span class="n">callbacks</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">TeacherStudentCallback</span><span class="p">())</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">init_and_sync_wandb</span><span class="p">()</span>
+        <span class="n">print_logger_info</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_trainer</span><span class="o">.</span><span class="n">logger</span><span class="p">)</span>
+        <span class="n">print_signal_info</span><span class="p">()</span>
+
+        <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2">● 📞📞📞 CALLBACKS 📞📞📞&quot;</span><span class="p">)</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\t\t</span><span class="s2"> - we found </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_trainer</span><span class="o">.</span><span class="n">callbacks</span><span class="p">)</span><span class="si">}</span><span class="s2"> callbacks&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="s2">&quot;SLURM_JOB_ID&quot;</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">ckpt_path</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                <span class="s2">&quot;Using SLURM but no ckpt_path, if requeued it will start from scratch&quot;</span>
+            <span class="p">)</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Consider passing a value to the Manager&#39;s `ckpt_path` &quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_configure_checkpointing</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">ckpt_path</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">ckpt_path</span><span class="o">.</span><span class="n">is_file</span><span class="p">():</span>
+            <span class="n">ckpt_path</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ckpt_path</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">ckpt_path</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">ckpt_path</span><span class="o">.</span><span class="n">is_file</span><span class="p">():</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">ckpt_path</span><span class="si">}</span><span class="s2"> specified, but does not exist, using None for now!&quot;</span>
+            <span class="p">)</span>
+            <span class="n">ckpt_path</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">ckpt_path</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">compile</span><span class="p">:</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Compiling module!&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">instantiated_module</span><span class="o">.</span><span class="n">compile</span><span class="p">()</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;📣📣📣 CALLING trainer.fit with </span><span class="si">{</span><span class="n">ckpt_path</span><span class="si">=}</span><span class="s2"> 📣📣📣&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_trainer</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">instantiated_module</span><span class="p">,</span>
+            <span class="n">datamodule</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">instantiated_data</span><span class="p">,</span>
+            <span class="n">ckpt_path</span><span class="o">=</span><span class="n">ckpt_path</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_dump_wandb_data</span><span class="p">()</span>
+
+<div class="viewcode-block" id="Manager.validate">
+<a class="viewcode-back" href="../../../stable_pretraining/#stable_pretraining.manager.Manager.validate">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">validate</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;📣📣📣 CALLING trainer.validate 📣📣📣&quot;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_trainer</span><span class="o">.</span><span class="n">validate</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">instantiated_module</span><span class="p">,</span> <span class="n">datamodule</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">instantiated_data</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_dump_wandb_data</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="Manager.predict">
+<a class="viewcode-back" href="../../../stable_pretraining/#stable_pretraining.manager.Manager.predict">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">predict</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;📣📣📣 CALLING trainer.predict 📣📣📣&quot;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_trainer</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">instantiated_module</span><span class="p">,</span> <span class="n">datamodule</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">instantiated_data</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_dump_wandb_data</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="Manager.test">
+<a class="viewcode-back" href="../../../stable_pretraining/#stable_pretraining.manager.Manager.test">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">test</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;📣📣📣 CALLING trainer.test 📣📣📣&quot;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_trainer</span><span class="o">.</span><span class="n">test</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">instantiated_module</span><span class="p">,</span> <span class="n">datamodule</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">instantiated_data</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_dump_wandb_data</span><span class="p">()</span></div>
+
+        <span class="c1"># wandb.finish()</span>
+        <span class="c1"># logging.info(f&quot;closing wandb 🗑️&quot;)</span>
+        <span class="c1"># cfg = wandb.run.config.as_dict()</span>
+        <span class="c1"># return cfg, module.info</span>
+
+    <span class="nd">@rank_zero_only</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_dump_wandb_data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">WANDB_AVAILABLE</span> <span class="ow">or</span> <span class="n">wandb</span><span class="o">.</span><span class="n">run</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">wandb</span><span class="o">.</span><span class="n">run</span><span class="o">.</span><span class="n">offline</span><span class="p">:</span>
+            <span class="k">return</span>
+
+        <span class="c1"># Print the summary</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Summary:&quot;</span><span class="p">)</span>
+        <span class="n">summary_dict</span> <span class="o">=</span> <span class="n">wandb</span><span class="o">.</span><span class="n">run</span><span class="o">.</span><span class="n">summary</span><span class="o">.</span><span class="n">_as_dict</span><span class="p">()</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">summary_dict</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">))</span>
+        <span class="n">fname</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">wandb</span><span class="o">.</span><span class="n">run</span><span class="o">.</span><span class="n">dir</span><span class="p">)</span> <span class="o">/</span> <span class="s2">&quot;wandb-summary.json&quot;</span>
+        <span class="k">if</span> <span class="n">fname</span><span class="o">.</span><span class="n">is_file</span><span class="p">():</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Summary file already exists </span><span class="si">{</span><span class="n">fname</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">fname</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">summary_dict</span><span class="p">,</span> <span class="n">f</span><span class="p">)</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2">● Saved summary at </span><span class="si">{</span><span class="n">fname</span><span class="si">}</span><span class="s2"> ✅&quot;</span><span class="p">)</span>
+        <span class="n">fname</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">wandb</span><span class="o">.</span><span class="n">run</span><span class="o">.</span><span class="n">dir</span><span class="p">)</span> <span class="o">/</span> <span class="s2">&quot;wandb-config.json&quot;</span>
+        <span class="k">if</span> <span class="n">fname</span><span class="o">.</span><span class="n">is_file</span><span class="p">():</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Config file already exists </span><span class="si">{</span><span class="n">fname</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">fname</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">wandb</span><span class="o">.</span><span class="n">run</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">as_dict</span><span class="p">(),</span> <span class="n">f</span><span class="p">)</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2">● Saved config at </span><span class="si">{</span><span class="n">fname</span><span class="si">}</span><span class="s2"> ✅&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_wandb_previous_dir</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">WANDB_AVAILABLE</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">wandb</span><span class="o">.</span><span class="n">run</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span>
+        <span class="c1"># to remove the /files</span>
+        <span class="n">path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">wandb</span><span class="o">.</span><span class="n">run</span><span class="o">.</span><span class="n">dir</span><span class="p">)</span><span class="o">.</span><span class="n">parent</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\t\t</span><span class="s2">● fetching previous Wandb runs from </span><span class="si">{</span><span class="n">path</span><span class="o">.</span><span class="n">parent</span><span class="si">}</span><span class="s2"> ✅&quot;</span><span class="p">)</span>
+        <span class="c1"># this will be of the form</span>
+        <span class="c1"># offline-run-20250413_025716-p8117tgi</span>
+        <span class="n">runs</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">path</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;offline-run-*-</span><span class="si">{</span><span class="n">wandb</span><span class="o">.</span><span class="n">run</span><span class="o">.</span><span class="n">id</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">))</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\t\t</span><span class="s2">● found </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">runs</span><span class="p">)</span><span class="si">}</span><span class="s2"> run(s):&quot;</span><span class="p">)</span>
+        <span class="n">runs</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">runs</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">run</span> <span class="ow">in</span> <span class="n">runs</span><span class="p">:</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\t\t\t</span><span class="s2">● </span><span class="si">{</span><span class="n">run</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="n">runs</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">path</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">runs</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span>
+        <span class="k">return</span> <span class="n">runs</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">]</span>
+
+<div class="viewcode-block" id="Manager.save_checkpoint">
+<a class="viewcode-back" href="../../../stable_pretraining/#stable_pretraining.manager.Manager.save_checkpoint">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">save_checkpoint</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">upload_wandb</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span>
+    <span class="p">):</span>
+        <span class="c1"># TODO: figure out how to flush logging in subprocess</span>
+        <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Entering checkpoint method&quot;</span><span class="p">,</span> <span class="n">flush</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">path</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">path</span> <span class="o">=</span> <span class="p">(</span><span class="n">Path</span><span class="p">()</span> <span class="o">/</span> <span class="s2">&quot;checkpoint.ckpt&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">resolve</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2">● saving checkpoint to local path </span><span class="si">{</span><span class="n">path</span><span class="si">}</span><span class="s2"> ⏳&quot;</span><span class="p">,</span> <span class="n">flush</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">path</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">is_dir</span><span class="p">():</span>
+                <span class="n">path</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2">● saving checkpoint to user&#39;s path </span><span class="si">{</span><span class="n">path</span><span class="si">}</span><span class="s2"> ⏳&quot;</span><span class="p">,</span> <span class="n">flush</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_trainer</span><span class="o">.</span><span class="n">save_checkpoint</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">path</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2">● checkpoint saved ✅&quot;</span><span class="p">,</span> <span class="n">flush</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">upload_wandb</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_upload_checkpoint_for_requeue</span><span class="p">(</span><span class="n">path</span><span class="p">)</span></div>
+
+
+    <span class="nd">@rank_zero_only</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_upload_checkpoint_for_requeue</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ckpt_path</span><span class="p">):</span>
+        <span class="c1"># if &quot;ckpt_path&quot; in wandb.run.config:</span>
+        <span class="c1">#     ckpt_path = Path(wandb.run.config[&quot;ckpt_path&quot;])</span>
+        <span class="c1">#     print(f&quot;\t● `ckpt_path` already in config, updating it!&quot;, flush=True)</span>
+
+        <span class="c1"># else:</span>
+        <span class="c1">#     ckpt_path = Path(wandb.run.dir) / &quot;checkpoint.ckpt&quot;</span>
+        <span class="c1">#     print(f&quot;\t● `ckpt_path` set to {ckpt_path}!&quot;, flush=True)</span>
+
+        <span class="k">if</span> <span class="n">WANDB_AVAILABLE</span> <span class="ow">and</span> <span class="n">wandb</span><span class="o">.</span><span class="n">run</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">wandb</span><span class="o">.</span><span class="n">run</span><span class="o">.</span><span class="n">offline</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2">● Wandb used and online:&quot;</span><span class="p">,</span> <span class="n">flush</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="n">artifact</span> <span class="o">=</span> <span class="n">wandb</span><span class="o">.</span><span class="n">Artifact</span><span class="p">(</span><span class="s2">&quot;requeue_checkpoint&quot;</span><span class="p">,</span> <span class="s2">&quot;model&quot;</span><span class="p">)</span>
+            <span class="n">artifact</span><span class="o">.</span><span class="n">add_file</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">ckpt_path</span><span class="p">))</span>
+            <span class="n">artifact</span><span class="o">.</span><span class="n">ttl</span> <span class="o">=</span> <span class="n">timedelta</span><span class="p">(</span><span class="n">days</span><span class="o">=</span><span class="mi">30</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\t\t</span><span class="s2">● artifact created ✅&quot;</span><span class="p">,</span> <span class="n">flush</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="n">wandb</span><span class="o">.</span><span class="n">run</span><span class="o">.</span><span class="n">log_artifact</span><span class="p">(</span><span class="n">artifact</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\t\t</span><span class="s2">● artifact logged ✅&quot;</span><span class="p">,</span> <span class="n">flush</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="n">ckpt_path</span><span class="o">.</span><span class="n">unlink</span><span class="p">()</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\t\t</span><span class="s2">● local checkpoint deleted ✅&quot;</span><span class="p">,</span> <span class="n">flush</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2">● Wandb used and offline:&quot;</span><span class="p">,</span> <span class="n">flush</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">WANDB_AVAILABLE</span> <span class="ow">and</span> <span class="n">wandb</span><span class="o">.</span><span class="n">run</span><span class="p">:</span>
+                <span class="n">wandb</span><span class="o">.</span><span class="n">run</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s2">&quot;ckpt_path&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">ckpt_path</span><span class="o">.</span><span class="n">resolve</span><span class="p">())})</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2">● `ckpt_path` added to Wandb config ✅&quot;</span><span class="p">,</span> <span class="n">flush</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="c1"># for offline case</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_dump_wandb_data</span><span class="p">()</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_matches_template</span><span class="p">(</span><span class="n">ckpt_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">callback</span><span class="p">:</span> <span class="n">ModelCheckpoint</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Checks if a concrete checkpoint filename could have been generated by a callback&#39;s template.</span>
+
+<span class="sd">        This is a heuristic that handles two cases:</span>
+<span class="sd">        1.  Guaranteed Match: Checks if the name is &#39;last.ckpt&#39; and the callback has `save_last=True`.</span>
+<span class="sd">        2.  Template Match: Checks if all metric keys from the filename template (e.g., &quot;epoch&quot;, &quot;step&quot;)</span>
+<span class="sd">            are present in the concrete checkpoint name (e.g., &quot;epoch=10-step=5000.ckpt&quot;).</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            ckpt_name: The concrete filename (e.g., &quot;last.ckpt&quot;, &quot;epoch=1-step=100.ckpt&quot;).</span>
+<span class="sd">            callback: The ModelCheckpoint callback instance.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            True if the name is a plausible match, False otherwise.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="kn">import</span><span class="w"> </span><span class="nn">re</span>
+
+        <span class="c1"># Case 1: guaranteed `last.pt` case</span>
+        <span class="n">ckpt_stem</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">ckpt_name</span><span class="p">)</span><span class="o">.</span><span class="n">stem</span>
+
+        <span class="c1"># the user can customize the name for the last checkpoint, so use the callback&#39;s property</span>
+        <span class="k">if</span> <span class="n">ckpt_stem</span> <span class="o">==</span> <span class="n">callback</span><span class="o">.</span><span class="n">CHECKPOINT_NAME_LAST</span><span class="p">:</span>
+            <span class="c1"># If the user&#39;s path is &#39;last.ckpt&#39;, the callback MUST have `save_last` enabled.</span>
+            <span class="k">return</span> <span class="nb">bool</span><span class="p">(</span><span class="n">callback</span><span class="o">.</span><span class="n">save_last</span><span class="p">)</span>
+
+        <span class="c1"># Case 2: versioned `last.pt` case</span>
+        <span class="k">if</span> <span class="p">(</span>
+            <span class="n">ckpt_stem</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">callback</span><span class="o">.</span><span class="n">CHECKPOINT_NAME_LAST</span><span class="si">}</span><span class="s2">-v&quot;</span><span class="p">)</span>
+            <span class="ow">and</span> <span class="n">callback</span><span class="o">.</span><span class="n">save_last</span>
+        <span class="p">):</span>
+            <span class="k">return</span> <span class="kc">True</span>
+
+        <span class="c1"># Case 3: templated filename case</span>
+        <span class="c1"># Get the template from the callback, using the default if not set.</span>
+        <span class="n">template</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">callback</span><span class="o">.</span><span class="n">filename</span> <span class="ow">or</span> <span class="s2">&quot;</span><span class="si">{epoch}</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="n">callback</span><span class="o">.</span><span class="n">CHECKPOINT_JOIN_CHAR</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="si">{step}</span><span class="s2">&quot;</span>
+        <span class="p">)</span>
+
+        <span class="c1"># Find all unique metric keys within the template string (e.g., from &quot;{epoch}-{val_loss:.2f}&quot;)</span>
+        <span class="c1"># This regex finds the name inside the curly braces, ignoring any formatting specs.</span>
+        <span class="n">template_keys</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">re</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;\{([a-zA-Z0-9_/-]+)&quot;</span><span class="p">,</span> <span class="n">template</span><span class="p">))</span>
+
+        <span class="c1"># If the template has no keys, we can&#39;t perform a match, so we assume it&#39;s valid if the dir matches.</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">template_keys</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">True</span>
+
+        <span class="c1"># Check if all keys from the template appear in the concrete filename in the format &quot;key=...&quot;.</span>
+        <span class="c1"># This is how PyTorch Lightning formats them by default.</span>
+        <span class="n">filename_keys</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">part</span> <span class="ow">in</span> <span class="n">ckpt_stem</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">callback</span><span class="o">.</span><span class="n">CHECKPOINT_JOIN_CHAR</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">callback</span><span class="o">.</span><span class="n">CHECKPOINT_EQUALS_CHAR</span> <span class="ow">in</span> <span class="n">part</span><span class="p">:</span>
+                <span class="n">filename_keys</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">part</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">callback</span><span class="o">.</span><span class="n">CHECKPOINT_EQUALS_CHAR</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span>
+
+        <span class="k">return</span> <span class="n">template_keys</span> <span class="o">==</span> <span class="n">filename_keys</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_configure_checkpointing</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Analyzes user configuration for checkpointing and ensures it&#39;s set up correctly.</span>
+
+<span class="sd">        This function is designed to handle four primary user scenarios by inspecting</span>
+<span class="sd">        the state of the Trainer&#39;s callbacks and the `ckpt_path` provided to the Manager.</span>
+<span class="sd">        It provides informative logs for each case and can add a `ModelCheckpoint`</span>
+<span class="sd">        callback as a safety net if needed.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            trainer: The PyTorch Lightning Trainer instance whose callbacks will be checked and</span>
+<span class="sd">                    potentially modified.</span>
+<span class="sd">            ckpt_path: The checkpoint path provided to the Manager, which indicates the user&#39;s</span>
+<span class="sd">                    intent to resume from or save to a specific file.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2">● 📞📞📞 CHECKPOINTING SETUP 📞📞📞&quot;</span><span class="p">)</span>
+        <span class="n">trainer</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_trainer</span>
+        <span class="n">ckpt_path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ckpt_path</span>
+
+        <span class="c1"># This flag checks if the user *explicitly* added any ModelCheckpoint</span>
+        <span class="c1"># instance in their configuration. It runs before Lightning&#39;s potential</span>
+        <span class="c1"># default callback is added.</span>
+        <span class="n">is_mc_explicitly_configured</span> <span class="o">=</span> <span class="nb">any</span><span class="p">(</span>
+            <span class="nb">isinstance</span><span class="p">(</span><span class="n">cb</span><span class="p">,</span> <span class="n">pl</span><span class="o">.</span><span class="n">pytorch</span><span class="o">.</span><span class="n">callbacks</span><span class="o">.</span><span class="n">ModelCheckpoint</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">cb</span> <span class="ow">in</span> <span class="n">trainer</span><span class="o">.</span><span class="n">callbacks</span>
+        <span class="p">)</span>
+
+        <span class="c1"># This flag checks if any of the *explicitly added* callbacks are configured</span>
+        <span class="c1"># to save to the directory containing the specific path the Manager cares about.</span>
+        <span class="n">is_manager_path_handled_by_callback</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="n">is_slurm_job</span> <span class="o">=</span> <span class="s2">&quot;SLURM_JOB_ID&quot;</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span>
+
+        <span class="k">if</span> <span class="n">is_mc_explicitly_configured</span> <span class="ow">and</span> <span class="n">ckpt_path</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">callback</span> <span class="ow">in</span> <span class="n">trainer</span><span class="o">.</span><span class="n">callbacks</span><span class="p">:</span>
+                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">callback</span><span class="p">,</span> <span class="n">ModelCheckpoint</span><span class="p">):</span>
+                    <span class="c1"># manually resolve the directory path the callback will use.</span>
+                    <span class="n">resolved_dirpath</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span>
+                        <span class="n">callback</span><span class="o">.</span><span class="n">_ModelCheckpoint__resolve_ckpt_dir</span><span class="p">(</span><span class="n">trainer</span><span class="p">)</span>
+                    <span class="p">)</span><span class="o">.</span><span class="n">resolve</span><span class="p">()</span>
+
+                    <span class="k">if</span> <span class="n">ckpt_path</span><span class="o">.</span><span class="n">parent</span> <span class="o">==</span> <span class="n">resolved_dirpath</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_matches_template</span><span class="p">(</span>
+                        <span class="n">ckpt_path</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">callback</span>
+                    <span class="p">):</span>
+                        <span class="n">is_manager_path_handled_by_callback</span> <span class="o">=</span> <span class="kc">True</span>
+                        <span class="k">break</span>
+
+        <span class="c1"># Case 1: Intentional ckpt_path, correct callback passed in - do nothing</span>
+        <span class="k">if</span> <span class="n">ckpt_path</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">is_manager_path_handled_by_callback</span><span class="p">:</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;</span><span class="se">\t\t</span><span class="s2"> Checkpoint: `manager.ckpt_path` (</span><span class="si">{</span><span class="n">ckpt_path</span><span class="si">}</span><span class="s2">) is set and a matching `ModelCheckpoint` callback was found to be saving to the same directory.&quot;</span>
+            <span class="p">)</span>
+            <span class="k">if</span> <span class="n">is_slurm_job</span><span class="p">:</span>
+                <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+                    <span class="s2">&quot;</span><span class="se">\t\t</span><span class="s2"> This setup is ready for SLURM preemption and requeueing.&quot;</span>
+                <span class="p">)</span>
+
+        <span class="c1"># Case 2: Intentional ckpt_path, but no callback found - assume the user forgot and add a callback</span>
+        <span class="k">elif</span> <span class="n">ckpt_path</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">is_manager_path_handled_by_callback</span><span class="p">:</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;</span><span class="se">\t\t</span><span class="s2"> Checkpoint mismatch: `manager.ckpt_path` (</span><span class="si">{</span><span class="n">ckpt_path</span><span class="si">}</span><span class="s2">) was provided, but no matching `ModelCheckpoint` callback was found.&quot;</span>
+            <span class="p">)</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                <span class="s2">&quot;</span><span class="se">\t\t</span><span class="s2"> Automatically creating a `ModelCheckpoint` to save to the specified path to prevent data loss.&quot;</span>
+            <span class="p">)</span>
+
+            <span class="n">saver</span> <span class="o">=</span> <span class="n">ModelCheckpoint</span><span class="p">(</span>
+                <span class="n">dirpath</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">ckpt_path</span><span class="o">.</span><span class="n">parent</span><span class="p">),</span>
+                <span class="n">filename</span><span class="o">=</span><span class="n">ckpt_path</span><span class="o">.</span><span class="n">with_suffix</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+                <span class="n">save_last</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>  <span class="c1"># be explicit, last.ckpt is a special case</span>
+                <span class="n">save_on_train_epoch_end</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                <span class="n">enable_version_counter</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="n">trainer</span><span class="o">.</span><span class="n">callbacks</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">saver</span><span class="p">)</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                <span class="s2">&quot;</span><span class="se">\t\t</span><span class="s2"> - Automatic `ModelCheckpoint` callback has been added to the trainer.&quot;</span>
+            <span class="p">)</span>
+
+        <span class="c1"># Case 3: No checkpoint, but with ModelCheckpoint callback - assume we are training from scratch.</span>
+        <span class="k">elif</span> <span class="n">ckpt_path</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">is_mc_explicitly_configured</span><span class="p">:</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+                <span class="s2">&quot;</span><span class="se">\t\t</span><span class="s2"> Checkpointing: A user-defined `ModelCheckpoint` callback was found. It will be used for saving checkpoints.&quot;</span>
+            <span class="p">)</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+                <span class="s2">&quot;</span><span class="se">\t\t</span><span class="s2"> The `Manager` will not manage resuming from a specific path as `manager.ckpt_path` was not provided.&quot;</span>
+            <span class="p">)</span>
+            <span class="k">if</span> <span class="n">is_slurm_job</span><span class="p">:</span>
+                <span class="n">logging</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                    <span class="s2">&quot;</span><span class="se">\t\t</span><span class="s2"> SLURM WARNING: Since `manager.ckpt_path` is not set, this job will restart from scratch if requeued, even though checkpoints are being saved elsewhere.&quot;</span>
+                <span class="p">)</span>
+
+        <span class="c1"># Case 4: No checkpoint and no ModelCheckpoint callback - assume we are training without saving checkpoints</span>
+        <span class="k">elif</span> <span class="n">ckpt_path</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">is_mc_explicitly_configured</span><span class="p">:</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+                <span class="s2">&quot;</span><span class="se">\t\t</span><span class="s2"> No Checkpointing: No `manager.ckpt_path` was provided and no `ModelCheckpoint` callback was found.&quot;</span>
+            <span class="p">)</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\t\t</span><span class="s2"> The model will not be saved during this run.&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">is_slurm_job</span><span class="p">:</span>
+                <span class="n">logging</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
+                    <span class="s2">&quot;</span><span class="se">\t\t</span><span class="s2"> CRITICAL SLURM WARNING: This job will lose all progress if it is preempted or requeued. It is highly recommended to configure checkpointing.&quot;</span>
+                <span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_register_trainer</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">trainer</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">trainer</span><span class="p">)</span> <span class="ow">is</span> <span class="nb">dict</span><span class="p">:</span>
+            <span class="n">trainer</span> <span class="o">=</span> <span class="n">OmegaConf</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">trainer</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">trainer</span><span class="p">)</span> <span class="ow">is</span> <span class="n">DictConfig</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">trainer</span><span class="p">:</span> <span class="n">DictConfig</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">trainer</span><span class="p">)</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2">● trainer config saved ✅&quot;</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">trainer</span><span class="p">,</span> <span class="n">pl</span><span class="o">.</span><span class="n">Trainer</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">trainer</span> <span class="o">=</span> <span class="n">trainer</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2">● trainer already instantiated ✅&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;`trainer` must be a dict, DictConfig or pl.Trainer, not </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">trainer</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_register_module</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">module</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">module</span><span class="p">)</span> <span class="ow">is</span> <span class="nb">dict</span><span class="p">:</span>
+            <span class="n">module</span> <span class="o">=</span> <span class="n">OmegaConf</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">module</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">module</span><span class="p">)</span> <span class="ow">is</span> <span class="n">DictConfig</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">module</span><span class="p">:</span> <span class="n">DictConfig</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">module</span><span class="p">)</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2">● module config saved ✅&quot;</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="n">pl</span><span class="o">.</span><span class="n">LightningModule</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">module</span> <span class="o">=</span> <span class="n">module</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2">● module already instantiated ✅&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;`module` must be a dict, DictConfig or pl.LightningModule, not </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">module</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_register_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="ow">is</span> <span class="nb">dict</span><span class="p">:</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="n">OmegaConf</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="ow">is</span> <span class="n">DictConfig</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">:</span> <span class="n">DictConfig</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2">● data config saved ✅&quot;</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">pl</span><span class="o">.</span><span class="n">LightningDataModule</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">data</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2">● data already instantiated ✅&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;`data` must be a dict, DictConfig or pl.LightningDataModule, not </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">data</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="p">)</span></div>
+
+</pre></div>
+
+                </article>
+              
+
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+<div class="bd-footer-content__inner container">
+  
+  <div class="footer-item">
+    
+<p class="component-author">
+By stable-pretraining team
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+
+  <p class="copyright">
+    
+      © Copyright 2024, stable-pretraining team.
+      <br/>
+    
+  </p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+</div>
+          </footer>
+        
+
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../../../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b"></script>
+<script src="../../../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+  <footer class="bd-footer">
+  </footer>
+  </body>
+</html>

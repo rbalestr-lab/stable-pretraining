@@ -1,0 +1,672 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../../../../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>stable_pretraining.callbacks.lidar &#8212; stable-pretraining 0.1.dev1+g8d0b48cc3.d20251109 documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../../../_static/styles/theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="../../../../_static/styles/bootstrap.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="../../../../_static/styles/pydata-sphinx-theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+
+  
+  <link href="../../../../_static/vendor/fontawesome/6.5.2/css/all.min.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../_static/vendor/fontawesome/6.5.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../_static/vendor/fontawesome/6.5.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../_static/vendor/fontawesome/6.5.2/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=8f2a1f02" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/styles/sphinx-book-theme.css?v=eba8b062" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/sg_gallery.css?v=d2d258e8" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/sg_gallery-binder.css?v=f4aeca0c" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../../../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b" />
+<link rel="preload" as="script" href="../../../../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
+  <script src="../../../../_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+    <script src="../../../../_static/documentation_options.js?v=eff7c767"></script>
+    <script src="../../../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../../_static/scripts/sphinx-book-theme.js?v=887ef09a"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = '_modules/stable_pretraining/callbacks/lidar';</script>
+    <link rel="index" title="Index" href="../../../../genindex/" />
+    <link rel="search" title="Search" href="../../../../search/" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-primary-sidebar-checkbox"/>
+  <label class="overlay overlay-primary" for="pst-primary-sidebar-checkbox"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-secondary-sidebar-checkbox"/>
+  <label class="overlay overlay-secondary" for="pst-secondary-sidebar-checkbox"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="../../../../search/"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search..."
+         aria-label="Search..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+        
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+    
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../../../../">
+  
+  
+  
+  
+  
+  
+    <p class="title logo__title">stable-pretraining 0.1.dev1+g8d0b48cc3.d20251109 documentation</p>
+  
+</a></div>
+        <div class="sidebar-primary-item">
+
+ <script>
+ document.write(`
+   <button class="btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script></div>
+        <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item navbar-nav active">
+        <p aria-level="2" class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../../../">stable-pretraining</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../releases/">Releases</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../contributing/">Contributing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../bibliography/">Bibliography</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">API</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../../../api/backbone/">stable_pretraining.backbone</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.backbone.MLP/">MLP</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.backbone.Resnet9/">Resnet9</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.backbone.ConvMixer/">ConvMixer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.backbone.from_timm/">from_timm</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.backbone.from_torchvision/">from_torchvision</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.backbone.set_embedding_dim/">set_embedding_dim</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.backbone.TeacherStudentWrapper/">TeacherStudentWrapper</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.backbone.EvalOnly/">EvalOnly</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.backbone.mae/">mae</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../../../api/data/">stable_pretraining.data</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.data.DataModule/">DataModule</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.data.Collator/">Collator</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.data.Dataset/">Dataset</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.data.FromTorchDataset/">FromTorchDataset</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.data.HFDataset/">HFDataset</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.data.Subset/">Subset</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.data.GMM/">GMM</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.data.MinariStepsDataset/">MinariStepsDataset</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.data.MinariEpisodeDataset/">MinariEpisodeDataset</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.data.swiss_roll/">swiss_roll</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.data.generate_perlin_noise_2d/">generate_perlin_noise_2d</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.data.perlin_noise_3d/">perlin_noise_3d</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.data.Categorical/">Categorical</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.data.ExponentialMixtureNoiseModel/">ExponentialMixtureNoiseModel</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.data.ExponentialNormalNoiseModel/">ExponentialNormalNoiseModel</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.data.RepeatedRandomSampler/">RepeatedRandomSampler</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.data.SupervisedBatchSampler/">SupervisedBatchSampler</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.data.RandomBatchSampler/">RandomBatchSampler</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.data.fold_views/">fold_views</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.data.random_split/">random_split</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.data.download/">download</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.data.bulk_download/">bulk_download</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.data.transforms/">stable_pretraining.data.transforms</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.data.dataset_stats/">stable_pretraining.data.dataset_stats</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.data.synthetic_data/">stable_pretraining.data.synthetic_data</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/forward/">stable_pretraining.forward</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../../../api/losses/">stable_pretraining.losses</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.losses.NTXEntLoss/">NTXEntLoss</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.losses.NegativeCosineSimilarity/">NegativeCosineSimilarity</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.losses.VICRegLoss/">VICRegLoss</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.losses.BarlowTwinsLoss/">BarlowTwinsLoss</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../../../api/manager/">stable_pretraining.manager</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.manager.Manager/">Manager</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../../../api/module/">stable_pretraining.module</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.module.Module/">Module</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../../../api/monitors/">stable_pretraining.callbacks</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.callbacks.OnlineProbe/">OnlineProbe</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.callbacks.OnlineKNN/">OnlineKNN</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.callbacks.OnlineWriter/">OnlineWriter</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.callbacks.RankMe/">RankMe</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.callbacks.LiDAR/">LiDAR</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.callbacks.EarlyStopping/">EarlyStopping</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.callbacks.TrainerInfo/">TrainerInfo</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.callbacks.LoggingCallback/">LoggingCallback</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.callbacks.ModuleSummary/">ModuleSummary</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.callbacks.SklearnCheckpoint/">SklearnCheckpoint</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.callbacks.ImageRetrieval/">ImageRetrieval</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../../../api/optim/">stable_pretraining.optim</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.optim.LARS/">LARS</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.optim.CosineDecayer/">CosineDecayer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.optim.LinearWarmup/">LinearWarmup</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.optim.LinearWarmupCosineAnnealing/">LinearWarmupCosineAnnealing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.optim.LinearWarmupCyclicAnnealing/">LinearWarmupCyclicAnnealing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.optim.LinearWarmupThreeStepsAnnealing/">LinearWarmupThreeStepsAnnealing</a></li>
+</ul>
+</details></li>
+</ul>
+
+    </div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+
+<div class="sbt-scroll-pixel-helper"></div>
+
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item"><button class="sidebar-toggle primary-toggle btn btn-sm" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <span class="fa-solid fa-bars"></span>
+</button></div>
+      
+    </div>
+  
+  
+    <div class="header-article-items__end">
+      
+        <div class="header-article-item">
+
+<div class="article-header-buttons">
+
+
+
+<button onclick="toggleFullScreen()"
+  class="btn btn-sm btn-fullscreen-button"
+  title="Fullscreen mode"
+  data-bs-placement="bottom" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-expand"></i>
+  </span>
+
+</button>
+
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"></i>
+  </button>
+`);
+</script>
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm pst-navbar-icon search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+  </button>
+`);
+</script>
+
+</div></div>
+      
+    </div>
+  
+</div>
+</div>
+              
+              
+
+<div id="jb-print-docs-body" class="onlyprint">
+    <h1></h1>
+    <!-- Table of contents -->
+    <div id="print-main-content">
+        <div id="jb-print-toc">
+            
+        </div>
+    </div>
+</div>
+
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <h1>Source code for stable_pretraining.callbacks.lidar</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;LiDAR (Linear Discriminant Analysis Rank) callback for monitoring representation quality.</span>
+
+<span class="sd">Based on:</span>
+<span class="sd">    Thilak et al. &quot;LiDAR: Sensing Linear Probing Performance in Joint Embedding SSL Architectures&quot;</span>
+<span class="sd">    arXiv:2312.04000 (2023)</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Iterable</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Union</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">lightning.pytorch</span><span class="w"> </span><span class="kn">import</span> <span class="n">Callback</span><span class="p">,</span> <span class="n">LightningModule</span><span class="p">,</span> <span class="n">Trainer</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">loguru</span><span class="w"> </span><span class="kn">import</span> <span class="n">logger</span> <span class="k">as</span> <span class="n">logging</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">.queue</span><span class="w"> </span><span class="kn">import</span> <span class="n">find_or_create_queue_callback</span>
+
+
+<div class="viewcode-block" id="LiDAR">
+<a class="viewcode-back" href="../../../../stable_pretraining.callbacks/#stable_pretraining.callbacks.LiDAR">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">LiDAR</span><span class="p">(</span><span class="n">Callback</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;LiDAR (Linear Discriminant Analysis Rank) monitor using queue discovery.</span>
+
+<span class="sd">    LiDAR measures the effective rank of learned representations using Linear Discriminant</span>
+<span class="sd">    Analysis (LDA). It computes the exponential of the entropy of the eigenvalue distribution</span>
+<span class="sd">    from the LDA transformation, providing a metric between 1 and min(d, n_classes - 1) where</span>
+<span class="sd">    d is the feature dimension, indicating how many dimensions are effectively being used.</span>
+
+<span class="sd">    This implementation is based on Thilak et al. &quot;LiDAR: Sensing Linear Probing Performance</span>
+<span class="sd">    in Joint Embedding SSL Architectures&quot; (arXiv:2312.04000).</span>
+
+<span class="sd">    IMPORTANT: Surrogate Class Formation Requirement</span>
+<span class="sd">    -------------------------------------------------</span>
+<span class="sd">    The LiDAR paper requires that each &quot;surrogate class&quot; consists of q augmented views</span>
+<span class="sd">    of the same clean sample. The current implementation chunks the queue sequentially</span>
+<span class="sd">    into groups of size samples_per_class. For faithful reproduction of the paper:</span>
+
+<span class="sd">    - Ensure the upstream queue pushes q contiguous augmentations of each clean sample</span>
+<span class="sd">    - OR implement ID-based grouping to ensure each group contains views of the same sample</span>
+
+<span class="sd">    Without proper grouping, the metric may not accurately reflect the paper&#39;s methodology.</span>
+
+<span class="sd">    The metric helps detect:</span>
+<span class="sd">    - Dimensional collapse in self-supervised learning</span>
+<span class="sd">    - Loss of representational capacity</span>
+<span class="sd">    - Over-regularization effects</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        name: Unique identifier for this callback instance</span>
+<span class="sd">        target: Key in batch dict containing the feature embeddings to monitor</span>
+<span class="sd">        queue_length: Size of the circular buffer for caching embeddings</span>
+<span class="sd">        target_shape: Shape of the target embeddings (e.g., 768 for 768-dim features)</span>
+<span class="sd">        n_classes: Number of surrogate classes (clean samples) for LDA computation</span>
+<span class="sd">        samples_per_class: Number of augmented samples per class</span>
+<span class="sd">        delta: Regularization constant added to within-class covariance (default: 1e-4)</span>
+<span class="sd">        epsilon: Small constant for numerical stability (default: 1e-8)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">target</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">queue_length</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+        <span class="n">target_shape</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">[</span><span class="nb">int</span><span class="p">]],</span>
+        <span class="n">n_classes</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">100</span><span class="p">,</span>
+        <span class="n">samples_per_class</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">10</span><span class="p">,</span>
+        <span class="n">delta</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1e-4</span><span class="p">,</span>
+        <span class="n">epsilon</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1e-8</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+
+        <span class="c1"># Convert target_shape to int if needed</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">target_shape</span><span class="p">,</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)):</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">target_shape</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">target_shape</span> <span class="o">=</span> <span class="n">target_shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">target_shape</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">prod</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">target_shape</span><span class="p">)))</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">target</span> <span class="o">=</span> <span class="n">target</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">queue_length</span> <span class="o">=</span> <span class="n">queue_length</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">target_shape</span> <span class="o">=</span> <span class="n">target_shape</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">n_classes</span> <span class="o">=</span> <span class="n">n_classes</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">samples_per_class</span> <span class="o">=</span> <span class="n">samples_per_class</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">delta</span> <span class="o">=</span> <span class="n">delta</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">epsilon</span> <span class="o">=</span> <span class="n">epsilon</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_target_queue</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="c1"># Validate queue length adequacy</span>
+        <span class="n">min_required_samples</span> <span class="o">=</span> <span class="n">n_classes</span> <span class="o">*</span> <span class="n">samples_per_class</span>
+        <span class="k">if</span> <span class="n">queue_length</span> <span class="o">&lt;</span> <span class="n">min_required_samples</span><span class="p">:</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">: Queue length (</span><span class="si">{</span><span class="n">queue_length</span><span class="si">}</span><span class="s2">) is less than required &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;samples (</span><span class="si">{</span><span class="n">min_required_samples</span><span class="si">}</span><span class="s2"> = </span><span class="si">{</span><span class="n">n_classes</span><span class="si">}</span><span class="s2"> classes × </span><span class="si">{</span><span class="n">samples_per_class</span><span class="si">}</span><span class="s2"> samples/class). &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;LiDAR computation may use fewer classes than specified.&quot;</span>
+            <span class="p">)</span>
+
+        <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Initialized LiDAR callback: </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  - Target: </span><span class="si">{</span><span class="n">target</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  - Queue length: </span><span class="si">{</span><span class="n">queue_length</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  - Feature dimension: </span><span class="si">{</span><span class="n">target_shape</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;  - N classes: </span><span class="si">{</span><span class="n">n_classes</span><span class="si">}</span><span class="s2">, Samples per class: </span><span class="si">{</span><span class="n">samples_per_class</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">state_key</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Unique identifier for this callback&#39;s state during checkpointing.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;LiDAR[name=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">]&quot;</span>
+
+<div class="viewcode-block" id="LiDAR.setup">
+<a class="viewcode-back" href="../../../../stable_pretraining.callbacks/#stable_pretraining.callbacks.LiDAR.setup">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">setup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">trainer</span><span class="p">:</span> <span class="n">Trainer</span><span class="p">,</span> <span class="n">pl_module</span><span class="p">:</span> <span class="n">LightningModule</span><span class="p">,</span> <span class="n">stage</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Find or create the queue callback for target features.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_target_queue</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_target_queue</span> <span class="o">=</span> <span class="n">find_or_create_queue_callback</span><span class="p">(</span>
+                <span class="n">trainer</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">queue_length</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">target_shape</span><span class="p">,</span>
+                <span class="n">torch</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span>
+                <span class="n">gather_distributed</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                <span class="n">create_if_missing</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">: Using queue for target &#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="LiDAR.on_validation_batch_end">
+<a class="viewcode-back" href="../../../../stable_pretraining.callbacks/#stable_pretraining.callbacks.LiDAR.on_validation_batch_end">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">on_validation_batch_end</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">trainer</span><span class="p">:</span> <span class="n">Trainer</span><span class="p">,</span>
+        <span class="n">pl_module</span><span class="p">:</span> <span class="n">LightningModule</span><span class="p">,</span>
+        <span class="n">outputs</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span>
+        <span class="n">batch</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span>
+        <span class="n">batch_idx</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+        <span class="n">dataloader_idx</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Compute LiDAR metric on the first validation batch only.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">batch_idx</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">return</span>
+
+        <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">: Computing LiDAR on first validation batch&quot;</span><span class="p">)</span>
+
+        <span class="n">embeddings</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_target_queue</span><span class="o">.</span><span class="n">data</span>
+
+        <span class="k">if</span> <span class="n">embeddings</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">: Queue data not available&quot;</span><span class="p">)</span>
+            <span class="k">return</span>
+
+        <span class="k">if</span> <span class="n">embeddings</span><span class="o">.</span><span class="n">numel</span><span class="p">()</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">: Queue data is empty&quot;</span><span class="p">)</span>
+            <span class="k">return</span>
+
+        <span class="c1"># The queue already handles gathering across GPUs if gather_distributed=True</span>
+        <span class="c1"># So embeddings here already contains data from all GPUs</span>
+        <span class="n">lidar_value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_compute_lidar</span><span class="p">(</span><span class="n">embeddings</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">lidar_value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">pl_module</span><span class="o">.</span><span class="n">log</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+                <span class="n">lidar_value</span><span class="p">,</span>
+                <span class="n">rank_zero_only</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>  <span class="c1"># Only log from rank 0 to avoid duplicates</span>
+                <span class="n">sync_dist</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>  <span class="c1"># No need to sync since we compute same value on all ranks</span>
+            <span class="p">)</span>
+            <span class="k">if</span> <span class="n">trainer</span><span class="o">.</span><span class="n">global_rank</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">: LiDAR = </span><span class="si">{</span><span class="n">lidar_value</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></div>
+
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_compute_lidar</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">embeddings</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Compute the LiDAR metric from embeddings.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            embeddings: Tensor of shape (n_samples, feature_dim)</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            LiDAR value or None if computation fails</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">n_samples</span><span class="p">,</span> <span class="n">d</span> <span class="o">=</span> <span class="n">embeddings</span><span class="o">.</span><span class="n">shape</span>
+
+        <span class="c1"># Determine how many classes we can form</span>
+        <span class="n">actual_n_classes</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_classes</span><span class="p">,</span> <span class="n">n_samples</span> <span class="o">//</span> <span class="bp">self</span><span class="o">.</span><span class="n">samples_per_class</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">actual_n_classes</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">: Not enough samples for LiDAR computation. &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;Need at least </span><span class="si">{</span><span class="mi">2</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="bp">self</span><span class="o">.</span><span class="n">samples_per_class</span><span class="si">}</span><span class="s2"> samples, got </span><span class="si">{</span><span class="n">n_samples</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="p">)</span>
+            <span class="k">return</span> <span class="kc">None</span>
+
+        <span class="c1"># Reshape embeddings to (n_classes, samples_per_class, feature_dim)</span>
+        <span class="c1"># WARNING: This assumes the queue contains contiguous groups of augmentations</span>
+        <span class="c1"># from the same clean sample. If the queue mixes samples randomly, the</span>
+        <span class="c1"># surrogate classes won&#39;t match the paper&#39;s methodology.</span>
+        <span class="c1"># Take only the samples we need</span>
+        <span class="n">n_used</span> <span class="o">=</span> <span class="n">actual_n_classes</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">samples_per_class</span>
+        <span class="n">embeddings</span> <span class="o">=</span> <span class="n">embeddings</span><span class="p">[:</span><span class="n">n_used</span><span class="p">]</span><span class="o">.</span><span class="n">view</span><span class="p">(</span>
+            <span class="n">actual_n_classes</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">samples_per_class</span><span class="p">,</span> <span class="n">d</span>
+        <span class="p">)</span>
+
+        <span class="k">with</span> <span class="n">torch</span><span class="o">.</span><span class="n">no_grad</span><span class="p">():</span>
+            <span class="n">class_means</span> <span class="o">=</span> <span class="n">embeddings</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>  <span class="c1"># (n_classes, d)</span>
+            <span class="n">grand_mean</span> <span class="o">=</span> <span class="n">class_means</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>  <span class="c1"># (d,)</span>
+
+            <span class="n">device</span> <span class="o">=</span> <span class="n">embeddings</span><span class="o">.</span><span class="n">device</span>
+
+            <span class="c1"># Sb = sum((mu_i - mu) @ (mu_i - mu)^T) / (n_classes - 1)</span>
+            <span class="n">centered_means</span> <span class="o">=</span> <span class="n">class_means</span> <span class="o">-</span> <span class="n">grand_mean</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+            <span class="n">Sb</span> <span class="o">=</span> <span class="p">(</span><span class="n">centered_means</span><span class="o">.</span><span class="n">T</span> <span class="o">@</span> <span class="n">centered_means</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">actual_n_classes</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+
+            <span class="c1"># First center all samples by their class means</span>
+            <span class="n">class_means_expanded</span> <span class="o">=</span> <span class="n">class_means</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">expand_as</span><span class="p">(</span><span class="n">embeddings</span><span class="p">)</span>
+            <span class="n">centered_samples</span> <span class="o">=</span> <span class="n">embeddings</span> <span class="o">-</span> <span class="n">class_means_expanded</span>
+
+            <span class="n">centered_samples_flat</span> <span class="o">=</span> <span class="n">centered_samples</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">d</span><span class="p">)</span>
+
+            <span class="c1"># Sw = sum((x_ij - mu_i) @ (x_ij - mu_i)^T) / (n_classes * (samples_per_class - 1))</span>
+            <span class="c1"># This is the unbiased estimate of class-averaged within-class covariance</span>
+            <span class="c1"># as described in the LiDAR paper (arXiv:2312.04000)</span>
+            <span class="n">Sw</span> <span class="o">=</span> <span class="p">(</span><span class="n">centered_samples_flat</span><span class="o">.</span><span class="n">T</span> <span class="o">@</span> <span class="n">centered_samples_flat</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span>
+                <span class="n">actual_n_classes</span> <span class="o">*</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">samples_per_class</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+            <span class="p">)</span>
+
+            <span class="c1"># Add regularization to within-class covariance</span>
+            <span class="n">Sw</span> <span class="o">=</span> <span class="n">Sw</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">delta</span> <span class="o">*</span> <span class="n">torch</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">)</span>
+
+            <span class="c1"># Compute Sw^(-1/2) using eigendecomposition</span>
+            <span class="n">eigvals_w</span><span class="p">,</span> <span class="n">eigvecs_w</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">eigh</span><span class="p">(</span><span class="n">Sw</span><span class="p">)</span>
+            <span class="n">eigvals_w</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">clamp</span><span class="p">(</span><span class="n">eigvals_w</span><span class="p">,</span> <span class="nb">min</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">epsilon</span><span class="p">)</span>
+
+            <span class="c1"># Sw^(-1/2) = V * D^(-1/2) * V^T</span>
+            <span class="n">sqrt_inv_eigvals</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="n">torch</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">eigvals_w</span><span class="p">)</span>
+            <span class="n">Sw_invsqrt</span> <span class="o">=</span> <span class="p">(</span><span class="n">eigvecs_w</span> <span class="o">*</span> <span class="n">sqrt_inv_eigvals</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="mi">0</span><span class="p">))</span> <span class="o">@</span> <span class="n">eigvecs_w</span><span class="o">.</span><span class="n">T</span>
+
+            <span class="c1"># Compute LiDAR matrix: Σ_lidar = Sw^(-1/2) * Sb * Sw^(-1/2)</span>
+            <span class="n">Sigma_lidar</span> <span class="o">=</span> <span class="n">Sw_invsqrt</span> <span class="o">@</span> <span class="n">Sb</span> <span class="o">@</span> <span class="n">Sw_invsqrt</span>
+
+            <span class="c1"># Handle numerical errors by ensuring symmetry</span>
+            <span class="n">Sigma_lidar</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="p">(</span><span class="n">Sigma_lidar</span> <span class="o">+</span> <span class="n">Sigma_lidar</span><span class="o">.</span><span class="n">T</span><span class="p">)</span>
+
+            <span class="c1"># Compute eigenvalues of LiDAR matrix</span>
+            <span class="n">eigvals_lidar</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">eigvalsh</span><span class="p">(</span><span class="n">Sigma_lidar</span><span class="p">)</span>
+            <span class="n">eigvals_lidar</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">clamp</span><span class="p">(</span><span class="n">eigvals_lidar</span><span class="p">,</span> <span class="nb">min</span><span class="o">=</span><span class="mf">0.0</span><span class="p">)</span>
+
+            <span class="c1"># Normalize eigenvalues to get probability distribution</span>
+            <span class="c1"># Following the paper: p_i = (lambda_i + epsilon) / sum_j(lambda_j + epsilon)</span>
+            <span class="n">eigvals_with_eps</span> <span class="o">=</span> <span class="n">eigvals_lidar</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">epsilon</span>
+            <span class="n">eigvals_sum</span> <span class="o">=</span> <span class="n">eigvals_with_eps</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">eigvals_sum</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">logging</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">: All eigenvalues are zero or negative&quot;</span><span class="p">)</span>
+                <span class="k">return</span> <span class="mf">1.0</span>  <span class="c1"># Return minimum rank</span>
+
+            <span class="n">p</span> <span class="o">=</span> <span class="n">eigvals_with_eps</span> <span class="o">/</span> <span class="n">eigvals_sum</span>
+
+            <span class="c1"># Compute entropy and LiDAR metric</span>
+            <span class="n">entropy</span> <span class="o">=</span> <span class="o">-</span><span class="p">(</span><span class="n">p</span> <span class="o">*</span> <span class="n">torch</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">p</span><span class="p">))</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+            <span class="n">lidar</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">entropy</span><span class="p">)</span><span class="o">.</span><span class="n">item</span><span class="p">()</span>
+
+            <span class="k">return</span> <span class="n">lidar</span></div>
+
+</pre></div>
+
+                </article>
+              
+
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+<div class="bd-footer-content__inner container">
+  
+  <div class="footer-item">
+    
+<p class="component-author">
+By stable-pretraining team
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+
+  <p class="copyright">
+    
+      © Copyright 2024, stable-pretraining team.
+      <br/>
+    
+  </p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+</div>
+          </footer>
+        
+
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../../../../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b"></script>
+<script src="../../../../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+  <footer class="bd-footer">
+  </footer>
+  </body>
+</html>

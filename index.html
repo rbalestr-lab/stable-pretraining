@@ -1,0 +1,1028 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="./" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>stable-pretraining &#8212; stable-pretraining 0.1.dev1+g8d0b48cc3.d20251109 documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="_static/styles/theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="_static/styles/bootstrap.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="_static/styles/pydata-sphinx-theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+
+  
+  <link href="_static/vendor/fontawesome/6.5.2/css/all.min.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.5.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.5.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.5.2/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=8f2a1f02" />
+    <link rel="stylesheet" type="text/css" href="_static/styles/sphinx-book-theme.css?v=eba8b062" />
+    <link rel="stylesheet" type="text/css" href="_static/sg_gallery.css?v=d2d258e8" />
+    <link rel="stylesheet" type="text/css" href="_static/sg_gallery-binder.css?v=f4aeca0c" />
+    <link rel="stylesheet" type="text/css" href="_static/sg_gallery-dataframe.css?v=2082cf3c" />
+    <link rel="stylesheet" type="text/css" href="_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b" />
+<link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
+  <script src="_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+    <script src="_static/documentation_options.js?v=eff7c767"></script>
+    <script src="_static/doctools.js?v=9bcbadda"></script>
+    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/scripts/sphinx-book-theme.js?v=887ef09a"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'index';</script>
+    <link rel="index" title="Index" href="genindex/" />
+    <link rel="search" title="Search" href="search/" />
+    <link rel="next" title="Releases" href="releases/" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-primary-sidebar-checkbox"/>
+  <label class="overlay overlay-primary" for="pst-primary-sidebar-checkbox"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-secondary-sidebar-checkbox"/>
+  <label class="overlay overlay-secondary" for="pst-secondary-sidebar-checkbox"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="search/"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search..."
+         aria-label="Search..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+        
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+    
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="#">
+  
+  
+  
+  
+  
+  
+    <p class="title logo__title">stable-pretraining 0.1.dev1+g8d0b48cc3.d20251109 documentation</p>
+  
+</a></div>
+        <div class="sidebar-primary-item">
+
+ <script>
+ document.write(`
+   <button class="btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script></div>
+        <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item navbar-nav active">
+        <p aria-level="2" class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current nav bd-sidenav">
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">stable-pretraining</a></li>
+<li class="toctree-l1"><a class="reference internal" href="releases/">Releases</a></li>
+<li class="toctree-l1"><a class="reference internal" href="contributing/">Contributing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="bibliography/">Bibliography</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">API</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1 has-children"><a class="reference internal" href="api/backbone/">stable_pretraining.backbone</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="api/gen_modules/stable_pretraining.backbone.MLP/">MLP</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/gen_modules/stable_pretraining.backbone.Resnet9/">Resnet9</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/gen_modules/stable_pretraining.backbone.ConvMixer/">ConvMixer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/gen_modules/stable_pretraining.backbone.from_timm/">from_timm</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/gen_modules/stable_pretraining.backbone.from_torchvision/">from_torchvision</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/gen_modules/stable_pretraining.backbone.set_embedding_dim/">set_embedding_dim</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/gen_modules/stable_pretraining.backbone.TeacherStudentWrapper/">TeacherStudentWrapper</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/gen_modules/stable_pretraining.backbone.EvalOnly/">EvalOnly</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/gen_modules/stable_pretraining.backbone.mae/">mae</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="api/data/">stable_pretraining.data</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="api/gen_modules/stable_pretraining.data.DataModule/">DataModule</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/gen_modules/stable_pretraining.data.Collator/">Collator</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/gen_modules/stable_pretraining.data.Dataset/">Dataset</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/gen_modules/stable_pretraining.data.FromTorchDataset/">FromTorchDataset</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/gen_modules/stable_pretraining.data.HFDataset/">HFDataset</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/gen_modules/stable_pretraining.data.Subset/">Subset</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/gen_modules/stable_pretraining.data.GMM/">GMM</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/gen_modules/stable_pretraining.data.MinariStepsDataset/">MinariStepsDataset</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/gen_modules/stable_pretraining.data.MinariEpisodeDataset/">MinariEpisodeDataset</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/gen_modules/stable_pretraining.data.swiss_roll/">swiss_roll</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/gen_modules/stable_pretraining.data.generate_perlin_noise_2d/">generate_perlin_noise_2d</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/gen_modules/stable_pretraining.data.perlin_noise_3d/">perlin_noise_3d</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/gen_modules/stable_pretraining.data.Categorical/">Categorical</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/gen_modules/stable_pretraining.data.ExponentialMixtureNoiseModel/">ExponentialMixtureNoiseModel</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/gen_modules/stable_pretraining.data.ExponentialNormalNoiseModel/">ExponentialNormalNoiseModel</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/gen_modules/stable_pretraining.data.RepeatedRandomSampler/">RepeatedRandomSampler</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/gen_modules/stable_pretraining.data.SupervisedBatchSampler/">SupervisedBatchSampler</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/gen_modules/stable_pretraining.data.RandomBatchSampler/">RandomBatchSampler</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/gen_modules/stable_pretraining.data.fold_views/">fold_views</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/gen_modules/stable_pretraining.data.random_split/">random_split</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/gen_modules/stable_pretraining.data.download/">download</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/gen_modules/stable_pretraining.data.bulk_download/">bulk_download</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/gen_modules/stable_pretraining.data.transforms/">stable_pretraining.data.transforms</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/gen_modules/stable_pretraining.data.dataset_stats/">stable_pretraining.data.dataset_stats</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/gen_modules/stable_pretraining.data.synthetic_data/">stable_pretraining.data.synthetic_data</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1"><a class="reference internal" href="api/forward/">stable_pretraining.forward</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="api/losses/">stable_pretraining.losses</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="api/gen_modules/stable_pretraining.losses.NTXEntLoss/">NTXEntLoss</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/gen_modules/stable_pretraining.losses.NegativeCosineSimilarity/">NegativeCosineSimilarity</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/gen_modules/stable_pretraining.losses.VICRegLoss/">VICRegLoss</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/gen_modules/stable_pretraining.losses.BarlowTwinsLoss/">BarlowTwinsLoss</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="api/manager/">stable_pretraining.manager</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="api/gen_modules/stable_pretraining.manager.Manager/">Manager</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="api/module/">stable_pretraining.module</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="api/gen_modules/stable_pretraining.module.Module/">Module</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="api/monitors/">stable_pretraining.callbacks</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="api/gen_modules/stable_pretraining.callbacks.OnlineProbe/">OnlineProbe</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/gen_modules/stable_pretraining.callbacks.OnlineKNN/">OnlineKNN</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/gen_modules/stable_pretraining.callbacks.OnlineWriter/">OnlineWriter</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/gen_modules/stable_pretraining.callbacks.RankMe/">RankMe</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/gen_modules/stable_pretraining.callbacks.LiDAR/">LiDAR</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/gen_modules/stable_pretraining.callbacks.EarlyStopping/">EarlyStopping</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/gen_modules/stable_pretraining.callbacks.TrainerInfo/">TrainerInfo</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/gen_modules/stable_pretraining.callbacks.LoggingCallback/">LoggingCallback</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/gen_modules/stable_pretraining.callbacks.ModuleSummary/">ModuleSummary</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/gen_modules/stable_pretraining.callbacks.SklearnCheckpoint/">SklearnCheckpoint</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/gen_modules/stable_pretraining.callbacks.ImageRetrieval/">ImageRetrieval</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="api/optim/">stable_pretraining.optim</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="api/gen_modules/stable_pretraining.optim.LARS/">LARS</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/gen_modules/stable_pretraining.optim.CosineDecayer/">CosineDecayer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/gen_modules/stable_pretraining.optim.LinearWarmup/">LinearWarmup</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/gen_modules/stable_pretraining.optim.LinearWarmupCosineAnnealing/">LinearWarmupCosineAnnealing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/gen_modules/stable_pretraining.optim.LinearWarmupCyclicAnnealing/">LinearWarmupCyclicAnnealing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/gen_modules/stable_pretraining.optim.LinearWarmupThreeStepsAnnealing/">LinearWarmupThreeStepsAnnealing</a></li>
+</ul>
+</details></li>
+</ul>
+
+    </div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+
+<div class="sbt-scroll-pixel-helper"></div>
+
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item"><button class="sidebar-toggle primary-toggle btn btn-sm" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <span class="fa-solid fa-bars"></span>
+</button></div>
+      
+    </div>
+  
+  
+    <div class="header-article-items__end">
+      
+        <div class="header-article-item">
+
+<div class="article-header-buttons">
+
+
+
+
+
+<div class="dropdown dropdown-download-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Download this page">
+    <i class="fas fa-download"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="_sources/index.rst" target="_blank"
+   class="btn btn-sm btn-download-source-button dropdown-item"
+   title="Download source file"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file"></i>
+  </span>
+<span class="btn__text-container">.rst</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li>
+<button onclick="window.print()"
+  class="btn btn-sm btn-download-pdf-button dropdown-item"
+  title="Print to PDF"
+  data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file-pdf"></i>
+  </span>
+<span class="btn__text-container">.pdf</span>
+</button>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+<button onclick="toggleFullScreen()"
+  class="btn btn-sm btn-fullscreen-button"
+  title="Fullscreen mode"
+  data-bs-placement="bottom" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-expand"></i>
+  </span>
+
+</button>
+
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"></i>
+  </button>
+`);
+</script>
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm pst-navbar-icon search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+  </button>
+`);
+</script>
+<button class="sidebar-toggle secondary-toggle btn btn-sm" title="Toggle secondary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="fa-solid fa-list"></span>
+</button>
+</div></div>
+      
+    </div>
+  
+</div>
+</div>
+              
+              
+
+<div id="jb-print-docs-body" class="onlyprint">
+    <h1>stable-pretraining</h1>
+    <!-- Table of contents -->
+    <div id="print-main-content">
+        <div id="jb-print-toc">
+            
+            <div>
+                <h2> Contents </h2>
+            </div>
+            <nav aria-label="Page">
+                <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#how">How?</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#core-structure">Core Structure</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#data">1 - Data</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#module">2 - Module</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#callbacks">3 - Callbacks</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trainer">4 - Trainer</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#complete-example">Complete Example</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#quick-start-with-spt-cli">🚀 Quick Start with <code class="docutils literal notranslate"><span class="pre">spt</span></code> CLI</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#local-training">Local Training</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#slurm-cluster-training">SLURM Cluster Training</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#installation">Installation</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#ways-you-can-contribute">Ways You Can Contribute:</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#contributors">Contributors</a></li>
+</ul>
+            </nav>
+        </div>
+    </div>
+</div>
+
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <div class="toctree-wrapper compound">
+</div>
+<section id="stable-pretraining">
+<h1>stable-pretraining<a class="headerlink" href="#stable-pretraining" title="Link to this heading">#</a></h1>
+<p><a class="reference external" href="https://rbalestr-lab.github.io/stable-pretraining.github.io/dev/"><img alt="Documentation" src="https://img.shields.io/badge/Documentation-blue.svg" /></a>
+<a class="reference external" href="https://github.com/rbalestr-lab/stable-pretraining/tree/main/benchmarks"><img alt="Benchmarks" src="https://img.shields.io/badge/Benchmarks-blue.svg" /></a>
+<a class="reference external" href="https://github.com/rbalestr-lab/stable-pretraining/actions/workflows/testing.yml"><img alt="Test Status" src="https://github.com/rbalestr-lab/stable-pretraining/actions/workflows/testing.yml/badge.svg" /></a>
+<a class="reference external" href="https://dl.circleci.com/status-badge/redirect/gh/rbalestr-lab/stable-pretraining/tree/main"><img alt="CircleCI" src="https://dl.circleci.com/status-badge/img/gh/rbalestr-lab/stable-pretraining/tree/main.svg?style=svg" /></a>
+<a class="reference external" href="https://pytorch.org/get-started/locally/"><img alt="PyTorch" src="https://img.shields.io/badge/PyTorch-ee4c2c?logo=pytorch&amp;logoColor=white" /></a>
+<a class="reference external" href="https://github.com/astral-sh/ruff"><img alt="Ruff" src="https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json" /></a>
+<a class="reference external" href="https://opensource.org/licenses/MIT"><img alt="License" src="https://img.shields.io/badge/License-MIT-yellow.svg" /></a>
+<a class="reference external" href="https://wandb.ai/site"><img alt="WandB" src="https://raw.githubusercontent.com/wandb/assets/main/wandb-github-badge-gradient.svg" /></a></p>
+<p>AI is moving beyond labels. Today’s models learn through <strong>self-supervision</strong> and <strong>multimodal alignment</strong>, extracting knowledge from raw data to build general-purpose representations that work across tasks. These foundation models are then deployed at scale, often after finetuning, to solve tasks in zero or few shot.</p>
+<p><code class="docutils literal notranslate"><span class="pre">stable-pretraining</span></code> is a PyTorch framework built on top of Lightning for this new paradigm. What sets us apart is <strong>real-time visibility into training quality</strong> through extensive logging and monitoring. Our callback ecosystem (<code class="docutils literal notranslate"><span class="pre">OnlineProbe</span></code>, <code class="docutils literal notranslate"><span class="pre">OnlineKNN</span></code>, <code class="docutils literal notranslate"><span class="pre">RankMe</span></code>, and many more) provides insights into feature collapse, training dynamics, and downstream performance. Data flow as dictionaries through model components, metrics, and callbacks, making any intermediate value accessible and debuggable. With <code class="docutils literal notranslate"><span class="pre">stable-pretraining</span></code>: track everything, debug faster, iterate sooner.</p>
+<p>Join our Discord: <a class="reference external" href="https://discord.gg/adzpqWKM25">https://discord.gg/8M6hT39X</a></p>
+<section id="how">
+<h2>How?<a class="headerlink" href="#how" title="Link to this heading">#</a></h2>
+<p>To reach flexibility, scalability and stability, we rely on battle-tested third party libraries: <code class="docutils literal notranslate"><span class="pre">PyTorch</span></code>, <code class="docutils literal notranslate"><span class="pre">Lightning</span></code>, <code class="docutils literal notranslate"><span class="pre">HuggingFace</span></code>, <code class="docutils literal notranslate"><span class="pre">TorchMetrics</span></code> amongst a few others. Those dependencies allow us to focus on assembling everything into a powerful ML framework. <code class="docutils literal notranslate"><span class="pre">stable-pretraining</span></code> adopts a flexible and modular design for seamless integration of components from external libraries, including architectures, loss functions, evaluation metrics, and augmentations.</p>
+</section>
+<section id="core-structure">
+<h2>Core Structure<a class="headerlink" href="#core-structure" title="Link to this heading">#</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">stable-pretraining</span></code> simplifies complex ML workflows into 4 intuitive components:</p>
+<section id="data">
+<h3>1 - Data<a class="headerlink" href="#data" title="Link to this heading">#</a></h3>
+<p>Your dataset must follow a dictionary-structured format where each sample is a dictionary with named fields (e.g., <code class="docutils literal notranslate"><span class="pre">{&quot;image&quot;:</span> <span class="pre">...,</span> <span class="pre">&quot;label&quot;:</span> <span class="pre">...}</span></code>). This ensures consistent behavior across all components. You have multiple options for creating datasets:</p>
+<ul class="simple">
+<li><p><strong>HuggingFace datasets</strong> (if available on the Hub):</p></li>
+</ul>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">stable_pretraining</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">spt</span>
+<span class="n">train_dataset</span> <span class="o">=</span> <span class="n">spt</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">HFDataset</span><span class="p">(</span>
+    <span class="n">path</span><span class="o">=</span><span class="s2">&quot;frgfm/imagenette&quot;</span><span class="p">,</span>
+    <span class="n">name</span><span class="o">=</span><span class="s2">&quot;160px&quot;</span><span class="p">,</span>
+    <span class="n">split</span><span class="o">=</span><span class="s2">&quot;train&quot;</span><span class="p">,</span>
+    <span class="n">transform</span><span class="o">=</span><span class="n">train_transform</span><span class="p">,</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p><strong>From PyTorch datasets</strong>:</p></li>
+</ul>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">train_dataset</span> <span class="o">=</span> <span class="n">spt</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">FromTorchDataset</span><span class="p">(</span>
+    <span class="n">torchvision_dataset</span><span class="p">,</span>
+    <span class="n">names</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;image&quot;</span><span class="p">,</span> <span class="s2">&quot;label&quot;</span><span class="p">],</span>  <span class="c1"># Map tuple outputs to dictionary keys</span>
+    <span class="n">transform</span><span class="o">=</span><span class="n">train_transform</span><span class="p">,</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p><strong>Custom datasets</strong>: Any dataset that returns dictionaries</p></li>
+</ul>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">datamodule</span> <span class="o">=</span> <span class="n">spt</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">DataModule</span><span class="p">(</span><span class="n">train</span><span class="o">=</span><span class="n">train_dataloader</span><span class="p">,</span> <span class="n">val</span><span class="o">=</span><span class="n">val_dataloader</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="module">
+<h3>2 - Module<a class="headerlink" href="#module" title="Link to this heading">#</a></h3>
+<p>The key differentiator from PyTorch Lightning - <strong>you only define the <code class="docutils literal notranslate"><span class="pre">forward</span></code> function</strong>, not <code class="docutils literal notranslate"><span class="pre">training_step</span></code>! This unified approach computes losses and generates useful quantities that can be retrieved for monitoring and analysis:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Use the pre-built forward functions from stable_pretraining</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">stable_pretraining</span><span class="w"> </span><span class="kn">import</span> <span class="n">forward</span>
+
+<span class="c1"># Simply use the appropriate forward for your method</span>
+<span class="n">module</span> <span class="o">=</span> <span class="n">spt</span><span class="o">.</span><span class="n">Module</span><span class="p">(</span>
+    <span class="n">backbone</span><span class="o">=</span><span class="n">backbone</span><span class="p">,</span>
+    <span class="n">projector</span><span class="o">=</span><span class="n">projector</span><span class="p">,</span>
+    <span class="n">forward</span><span class="o">=</span><span class="n">forward</span><span class="o">.</span><span class="n">simclr_forward</span><span class="p">,</span>  <span class="c1"># Or byol_forward, vicreg_forward, etc.</span>
+    <span class="n">simclr_loss</span><span class="o">=</span><span class="n">spt</span><span class="o">.</span><span class="n">losses</span><span class="o">.</span><span class="n">NTXEntLoss</span><span class="p">(</span><span class="n">temperature</span><span class="o">=</span><span class="mf">0.5</span><span class="p">),</span>
+    <span class="n">optim</span><span class="o">=</span><span class="p">{</span>
+        <span class="s2">&quot;optimizer&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;Adam&quot;</span><span class="p">,</span> <span class="s2">&quot;lr&quot;</span><span class="p">:</span> <span class="mf">0.001</span><span class="p">},</span>
+        <span class="s2">&quot;scheduler&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;CosineAnnealingLR&quot;</span><span class="p">},</span>
+        <span class="s2">&quot;interval&quot;</span><span class="p">:</span> <span class="s2">&quot;epoch&quot;</span>
+    <span class="p">}</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<p>Or define your own custom forward:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">batch</span><span class="p">,</span> <span class="n">stage</span><span class="p">):</span>
+    <span class="n">out</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">batch</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+        <span class="c1"># Multi-view training - batch is a list of view dicts</span>
+        <span class="n">embeddings</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">backbone</span><span class="p">(</span><span class="n">view</span><span class="p">[</span><span class="s2">&quot;image&quot;</span><span class="p">])</span> <span class="k">for</span> <span class="n">view</span> <span class="ow">in</span> <span class="n">batch</span><span class="p">]</span>
+        <span class="n">out</span><span class="p">[</span><span class="s2">&quot;embedding&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">cat</span><span class="p">(</span><span class="n">embeddings</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">training</span><span class="p">:</span>
+            <span class="n">projections</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">projector</span><span class="p">(</span><span class="n">emb</span><span class="p">)</span> <span class="k">for</span> <span class="n">emb</span> <span class="ow">in</span> <span class="n">embeddings</span><span class="p">]</span>
+            <span class="n">out</span><span class="p">[</span><span class="s2">&quot;loss&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">simclr_loss</span><span class="p">(</span><span class="n">projections</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">projections</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c1"># Single-view validation</span>
+        <span class="n">out</span><span class="p">[</span><span class="s2">&quot;embedding&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">backbone</span><span class="p">(</span><span class="n">batch</span><span class="p">[</span><span class="s2">&quot;image&quot;</span><span class="p">])</span>
+
+    <span class="k">return</span> <span class="n">out</span>
+</pre></div>
+</div>
+<p><strong>Key points:</strong></p>
+<ul class="simple">
+<li><p>The <code class="docutils literal notranslate"><span class="pre">forward</span></code> method defines both the loss and any quantities to monitor</p></li>
+<li><p>No need to override <code class="docutils literal notranslate"><span class="pre">training_step</span></code>, <code class="docutils literal notranslate"><span class="pre">validation_step</span></code>, etc.</p></li>
+<li><p>Return a dictionary with a <code class="docutils literal notranslate"><span class="pre">&quot;loss&quot;</span></code> key for training</p></li>
+<li><p>All model components are passed as kwargs to <code class="docutils literal notranslate"><span class="pre">spt.Module</span></code></p></li>
+</ul>
+</section>
+<section id="callbacks">
+<h3>3 - Callbacks<a class="headerlink" href="#callbacks" title="Link to this heading">#</a></h3>
+<p>Monitor and evaluate your models in real-time during training. Callbacks are key ingredients of <code class="docutils literal notranslate"><span class="pre">stable-pretraining</span></code>, providing rich insights without interrupting your training flow:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Monitor SSL representations with a linear probe</span>
+<span class="n">linear_probe</span> <span class="o">=</span> <span class="n">spt</span><span class="o">.</span><span class="n">callbacks</span><span class="o">.</span><span class="n">OnlineProbe</span><span class="p">(</span>
+    <span class="n">name</span><span class="o">=</span><span class="s2">&quot;linear_probe&quot;</span><span class="p">,</span>  <span class="c1"># Useful for retrieving metrics and values in logging</span>
+    <span class="nb">input</span><span class="o">=</span><span class="s2">&quot;embedding&quot;</span><span class="p">,</span>  <span class="c1"># Which output from forward to monitor</span>
+    <span class="n">target</span><span class="o">=</span><span class="s2">&quot;label&quot;</span><span class="p">,</span>      <span class="c1"># Ground truth from batch</span>
+    <span class="n">probe</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="mi">512</span><span class="p">,</span> <span class="mi">10</span><span class="p">),</span>
+    <span class="n">loss_fn</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">CrossEntropyLoss</span><span class="p">(),</span>
+    <span class="n">metrics</span><span class="o">=</span><span class="p">{</span>
+        <span class="s2">&quot;top1&quot;</span><span class="p">:</span> <span class="n">torchmetrics</span><span class="o">.</span><span class="n">classification</span><span class="o">.</span><span class="n">MulticlassAccuracy</span><span class="p">(</span><span class="mi">10</span><span class="p">),</span>
+        <span class="s2">&quot;top5&quot;</span><span class="p">:</span> <span class="n">torchmetrics</span><span class="o">.</span><span class="n">classification</span><span class="o">.</span><span class="n">MulticlassAccuracy</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="n">top_k</span><span class="o">=</span><span class="mi">5</span><span class="p">),</span>
+    <span class="p">},</span>
+<span class="p">)</span>
+
+<span class="c1"># Track representation quality with KNN evaluation</span>
+<span class="n">knn_probe</span> <span class="o">=</span> <span class="n">spt</span><span class="o">.</span><span class="n">callbacks</span><span class="o">.</span><span class="n">OnlineKNN</span><span class="p">(</span>
+    <span class="n">name</span><span class="o">=</span><span class="s2">&quot;knn_probe&quot;</span><span class="p">,</span>
+    <span class="nb">input</span><span class="o">=</span><span class="s2">&quot;embedding&quot;</span><span class="p">,</span>
+    <span class="n">target</span><span class="o">=</span><span class="s2">&quot;label&quot;</span><span class="p">,</span>
+    <span class="n">queue_length</span><span class="o">=</span><span class="mi">20000</span><span class="p">,</span>
+    <span class="n">k</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<p>Callbacks are powered by an intelligent queue management system that automatically shares memory between callbacks monitoring the same data thus eliminating redundant computations.</p>
+<p><strong>Why callbacks matter:</strong> Get real-time feedback on representation quality, catch issues like collapse early, and track multiple metrics simultaneously for deeper insights.</p>
+</section>
+<section id="trainer">
+<h3>4 - Trainer<a class="headerlink" href="#trainer" title="Link to this heading">#</a></h3>
+<p>Orchestrate everything together with PyTorch Lightning’s <code class="docutils literal notranslate"><span class="pre">Trainer</span></code>:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">trainer</span> <span class="o">=</span> <span class="n">pl</span><span class="o">.</span><span class="n">Trainer</span><span class="p">(</span>
+    <span class="n">max_epochs</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+    <span class="n">num_sanity_val_steps</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+    <span class="n">callbacks</span><span class="o">=</span><span class="p">[</span><span class="n">linear_probe</span><span class="p">,</span> <span class="n">knn_probe</span><span class="p">,</span> <span class="n">rankme</span><span class="p">],</span>  <span class="c1"># Your monitoring callbacks</span>
+    <span class="n">precision</span><span class="o">=</span><span class="s2">&quot;16-mixed&quot;</span><span class="p">,</span>
+    <span class="n">logger</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">enable_checkpointing</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">manager</span> <span class="o">=</span> <span class="n">spt</span><span class="o">.</span><span class="n">Manager</span><span class="p">(</span><span class="n">trainer</span><span class="o">=</span><span class="n">trainer</span><span class="p">,</span> <span class="n">module</span><span class="o">=</span><span class="n">module</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">)</span>
+<span class="n">manager</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>Once configured, the <code class="docutils literal notranslate"><span class="pre">Manager</span></code> connects all components and handles the training loop with precise logging and monitoring (optional).</p>
+</section>
+</section>
+<section id="complete-example">
+<h2>Complete Example<a class="headerlink" href="#complete-example" title="Link to this heading">#</a></h2>
+<details>
+<summary>SimCLR on CIFAR-10</summary>
+<p>This example demonstrates the key features of <code class="docutils literal notranslate"><span class="pre">stable-pretraining</span></code>: dictionary-structured data, unified forward function, and rich monitoring through callbacks.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">lightning</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pl</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">torchmetrics</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">torchvision</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">torch</span><span class="w"> </span><span class="kn">import</span> <span class="n">nn</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">lightning.pytorch.loggers</span><span class="w"> </span><span class="kn">import</span> <span class="n">WandbLogger</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">stable_pretraining</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">spt</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">stable_pretraining</span><span class="w"> </span><span class="kn">import</span> <span class="n">forward</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">stable_pretraining.data</span><span class="w"> </span><span class="kn">import</span> <span class="n">transforms</span>
+
+<span class="c1"># Define augmentations for SimCLR (creates 2 views of each image)</span>
+<span class="n">simclr_transform</span> <span class="o">=</span> <span class="n">transforms</span><span class="o">.</span><span class="n">MultiViewTransform</span><span class="p">(</span>
+    <span class="p">[</span>
+        <span class="n">transforms</span><span class="o">.</span><span class="n">Compose</span><span class="p">(</span>
+            <span class="n">transforms</span><span class="o">.</span><span class="n">RGB</span><span class="p">(),</span>
+            <span class="n">transforms</span><span class="o">.</span><span class="n">RandomResizedCrop</span><span class="p">((</span><span class="mi">32</span><span class="p">,</span> <span class="mi">32</span><span class="p">),</span> <span class="n">scale</span><span class="o">=</span><span class="p">(</span><span class="mf">0.2</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)),</span>
+            <span class="n">transforms</span><span class="o">.</span><span class="n">RandomHorizontalFlip</span><span class="p">(</span><span class="n">p</span><span class="o">=</span><span class="mf">0.5</span><span class="p">),</span>
+            <span class="n">transforms</span><span class="o">.</span><span class="n">ColorJitter</span><span class="p">(</span><span class="n">brightness</span><span class="o">=</span><span class="mf">0.4</span><span class="p">,</span> <span class="n">contrast</span><span class="o">=</span><span class="mf">0.4</span><span class="p">,</span> <span class="n">saturation</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span> <span class="n">hue</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">p</span><span class="o">=</span><span class="mf">0.8</span><span class="p">),</span>
+            <span class="n">transforms</span><span class="o">.</span><span class="n">RandomGrayscale</span><span class="p">(</span><span class="n">p</span><span class="o">=</span><span class="mf">0.2</span><span class="p">),</span>
+            <span class="n">transforms</span><span class="o">.</span><span class="n">ToImage</span><span class="p">(</span><span class="o">**</span><span class="n">spt</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">static</span><span class="o">.</span><span class="n">CIFAR10</span><span class="p">),</span>
+        <span class="p">),</span>
+        <span class="c1"># Second view with slightly different augmentations</span>
+        <span class="n">transforms</span><span class="o">.</span><span class="n">Compose</span><span class="p">(</span>
+            <span class="n">transforms</span><span class="o">.</span><span class="n">RGB</span><span class="p">(),</span>
+            <span class="n">transforms</span><span class="o">.</span><span class="n">RandomResizedCrop</span><span class="p">((</span><span class="mi">32</span><span class="p">,</span> <span class="mi">32</span><span class="p">),</span> <span class="n">scale</span><span class="o">=</span><span class="p">(</span><span class="mf">0.08</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)),</span>
+            <span class="n">transforms</span><span class="o">.</span><span class="n">RandomHorizontalFlip</span><span class="p">(</span><span class="n">p</span><span class="o">=</span><span class="mf">0.5</span><span class="p">),</span>
+            <span class="n">transforms</span><span class="o">.</span><span class="n">ColorJitter</span><span class="p">(</span><span class="n">brightness</span><span class="o">=</span><span class="mf">0.4</span><span class="p">,</span> <span class="n">contrast</span><span class="o">=</span><span class="mf">0.4</span><span class="p">,</span> <span class="n">saturation</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span> <span class="n">hue</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">p</span><span class="o">=</span><span class="mf">0.8</span><span class="p">),</span>
+            <span class="n">transforms</span><span class="o">.</span><span class="n">RandomGrayscale</span><span class="p">(</span><span class="n">p</span><span class="o">=</span><span class="mf">0.2</span><span class="p">),</span>
+            <span class="n">transforms</span><span class="o">.</span><span class="n">RandomSolarize</span><span class="p">(</span><span class="n">threshold</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">p</span><span class="o">=</span><span class="mf">0.2</span><span class="p">),</span>
+            <span class="n">transforms</span><span class="o">.</span><span class="n">ToImage</span><span class="p">(</span><span class="o">**</span><span class="n">spt</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">static</span><span class="o">.</span><span class="n">CIFAR10</span><span class="p">),</span>
+        <span class="p">),</span>
+    <span class="p">]</span>
+<span class="p">)</span>
+
+<span class="c1"># Load CIFAR-10 and wrap in dictionary format</span>
+<span class="n">cifar_train</span> <span class="o">=</span> <span class="n">torchvision</span><span class="o">.</span><span class="n">datasets</span><span class="o">.</span><span class="n">CIFAR10</span><span class="p">(</span><span class="n">root</span><span class="o">=</span><span class="s2">&quot;./data&quot;</span><span class="p">,</span> <span class="n">train</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">download</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">cifar_val</span> <span class="o">=</span> <span class="n">torchvision</span><span class="o">.</span><span class="n">datasets</span><span class="o">.</span><span class="n">CIFAR10</span><span class="p">(</span><span class="n">root</span><span class="o">=</span><span class="s2">&quot;./data&quot;</span><span class="p">,</span> <span class="n">train</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">download</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+<span class="n">train_dataset</span> <span class="o">=</span> <span class="n">spt</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">FromTorchDataset</span><span class="p">(</span>
+    <span class="n">cifar_train</span><span class="p">,</span>
+    <span class="n">names</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;image&quot;</span><span class="p">,</span> <span class="s2">&quot;label&quot;</span><span class="p">],</span>  <span class="c1"># Convert tuple to dictionary</span>
+    <span class="n">transform</span><span class="o">=</span><span class="n">simclr_transform</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="n">val_dataset</span> <span class="o">=</span> <span class="n">spt</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">FromTorchDataset</span><span class="p">(</span>
+    <span class="n">cifar_val</span><span class="p">,</span>
+    <span class="n">names</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;image&quot;</span><span class="p">,</span> <span class="s2">&quot;label&quot;</span><span class="p">],</span>
+    <span class="n">transform</span><span class="o">=</span><span class="n">transforms</span><span class="o">.</span><span class="n">Compose</span><span class="p">(</span>
+        <span class="n">transforms</span><span class="o">.</span><span class="n">RGB</span><span class="p">(),</span>
+        <span class="n">transforms</span><span class="o">.</span><span class="n">Resize</span><span class="p">((</span><span class="mi">32</span><span class="p">,</span> <span class="mi">32</span><span class="p">)),</span>
+        <span class="n">transforms</span><span class="o">.</span><span class="n">ToImage</span><span class="p">(</span><span class="o">**</span><span class="n">spt</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">static</span><span class="o">.</span><span class="n">CIFAR10</span><span class="p">),</span>
+    <span class="p">),</span>
+<span class="p">)</span>
+
+<span class="c1"># Create dataloaders - MultiViewTransform handles the view creation</span>
+<span class="n">train_dataloader</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">DataLoader</span><span class="p">(</span>
+    <span class="n">dataset</span><span class="o">=</span><span class="n">train_dataset</span><span class="p">,</span>
+    <span class="n">batch_size</span><span class="o">=</span><span class="mi">256</span><span class="p">,</span>
+    <span class="n">num_workers</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span>
+    <span class="n">drop_last</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">shuffle</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>  <span class="c1"># Simple shuffle, no RepeatedRandomSampler needed</span>
+<span class="p">)</span>
+
+<span class="n">val_dataloader</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">DataLoader</span><span class="p">(</span>
+    <span class="n">dataset</span><span class="o">=</span><span class="n">val_dataset</span><span class="p">,</span>
+    <span class="n">batch_size</span><span class="o">=</span><span class="mi">256</span><span class="p">,</span>
+    <span class="n">num_workers</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="n">data</span> <span class="o">=</span> <span class="n">spt</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">DataModule</span><span class="p">(</span><span class="n">train</span><span class="o">=</span><span class="n">train_dataloader</span><span class="p">,</span> <span class="n">val</span><span class="o">=</span><span class="n">val_dataloader</span><span class="p">)</span>
+
+<span class="c1"># Build model components</span>
+<span class="n">backbone</span> <span class="o">=</span> <span class="n">spt</span><span class="o">.</span><span class="n">backbone</span><span class="o">.</span><span class="n">from_torchvision</span><span class="p">(</span><span class="s2">&quot;resnet18&quot;</span><span class="p">,</span> <span class="n">low_resolution</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">backbone</span><span class="o">.</span><span class="n">fc</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Identity</span><span class="p">()</span>  <span class="c1"># Remove classification head</span>
+
+<span class="n">projector</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Sequential</span><span class="p">(</span>
+    <span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="mi">512</span><span class="p">,</span> <span class="mi">2048</span><span class="p">),</span>
+    <span class="n">nn</span><span class="o">.</span><span class="n">BatchNorm1d</span><span class="p">(</span><span class="mi">2048</span><span class="p">),</span>
+    <span class="n">nn</span><span class="o">.</span><span class="n">ReLU</span><span class="p">(</span><span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
+    <span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="mi">2048</span><span class="p">,</span> <span class="mi">2048</span><span class="p">),</span>
+    <span class="n">nn</span><span class="o">.</span><span class="n">BatchNorm1d</span><span class="p">(</span><span class="mi">2048</span><span class="p">),</span>
+    <span class="n">nn</span><span class="o">.</span><span class="n">ReLU</span><span class="p">(</span><span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
+    <span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="mi">2048</span><span class="p">,</span> <span class="mi">256</span><span class="p">),</span>
+<span class="p">)</span>
+
+<span class="c1"># Create the module using the built-in SimCLR forward function</span>
+<span class="n">module</span> <span class="o">=</span> <span class="n">spt</span><span class="o">.</span><span class="n">Module</span><span class="p">(</span>
+    <span class="n">backbone</span><span class="o">=</span><span class="n">backbone</span><span class="p">,</span>
+    <span class="n">projector</span><span class="o">=</span><span class="n">projector</span><span class="p">,</span>
+    <span class="n">forward</span><span class="o">=</span><span class="n">forward</span><span class="o">.</span><span class="n">simclr_forward</span><span class="p">,</span>  <span class="c1"># Use the built-in forward function</span>
+    <span class="n">simclr_loss</span><span class="o">=</span><span class="n">spt</span><span class="o">.</span><span class="n">losses</span><span class="o">.</span><span class="n">NTXEntLoss</span><span class="p">(</span><span class="n">temperature</span><span class="o">=</span><span class="mf">0.5</span><span class="p">),</span>
+    <span class="n">optim</span><span class="o">=</span><span class="p">{</span>
+        <span class="s2">&quot;optimizer&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;LARS&quot;</span><span class="p">,</span> <span class="s2">&quot;lr&quot;</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span> <span class="s2">&quot;weight_decay&quot;</span><span class="p">:</span> <span class="mf">1e-6</span><span class="p">},</span>
+        <span class="s2">&quot;scheduler&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;LinearWarmupCosineAnnealing&quot;</span><span class="p">},</span>
+        <span class="s2">&quot;interval&quot;</span><span class="p">:</span> <span class="s2">&quot;epoch&quot;</span><span class="p">,</span>
+    <span class="p">},</span>
+<span class="p">)</span>
+
+<span class="c1"># Add callbacks for monitoring performance during training</span>
+<span class="n">linear_probe</span> <span class="o">=</span> <span class="n">spt</span><span class="o">.</span><span class="n">callbacks</span><span class="o">.</span><span class="n">OnlineProbe</span><span class="p">(</span>
+    <span class="n">name</span><span class="o">=</span><span class="s2">&quot;linear_probe&quot;</span><span class="p">,</span>
+    <span class="nb">input</span><span class="o">=</span><span class="s2">&quot;embedding&quot;</span><span class="p">,</span>
+    <span class="n">target</span><span class="o">=</span><span class="s2">&quot;label&quot;</span><span class="p">,</span>
+    <span class="n">probe</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="mi">512</span><span class="p">,</span> <span class="mi">10</span><span class="p">),</span>
+    <span class="n">loss_fn</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">CrossEntropyLoss</span><span class="p">(),</span>
+    <span class="n">metrics</span><span class="o">=</span><span class="p">{</span>
+        <span class="s2">&quot;top1&quot;</span><span class="p">:</span> <span class="n">torchmetrics</span><span class="o">.</span><span class="n">classification</span><span class="o">.</span><span class="n">MulticlassAccuracy</span><span class="p">(</span><span class="mi">10</span><span class="p">),</span>
+        <span class="s2">&quot;top5&quot;</span><span class="p">:</span> <span class="n">torchmetrics</span><span class="o">.</span><span class="n">classification</span><span class="o">.</span><span class="n">MulticlassAccuracy</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="n">top_k</span><span class="o">=</span><span class="mi">5</span><span class="p">),</span>
+    <span class="p">},</span>
+<span class="p">)</span>
+
+<span class="n">knn_probe</span> <span class="o">=</span> <span class="n">spt</span><span class="o">.</span><span class="n">callbacks</span><span class="o">.</span><span class="n">OnlineKNN</span><span class="p">(</span>
+    <span class="n">name</span><span class="o">=</span><span class="s2">&quot;knn_probe&quot;</span><span class="p">,</span>
+    <span class="nb">input</span><span class="o">=</span><span class="s2">&quot;embedding&quot;</span><span class="p">,</span>
+    <span class="n">target</span><span class="o">=</span><span class="s2">&quot;label&quot;</span><span class="p">,</span>
+    <span class="n">queue_length</span><span class="o">=</span><span class="mi">20000</span><span class="p">,</span>
+    <span class="n">metrics</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;accuracy&quot;</span><span class="p">:</span> <span class="n">torchmetrics</span><span class="o">.</span><span class="n">classification</span><span class="o">.</span><span class="n">MulticlassAccuracy</span><span class="p">(</span><span class="mi">10</span><span class="p">)},</span>
+    <span class="n">input_dim</span><span class="o">=</span><span class="mi">512</span><span class="p">,</span>
+    <span class="n">k</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="c1"># Configure training</span>
+<span class="n">trainer</span> <span class="o">=</span> <span class="n">pl</span><span class="o">.</span><span class="n">Trainer</span><span class="p">(</span>
+    <span class="n">max_epochs</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span>
+    <span class="n">callbacks</span><span class="o">=</span><span class="p">[</span><span class="n">knn_probe</span><span class="p">,</span> <span class="n">linear_probe</span><span class="p">],</span>  <span class="c1"># Monitor SSL quality in real-time</span>
+    <span class="n">precision</span><span class="o">=</span><span class="s2">&quot;16-mixed&quot;</span><span class="p">,</span>
+    <span class="n">logger</span><span class="o">=</span><span class="n">WandbLogger</span><span class="p">(</span><span class="n">project</span><span class="o">=</span><span class="s2">&quot;cifar10-simclr&quot;</span><span class="p">),</span>
+<span class="p">)</span>
+
+<span class="c1"># Launch training</span>
+<span class="n">manager</span> <span class="o">=</span> <span class="n">spt</span><span class="o">.</span><span class="n">Manager</span><span class="p">(</span><span class="n">trainer</span><span class="o">=</span><span class="n">trainer</span><span class="p">,</span> <span class="n">module</span><span class="o">=</span><span class="n">module</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">)</span>
+<span class="n">manager</span><span class="p">()</span>
+</pre></div>
+</div>
+</details>
+</section>
+<section id="quick-start-with-spt-cli">
+<h2>🚀 Quick Start with <code class="docutils literal notranslate"><span class="pre">spt</span></code> CLI<a class="headerlink" href="#quick-start-with-spt-cli" title="Link to this heading">#</a></h2>
+<p>The <code class="docutils literal notranslate"><span class="pre">spt</span></code> command launches training from YAML configuration files using Hydra.</p>
+<p><strong>Note:</strong> <code class="docutils literal notranslate"><span class="pre">spt</span></code> requires YAML configs. If you have Python-based configs, you can:</p>
+<ul class="simple">
+<li><p>Convert them to YAML format where each component uses <code class="docutils literal notranslate"><span class="pre">_target_</span></code> to specify the importable class/function</p></li>
+<li><p>See <code class="docutils literal notranslate"><span class="pre">examples/simclr_cifar10_config.yaml</span></code> for the structure and syntax</p></li>
+</ul>
+<section id="local-training">
+<h3>Local Training<a class="headerlink" href="#local-training" title="Link to this heading">#</a></h3>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Run with a config file</span>
+spt<span class="w"> </span>examples/simclr_cifar10_config.yaml
+
+<span class="c1"># With parameter overrides</span>
+spt<span class="w"> </span>examples/simclr_cifar10_config.yaml<span class="w"> </span>trainer.max_epochs<span class="o">=</span><span class="m">50</span><span class="w"> </span>module.optim.lr<span class="o">=</span><span class="m">0</span>.01
+
+<span class="c1"># Run from any directory - supports absolute and relative paths</span>
+spt<span class="w"> </span>../configs/my_config.yaml
+spt<span class="w"> </span>/path/to/config.yaml
+</pre></div>
+</div>
+</section>
+<section id="slurm-cluster-training">
+<h3>SLURM Cluster Training<a class="headerlink" href="#slurm-cluster-training" title="Link to this heading">#</a></h3>
+<p>For training on SLURM clusters, use the <code class="docutils literal notranslate"><span class="pre">-m</span></code> flag to enable multirun mode:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Use the provided SLURM template (customize partition/QOS in the file)</span>
+spt<span class="w"> </span>examples/simclr_cifar10_slurm.yaml<span class="w"> </span>-m
+
+<span class="c1"># Override SLURM parameters via command line</span>
+spt<span class="w"> </span>examples/simclr_cifar10_slurm.yaml<span class="w"> </span>-m<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>hydra.launcher.partition<span class="o">=</span>gpu<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>hydra.launcher.qos<span class="o">=</span>normal<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>hydra.launcher.timeout_min<span class="o">=</span><span class="m">720</span>
+</pre></div>
+</div>
+<p>The SLURM template (<code class="docutils literal notranslate"><span class="pre">examples/simclr_cifar10_slurm.yaml</span></code>) includes placeholders for cluster-specific settings. Either modify the file directly or override values via command line.</p>
+</section>
+</section>
+<section id="installation">
+<h2>Installation<a class="headerlink" href="#installation" title="Link to this heading">#</a></h2>
+<p>The library is not yet available on PyPI. You can install it from the source code, as follows.</p>
+<ol class="arabic">
+<li><details><summary>conda (optional)</summary>
+<p>First use your favorite environment manager and install your favorite pytorch version, we provide an example with conda</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">wget</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">repo</span><span class="o">.</span><span class="n">anaconda</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">miniconda</span><span class="o">/</span><span class="n">Miniconda3</span><span class="o">-</span><span class="n">latest</span><span class="o">-</span><span class="n">Linux</span><span class="o">-</span><span class="n">x86_64</span><span class="o">.</span><span class="n">sh</span>
+<span class="n">bash</span> <span class="n">Miniconda3</span><span class="o">-</span><span class="n">latest</span><span class="o">-</span><span class="n">Linux</span><span class="o">-</span><span class="n">x86_64</span><span class="o">.</span><span class="n">sh</span>
+</pre></div>
+</div>
+<p>follow installation instructions… once completed, create your environment</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">conda</span> <span class="n">create</span> <span class="o">-</span><span class="n">n</span> <span class="n">my_env</span> <span class="n">python</span><span class="o">=</span><span class="mf">3.11</span>
+</pre></div>
+</div>
+<p>with your environment name (here <code class="docutils literal notranslate"><span class="pre">my_env</span></code>) and your favorite Python version (here, <code class="docutils literal notranslate"><span class="pre">3.11</span></code>). Once completed, make sure to activate your environment (<code class="docutils literal notranslate"><span class="pre">conda</span> <span class="pre">activate</span> <span class="pre">my_env</span></code>) before proceeding to the next steps!</p>
+</li>
+</ol>
+  </details>
+<ol class="arabic" start="2">
+<li><p>Pytorch and our library (we recommend using <code class="docutils literal notranslate"><span class="pre">uv</span></code> for quicker package management):</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip3<span class="w"> </span>install<span class="w"> </span>uv
+uv<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>torch<span class="w"> </span>torchvision<span class="w"> </span>torchaudio
+uv<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </span>.<span class="w">  </span><span class="c1"># Core dependencies only</span>
+</pre></div>
+</div>
+<p>For optional features (vision models, experiment tracking, cluster support, etc.):</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>uv<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </span><span class="s2">&quot;.[vision,tracking]&quot;</span><span class="w">  </span><span class="c1"># Example: add vision models and wandb</span>
+uv<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </span><span class="s2">&quot;.[all]&quot;</span><span class="w">  </span><span class="c1"># Or install all optional dependencies</span>
+</pre></div>
+</div>
+<p>See <code class="docutils literal notranslate"><span class="pre">pyproject.toml</span></code> for available dependency groups (<code class="docutils literal notranslate"><span class="pre">vision</span></code>, <code class="docutils literal notranslate"><span class="pre">tracking</span></code>, <code class="docutils literal notranslate"><span class="pre">cluster</span></code>, <code class="docutils literal notranslate"><span class="pre">visualization</span></code>, <code class="docutils literal notranslate"><span class="pre">datasets</span></code>, <code class="docutils literal notranslate"><span class="pre">extras</span></code>, <code class="docutils literal notranslate"><span class="pre">dev</span></code>, <code class="docutils literal notranslate"><span class="pre">doc</span></code>).</p>
+<p>If you do not want to use uv, simply remove it from the above commands.</p>
+</li>
+<li><p>API login (optional)</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">wandb</span> <span class="n">login</span>
+<span class="n">huggingface</span><span class="o">-</span><span class="n">cli</span> <span class="n">login</span>
+</pre></div>
+</div>
+</li>
+<li><p>LATEX support in Matplotlib (optional)</p>
+<ol class="arabic">
+<li><details>
+<summary>Install the LaTex font (Computer Modern)</summary>
+<ul>
+<li><p>we provide the ttf files <a class="reference internal" href="#assets/cm-unicode-0.7.0%202/"><span class="xref myst">in the repo</span></a> to make things simple</p></li>
+<li><p>create your local folder (if not present) and copy the ttf files there</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">mkdir</span> <span class="pre">-p</span> <span class="pre">~/.local/share/fonts</span> </code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">cp</span> <span class="pre">assets/cm-unicode-0.7.0\</span> <span class="pre">2/*ttf</span> <span class="pre">~/.local/share/fonts/</span></code></p></li>
+</ul>
+</li>
+<li><p>refresh the font cache with <code class="docutils literal notranslate"><span class="pre">fc-cache</span> <span class="pre">-f</span> <span class="pre">-v</span></code></p></li>
+<li><p>validate that the fonts are listed in your system with <code class="docutils literal notranslate"><span class="pre">fc-list</span> <span class="pre">|</span> <span class="pre">grep</span> <span class="pre">cmu</span></code></p></li>
+<li><p>refresh matplotlib cache</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">shutil</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib</span>
+
+<span class="n">shutil</span><span class="o">.</span><span class="n">rmtree</span><span class="p">(</span><span class="n">matplotlib</span><span class="o">.</span><span class="n">get_cachedir</span><span class="p">())</span>
+</pre></div>
+</div>
+</li>
+</ul>
+</details>
+</li>
+<li><details>
+ <summary>Install the Tex compiler (optional, if not available on your system)</summary>
+<ul class="simple">
+<li><p>install texlive locally following https://tug.org/texlive/quickinstall.html#running where you can use <code class="docutils literal notranslate"><span class="pre">-texdir</span> <span class="pre">your_path</span></code> to install to a local path (so you don’t need sudo privileges)</p></li>
+<li><p>follow the instructions at the end of the installation to edit the PATH variables. If in the above step you used <code class="docutils literal notranslate"><span class="pre">-texdir</span> <span class="pre">~/texdir</span></code> then the path to add should be like <code class="docutils literal notranslate"><span class="pre">TEXDIR_PATH=/private/home/$USER/texdir/bin/x86_64-linux</span></code>. You can use your favorite method such as</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">export</span> <span class="pre">PATH=&quot;$TEXDIR_PATH:$PATH&quot;</span></code> for local session</p></li>
+<li><p>adding <code class="docutils literal notranslate"><span class="pre">export</span> <span class="pre">PATH=&quot;$TEXDIR_PATH:$PATH&quot;</span></code> to your <code class="docutils literal notranslate"><span class="pre">.bashrc</span></code></p></li>
+<li><p>run <code class="docutils literal notranslate"><span class="pre">conda</span> <span class="pre">env</span> <span class="pre">config</span> <span class="pre">vars</span> <span class="pre">set</span> <span class="pre">PATH=&quot;$TEXDIR_PATH:$PATH&quot;</span></code> once for it to be set within your conda env</p></li>
+<li><p>IMPORTANT: if the above is not done you will see an error akin to <code class="docutils literal notranslate"><span class="pre">!</span> <span class="pre">LaTeX</span> <span class="pre">Error:</span> <span class="pre">File</span> <span class="pre">type1ec.sty</span> <span class="pre">not</span> <span class="pre">found.</span></code></p></li>
+</ul>
+</li>
+<li><p>make sure inside the conde environment that you point to the right binaries e.g. <code class="docutils literal notranslate"><span class="pre">whereis</span> <span class="pre">latex</span></code> and <code class="docutils literal notranslate"><span class="pre">whereis</span> <span class="pre">mktexfmt</span></code></p></li>
+<li><p>If at some point there is an error that the file <code class="docutils literal notranslate"><span class="pre">latex.fmt</span></code> is not found. You can generate it with</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">pdftex</span> <span class="pre">-ini</span>&#160;&#160; <span class="pre">-jobname=latex</span> <span class="pre">-progname=latex</span> <span class="pre">-translate-file=cp227.tcx</span> <span class="pre">*latex.ini</span></code></p></li>
+<li><p>or (unsure) <code class="docutils literal notranslate"><span class="pre">fmtutil-sys</span> <span class="pre">--all</span></code></p></li>
+</ul>
+</li>
+</ul>
+ </details>
+</li>
+<li><details>
+ <summary>rc config (optional)</summary>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">font</span><span class="o">.</span><span class="n">family</span><span class="p">:</span> <span class="n">serif</span>
+<span class="n">font</span><span class="o">.</span><span class="n">serif</span><span class="p">:</span> <span class="n">cmr10</span>
+<span class="n">font</span><span class="o">.</span><span class="n">sans</span><span class="o">-</span><span class="n">serif</span><span class="p">:</span> <span class="n">cmss10</span>
+<span class="n">font</span><span class="o">.</span><span class="n">monospace</span><span class="p">:</span> <span class="n">cmtt10</span>
+
+<span class="n">text</span><span class="o">.</span><span class="n">usetex</span><span class="p">:</span> <span class="kc">True</span>
+<span class="n">text</span><span class="o">.</span><span class="n">latex</span><span class="o">.</span><span class="n">preamble</span><span class="p">:</span> \<span class="n">usepackage</span><span class="p">{</span><span class="n">amssymb</span><span class="p">}</span> \<span class="n">usepackage</span><span class="p">{</span><span class="n">amsmath</span><span class="p">}</span> \<span class="n">usepackage</span><span class="p">{</span><span class="n">bm</span><span class="p">}</span>
+
+<span class="n">xtick</span><span class="o">.</span><span class="n">labelsize</span><span class="p">:</span> <span class="mi">14</span>
+<span class="n">ytick</span><span class="o">.</span><span class="n">labelsize</span><span class="p">:</span> <span class="mi">14</span>
+<span class="n">legend</span><span class="o">.</span><span class="n">fontsize</span><span class="p">:</span> <span class="mi">14</span>
+<span class="n">axes</span><span class="o">.</span><span class="n">labelsize</span><span class="p">:</span> <span class="mi">16</span>
+<span class="n">axes</span><span class="o">.</span><span class="n">titlesize</span><span class="p">:</span> <span class="mi">16</span>
+<span class="n">axes</span><span class="o">.</span><span class="n">formatter</span><span class="o">.</span><span class="n">use_mathtext</span><span class="p">:</span> <span class="kc">True</span>
+</pre></div>
+</div>
+<p>which can be written to a file, e.g., <code class="docutils literal notranslate"><span class="pre">~/.config/matplotlib/matplotlibrc</span></code> or set via <code class="docutils literal notranslate"><span class="pre">rc</span></code> in your script directly. See here for more details.</p>
+ </details>
+</li>
+<li><details>
+ <summary>Example of matplotlib script to run for a quick test (optional)</summary>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">matplotlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">rc</span>
+<span class="n">rc</span><span class="p">(</span><span class="s1">&#39;font&#39;</span><span class="p">,</span><span class="o">**</span><span class="p">{</span><span class="s1">&#39;family&#39;</span><span class="p">:</span><span class="s1">&#39;sans-serif&#39;</span><span class="p">,</span><span class="s1">&#39;sans-serif&#39;</span><span class="p">:[</span><span class="s1">&#39;Helvetica&#39;</span><span class="p">]})</span>
+<span class="n">rc</span><span class="p">(</span><span class="s1">&#39;text&#39;</span><span class="p">,</span> <span class="n">usetex</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
+
+
+<span class="n">t</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span> <span class="o">+</span> <span class="mf">0.01</span><span class="p">,</span> <span class="mf">0.01</span><span class="p">)</span>
+<span class="n">s</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="mi">4</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">t</span><span class="p">)</span> <span class="o">+</span> <span class="mi">2</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">rc</span><span class="p">(</span><span class="s1">&#39;text&#39;</span><span class="p">,</span> <span class="n">usetex</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">rc</span><span class="p">(</span><span class="s1">&#39;font&#39;</span><span class="p">,</span> <span class="n">family</span><span class="o">=</span><span class="s1">&#39;serif&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">s</span><span class="p">)</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;\textbf</span><span class="si">{time}</span><span class="s1"> (s)&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;\textit</span><span class="si">{voltage}</span><span class="s1"> (mV)&#39;</span><span class="p">,</span><span class="n">fontsize</span><span class="o">=</span><span class="mi">16</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;\TeX\ is Number &quot;</span>
+          <span class="sa">r</span><span class="s2">&quot;$\displaystyle\sum_{n=1}^\infty\frac{-e^{i\pi}}{2^n}$!&quot;</span><span class="p">,</span>
+          <span class="n">fontsize</span><span class="o">=</span><span class="mi">16</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;gray&#39;</span><span class="p">)</span>
+<span class="c1"># Make room for the ridiculously large title.</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">subplots_adjust</span><span class="p">(</span><span class="n">top</span><span class="o">=</span><span class="mf">0.8</span><span class="p">)</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="s1">&#39;tex_demo&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</li>
+</ol>
+   </details>
+</li>
+</ol>
+</section>
+<section id="ways-you-can-contribute">
+<h2>Ways You Can Contribute:<a class="headerlink" href="#ways-you-can-contribute" title="Link to this heading">#</a></h2>
+<ul class="simple">
+<li><p>If you’d like to contribute new features, bug fixes, or improvements to the documentation, please refer to our <a class="reference external" href="https://rbalestr-lab.github.io/stable-pretraining.github.io/dev/contributing.html">contributing guide</a> for detailed instructions on how to get started.</p></li>
+<li><p>You can also contribute by adding new methods, datasets, or configurations that improve the current performance of a method in the <a class="reference external" href="https://github.com/rbalestr-lab/stable-pretraining/tree/main/benchmarks">benchmark section</a>.</p></li>
+</ul>
+</section>
+<section id="contributors">
+<h2>Contributors<a class="headerlink" href="#contributors" title="Link to this heading">#</a></h2>
+<p>Core contributors (in order of joining the project):</p>
+<ul class="simple">
+<li><p><a class="reference external" href="https://github.com/RandallBalestriero">Randall Balestriero</a></p></li>
+<li><p><a class="reference external" href="https://github.com/huguesva">Hugues Van Assel</a></p></li>
+<li><p><a class="reference external" href="https://github.com/sami-bg">Sami BuGhanem</a></p></li>
+<li><p><a class="reference external" href="https://github.com/lucas-maes">Lucas Maes</a></p></li>
+</ul>
+</section>
+</section>
+<div class="toctree-wrapper compound">
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">API</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="api/backbone/">stable_pretraining.backbone</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/data/">stable_pretraining.data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/forward/">stable_pretraining.forward</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/losses/">stable_pretraining.losses</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/manager/">stable_pretraining.manager</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/module/">stable_pretraining.module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/monitors/">stable_pretraining.callbacks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/optim/">stable_pretraining.optim</a></li>
+</ul>
+</div>
+
+
+                </article>
+              
+
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="right-next"
+       href="releases/"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">Releases</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+  <div class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> Contents
+  </div>
+  <nav class="bd-toc-nav page-toc">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#how">How?</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#core-structure">Core Structure</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#data">1 - Data</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#module">2 - Module</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#callbacks">3 - Callbacks</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trainer">4 - Trainer</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#complete-example">Complete Example</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#quick-start-with-spt-cli">🚀 Quick Start with <code class="docutils literal notranslate"><span class="pre">spt</span></code> CLI</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#local-training">Local Training</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#slurm-cluster-training">SLURM Cluster Training</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#installation">Installation</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#ways-you-can-contribute">Ways You Can Contribute:</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#contributors">Contributors</a></li>
+</ul>
+  </nav></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+<div class="bd-footer-content__inner container">
+  
+  <div class="footer-item">
+    
+<p class="component-author">
+By stable-pretraining team
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+
+  <p class="copyright">
+    
+      © Copyright 2024, stable-pretraining team.
+      <br/>
+    
+  </p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+</div>
+          </footer>
+        
+
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b"></script>
+<script src="_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+  <footer class="bd-footer">
+  </footer>
+  </body>
+</html>

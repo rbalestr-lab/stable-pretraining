@@ -1,0 +1,575 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../../../../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>stable_pretraining.optim.lars &#8212; stable-pretraining 0.1.dev1+g8d0b48cc3.d20251109 documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../../../_static/styles/theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="../../../../_static/styles/bootstrap.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="../../../../_static/styles/pydata-sphinx-theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+
+  
+  <link href="../../../../_static/vendor/fontawesome/6.5.2/css/all.min.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../_static/vendor/fontawesome/6.5.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../_static/vendor/fontawesome/6.5.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../_static/vendor/fontawesome/6.5.2/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=8f2a1f02" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/styles/sphinx-book-theme.css?v=eba8b062" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/sg_gallery.css?v=d2d258e8" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/sg_gallery-binder.css?v=f4aeca0c" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../../../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b" />
+<link rel="preload" as="script" href="../../../../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
+  <script src="../../../../_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+    <script src="../../../../_static/documentation_options.js?v=eff7c767"></script>
+    <script src="../../../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../../_static/scripts/sphinx-book-theme.js?v=887ef09a"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = '_modules/stable_pretraining/optim/lars';</script>
+    <link rel="index" title="Index" href="../../../../genindex/" />
+    <link rel="search" title="Search" href="../../../../search/" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-primary-sidebar-checkbox"/>
+  <label class="overlay overlay-primary" for="pst-primary-sidebar-checkbox"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-secondary-sidebar-checkbox"/>
+  <label class="overlay overlay-secondary" for="pst-secondary-sidebar-checkbox"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="../../../../search/"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search..."
+         aria-label="Search..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+        
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+    
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../../../../">
+  
+  
+  
+  
+  
+  
+    <p class="title logo__title">stable-pretraining 0.1.dev1+g8d0b48cc3.d20251109 documentation</p>
+  
+</a></div>
+        <div class="sidebar-primary-item">
+
+ <script>
+ document.write(`
+   <button class="btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script></div>
+        <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item navbar-nav active">
+        <p aria-level="2" class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../../../">stable-pretraining</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../releases/">Releases</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../contributing/">Contributing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../bibliography/">Bibliography</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">API</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../../../api/backbone/">stable_pretraining.backbone</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.backbone.MLP/">MLP</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.backbone.Resnet9/">Resnet9</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.backbone.ConvMixer/">ConvMixer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.backbone.from_timm/">from_timm</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.backbone.from_torchvision/">from_torchvision</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.backbone.set_embedding_dim/">set_embedding_dim</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.backbone.TeacherStudentWrapper/">TeacherStudentWrapper</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.backbone.EvalOnly/">EvalOnly</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.backbone.mae/">mae</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../../../api/data/">stable_pretraining.data</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.data.DataModule/">DataModule</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.data.Collator/">Collator</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.data.Dataset/">Dataset</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.data.FromTorchDataset/">FromTorchDataset</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.data.HFDataset/">HFDataset</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.data.Subset/">Subset</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.data.GMM/">GMM</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.data.MinariStepsDataset/">MinariStepsDataset</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.data.MinariEpisodeDataset/">MinariEpisodeDataset</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.data.swiss_roll/">swiss_roll</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.data.generate_perlin_noise_2d/">generate_perlin_noise_2d</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.data.perlin_noise_3d/">perlin_noise_3d</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.data.Categorical/">Categorical</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.data.ExponentialMixtureNoiseModel/">ExponentialMixtureNoiseModel</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.data.ExponentialNormalNoiseModel/">ExponentialNormalNoiseModel</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.data.RepeatedRandomSampler/">RepeatedRandomSampler</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.data.SupervisedBatchSampler/">SupervisedBatchSampler</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.data.RandomBatchSampler/">RandomBatchSampler</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.data.fold_views/">fold_views</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.data.random_split/">random_split</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.data.download/">download</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.data.bulk_download/">bulk_download</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.data.transforms/">stable_pretraining.data.transforms</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.data.dataset_stats/">stable_pretraining.data.dataset_stats</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.data.synthetic_data/">stable_pretraining.data.synthetic_data</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/forward/">stable_pretraining.forward</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../../../api/losses/">stable_pretraining.losses</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.losses.NTXEntLoss/">NTXEntLoss</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.losses.NegativeCosineSimilarity/">NegativeCosineSimilarity</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.losses.VICRegLoss/">VICRegLoss</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.losses.BarlowTwinsLoss/">BarlowTwinsLoss</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../../../api/manager/">stable_pretraining.manager</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.manager.Manager/">Manager</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../../../api/module/">stable_pretraining.module</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.module.Module/">Module</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../../../api/monitors/">stable_pretraining.callbacks</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.callbacks.OnlineProbe/">OnlineProbe</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.callbacks.OnlineKNN/">OnlineKNN</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.callbacks.OnlineWriter/">OnlineWriter</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.callbacks.RankMe/">RankMe</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.callbacks.LiDAR/">LiDAR</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.callbacks.EarlyStopping/">EarlyStopping</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.callbacks.TrainerInfo/">TrainerInfo</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.callbacks.LoggingCallback/">LoggingCallback</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.callbacks.ModuleSummary/">ModuleSummary</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.callbacks.SklearnCheckpoint/">SklearnCheckpoint</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.callbacks.ImageRetrieval/">ImageRetrieval</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../../../api/optim/">stable_pretraining.optim</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.optim.LARS/">LARS</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.optim.CosineDecayer/">CosineDecayer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.optim.LinearWarmup/">LinearWarmup</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.optim.LinearWarmupCosineAnnealing/">LinearWarmupCosineAnnealing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.optim.LinearWarmupCyclicAnnealing/">LinearWarmupCyclicAnnealing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.optim.LinearWarmupThreeStepsAnnealing/">LinearWarmupThreeStepsAnnealing</a></li>
+</ul>
+</details></li>
+</ul>
+
+    </div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+
+<div class="sbt-scroll-pixel-helper"></div>
+
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item"><button class="sidebar-toggle primary-toggle btn btn-sm" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <span class="fa-solid fa-bars"></span>
+</button></div>
+      
+    </div>
+  
+  
+    <div class="header-article-items__end">
+      
+        <div class="header-article-item">
+
+<div class="article-header-buttons">
+
+
+
+<button onclick="toggleFullScreen()"
+  class="btn btn-sm btn-fullscreen-button"
+  title="Fullscreen mode"
+  data-bs-placement="bottom" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-expand"></i>
+  </span>
+
+</button>
+
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"></i>
+  </button>
+`);
+</script>
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm pst-navbar-icon search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+  </button>
+`);
+</script>
+
+</div></div>
+      
+    </div>
+  
+</div>
+</div>
+              
+              
+
+<div id="jb-print-docs-body" class="onlyprint">
+    <h1></h1>
+    <!-- Table of contents -->
+    <div id="print-main-content">
+        <div id="jb-print-toc">
+            
+        </div>
+    </div>
+</div>
+
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <h1>Source code for stable_pretraining.optim.lars</h1><div class="highlight"><pre>
+<span></span><span class="c1"># Copied from Pytorch Lightning Bolts</span>
+<span class="c1"># (https://github.com/PyTorchLightning/lightning-bolts/blob/master/pl_bolts/optimizers/lars.py)</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">torch.optim.optimizer</span><span class="w"> </span><span class="kn">import</span> <span class="n">Optimizer</span><span class="p">,</span> <span class="n">required</span>
+
+
+<div class="viewcode-block" id="LARS">
+<a class="viewcode-back" href="../../../../stable_pretraining.optim/#stable_pretraining.optim.LARS">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">LARS</span><span class="p">(</span><span class="n">Optimizer</span><span class="p">):</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Extends SGD in PyTorch with LARS scaling from the paper.</span>
+
+<span class="sd">    Implementation based on `Large batch training of Convolutional Networks &lt;https://arxiv.org/pdf/1708.03888.pdf&gt;`_.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        params (iterable): iterable of parameters to optimize or dicts defining</span>
+<span class="sd">            parameter groups</span>
+<span class="sd">        lr (float): learning rate</span>
+<span class="sd">        momentum (float, optional): momentum factor (default: 0)</span>
+<span class="sd">        weight_decay (float, optional): weight decay (L2 penalty) (default: 0)</span>
+<span class="sd">        dampening (float, optional): dampening for momentum (default: 0)</span>
+<span class="sd">        nesterov (bool, optional): enables Nesterov momentum (default: False)</span>
+<span class="sd">        eta (float, optional): trust coefficient for computing LR (default: 0.001)</span>
+<span class="sd">        eps (float, optional): eps for division denominator (default: 1e-8)</span>
+
+<span class="sd">    Example:</span>
+<span class="sd">        &gt;&gt;&gt; model = torch.nn.Linear(10, 1)</span>
+<span class="sd">        &gt;&gt;&gt; input = torch.Tensor(10)</span>
+<span class="sd">        &gt;&gt;&gt; target = torch.Tensor([1.])</span>
+<span class="sd">        &gt;&gt;&gt; loss_fn = lambda input, target: (input - target) ** 2</span>
+<span class="sd">        &gt;&gt;&gt; #</span>
+<span class="sd">        &gt;&gt;&gt; optimizer = LARS(model.parameters(), lr=0.1, momentum=0.9)</span>
+<span class="sd">        &gt;&gt;&gt; optimizer.zero_grad()</span>
+<span class="sd">        &gt;&gt;&gt; loss_fn(model(input), target).backward()</span>
+<span class="sd">        &gt;&gt;&gt; optimizer.step()</span>
+
+<span class="sd">    .. note::</span>
+<span class="sd">        The application of momentum in the SGD part is modified according to</span>
+<span class="sd">        the PyTorch standards. LARS scaling fits into the equation in the</span>
+<span class="sd">        following fashion.</span>
+<span class="sd">        .. math::</span>
+<span class="sd">            \begin{aligned}</span>
+<span class="sd">                g_{t+1} &amp; = \text{lars_lr} * (\beta * p_{t} + g_{t+1}), \\</span>
+<span class="sd">                v_{t+1} &amp; = \\mu * v_{t} + g_{t+1}, \\</span>
+<span class="sd">                p_{t+1} &amp; = p_{t} - \text{lr} * v_{t+1},</span>
+<span class="sd">            \\end{aligned}</span>
+<span class="sd">        where :math:`p`, :math:`g`, :math:`v`, :math:`\\mu` and :math:`\beta` denote the</span>
+<span class="sd">        parameters, gradient, velocity, momentum, and weight decay respectively.</span>
+<span class="sd">        The :math:`lars_lr` is defined by Eq. 6 in the paper.</span>
+<span class="sd">        The Nesterov version is analogously modified.</span>
+
+<span class="sd">    .. warning::</span>
+<span class="sd">        Parameters with weight decay set to 0 will automatically be excluded from</span>
+<span class="sd">        layer-wise LR scaling. This is to ensure consistency with papers like SimCLR</span>
+<span class="sd">        and BYOL.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">params</span><span class="p">,</span>
+        <span class="n">lr</span><span class="o">=</span><span class="n">required</span><span class="p">,</span>
+        <span class="n">momentum</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+        <span class="n">dampening</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+        <span class="n">weight_decay</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+        <span class="n">nesterov</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">eta</span><span class="o">=</span><span class="mf">1e-3</span><span class="p">,</span>
+        <span class="n">eps</span><span class="o">=</span><span class="mf">1e-8</span><span class="p">,</span>
+        <span class="n">clip_lr</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">exclude_bias_n_norm</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="k">if</span> <span class="n">lr</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">required</span> <span class="ow">and</span> <span class="n">lr</span> <span class="o">&lt;</span> <span class="mf">0.0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Invalid learning rate: </span><span class="si">{</span><span class="n">lr</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">momentum</span> <span class="o">&lt;</span> <span class="mf">0.0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Invalid momentum value: </span><span class="si">{</span><span class="n">momentum</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">weight_decay</span> <span class="o">&lt;</span> <span class="mf">0.0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Invalid weight_decay value: </span><span class="si">{</span><span class="n">weight_decay</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="n">defaults</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
+            <span class="n">lr</span><span class="o">=</span><span class="n">lr</span><span class="p">,</span>
+            <span class="n">momentum</span><span class="o">=</span><span class="n">momentum</span><span class="p">,</span>
+            <span class="n">dampening</span><span class="o">=</span><span class="n">dampening</span><span class="p">,</span>
+            <span class="n">weight_decay</span><span class="o">=</span><span class="n">weight_decay</span><span class="p">,</span>
+            <span class="n">nesterov</span><span class="o">=</span><span class="n">nesterov</span><span class="p">,</span>
+            <span class="n">eta</span><span class="o">=</span><span class="n">eta</span><span class="p">,</span>
+            <span class="n">eps</span><span class="o">=</span><span class="n">eps</span><span class="p">,</span>
+            <span class="n">clip_lr</span><span class="o">=</span><span class="n">clip_lr</span><span class="p">,</span>
+            <span class="n">exclude_bias_n_norm</span><span class="o">=</span><span class="n">exclude_bias_n_norm</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">if</span> <span class="n">nesterov</span> <span class="ow">and</span> <span class="p">(</span><span class="n">momentum</span> <span class="o">&lt;=</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">dampening</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Nesterov momentum requires a momentum and zero dampening&quot;</span><span class="p">)</span>
+
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">defaults</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">__setstate__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">__setstate__</span><span class="p">(</span><span class="n">state</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">group</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">param_groups</span><span class="p">:</span>
+            <span class="n">group</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s2">&quot;nesterov&quot;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+
+<div class="viewcode-block" id="LARS.step">
+<a class="viewcode-back" href="../../../../stable_pretraining.optim/#stable_pretraining.optim.LARS.step">[docs]</a>
+    <span class="nd">@torch</span><span class="o">.</span><span class="n">no_grad</span><span class="p">()</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">closure</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Performs a single optimization step.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            closure (callable, optional): A closure that reevaluates the model</span>
+<span class="sd">                and returns the loss.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">loss</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="n">closure</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">with</span> <span class="n">torch</span><span class="o">.</span><span class="n">enable_grad</span><span class="p">():</span>
+                <span class="n">loss</span> <span class="o">=</span> <span class="n">closure</span><span class="p">()</span>
+
+        <span class="c1"># exclude scaling for params with 0 weight decay</span>
+        <span class="k">for</span> <span class="n">group</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">param_groups</span><span class="p">:</span>
+            <span class="n">weight_decay</span> <span class="o">=</span> <span class="n">group</span><span class="p">[</span><span class="s2">&quot;weight_decay&quot;</span><span class="p">]</span>
+            <span class="n">momentum</span> <span class="o">=</span> <span class="n">group</span><span class="p">[</span><span class="s2">&quot;momentum&quot;</span><span class="p">]</span>
+            <span class="n">dampening</span> <span class="o">=</span> <span class="n">group</span><span class="p">[</span><span class="s2">&quot;dampening&quot;</span><span class="p">]</span>
+            <span class="n">nesterov</span> <span class="o">=</span> <span class="n">group</span><span class="p">[</span><span class="s2">&quot;nesterov&quot;</span><span class="p">]</span>
+
+            <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">group</span><span class="p">[</span><span class="s2">&quot;params&quot;</span><span class="p">]:</span>
+                <span class="k">if</span> <span class="n">p</span><span class="o">.</span><span class="n">grad</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="k">continue</span>
+
+                <span class="n">d_p</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">grad</span>
+                <span class="n">p_norm</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
+                <span class="n">g_norm</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">grad</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
+
+                <span class="c1"># lars scaling + weight decay part</span>
+                <span class="k">if</span> <span class="n">p</span><span class="o">.</span><span class="n">ndim</span> <span class="o">!=</span> <span class="mi">1</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">group</span><span class="p">[</span><span class="s2">&quot;exclude_bias_n_norm&quot;</span><span class="p">]:</span>
+                    <span class="k">if</span> <span class="n">p_norm</span> <span class="o">!=</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">g_norm</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+                        <span class="n">lars_lr</span> <span class="o">=</span> <span class="n">p_norm</span> <span class="o">/</span> <span class="p">(</span>
+                            <span class="n">g_norm</span> <span class="o">+</span> <span class="n">p_norm</span> <span class="o">*</span> <span class="n">weight_decay</span> <span class="o">+</span> <span class="n">group</span><span class="p">[</span><span class="s2">&quot;eps&quot;</span><span class="p">]</span>
+                        <span class="p">)</span>
+                        <span class="n">lars_lr</span> <span class="o">*=</span> <span class="n">group</span><span class="p">[</span><span class="s2">&quot;eta&quot;</span><span class="p">]</span>
+
+                        <span class="c1"># clip lr</span>
+                        <span class="k">if</span> <span class="n">group</span><span class="p">[</span><span class="s2">&quot;clip_lr&quot;</span><span class="p">]:</span>
+                            <span class="n">lars_lr</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">lars_lr</span> <span class="o">/</span> <span class="n">group</span><span class="p">[</span><span class="s2">&quot;lr&quot;</span><span class="p">],</span> <span class="mi">1</span><span class="p">)</span>
+
+                        <span class="n">d_p</span> <span class="o">=</span> <span class="n">d_p</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="n">weight_decay</span><span class="p">)</span>
+                        <span class="n">d_p</span> <span class="o">*=</span> <span class="n">lars_lr</span>
+
+                <span class="c1"># sgd part</span>
+                <span class="k">if</span> <span class="n">momentum</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">param_state</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="p">[</span><span class="n">p</span><span class="p">]</span>
+                    <span class="k">if</span> <span class="s2">&quot;momentum_buffer&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">param_state</span><span class="p">:</span>
+                        <span class="n">buf</span> <span class="o">=</span> <span class="n">param_state</span><span class="p">[</span><span class="s2">&quot;momentum_buffer&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">clone</span><span class="p">(</span><span class="n">d_p</span><span class="p">)</span><span class="o">.</span><span class="n">detach</span><span class="p">()</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">buf</span> <span class="o">=</span> <span class="n">param_state</span><span class="p">[</span><span class="s2">&quot;momentum_buffer&quot;</span><span class="p">]</span>
+                        <span class="n">buf</span><span class="o">.</span><span class="n">mul_</span><span class="p">(</span><span class="n">momentum</span><span class="p">)</span><span class="o">.</span><span class="n">add_</span><span class="p">(</span><span class="n">d_p</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mi">1</span> <span class="o">-</span> <span class="n">dampening</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">nesterov</span><span class="p">:</span>
+                        <span class="n">d_p</span> <span class="o">=</span> <span class="n">d_p</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">buf</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="n">momentum</span><span class="p">)</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">d_p</span> <span class="o">=</span> <span class="n">buf</span>
+
+                <span class="n">p</span><span class="o">.</span><span class="n">add_</span><span class="p">(</span><span class="n">d_p</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=-</span><span class="n">group</span><span class="p">[</span><span class="s2">&quot;lr&quot;</span><span class="p">])</span>
+
+        <span class="k">return</span> <span class="n">loss</span></div>
+</div>
+
+</pre></div>
+
+                </article>
+              
+
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+<div class="bd-footer-content__inner container">
+  
+  <div class="footer-item">
+    
+<p class="component-author">
+By stable-pretraining team
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+
+  <p class="copyright">
+    
+      © Copyright 2024, stable-pretraining team.
+      <br/>
+    
+  </p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+</div>
+          </footer>
+        
+
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../../../../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b"></script>
+<script src="../../../../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+  <footer class="bd-footer">
+  </footer>
+  </body>
+</html>

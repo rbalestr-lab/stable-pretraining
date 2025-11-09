@@ -1,0 +1,718 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../../../../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>stable_pretraining.data.utils &#8212; stable-pretraining 0.1.dev1+g8d0b48cc3.d20251109 documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../../../_static/styles/theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="../../../../_static/styles/bootstrap.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="../../../../_static/styles/pydata-sphinx-theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+
+  
+  <link href="../../../../_static/vendor/fontawesome/6.5.2/css/all.min.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../_static/vendor/fontawesome/6.5.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../_static/vendor/fontawesome/6.5.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../_static/vendor/fontawesome/6.5.2/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=8f2a1f02" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/styles/sphinx-book-theme.css?v=eba8b062" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/sg_gallery.css?v=d2d258e8" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/sg_gallery-binder.css?v=f4aeca0c" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../../../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b" />
+<link rel="preload" as="script" href="../../../../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
+  <script src="../../../../_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+    <script src="../../../../_static/documentation_options.js?v=eff7c767"></script>
+    <script src="../../../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../../_static/scripts/sphinx-book-theme.js?v=887ef09a"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = '_modules/stable_pretraining/data/utils';</script>
+    <link rel="index" title="Index" href="../../../../genindex/" />
+    <link rel="search" title="Search" href="../../../../search/" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-primary-sidebar-checkbox"/>
+  <label class="overlay overlay-primary" for="pst-primary-sidebar-checkbox"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-secondary-sidebar-checkbox"/>
+  <label class="overlay overlay-secondary" for="pst-secondary-sidebar-checkbox"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="../../../../search/"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search..."
+         aria-label="Search..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+        
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+    
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../../../../">
+  
+  
+  
+  
+  
+  
+    <p class="title logo__title">stable-pretraining 0.1.dev1+g8d0b48cc3.d20251109 documentation</p>
+  
+</a></div>
+        <div class="sidebar-primary-item">
+
+ <script>
+ document.write(`
+   <button class="btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script></div>
+        <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item navbar-nav active">
+        <p aria-level="2" class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../../../">stable-pretraining</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../releases/">Releases</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../contributing/">Contributing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../bibliography/">Bibliography</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">API</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../../../api/backbone/">stable_pretraining.backbone</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.backbone.MLP/">MLP</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.backbone.Resnet9/">Resnet9</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.backbone.ConvMixer/">ConvMixer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.backbone.from_timm/">from_timm</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.backbone.from_torchvision/">from_torchvision</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.backbone.set_embedding_dim/">set_embedding_dim</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.backbone.TeacherStudentWrapper/">TeacherStudentWrapper</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.backbone.EvalOnly/">EvalOnly</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.backbone.mae/">mae</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../../../api/data/">stable_pretraining.data</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.data.DataModule/">DataModule</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.data.Collator/">Collator</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.data.Dataset/">Dataset</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.data.FromTorchDataset/">FromTorchDataset</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.data.HFDataset/">HFDataset</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.data.Subset/">Subset</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.data.GMM/">GMM</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.data.MinariStepsDataset/">MinariStepsDataset</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.data.MinariEpisodeDataset/">MinariEpisodeDataset</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.data.swiss_roll/">swiss_roll</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.data.generate_perlin_noise_2d/">generate_perlin_noise_2d</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.data.perlin_noise_3d/">perlin_noise_3d</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.data.Categorical/">Categorical</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.data.ExponentialMixtureNoiseModel/">ExponentialMixtureNoiseModel</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.data.ExponentialNormalNoiseModel/">ExponentialNormalNoiseModel</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.data.RepeatedRandomSampler/">RepeatedRandomSampler</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.data.SupervisedBatchSampler/">SupervisedBatchSampler</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.data.RandomBatchSampler/">RandomBatchSampler</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.data.fold_views/">fold_views</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.data.random_split/">random_split</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.data.download/">download</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.data.bulk_download/">bulk_download</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.data.transforms/">stable_pretraining.data.transforms</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.data.dataset_stats/">stable_pretraining.data.dataset_stats</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.data.synthetic_data/">stable_pretraining.data.synthetic_data</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/forward/">stable_pretraining.forward</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../../../api/losses/">stable_pretraining.losses</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.losses.NTXEntLoss/">NTXEntLoss</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.losses.NegativeCosineSimilarity/">NegativeCosineSimilarity</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.losses.VICRegLoss/">VICRegLoss</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.losses.BarlowTwinsLoss/">BarlowTwinsLoss</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../../../api/manager/">stable_pretraining.manager</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.manager.Manager/">Manager</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../../../api/module/">stable_pretraining.module</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.module.Module/">Module</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../../../api/monitors/">stable_pretraining.callbacks</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.callbacks.OnlineProbe/">OnlineProbe</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.callbacks.OnlineKNN/">OnlineKNN</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.callbacks.OnlineWriter/">OnlineWriter</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.callbacks.RankMe/">RankMe</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.callbacks.LiDAR/">LiDAR</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.callbacks.EarlyStopping/">EarlyStopping</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.callbacks.TrainerInfo/">TrainerInfo</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.callbacks.LoggingCallback/">LoggingCallback</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.callbacks.ModuleSummary/">ModuleSummary</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.callbacks.SklearnCheckpoint/">SklearnCheckpoint</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.callbacks.ImageRetrieval/">ImageRetrieval</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../../../api/optim/">stable_pretraining.optim</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.optim.LARS/">LARS</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.optim.CosineDecayer/">CosineDecayer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.optim.LinearWarmup/">LinearWarmup</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.optim.LinearWarmupCosineAnnealing/">LinearWarmupCosineAnnealing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.optim.LinearWarmupCyclicAnnealing/">LinearWarmupCyclicAnnealing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/gen_modules/stable_pretraining.optim.LinearWarmupThreeStepsAnnealing/">LinearWarmupThreeStepsAnnealing</a></li>
+</ul>
+</details></li>
+</ul>
+
+    </div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+
+<div class="sbt-scroll-pixel-helper"></div>
+
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item"><button class="sidebar-toggle primary-toggle btn btn-sm" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <span class="fa-solid fa-bars"></span>
+</button></div>
+      
+    </div>
+  
+  
+    <div class="header-article-items__end">
+      
+        <div class="header-article-item">
+
+<div class="article-header-buttons">
+
+
+
+<button onclick="toggleFullScreen()"
+  class="btn btn-sm btn-fullscreen-button"
+  title="Fullscreen mode"
+  data-bs-placement="bottom" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-expand"></i>
+  </span>
+
+</button>
+
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"></i>
+  </button>
+`);
+</script>
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm pst-navbar-icon search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+  </button>
+`);
+</script>
+
+</div></div>
+      
+    </div>
+  
+</div>
+</div>
+              
+              
+
+<div id="jb-print-docs-body" class="onlyprint">
+    <h1></h1>
+    <!-- Table of contents -->
+    <div id="print-main-content">
+        <div id="jb-print-toc">
+            
+        </div>
+    </div>
+</div>
+
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <h1>Source code for stable_pretraining.data.utils</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Utility functions for data manipulation and processing.</span>
+
+<span class="sd">This module provides utility functions for working with datasets, including</span>
+<span class="sd">view folding for contrastive learning and dataset splitting.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">itertools</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">math</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">warnings</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">collections.abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">Sequence</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">cast</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">torch</span><span class="w"> </span><span class="kn">import</span> <span class="n">Generator</span><span class="p">,</span> <span class="n">default_generator</span><span class="p">,</span> <span class="n">randperm</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">.datasets</span><span class="w"> </span><span class="kn">import</span> <span class="n">Dataset</span><span class="p">,</span> <span class="n">Subset</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">loguru</span><span class="w"> </span><span class="kn">import</span> <span class="n">logger</span>
+
+
+<div class="viewcode-block" id="get_num_workers">
+<a class="viewcode-back" href="../../../../stable_pretraining.data/#stable_pretraining.data.get_num_workers">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_num_workers</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Automatically determine the optimal number of DataLoader workers.</span>
+
+<span class="sd">    This function computes the ideal number of worker processes for PyTorch</span>
+<span class="sd">    DataLoaders based on available CPU resources and distributed training</span>
+<span class="sd">    configuration. It provides a zero-configuration approach that works</span>
+<span class="sd">    reliably across different environments.</span>
+
+<span class="sd">    The calculation logic:</span>
+<span class="sd">        1. Detect CPUs available to this process (respects affinity/cgroups)</span>
+<span class="sd">        2. Divide by world_size if using DDP (each rank spawns its own workers)</span>
+<span class="sd">        3. Return the result (always &gt;= 1)</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        int: Number of DataLoader workers to use. Minimum value is 1.</span>
+
+<span class="sd">    Notes:</span>
+<span class="sd">        - Uses `os.sched_getaffinity(0)` on Linux to respect CPU affinity masks</span>
+<span class="sd">          set by job schedulers (SLURM), containers (Docker), or taskset.</span>
+<span class="sd">        - Falls back to `os.cpu_count()` on macOS/Windows.</span>
+<span class="sd">        - In DDP mode, automatically divides by world_size since each process</span>
+<span class="sd">          independently spawns workers.</span>
+<span class="sd">        - Should be called AFTER distributed initialization for accurate results.</span>
+
+<span class="sd">    Examples:</span>
+<span class="sd">        &gt;&gt;&gt; # Simple usage</span>
+<span class="sd">        &gt;&gt;&gt; num_workers = get_num_workers()</span>
+<span class="sd">        &gt;&gt;&gt; loader = DataLoader(dataset, num_workers=num_workers)</span>
+
+<span class="sd">        &gt;&gt;&gt; # In a Lightning DataModule</span>
+<span class="sd">        &gt;&gt;&gt; class MyDataModule(L.LightningDataModule):</span>
+<span class="sd">        ...     def train_dataloader(self):</span>
+<span class="sd">        ...         return DataLoader(</span>
+<span class="sd">        ...             self.train_dataset,</span>
+<span class="sd">        ...             num_workers=get_num_workers(),</span>
+<span class="sd">        ...             shuffle=True,</span>
+<span class="sd">        ...         )</span>
+
+<span class="sd">        &gt;&gt;&gt; # Example outputs:</span>
+<span class="sd">        &gt;&gt;&gt; # - 16 CPUs, single GPU: returns 16</span>
+<span class="sd">        &gt;&gt;&gt; # - 32 CPUs, 4 GPUs (DDP): returns 8 per GPU</span>
+<span class="sd">        &gt;&gt;&gt; # - 8 CPUs, 8 GPUs (DDP): returns 1 per GPU</span>
+
+<span class="sd">    See Also:</span>
+<span class="sd">        - PyTorch DataLoader: https://pytorch.org/docs/stable/data.html</span>
+<span class="sd">        - CPU affinity: https://man7.org/linux/man-pages/man2/sched_setaffinity.2.html</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;🔍 Starting automatic num_workers detection&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Step 1: Detect available CPUs</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">num_cpus</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">sched_getaffinity</span><span class="p">(</span><span class="mi">0</span><span class="p">))</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;✓ Detected </span><span class="si">{</span><span class="n">num_cpus</span><span class="si">}</span><span class="s2"> CPUs via sched_getaffinity (respects affinity mask)&quot;</span>
+        <span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span>
+            <span class="s2">&quot;Using sched_getaffinity ensures we respect SLURM/Docker/cgroup limits&quot;</span>
+        <span class="p">)</span>
+    <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+        <span class="c1"># Fallback for systems without sched_getaffinity (macOS, Windows)</span>
+        <span class="n">num_cpus</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">cpu_count</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">num_cpus</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;⚠️  os.cpu_count() returned None, defaulting to 1 CPU&quot;</span><span class="p">)</span>
+            <span class="n">num_cpus</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;✓ Detected </span><span class="si">{</span><span class="n">num_cpus</span><span class="si">}</span><span class="s2"> CPUs via os.cpu_count() (fallback for non-Linux)&quot;</span>
+            <span class="p">)</span>
+
+    <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Total CPUs available to this process: </span><span class="si">{</span><span class="n">num_cpus</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Step 2: Check for distributed training</span>
+    <span class="n">world_size</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="n">rank</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">is_distributed</span> <span class="o">=</span> <span class="kc">False</span>
+
+    <span class="k">if</span> <span class="n">torch</span><span class="o">.</span><span class="n">distributed</span><span class="o">.</span><span class="n">is_available</span><span class="p">():</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span>
+            <span class="s2">&quot;torch.distributed is available, checking initialization status...&quot;</span>
+        <span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">torch</span><span class="o">.</span><span class="n">distributed</span><span class="o">.</span><span class="n">is_initialized</span><span class="p">():</span>
+            <span class="n">is_distributed</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="n">world_size</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">distributed</span><span class="o">.</span><span class="n">get_world_size</span><span class="p">()</span>
+            <span class="n">rank</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">distributed</span><span class="o">.</span><span class="n">get_rank</span><span class="p">()</span>
+
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;🌐 DDP detected: world_size=</span><span class="si">{</span><span class="n">world_size</span><span class="si">}</span><span class="s2">, rank=</span><span class="si">{</span><span class="n">rank</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Each of </span><span class="si">{</span><span class="n">world_size</span><span class="si">}</span><span class="s2"> processes will spawn its own DataLoader workers&quot;</span>
+            <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span>
+                <span class="s2">&quot;torch.distributed available but not initialized (single-process training)&quot;</span>
+            <span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;torch.distributed not available (CPU-only PyTorch build)&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Step 3: Calculate workers</span>
+    <span class="k">if</span> <span class="n">is_distributed</span> <span class="ow">and</span> <span class="n">world_size</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">num_workers</span> <span class="o">=</span> <span class="n">num_cpus</span> <span class="o">//</span> <span class="n">world_size</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;📊 DDP mode: </span><span class="si">{</span><span class="n">num_cpus</span><span class="si">}</span><span class="s2"> CPUs ÷ </span><span class="si">{</span><span class="n">world_size</span><span class="si">}</span><span class="s2"> ranks = </span><span class="si">{</span><span class="n">num_workers</span><span class="si">}</span><span class="s2"> workers per rank&quot;</span>
+        <span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">num_workers</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;⚠️  Only </span><span class="si">{</span><span class="n">num_cpus</span><span class="si">}</span><span class="s2"> CPUs for </span><span class="si">{</span><span class="n">world_size</span><span class="si">}</span><span class="s2"> ranks results in 0 workers/rank. &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;Setting to 1 worker minimum.&quot;</span>
+            <span class="p">)</span>
+            <span class="n">num_workers</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">num_workers</span> <span class="o">=</span> <span class="n">num_cpus</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Single-process mode: using all </span><span class="si">{</span><span class="n">num_cpus</span><span class="si">}</span><span class="s2"> CPUs for DataLoader workers&quot;</span>
+        <span class="p">)</span>
+
+    <span class="c1"># Step 4: Ensure minimum of 1</span>
+    <span class="n">num_workers</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">num_workers</span><span class="p">)</span>
+
+    <span class="c1"># Final summary</span>
+    <span class="k">if</span> <span class="n">is_distributed</span><span class="p">:</span>
+        <span class="n">total_workers</span> <span class="o">=</span> <span class="n">num_workers</span> <span class="o">*</span> <span class="n">world_size</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">success</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;✅ Final configuration: </span><span class="si">{</span><span class="n">num_workers</span><span class="si">}</span><span class="s2"> workers/rank × </span><span class="si">{</span><span class="n">world_size</span><span class="si">}</span><span class="s2"> ranks = </span><span class="si">{</span><span class="n">total_workers</span><span class="si">}</span><span class="s2"> total workers&quot;</span>
+        <span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">success</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;✅ Final configuration: </span><span class="si">{</span><span class="n">num_workers</span><span class="si">}</span><span class="s2"> DataLoader workers&quot;</span><span class="p">)</span>
+
+    <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Returning num_workers=</span><span class="si">{</span><span class="n">num_workers</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;🏁 num_workers detection complete</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">num_workers</span></div>
+
+
+
+<div class="viewcode-block" id="fold_views">
+<a class="viewcode-back" href="../../../../stable_pretraining.data/#stable_pretraining.data.fold_views">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">fold_views</span><span class="p">(</span><span class="n">tensor</span><span class="p">,</span> <span class="n">idx</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Fold a tensor containing multiple views back into separate views.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        tensor: Tensor containing concatenated views</span>
+<span class="sd">        idx: Sample indices to determine view boundaries</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Tuple of tensors, one for each view</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">sidx</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">argsort</span><span class="p">(</span><span class="n">idx</span><span class="p">,</span> <span class="n">stable</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="n">_</span><span class="p">,</span> <span class="n">counts</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">unique_consecutive</span><span class="p">(</span><span class="n">idx</span><span class="p">[</span><span class="n">sidx</span><span class="p">],</span> <span class="n">return_counts</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">counts</span><span class="o">.</span><span class="n">min</span><span class="p">()</span><span class="o">.</span><span class="n">eq</span><span class="p">(</span><span class="n">counts</span><span class="o">.</span><span class="n">max</span><span class="p">()):</span>
+        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
+            <span class="s2">&quot;counts are not the same for all samples!</span><span class="se">\n</span><span class="s2">&quot;</span>
+            <span class="s2">&quot;This typically occurs when batch size and number of views</span><span class="se">\n</span><span class="s2">&quot;</span>
+            <span class="s2">&quot;are not divisible&quot;</span>
+        <span class="p">)</span>
+    <span class="n">n_views</span> <span class="o">=</span> <span class="n">counts</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">item</span><span class="p">()</span>
+    <span class="n">fold_shape</span> <span class="o">=</span> <span class="p">(</span><span class="n">tensor</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="o">//</span> <span class="n">n_views</span><span class="p">,</span> <span class="n">n_views</span><span class="p">)</span>
+    <span class="n">t</span> <span class="o">=</span> <span class="n">tensor</span><span class="p">[</span><span class="n">sidx</span><span class="p">]</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="o">*</span><span class="n">fold_shape</span><span class="p">,</span> <span class="o">*</span><span class="n">tensor</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">:])</span>
+    <span class="k">return</span> <span class="n">t</span><span class="o">.</span><span class="n">unbind</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="random_split">
+<a class="viewcode-back" href="../../../../stable_pretraining.data/#stable_pretraining.data.random_split">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">random_split</span><span class="p">(</span>
+    <span class="n">dataset</span><span class="p">:</span> <span class="n">Dataset</span><span class="p">,</span>
+    <span class="n">lengths</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">]],</span>
+    <span class="n">generator</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Generator</span><span class="p">]</span> <span class="o">=</span> <span class="n">default_generator</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">Subset</span><span class="p">]:</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Randomly split a dataset into non-overlapping new datasets of given lengths.</span>
+
+<span class="sd">    If a list of fractions that sum up to 1 is given,</span>
+<span class="sd">    the lengths will be computed automatically as</span>
+<span class="sd">    floor(frac * len(dataset)) for each fraction provided.</span>
+
+<span class="sd">    After computing the lengths, if there are any remainders, 1 count will be</span>
+<span class="sd">    distributed in round-robin fashion to the lengths</span>
+<span class="sd">    until there are no remainders left.</span>
+
+<span class="sd">    Optionally fix the generator for reproducible results, e.g.:</span>
+
+<span class="sd">    Example:</span>
+<span class="sd">        &gt;&gt;&gt; # xdoctest: +SKIP</span>
+<span class="sd">        &gt;&gt;&gt; generator1 = torch.Generator().manual_seed(42)</span>
+<span class="sd">        &gt;&gt;&gt; generator2 = torch.Generator().manual_seed(42)</span>
+<span class="sd">        &gt;&gt;&gt; random_split(range(10), [3, 7], generator=generator1)</span>
+<span class="sd">        &gt;&gt;&gt; random_split(range(30), [0.3, 0.3, 0.4], generator=generator2)</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        dataset (Dataset): Dataset to be split</span>
+<span class="sd">        lengths (sequence): lengths or fractions of splits to be produced</span>
+<span class="sd">        generator (Generator): Generator used for the random permutation.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">math</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="nb">sum</span><span class="p">(</span><span class="n">lengths</span><span class="p">),</span> <span class="mi">1</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">sum</span><span class="p">(</span><span class="n">lengths</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">subset_lengths</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">frac</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">lengths</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">frac</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">frac</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Fraction at index </span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2"> is not between 0 and 1&quot;</span><span class="p">)</span>
+            <span class="n">n_items_in_split</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span>
+                <span class="n">math</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">dataset</span><span class="p">)</span> <span class="o">*</span> <span class="n">frac</span><span class="p">)</span>  <span class="c1"># type: ignore[arg-type]</span>
+            <span class="p">)</span>
+            <span class="n">subset_lengths</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">n_items_in_split</span><span class="p">)</span>
+        <span class="n">remainder</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">dataset</span><span class="p">)</span> <span class="o">-</span> <span class="nb">sum</span><span class="p">(</span><span class="n">subset_lengths</span><span class="p">)</span>  <span class="c1"># type: ignore[arg-type]</span>
+        <span class="c1"># add 1 to all the lengths in round-robin fashion until the remainder is 0</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">remainder</span><span class="p">):</span>
+            <span class="n">idx_to_add_at</span> <span class="o">=</span> <span class="n">i</span> <span class="o">%</span> <span class="nb">len</span><span class="p">(</span><span class="n">subset_lengths</span><span class="p">)</span>
+            <span class="n">subset_lengths</span><span class="p">[</span><span class="n">idx_to_add_at</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="n">lengths</span> <span class="o">=</span> <span class="n">subset_lengths</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">length</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">lengths</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">length</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;Length of split at index </span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2"> is 0. &quot;</span>
+                    <span class="sa">f</span><span class="s2">&quot;This might result in an empty dataset.&quot;</span>
+                <span class="p">)</span>
+
+    <span class="c1"># Cannot verify that dataset is Sized</span>
+    <span class="k">if</span> <span class="nb">sum</span><span class="p">(</span><span class="n">lengths</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">dataset</span><span class="p">):</span>  <span class="c1"># type: ignore[arg-type]</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+            <span class="s2">&quot;Sum of input lengths does not equal the length of the input dataset!&quot;</span>
+        <span class="p">)</span>
+
+    <span class="n">indices</span> <span class="o">=</span> <span class="n">randperm</span><span class="p">(</span><span class="nb">sum</span><span class="p">(</span><span class="n">lengths</span><span class="p">),</span> <span class="n">generator</span><span class="o">=</span><span class="n">generator</span><span class="p">)</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>  <span class="c1"># type: ignore[arg-type, call-overload]</span>
+    <span class="n">lengths</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">lengths</span><span class="p">)</span>
+    <span class="k">return</span> <span class="p">[</span>
+        <span class="n">Subset</span><span class="p">(</span><span class="n">dataset</span><span class="p">,</span> <span class="n">indices</span><span class="p">[</span><span class="n">offset</span> <span class="o">-</span> <span class="n">length</span> <span class="p">:</span> <span class="n">offset</span><span class="p">])</span>
+        <span class="k">for</span> <span class="n">offset</span><span class="p">,</span> <span class="n">length</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">itertools</span><span class="o">.</span><span class="n">accumulate</span><span class="p">(</span><span class="n">lengths</span><span class="p">),</span> <span class="n">lengths</span><span class="p">)</span>
+    <span class="p">]</span></div>
+
+
+
+<div class="viewcode-block" id="apply_masks">
+<a class="viewcode-back" href="../../../../stable_pretraining.data/#stable_pretraining.data.apply_masks">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">apply_masks</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="o">*</span><span class="n">masks</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Apply one or more masks to a batch of patched images.</span>
+
+<span class="sd">    This function is generalized to accept any number of mask tensors.</span>
+<span class="sd">    If a single mask is provided, the output shape is `[B, K, D]`. If `M`</span>
+<span class="sd">    masks are provided, the function creates `M` masked views</span>
+<span class="sd">    and concatenates them along the batch dimension, resulting in an</span>
+<span class="sd">    output of shape `[B*M, K, D]`.</span>
+
+<span class="sd">    Example:</span>
+<span class="sd">        &gt;&gt;&gt; # xdoctest: +SKIP</span>
+<span class="sd">        &gt;&gt;&gt; x = torch.randn(4, 196, 128)</span>
+<span class="sd">        &gt;&gt;&gt; mask1 = torch.randint(0, 196, (4, 50))</span>
+<span class="sd">        &gt;&gt;&gt; mask2 = torch.randint(0, 196, (4, 50))</span>
+<span class="sd">        &gt;&gt;&gt; # Single mask case</span>
+<span class="sd">        &gt;&gt;&gt; single_view = apply_masks(x, mask1)</span>
+<span class="sd">        &gt;&gt;&gt; single_view.shape</span>
+<span class="sd">        torch.Size([4, 50, 128])</span>
+<span class="sd">        &gt;&gt;&gt; # Multi-mask case</span>
+<span class="sd">        &gt;&gt;&gt; multi_view = apply_masks(x, mask1, mask2)</span>
+<span class="sd">        &gt;&gt;&gt; multi_view.shape</span>
+<span class="sd">        torch.Size([8, 50, 128])</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        x (torch.Tensor): Input tensor of patches with shape `[B, N, D]`.</span>
+<span class="sd">        *masks (torch.Tensor): A variable number of mask tensors, each a</span>
+<span class="sd">            tensor of indices with shape `[B, K]`.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        torch.Tensor: The tensor of selected patches. The shape will be</span>
+<span class="sd">            `[B, K, D]` for a single mask, or `[B*M, K, D]` for `M` masks.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        ValueError: If no masks are provided.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">masks</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;At least one mask tensor must be provided.&quot;</span><span class="p">)</span>
+
+    <span class="n">B</span><span class="p">,</span> <span class="n">N</span><span class="p">,</span> <span class="n">D</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">shape</span>
+    <span class="n">M</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">masks</span><span class="p">)</span>
+
+    <span class="n">idx</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">stack</span><span class="p">([</span><span class="n">m</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">device</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">long</span><span class="p">)</span> <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">masks</span><span class="p">],</span> <span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">K</span> <span class="o">=</span> <span class="n">idx</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="n">x_expanded</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">expand</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">M</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">idx_expanded</span> <span class="o">=</span> <span class="n">idx</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">expand</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">D</span><span class="p">)</span>
+    <span class="n">out</span> <span class="o">=</span> <span class="n">x_expanded</span><span class="o">.</span><span class="n">gather</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">idx_expanded</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">out</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">B</span> <span class="o">*</span> <span class="n">M</span><span class="p">,</span> <span class="n">K</span><span class="p">,</span> <span class="n">D</span><span class="p">)</span></div>
+
+</pre></div>
+
+                </article>
+              
+
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+<div class="bd-footer-content__inner container">
+  
+  <div class="footer-item">
+    
+<p class="component-author">
+By stable-pretraining team
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+
+  <p class="copyright">
+    
+      © Copyright 2024, stable-pretraining team.
+      <br/>
+    
+  </p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+</div>
+          </footer>
+        
+
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../../../../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b"></script>
+<script src="../../../../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+  <footer class="bd-footer">
+  </footer>
+  </body>
+</html>
