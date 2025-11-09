@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Index &#8212; stable-pretraining 0.1.dev1+g875a54eb6.d20251109 documentation</title>
+    <title>Index &#8212; stable-pretraining 0.1.dev1+g6566e379d.d20251109 documentation</title>
   
   
   
@@ -39,7 +39,7 @@
 <link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
   <script src="../_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
 
-    <script src="../_static/documentation_options.js?v=a1350a1f"></script>
+    <script src="../_static/documentation_options.js?v=6064f4aa"></script>
     <script src="../_static/doctools.js?v=9bcbadda"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/scripts/sphinx-book-theme.js?v=887ef09a"></script>
@@ -135,7 +135,7 @@
   
   
   
-    <p class="title logo__title">stable-pretraining 0.1.dev1+g875a54eb6.d20251109 documentation</p>
+    <p class="title logo__title">stable-pretraining 0.1.dev1+g6566e379d.d20251109 documentation</p>
   
 </a></div>
         <div class="sidebar-primary-item">
@@ -597,6 +597,8 @@ document.write(`
       </ul></li>
       <li><a href="../stable_pretraining/#stable_pretraining.static.count_parameters">count_parameters() (in module stable_pretraining.static)</a>
 </li>
+      <li><a href="../stable_pretraining.callbacks/#stable_pretraining.callbacks.cpu_offload.CPUOffloadCallback">CPUOffloadCallback (class in stable_pretraining.callbacks.cpu_offload)</a>
+</li>
       <li><a href="../stable_pretraining.optim/#stable_pretraining.optim.utils.create_optimizer">create_optimizer() (in module stable_pretraining.optim.utils)</a>
 </li>
       <li><a href="../stable_pretraining.utils/#stable_pretraining.utils.log_reader.create_results_table">create_results_table() (in module stable_pretraining.utils.log_reader)</a>
@@ -622,7 +624,7 @@ document.write(`
       <li><a href="../stable_pretraining.callbacks/#stable_pretraining.callbacks.queue.OnlineQueue.data">data (stable_pretraining.callbacks.queue.OnlineQueue attribute)</a>
 
       <ul>
-        <li><a href="../stable_pretraining.callbacks/#id13">(stable_pretraining.callbacks.queue.OnlineQueue property)</a>
+        <li><a href="../stable_pretraining.callbacks/#id21">(stable_pretraining.callbacks.queue.OnlineQueue property)</a>
 </li>
         <li><a href="../stable_pretraining/#stable_pretraining.static.TIMM_EMBEDDINGS.data">(stable_pretraining.static.TIMM_EMBEDDINGS attribute)</a>
 </li>
@@ -1257,9 +1259,11 @@ document.write(`
         <li><a href="../stable_pretraining.utils/#stable_pretraining.utils.config.load_hparams_from_ckpt">(in module stable_pretraining.utils.config)</a>
 </li>
       </ul></li>
-      <li><a href="../stable_pretraining.callbacks/#stable_pretraining.callbacks.wd_schedule.WeightDecayUpdater.load_state_dict">load_state_dict() (stable_pretraining.callbacks.wd_schedule.WeightDecayUpdater method)</a>
+      <li><a href="../stable_pretraining.callbacks/#stable_pretraining.callbacks.cpu_offload.CPUOffloadCallback.load_state_dict">load_state_dict() (stable_pretraining.callbacks.cpu_offload.CPUOffloadCallback method)</a>
 
       <ul>
+        <li><a href="../stable_pretraining.callbacks/#stable_pretraining.callbacks.wd_schedule.WeightDecayUpdater.load_state_dict">(stable_pretraining.callbacks.wd_schedule.WeightDecayUpdater method)</a>
+</li>
         <li><a href="../api/gen_modules/stable_pretraining.data.DataModule/#stable_pretraining.data.DataModule.load_state_dict">(stable_pretraining.data.DataModule method)</a>, <a href="../stable_pretraining.data/#stable_pretraining.data.DataModule.load_state_dict">[1]</a>
 </li>
         <li><a href="../stable_pretraining.data/#stable_pretraining.data.module.DataModule.load_state_dict">(stable_pretraining.data.module.DataModule method)</a>
@@ -1362,6 +1366,8 @@ document.write(`
         <li><a href="../stable_pretraining.callbacks/#module-stable_pretraining.callbacks.cleanup">stable_pretraining.callbacks.cleanup</a>
 </li>
         <li><a href="../stable_pretraining.callbacks/#module-stable_pretraining.callbacks.clip_zero_shot">stable_pretraining.callbacks.clip_zero_shot</a>
+</li>
+        <li><a href="../stable_pretraining.callbacks/#module-stable_pretraining.callbacks.cpu_offload">stable_pretraining.callbacks.cpu_offload</a>
 </li>
         <li><a href="../stable_pretraining.callbacks/#module-stable_pretraining.callbacks.earlystop">stable_pretraining.callbacks.earlystop</a>
 </li>
@@ -1601,7 +1607,11 @@ document.write(`
       <li><a href="../stable_pretraining.callbacks/#stable_pretraining.callbacks.wd_schedule.WeightDecayUpdater.on_before_optimizer_step">on_before_optimizer_step() (stable_pretraining.callbacks.wd_schedule.WeightDecayUpdater method)</a>
 </li>
       <li><a href="../stable_pretraining.callbacks/#stable_pretraining.callbacks.cleanup.CleanUpCallback.on_exception">on_exception() (stable_pretraining.callbacks.cleanup.CleanUpCallback method)</a>
+
+      <ul>
+        <li><a href="../stable_pretraining.callbacks/#stable_pretraining.callbacks.cpu_offload.CPUOffloadCallback.on_exception">(stable_pretraining.callbacks.cpu_offload.CPUOffloadCallback method)</a>
 </li>
+      </ul></li>
       <li><a href="../stable_pretraining.callbacks/#stable_pretraining.callbacks.cleanup.CleanUpCallback.on_fit_end">on_fit_end() (stable_pretraining.callbacks.cleanup.CleanUpCallback method)</a>
 </li>
       <li><a href="../stable_pretraining.callbacks/#stable_pretraining.callbacks.teacher_student.TeacherStudentCallback.on_fit_start">on_fit_start() (stable_pretraining.callbacks.teacher_student.TeacherStudentCallback method)</a>
@@ -1653,6 +1663,8 @@ document.write(`
       <ul>
         <li><a href="../stable_pretraining.callbacks/#stable_pretraining.callbacks.checkpoint_sklearn.WandbCheckpoint.on_save_checkpoint">(stable_pretraining.callbacks.checkpoint_sklearn.WandbCheckpoint method)</a>
 </li>
+        <li><a href="../stable_pretraining.callbacks/#stable_pretraining.callbacks.cpu_offload.CPUOffloadCallback.on_save_checkpoint">(stable_pretraining.callbacks.cpu_offload.CPUOffloadCallback method)</a>
+</li>
         <li><a href="../api/gen_modules/stable_pretraining.callbacks.SklearnCheckpoint/#stable_pretraining.callbacks.SklearnCheckpoint.on_save_checkpoint">(stable_pretraining.callbacks.SklearnCheckpoint method)</a>
 </li>
         <li><a href="../stable_pretraining/#stable_pretraining.Module.on_save_checkpoint">(stable_pretraining.Module method)</a>
@@ -1692,11 +1704,15 @@ document.write(`
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="../stable_pretraining.callbacks/#stable_pretraining.callbacks.cpu_offload.CPUOffloadCallback.on_train_end">on_train_end() (stable_pretraining.callbacks.cpu_offload.CPUOffloadCallback method)</a>
+</li>
       <li><a href="../stable_pretraining.callbacks/#stable_pretraining.callbacks.cleanup.CleanUpCallback.on_train_epoch_end">on_train_epoch_end() (stable_pretraining.callbacks.cleanup.CleanUpCallback method)</a>
 </li>
-      <li><a href="../stable_pretraining/#stable_pretraining.Module.on_train_start">on_train_start() (stable_pretraining.Module method)</a>
+      <li><a href="../stable_pretraining.callbacks/#stable_pretraining.callbacks.cpu_offload.CPUOffloadCallback.on_train_start">on_train_start() (stable_pretraining.callbacks.cpu_offload.CPUOffloadCallback method)</a>
 
       <ul>
+        <li><a href="../stable_pretraining/#stable_pretraining.Module.on_train_start">(stable_pretraining.Module method)</a>
+</li>
         <li><a href="../api/gen_modules/stable_pretraining.module.Module/#stable_pretraining.module.Module.on_train_start">(stable_pretraining.module.Module method)</a>, <a href="../stable_pretraining/#stable_pretraining.module.Module.on_train_start">[1]</a>
 </li>
       </ul></li>
@@ -2049,6 +2065,8 @@ document.write(`
 </li>
         <li><a href="../stable_pretraining.callbacks/#stable_pretraining.callbacks.clip_zero_shot.CLIPZeroShot.setup">(stable_pretraining.callbacks.clip_zero_shot.CLIPZeroShot method)</a>
 </li>
+        <li><a href="../stable_pretraining.callbacks/#stable_pretraining.callbacks.cpu_offload.CPUOffloadCallback.setup">(stable_pretraining.callbacks.cpu_offload.CPUOffloadCallback method)</a>
+</li>
         <li><a href="../stable_pretraining.callbacks/#stable_pretraining.callbacks.embedding_cache.EmbeddingCache.setup">(stable_pretraining.callbacks.embedding_cache.EmbeddingCache method)</a>
 </li>
         <li><a href="../stable_pretraining.callbacks/#stable_pretraining.callbacks.env_info.EnvironmentDumpCallback.setup">(stable_pretraining.callbacks.env_info.EnvironmentDumpCallback method)</a>
@@ -2241,6 +2259,13 @@ document.write(`
 
       <ul>
         <li><a href="../stable_pretraining.callbacks/#module-stable_pretraining.callbacks.clip_zero_shot">module</a>
+</li>
+      </ul></li>
+      <li>
+    stable_pretraining.callbacks.cpu_offload
+
+      <ul>
+        <li><a href="../stable_pretraining.callbacks/#module-stable_pretraining.callbacks.cpu_offload">module</a>
 </li>
       </ul></li>
       <li>
@@ -2658,9 +2683,11 @@ document.write(`
         <li><a href="../stable_pretraining.utils/#module-stable_pretraining.utils.visualization">module</a>
 </li>
       </ul></li>
-      <li><a href="../stable_pretraining.callbacks/#stable_pretraining.callbacks.wd_schedule.WeightDecayUpdater.state_dict">state_dict() (stable_pretraining.callbacks.wd_schedule.WeightDecayUpdater method)</a>
+      <li><a href="../stable_pretraining.callbacks/#stable_pretraining.callbacks.cpu_offload.CPUOffloadCallback.state_dict">state_dict() (stable_pretraining.callbacks.cpu_offload.CPUOffloadCallback method)</a>
 
       <ul>
+        <li><a href="../stable_pretraining.callbacks/#stable_pretraining.callbacks.wd_schedule.WeightDecayUpdater.state_dict">(stable_pretraining.callbacks.wd_schedule.WeightDecayUpdater method)</a>
+</li>
         <li><a href="../api/gen_modules/stable_pretraining.data.DataModule/#stable_pretraining.data.DataModule.state_dict">(stable_pretraining.data.DataModule method)</a>, <a href="../stable_pretraining.data/#stable_pretraining.data.DataModule.state_dict">[1]</a>
 </li>
         <li><a href="../stable_pretraining.data/#stable_pretraining.data.module.DataModule.state_dict">(stable_pretraining.data.module.DataModule method)</a>
@@ -2752,9 +2779,11 @@ document.write(`
         <li><a href="../stable_pretraining.backbone/#stable_pretraining.backbone.utils.TeacherStudentWrapper">(class in stable_pretraining.backbone.utils)</a>
 </li>
       </ul></li>
-      <li><a href="../stable_pretraining.callbacks/#stable_pretraining.callbacks.embedding_cache.EmbeddingCache.teardown">teardown() (stable_pretraining.callbacks.embedding_cache.EmbeddingCache method)</a>
+      <li><a href="../stable_pretraining.callbacks/#stable_pretraining.callbacks.cpu_offload.CPUOffloadCallback.teardown">teardown() (stable_pretraining.callbacks.cpu_offload.CPUOffloadCallback method)</a>
 
       <ul>
+        <li><a href="../stable_pretraining.callbacks/#stable_pretraining.callbacks.embedding_cache.EmbeddingCache.teardown">(stable_pretraining.callbacks.embedding_cache.EmbeddingCache method)</a>
+</li>
         <li><a href="../stable_pretraining.callbacks/#stable_pretraining.callbacks.env_info.EnvironmentDumpCallback.teardown">(stable_pretraining.callbacks.env_info.EnvironmentDumpCallback method)</a>
 </li>
         <li><a href="../api/gen_modules/stable_pretraining.data.DataModule/#stable_pretraining.data.DataModule.teardown">(stable_pretraining.data.DataModule method)</a>, <a href="../stable_pretraining.data/#stable_pretraining.data.DataModule.teardown">[1]</a>
@@ -2776,14 +2805,14 @@ document.write(`
         <li><a href="../stable_pretraining.data/#stable_pretraining.data.module.DataModule.test_dataloader">(stable_pretraining.data.module.DataModule method)</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="../stable_pretraining/#stable_pretraining.Module.test_step">test_step() (stable_pretraining.Module method)</a>
 
       <ul>
         <li><a href="../api/gen_modules/stable_pretraining.module.Module/#stable_pretraining.module.Module.test_step">(stable_pretraining.module.Module method)</a>, <a href="../stable_pretraining/#stable_pretraining.module.Module.test_step">[1]</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="../stable_pretraining/#stable_pretraining.static.TIMM_EMBEDDINGS">TIMM_EMBEDDINGS (class in stable_pretraining.static)</a>
 </li>
       <li><a href="../stable_pretraining/#stable_pretraining.static.TIMM_PARAMETERS">TIMM_PARAMETERS (class in stable_pretraining.static)</a>
