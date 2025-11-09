@@ -35,7 +35,7 @@ jobs:
           python -m pip install --user --upgrade --progress-bar off pip
       - name: Install 'stable_pretraining' package
         run: |
-          python -m pip install --user -e .[all,dev]
+          python -m pip install --user -e .[dev]
       # Run Tests
       - name: Run Unit Tests
         run: pytest stable_pretraining/ -m unit --verbose --cov=stable_pretraining --cov-report term
@@ -67,7 +67,7 @@ jobs:
           python -m pip install --user --upgrade --progress-bar off pip
       - name: Install 'stable_pretraining' package
         run: |
-          python -m pip install --user -e .[all,dev]
+          python -m pip install --user -e .[dev]
       # Run Tests
       - name: Run Unit Tests
         run: pytest stable_pretraining/ -m unit --verbose --cov=stable_pretraining --cov-report term
