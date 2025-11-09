@@ -9,7 +9,6 @@ authors = []
 license = {text = "MIT"}
 readme = {file = "README.md", content-type = "text/markdown"}
 dependencies = [
-    # Core dependencies - minimal required for basic SSL training
     "torch",
     "torchvision",
     "torchmetrics",
@@ -25,7 +24,17 @@ dependencies = [
     "submitit",
     "timm",
     "zstandard",
-    "typer"
+    "typer",
+    "transformers",
+    "pillow>=11.3.0",
+    "wandb",
+    "hydra-submitit-launcher",
+    "matplotlib",
+    "datasets",
+    "pyarrow==20.0.0",
+    "minari[hdf5]>=0.5.3",
+    "scikit-learn>=1.7.0",
+    "richuru",
 ]
 
 dynamic = ["version"]
@@ -45,46 +54,7 @@ write_to = "stable_pretraining/_version.py"
 write_to_template = "version = \"{version}\"\n"
 
 [project.optional-dependencies]
-# Advanced vision models and transforms
-vision = [
-    "transformers",
-    "pillow>=11.3.0",
-]
-
-# Experiment tracking
-tracking = [
-    "wandb",
-]
-
-# Cluster/SLURM execution support
-cluster = [
-    "hydra-submitit-launcher",
-]
-
-# Visualization and reporting tools
-visualization = [
-    "matplotlib",
-]
-
-# Extra dataset support
-datasets = [
-    "datasets",  # HuggingFace datasets
-    "pyarrow==20.0.0",  # Required for datasets compatibility
-    "minari[hdf5]>=0.5.3",  # Reinforcement learning datasets
-]
-
-# Additional utilities
-extras = [
-    "scikit-learn>=1.7.0",  # sklearn model checkpointing
-    "richuru",  # Enhanced logging formatting
-]
-
-# All optional dependencies
-all = [
-    "stable-pretraining[vision,tracking,cluster,visualization,datasets,extras]",
-]
-
-# Development tools
+# Development and documentation tools
 dev = [
     "pytest",
     "coverage",
@@ -92,10 +62,6 @@ dev = [
     "codecov",
     "pre-commit",
     "ruff",
-]
-
-# Documentation tools
-doc = [
     "sphinx",
     "sphinx-gallery",
     "sphinx-book-theme",
