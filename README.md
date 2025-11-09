@@ -1,9 +1,8 @@
 # stable-pretraining
 
-[![Documentation](https://img.shields.io/badge/Documentation-blue.svg)](https://rbalestr-lab.github.io/stable-pretraining.github.io/dev/)
+[![Documentation](https://img.shields.io/badge/Documentation-blue.svg)](https://rbalestr-lab.github.io/stable-pretraining/)
 [![Benchmarks](https://img.shields.io/badge/Benchmarks-blue.svg)](https://github.com/rbalestr-lab/stable-pretraining/tree/main/benchmarks)
 [![Test Status](https://github.com/rbalestr-lab/stable-pretraining/actions/workflows/testing.yml/badge.svg)](https://github.com/rbalestr-lab/stable-pretraining/actions/workflows/testing.yml)
-[![CircleCI](https://dl.circleci.com/status-badge/img/gh/rbalestr-lab/stable-pretraining/tree/main.svg?style=svg)](https://dl.circleci.com/status-badge/redirect/gh/rbalestr-lab/stable-pretraining/tree/main)
 [![PyTorch](https://img.shields.io/badge/PyTorch-ee4c2c?logo=pytorch&logoColor=white)](https://pytorch.org/get-started/locally/)
 [![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
 [![License](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
