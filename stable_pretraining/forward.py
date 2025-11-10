@@ -76,6 +76,9 @@ def supervised_forward(self, batch, stage):
                 "Pass it when constructing the Module: Module(..., supervised_loss=nn.CrossEntropyLoss(), ...)"
             )
         out["loss"] = self.supervised_loss(out["logits"], batch["label"])
+        self.log(
+            f"{stage}/loss", out["loss"], on_step=True, on_epoch=True, sync_dist=True
+        )
 
     return out
 
@@ -125,6 +128,13 @@ def simclr_forward(self, batch, stage):
         if self.training:
             projections = [self.projector(emb) for emb in embeddings]
             out["loss"] = self.simclr_loss(projections[0], projections[1])
+            self.log(
+                f"{stage}/loss",
+                out["loss"],
+                on_step=True,
+                on_epoch=True,
+                sync_dist=True,
+            )
     else:
         # Single-view validation
         out["embedding"] = self.backbone(batch["image"])
@@ -211,6 +221,9 @@ def byol_forward(self, batch, stage):
 
         out["embedding"] = torch.cat(target_features, dim=0).detach()
         out["loss"] = loss
+        self.log(
+            f"{stage}/loss", out["loss"], on_step=True, on_epoch=True, sync_dist=True
+        )
 
     else:
         # Single-view validation
@@ -273,6 +286,13 @@ def vicreg_forward(self, batch, stage):
         if self.training:
             projections = [self.projector(emb) for emb in embeddings]
             out["loss"] = self.vicreg_loss(projections[0], projections[1])
+            self.log(
+                f"{stage}/loss",
+                out["loss"],
+                on_step=True,
+                on_epoch=True,
+                sync_dist=True,
+            )
     else:
         # Single-view validation
         out["embedding"] = self.backbone(batch["image"])
@@ -328,6 +348,13 @@ def barlow_twins_forward(self, batch, stage):
         if self.training:
             projections = [self.projector(emb) for emb in embeddings]
             out["loss"] = self.barlow_loss(projections[0], projections[1])
+            self.log(
+                f"{stage}/loss",
+                out["loss"],
+                on_step=True,
+                on_epoch=True,
+                sync_dist=True,
+            )
     else:
         # Single-view validation
         out["embedding"] = self.backbone(batch["image"])
@@ -381,6 +408,13 @@ def swav_forward(self, batch, stage):
                 out["swav_queue"] = torch.cat(projections).detach()
 
             out["loss"] = self.swav_loss(proj1, proj2, self.prototypes, queue_feats)
+            self.log(
+                f"{stage}/loss",
+                out["loss"],
+                on_step=True,
+                on_epoch=True,
+                sync_dist=True,
+            )
 
     else:
         out["embedding"] = self.backbone(batch["image"])
@@ -473,6 +507,14 @@ def nnclr_forward(self, batch, stage):
             else:
                 # Fallback to SimCLR style loss if queue is empty
                 out["loss"] = self.nnclr_loss(proj_q, proj_k)
+
+            self.log(
+                f"{stage}/loss",
+                out["loss"],
+                on_step=True,
+                on_epoch=True,
+                sync_dist=True,
+            )
 
             # The key here must match the `key` argument of the `OnlineQueue` callback
             out["nnclr_support_set"] = torch.cat(projections)
@@ -679,6 +721,7 @@ def dino_forward(self, batch, stage):
 
     out["embedding"] = teacher_cls_features.detach()
     out["loss"] = loss
+    self.log(f"{stage}/loss", out["loss"], on_step=True, on_epoch=True, sync_dist=True)
 
     return out
 
@@ -977,5 +1020,6 @@ def dinov2_forward(self, batch, stage):
     # Return flattened CLS features for callbacks (probes expect [n_global * batch_size, dim])
     out["embedding"] = teacher_cls_features.view(n_global * batch_size, -1).detach()
     out["loss"] = loss
+    self.log(f"{stage}/loss", out["loss"], on_step=True, on_epoch=True, sync_dist=True)
 
     return out
