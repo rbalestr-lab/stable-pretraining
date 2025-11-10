@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>stable_pretraining.callbacks.factories &#8212; stable-pretraining 0.1.dev1+g2b267be5d.d20251109 documentation</title>
+    <title>stable_pretraining.callbacks.factories &#8212; stable-pretraining 0.1.dev1+gd7c12db70.d20251110 documentation</title>
   
   
   
@@ -39,7 +39,7 @@
 <link rel="preload" as="script" href="../../../../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
   <script src="../../../../_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
 
-    <script src="../../../../_static/documentation_options.js?v=d1abb877"></script>
+    <script src="../../../../_static/documentation_options.js?v=8f7940bb"></script>
     <script src="../../../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../../_static/scripts/sphinx-book-theme.js?v=887ef09a"></script>
@@ -135,7 +135,7 @@
   
   
   
-    <p class="title logo__title">stable-pretraining 0.1.dev1+g2b267be5d.d20251109 documentation</p>
+    <p class="title logo__title">stable-pretraining 0.1.dev1+gd7c12db70.d20251110 documentation</p>
   
 </a></div>
         <div class="sidebar-primary-item">
@@ -350,14 +350,7 @@ document.write(`
 <div class="viewcode-block" id="default">
 <a class="viewcode-back" href="../../../../stable_pretraining.callbacks/#stable_pretraining.callbacks.factories.default">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">default</span><span class="p">():</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Factory function that returns callbacks.</span>
-
-<span class="sd">    Since Lightning doesn&#39;t pass pl_module when loading from entry points,</span>
-<span class="sd">    we can&#39;t auto-detect TeacherStudent. Returns static callbacks only.</span>
-
-<span class="sd">    For auto-detection to work, the TeacherStudentCallback must be added</span>
-<span class="sd">    manually in the trainer config or script.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Factory function that returns default callbacks.&quot;&quot;&quot;</span>
     <span class="n">callbacks</span> <span class="o">=</span> <span class="p">[</span>
         <span class="c1"># RichProgressBar(),</span>
         <span class="n">LoggingCallback</span><span class="p">(),</span>

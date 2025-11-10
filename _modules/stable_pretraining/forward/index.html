@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>stable_pretraining.forward &#8212; stable-pretraining 0.1.dev1+g2b267be5d.d20251109 documentation</title>
+    <title>stable_pretraining.forward &#8212; stable-pretraining 0.1.dev1+gd7c12db70.d20251110 documentation</title>
   
   
   
@@ -39,7 +39,7 @@
 <link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
   <script src="../../../_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
 
-    <script src="../../../_static/documentation_options.js?v=d1abb877"></script>
+    <script src="../../../_static/documentation_options.js?v=8f7940bb"></script>
     <script src="../../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/scripts/sphinx-book-theme.js?v=887ef09a"></script>
@@ -135,7 +135,7 @@
   
   
   
-    <p class="title logo__title">stable-pretraining 0.1.dev1+g2b267be5d.d20251109 documentation</p>
+    <p class="title logo__title">stable-pretraining 0.1.dev1+gd7c12db70.d20251110 documentation</p>
   
 </a></div>
         <div class="sidebar-primary-item">
@@ -422,6 +422,9 @@ document.write(`
                 <span class="s2">&quot;Pass it when constructing the Module: Module(..., supervised_loss=nn.CrossEntropyLoss(), ...)&quot;</span>
             <span class="p">)</span>
         <span class="n">out</span><span class="p">[</span><span class="s2">&quot;loss&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">supervised_loss</span><span class="p">(</span><span class="n">out</span><span class="p">[</span><span class="s2">&quot;logits&quot;</span><span class="p">],</span> <span class="n">batch</span><span class="p">[</span><span class="s2">&quot;label&quot;</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">stage</span><span class="si">}</span><span class="s2">/loss&quot;</span><span class="p">,</span> <span class="n">out</span><span class="p">[</span><span class="s2">&quot;loss&quot;</span><span class="p">],</span> <span class="n">on_step</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">on_epoch</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">sync_dist</span><span class="o">=</span><span class="kc">True</span>
+        <span class="p">)</span>
 
     <span class="k">return</span> <span class="n">out</span></div>
 
@@ -474,6 +477,13 @@ document.write(`
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">training</span><span class="p">:</span>
             <span class="n">projections</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">projector</span><span class="p">(</span><span class="n">emb</span><span class="p">)</span> <span class="k">for</span> <span class="n">emb</span> <span class="ow">in</span> <span class="n">embeddings</span><span class="p">]</span>
             <span class="n">out</span><span class="p">[</span><span class="s2">&quot;loss&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">simclr_loss</span><span class="p">(</span><span class="n">projections</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">projections</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">stage</span><span class="si">}</span><span class="s2">/loss&quot;</span><span class="p">,</span>
+                <span class="n">out</span><span class="p">[</span><span class="s2">&quot;loss&quot;</span><span class="p">],</span>
+                <span class="n">on_step</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                <span class="n">on_epoch</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                <span class="n">sync_dist</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="c1"># Single-view validation</span>
         <span class="n">out</span><span class="p">[</span><span class="s2">&quot;embedding&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">backbone</span><span class="p">(</span><span class="n">batch</span><span class="p">[</span><span class="s2">&quot;image&quot;</span><span class="p">])</span>
@@ -563,6 +573,9 @@ document.write(`
 
         <span class="n">out</span><span class="p">[</span><span class="s2">&quot;embedding&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">cat</span><span class="p">(</span><span class="n">target_features</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">detach</span><span class="p">()</span>
         <span class="n">out</span><span class="p">[</span><span class="s2">&quot;loss&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">loss</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">stage</span><span class="si">}</span><span class="s2">/loss&quot;</span><span class="p">,</span> <span class="n">out</span><span class="p">[</span><span class="s2">&quot;loss&quot;</span><span class="p">],</span> <span class="n">on_step</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">on_epoch</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">sync_dist</span><span class="o">=</span><span class="kc">True</span>
+        <span class="p">)</span>
 
     <span class="k">else</span><span class="p">:</span>
         <span class="c1"># Single-view validation</span>
@@ -628,6 +641,13 @@ document.write(`
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">training</span><span class="p">:</span>
             <span class="n">projections</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">projector</span><span class="p">(</span><span class="n">emb</span><span class="p">)</span> <span class="k">for</span> <span class="n">emb</span> <span class="ow">in</span> <span class="n">embeddings</span><span class="p">]</span>
             <span class="n">out</span><span class="p">[</span><span class="s2">&quot;loss&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">vicreg_loss</span><span class="p">(</span><span class="n">projections</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">projections</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">stage</span><span class="si">}</span><span class="s2">/loss&quot;</span><span class="p">,</span>
+                <span class="n">out</span><span class="p">[</span><span class="s2">&quot;loss&quot;</span><span class="p">],</span>
+                <span class="n">on_step</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                <span class="n">on_epoch</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                <span class="n">sync_dist</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="c1"># Single-view validation</span>
         <span class="n">out</span><span class="p">[</span><span class="s2">&quot;embedding&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">backbone</span><span class="p">(</span><span class="n">batch</span><span class="p">[</span><span class="s2">&quot;image&quot;</span><span class="p">])</span>
@@ -686,6 +706,13 @@ document.write(`
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">training</span><span class="p">:</span>
             <span class="n">projections</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">projector</span><span class="p">(</span><span class="n">emb</span><span class="p">)</span> <span class="k">for</span> <span class="n">emb</span> <span class="ow">in</span> <span class="n">embeddings</span><span class="p">]</span>
             <span class="n">out</span><span class="p">[</span><span class="s2">&quot;loss&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">barlow_loss</span><span class="p">(</span><span class="n">projections</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">projections</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">stage</span><span class="si">}</span><span class="s2">/loss&quot;</span><span class="p">,</span>
+                <span class="n">out</span><span class="p">[</span><span class="s2">&quot;loss&quot;</span><span class="p">],</span>
+                <span class="n">on_step</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                <span class="n">on_epoch</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                <span class="n">sync_dist</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="c1"># Single-view validation</span>
         <span class="n">out</span><span class="p">[</span><span class="s2">&quot;embedding&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">backbone</span><span class="p">(</span><span class="n">batch</span><span class="p">[</span><span class="s2">&quot;image&quot;</span><span class="p">])</span>
@@ -742,6 +769,13 @@ document.write(`
                 <span class="n">out</span><span class="p">[</span><span class="s2">&quot;swav_queue&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">cat</span><span class="p">(</span><span class="n">projections</span><span class="p">)</span><span class="o">.</span><span class="n">detach</span><span class="p">()</span>
 
             <span class="n">out</span><span class="p">[</span><span class="s2">&quot;loss&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">swav_loss</span><span class="p">(</span><span class="n">proj1</span><span class="p">,</span> <span class="n">proj2</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">prototypes</span><span class="p">,</span> <span class="n">queue_feats</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">stage</span><span class="si">}</span><span class="s2">/loss&quot;</span><span class="p">,</span>
+                <span class="n">out</span><span class="p">[</span><span class="s2">&quot;loss&quot;</span><span class="p">],</span>
+                <span class="n">on_step</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                <span class="n">on_epoch</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                <span class="n">sync_dist</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="p">)</span>
 
     <span class="k">else</span><span class="p">:</span>
         <span class="n">out</span><span class="p">[</span><span class="s2">&quot;embedding&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">backbone</span><span class="p">(</span><span class="n">batch</span><span class="p">[</span><span class="s2">&quot;image&quot;</span><span class="p">])</span>
@@ -837,6 +871,14 @@ document.write(`
             <span class="k">else</span><span class="p">:</span>
                 <span class="c1"># Fallback to SimCLR style loss if queue is empty</span>
                 <span class="n">out</span><span class="p">[</span><span class="s2">&quot;loss&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">nnclr_loss</span><span class="p">(</span><span class="n">proj_q</span><span class="p">,</span> <span class="n">proj_k</span><span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">stage</span><span class="si">}</span><span class="s2">/loss&quot;</span><span class="p">,</span>
+                <span class="n">out</span><span class="p">[</span><span class="s2">&quot;loss&quot;</span><span class="p">],</span>
+                <span class="n">on_step</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                <span class="n">on_epoch</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                <span class="n">sync_dist</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="p">)</span>
 
             <span class="c1"># The key here must match the `key` argument of the `OnlineQueue` callback</span>
             <span class="n">out</span><span class="p">[</span><span class="s2">&quot;nnclr_support_set&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">cat</span><span class="p">(</span><span class="n">projections</span><span class="p">)</span>
@@ -1046,6 +1088,7 @@ document.write(`
 
     <span class="n">out</span><span class="p">[</span><span class="s2">&quot;embedding&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">teacher_cls_features</span><span class="o">.</span><span class="n">detach</span><span class="p">()</span>
     <span class="n">out</span><span class="p">[</span><span class="s2">&quot;loss&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">loss</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">stage</span><span class="si">}</span><span class="s2">/loss&quot;</span><span class="p">,</span> <span class="n">out</span><span class="p">[</span><span class="s2">&quot;loss&quot;</span><span class="p">],</span> <span class="n">on_step</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">on_epoch</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">sync_dist</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">out</span></div>
 
@@ -1347,6 +1390,7 @@ document.write(`
     <span class="c1"># Return flattened CLS features for callbacks (probes expect [n_global * batch_size, dim])</span>
     <span class="n">out</span><span class="p">[</span><span class="s2">&quot;embedding&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">teacher_cls_features</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="n">n_global</span> <span class="o">*</span> <span class="n">batch_size</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">detach</span><span class="p">()</span>
     <span class="n">out</span><span class="p">[</span><span class="s2">&quot;loss&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">loss</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">stage</span><span class="si">}</span><span class="s2">/loss&quot;</span><span class="p">,</span> <span class="n">out</span><span class="p">[</span><span class="s2">&quot;loss&quot;</span><span class="p">],</span> <span class="n">on_step</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">on_epoch</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">sync_dist</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">out</span></div>
 
