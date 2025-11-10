@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>stable_pretraining.backbone package &#8212; stable-pretraining 0.1.dev1+gd7c12db70.d20251110 documentation</title>
+    <title>stable_pretraining.backbone package &#8212; stable-pretraining 0.1.dev1+gccaf93b1a.d20251110 documentation</title>
   
   
   
@@ -40,7 +40,7 @@
 <link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
   <script src="../_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
 
-    <script src="../_static/documentation_options.js?v=8f7940bb"></script>
+    <script src="../_static/documentation_options.js?v=68451b9c"></script>
     <script src="../_static/doctools.js?v=9bcbadda"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/scripts/sphinx-book-theme.js?v=887ef09a"></script>
@@ -134,7 +134,7 @@
   
   
   
-    <p class="title logo__title">stable-pretraining 0.1.dev1+gd7c12db70.d20251110 documentation</p>
+    <p class="title logo__title">stable-pretraining 0.1.dev1+gccaf93b1a.d20251110 documentation</p>
   
 </a></div>
         <div class="sidebar-primary-item">
@@ -1323,7 +1323,7 @@ registered hooks while the latter silently ignores them.</p>
 <p>This module is designed to work with timm ViT models and provides:
 - Per-sample NaN masking (different NaN patterns per image in batch)
 - Fast path for same masking pattern across batch
-- Support for class tokens (cls_token) and distillation tokens (dist_token)
+- Support for class tokens (cls_token), distillation tokens (dist_token), and register tokens
 - Compatibility with various timm ViT architectures (vit_*, deit_*, beit_*, etc.)
 - Minimal overhead when no masking is present</p>
 <p>Key Optimizations:
@@ -1345,7 +1345,9 @@ registered hooks while the latter silently ignores them.</p>
 </dl>
 <p class="rubric">Example</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">timm</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">vit</span> <span class="o">=</span> <span class="n">timm</span><span class="o">.</span><span class="n">create_model</span><span class="p">(</span><span class="s2">&quot;vit_base_patch16_224&quot;</span><span class="p">,</span> <span class="n">pretrained</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">vit</span> <span class="o">=</span> <span class="n">timm</span><span class="o">.</span><span class="n">create_model</span><span class="p">(</span>
+<span class="gp">... </span>    <span class="s2">&quot;vit_base_patch16_224&quot;</span><span class="p">,</span> <span class="n">pretrained</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">reg_tokens</span><span class="o">=</span><span class="mi">4</span>
+<span class="gp">... </span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">masked_vit</span> <span class="o">=</span> <span class="n">EfficientMaskedTimmViT</span><span class="p">(</span><span class="n">vit</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt;</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="c1"># Create input with some NaN patches</span>
@@ -1366,17 +1368,8 @@ registered hooks while the latter silently ignores them.</p>
 <p class="admonition-title">Note</p>
 <p>All samples in a batch must have the same NUMBER of NaN patches,
 but the LOCATION of NaN patches can differ per sample.</p>
+<p>Register tokens (DINOv2 style) do NOT receive positional embeddings.</p>
 </div>
-<dl class="simple">
-<dt>Performance Notes:</dt><dd><ul class="simple">
-<li><p>Works best with vit_small and larger models</p></li>
-<li><p>vit_tiny: ~1.5x max speedup (model too small)</p></li>
-<li><p>vit_small: ~3-4x speedup at high masking</p></li>
-<li><p>vit_base: ~7-8x speedup at high masking</p></li>
-<li><p>Same pattern: 0-5% faster than different patterns</p></li>
-</ul>
-</dd>
-</dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="stable_pretraining.backbone.utils.EfficientMaskedTimmViT.clear_cache">
 <span class="sig-name descname"><span class="pre">clear_cache</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/stable_pretraining/backbone/utils/#EfficientMaskedTimmViT.clear_cache"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_pretraining.backbone.utils.EfficientMaskedTimmViT.clear_cache" title="Link to this definition">#</a></dt>
@@ -1393,12 +1386,15 @@ The cache will be rebuilt as needed during forward passes.</p>
 - Early exit for inputs without NaN patches (fast path)
 - Optimized indexing for same masking patterns across batch
 - Per-sample masking support with advanced indexing
-- Automatic NaN replacement for partial NaN patches</p>
+- Automatic NaN replacement for partial NaN patches
+- Support for register tokens (DINOv2 style)</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>x</strong> – Input tensor, either:
-- Raw images: shape (B, C, H, W)
-- Pre-patchified: shape (B, N, D) where N is number of patches</p>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> – Input tensor, either:</p></li>
+<li><p><strong>images</strong> (<em>- Raw</em>) – shape (B, C, H, W)</p></li>
+<li><p><strong>Pre-patchified</strong> (<em>-</em>) – shape (B, N, D) where N is number of patches</p></li>
+</ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>Model output (logits if head exists, features otherwise)</p>

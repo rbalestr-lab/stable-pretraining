@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>stable_pretraining.backbone.utils &#8212; stable-pretraining 0.1.dev1+gd7c12db70.d20251110 documentation</title>
+    <title>stable_pretraining.backbone.utils &#8212; stable-pretraining 0.1.dev1+gccaf93b1a.d20251110 documentation</title>
   
   
   
@@ -39,7 +39,7 @@
 <link rel="preload" as="script" href="../../../../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
   <script src="../../../../_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
 
-    <script src="../../../../_static/documentation_options.js?v=8f7940bb"></script>
+    <script src="../../../../_static/documentation_options.js?v=68451b9c"></script>
     <script src="../../../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../../_static/scripts/sphinx-book-theme.js?v=887ef09a"></script>
@@ -135,7 +135,7 @@
   
   
   
-    <p class="title logo__title">stable-pretraining 0.1.dev1+gd7c12db70.d20251110 documentation</p>
+    <p class="title logo__title">stable-pretraining 0.1.dev1+gccaf93b1a.d20251110 documentation</p>
   
 </a></div>
         <div class="sidebar-primary-item">
@@ -1279,7 +1279,7 @@ document.write(`
 <span class="sd">    This module is designed to work with timm ViT models and provides:</span>
 <span class="sd">    - Per-sample NaN masking (different NaN patterns per image in batch)</span>
 <span class="sd">    - Fast path for same masking pattern across batch</span>
-<span class="sd">    - Support for class tokens (cls_token) and distillation tokens (dist_token)</span>
+<span class="sd">    - Support for class tokens (cls_token), distillation tokens (dist_token), and register tokens</span>
 <span class="sd">    - Compatibility with various timm ViT architectures (vit_*, deit_*, beit_*, etc.)</span>
 <span class="sd">    - Minimal overhead when no masking is present</span>
 
@@ -1299,7 +1299,9 @@ document.write(`
 
 <span class="sd">    Example:</span>
 <span class="sd">        &gt;&gt;&gt; import timm</span>
-<span class="sd">        &gt;&gt;&gt; vit = timm.create_model(&quot;vit_base_patch16_224&quot;, pretrained=True)</span>
+<span class="sd">        &gt;&gt;&gt; vit = timm.create_model(</span>
+<span class="sd">        ...     &quot;vit_base_patch16_224&quot;, pretrained=False, reg_tokens=4</span>
+<span class="sd">        ... )</span>
 <span class="sd">        &gt;&gt;&gt; masked_vit = EfficientMaskedTimmViT(vit)</span>
 <span class="sd">        &gt;&gt;&gt;</span>
 <span class="sd">        &gt;&gt;&gt; # Create input with some NaN patches</span>
@@ -1315,12 +1317,8 @@ document.write(`
 <span class="sd">    Note:</span>
 <span class="sd">        All samples in a batch must have the same NUMBER of NaN patches,</span>
 <span class="sd">        but the LOCATION of NaN patches can differ per sample.</span>
-<span class="sd">    Performance Notes:</span>
-<span class="sd">        - Works best with vit_small and larger models</span>
-<span class="sd">        - vit_tiny: ~1.5x max speedup (model too small)</span>
-<span class="sd">        - vit_small: ~3-4x speedup at high masking</span>
-<span class="sd">        - vit_base: ~7-8x speedup at high masking</span>
-<span class="sd">        - Same pattern: 0-5% faster than different patterns</span>
+
+<span class="sd">        Register tokens (DINOv2 style) do NOT receive positional embeddings.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vit</span><span class="p">:</span> <span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
@@ -1355,33 +1353,71 @@ document.write(`
                 <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Registered NaN hook for: </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_get_num_extra_tokens</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Determine the number of extra tokens (cls, dist) the model uses.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Determine the number of extra tokens (cls, dist, register) the model uses.</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            int: Number of extra tokens (0, 1, or 2)</span>
+<span class="sd">            int: Number of extra tokens (cls + dist + register)</span>
 
 <span class="sd">        Note:</span>
-<span class="sd">            This is cached based on model structure and doesn&#39;t change during forward pass.</span>
+<span class="sd">            This counts ALL extra tokens that occupy sequence positions.</span>
+<span class="sd">            Register tokens don&#39;t receive positional embeddings but do occupy positions.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">num_extra</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="c1"># CLS token</span>
         <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">vit</span><span class="p">,</span> <span class="s2">&quot;cls_token&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">vit</span><span class="o">.</span><span class="n">cls_token</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">num_extra</span> <span class="o">+=</span> <span class="mi">1</span>
+
+        <span class="c1"># Distillation token (DeiT)</span>
         <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">vit</span><span class="p">,</span> <span class="s2">&quot;dist_token&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">vit</span><span class="o">.</span><span class="n">dist_token</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">num_extra</span> <span class="o">+=</span> <span class="mi">1</span>
+
+        <span class="c1"># Register tokens (DINOv2 style)</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">vit</span><span class="p">,</span> <span class="s2">&quot;reg_token&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">vit</span><span class="o">.</span><span class="n">reg_token</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">num_extra</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">vit</span><span class="o">.</span><span class="n">reg_token</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="k">elif</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">vit</span><span class="p">,</span> <span class="s2">&quot;num_reg_tokens&quot;</span><span class="p">):</span>
+            <span class="n">num_extra</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">vit</span><span class="o">.</span><span class="n">num_reg_tokens</span>
+
         <span class="k">return</span> <span class="n">num_extra</span>
 
+    <span class="k">def</span><span class="w"> </span><span class="nf">_get_num_pos_tokens</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get the number of tokens that RECEIVE positional embeddings.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            int: Number of tokens with positional embeddings</span>
+
+<span class="sd">        Note:</span>
+<span class="sd">            With timm&#39;s dynamic_img_size=True, register tokens ARE included in pos_embed.</span>
+<span class="sd">            This method returns CLS + DIST (not register) for non-dynamic models,</span>
+<span class="sd">            but we need to check pos_embed.shape to know the actual structure.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">num_pos</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="c1"># CLS token gets positional embedding</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">vit</span><span class="p">,</span> <span class="s2">&quot;cls_token&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">vit</span><span class="o">.</span><span class="n">cls_token</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">num_pos</span> <span class="o">+=</span> <span class="mi">1</span>
+
+        <span class="c1"># Distillation token gets positional embedding</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">vit</span><span class="p">,</span> <span class="s2">&quot;dist_token&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">vit</span><span class="o">.</span><span class="n">dist_token</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">num_pos</span> <span class="o">+=</span> <span class="mi">1</span>
+
+        <span class="c1"># Note: Register tokens may or may not be in pos_embed depending on timm config</span>
+        <span class="c1"># This is checked dynamically in _interpolate_pos_embed</span>
+
+        <span class="k">return</span> <span class="n">num_pos</span>
+
     <span class="k">def</span><span class="w"> </span><span class="nf">_add_extra_tokens</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Add cls_token and/or dist_token to the sequence.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Add cls_token, dist_token, and/or register tokens to the sequence.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            x: Input tensor of shape (B, N, D) containing patch embeddings</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            torch.Tensor: Tensor with extra tokens prepended, shape (B, N+num_extra, D)</span>
+<span class="sd">            torch.Tensor: Tensor with extra tokens prepended</span>
 
 <span class="sd">        Note:</span>
-<span class="sd">            Tokens are added in the order: [cls_token, dist_token (if present), patches]</span>
-<span class="sd">            For DeiT models, the order is: [cls_token, dist_token, patches]</span>
+<span class="sd">            Token order: [cls_token, dist_token (if present), register_tokens (if present), patches]</span>
+<span class="sd">            This matches the timm convention for ViTs with register tokens.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">B</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
 
@@ -1393,11 +1429,27 @@ document.write(`
         <span class="c1"># Add dist_token if present (for DeiT models)</span>
         <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">vit</span><span class="p">,</span> <span class="s2">&quot;dist_token&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">vit</span><span class="o">.</span><span class="n">dist_token</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">dist_tokens</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">vit</span><span class="o">.</span><span class="n">dist_token</span><span class="o">.</span><span class="n">expand</span><span class="p">(</span><span class="n">B</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
-            <span class="c1"># Insert after cls_token if it exists, otherwise at the beginning</span>
             <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">vit</span><span class="p">,</span> <span class="s2">&quot;cls_token&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">vit</span><span class="o">.</span><span class="n">cls_token</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="n">x</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">cat</span><span class="p">([</span><span class="n">x</span><span class="p">[:,</span> <span class="p">:</span><span class="mi">1</span><span class="p">,</span> <span class="p">:],</span> <span class="n">dist_tokens</span><span class="p">,</span> <span class="n">x</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">:,</span> <span class="p">:]],</span> <span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">x</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">cat</span><span class="p">([</span><span class="n">dist_tokens</span><span class="p">,</span> <span class="n">x</span><span class="p">],</span> <span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+        <span class="c1"># Add register tokens if present (DINOv2 style)</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">vit</span><span class="p">,</span> <span class="s2">&quot;reg_token&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">vit</span><span class="o">.</span><span class="n">reg_token</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">reg_tokens</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">vit</span><span class="o">.</span><span class="n">reg_token</span><span class="o">.</span><span class="n">expand</span><span class="p">(</span><span class="n">B</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+            <span class="c1"># Register tokens come after cls/dist but before patches</span>
+            <span class="n">num_prefix</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">vit</span><span class="p">,</span> <span class="s2">&quot;cls_token&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">vit</span><span class="o">.</span><span class="n">cls_token</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">num_prefix</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">vit</span><span class="p">,</span> <span class="s2">&quot;dist_token&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">vit</span><span class="o">.</span><span class="n">dist_token</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">num_prefix</span> <span class="o">+=</span> <span class="mi">1</span>
+
+            <span class="k">if</span> <span class="n">num_prefix</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">x</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">cat</span><span class="p">(</span>
+                    <span class="p">[</span><span class="n">x</span><span class="p">[:,</span> <span class="p">:</span><span class="n">num_prefix</span><span class="p">,</span> <span class="p">:],</span> <span class="n">reg_tokens</span><span class="p">,</span> <span class="n">x</span><span class="p">[:,</span> <span class="n">num_prefix</span><span class="p">:,</span> <span class="p">:]],</span> <span class="n">dim</span><span class="o">=</span><span class="mi">1</span>
+                <span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">x</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">cat</span><span class="p">([</span><span class="n">reg_tokens</span><span class="p">,</span> <span class="n">x</span><span class="p">],</span> <span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">x</span>
 
@@ -1428,20 +1480,45 @@ document.write(`
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Subsample positional embeddings when all samples have the same mask pattern.&quot;&quot;&quot;</span>
         <span class="n">pos_embed</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">vit</span><span class="o">.</span><span class="n">pos_embed</span>
-        <span class="n">num_extra_tokens</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_num_extra_tokens</span><span class="p">()</span>
+        <span class="n">num_pos_tokens</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_num_pos_tokens</span><span class="p">()</span>
 
-        <span class="c1"># ✨ NEW: Interpolate if needed for dynamic image sizes</span>
+        <span class="c1"># Check if model has register tokens</span>
+        <span class="n">num_register_tokens</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">vit</span><span class="p">,</span> <span class="s2">&quot;reg_token&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">vit</span><span class="o">.</span><span class="n">reg_token</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">num_register_tokens</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">vit</span><span class="o">.</span><span class="n">reg_token</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="k">elif</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">vit</span><span class="p">,</span> <span class="s2">&quot;num_reg_tokens&quot;</span><span class="p">):</span>
+            <span class="n">num_register_tokens</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">vit</span><span class="o">.</span><span class="n">num_reg_tokens</span>
+
+        <span class="c1"># Interpolate if needed for dynamic image sizes</span>
         <span class="n">pos_embed</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_interpolate_pos_embed</span><span class="p">(</span><span class="n">pos_embed</span><span class="p">,</span> <span class="n">N</span><span class="p">)</span>
 
         <span class="c1"># Determine positional embedding structure</span>
-        <span class="k">if</span> <span class="n">pos_embed</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">N</span> <span class="o">+</span> <span class="n">num_extra_tokens</span><span class="p">:</span>
-            <span class="n">extra_tokens_pos</span> <span class="o">=</span> <span class="n">pos_embed</span><span class="p">[:,</span> <span class="p">:</span><span class="n">num_extra_tokens</span><span class="p">,</span> <span class="p">:]</span>
-            <span class="n">patch_pos_embed</span> <span class="o">=</span> <span class="n">pos_embed</span><span class="p">[:,</span> <span class="n">num_extra_tokens</span><span class="p">:,</span> <span class="p">:]</span>
+        <span class="c1"># With dynamic_img_size=True, pos_embed may include register tokens</span>
+        <span class="c1"># Check both: with and without register tokens</span>
+        <span class="k">if</span> <span class="n">pos_embed</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">N</span> <span class="o">+</span> <span class="n">num_pos_tokens</span> <span class="o">+</span> <span class="n">num_register_tokens</span><span class="p">:</span>
+            <span class="c1"># pos_embed includes register tokens: [CLS, REG, PATCHES]</span>
+            <span class="n">extra_tokens_pos</span> <span class="o">=</span> <span class="n">pos_embed</span><span class="p">[:,</span> <span class="p">:</span> <span class="n">num_pos_tokens</span> <span class="o">+</span> <span class="n">num_register_tokens</span><span class="p">,</span> <span class="p">:]</span>
+            <span class="n">patch_pos_embed</span> <span class="o">=</span> <span class="n">pos_embed</span><span class="p">[:,</span> <span class="n">num_pos_tokens</span> <span class="o">+</span> <span class="n">num_register_tokens</span> <span class="p">:,</span> <span class="p">:]</span>
 
             <span class="c1"># Subsample patch positions</span>
             <span class="n">patch_pos_embed</span> <span class="o">=</span> <span class="n">patch_pos_embed</span><span class="p">[:,</span> <span class="n">keep_idx</span><span class="p">,</span> <span class="p">:]</span>
 
-            <span class="k">if</span> <span class="n">num_extra_tokens</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">pos_embed</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">cat</span><span class="p">(</span>
+                <span class="p">[</span>
+                    <span class="n">extra_tokens_pos</span><span class="o">.</span><span class="n">expand</span><span class="p">(</span><span class="n">B</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">),</span>
+                    <span class="n">patch_pos_embed</span><span class="o">.</span><span class="n">expand</span><span class="p">(</span><span class="n">B</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">),</span>
+                <span class="p">],</span>
+                <span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="k">elif</span> <span class="n">pos_embed</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">N</span> <span class="o">+</span> <span class="n">num_pos_tokens</span><span class="p">:</span>
+            <span class="c1"># pos_embed doesn&#39;t include register tokens: [CLS, PATCHES]</span>
+            <span class="n">extra_tokens_pos</span> <span class="o">=</span> <span class="n">pos_embed</span><span class="p">[:,</span> <span class="p">:</span><span class="n">num_pos_tokens</span><span class="p">,</span> <span class="p">:]</span>
+            <span class="n">patch_pos_embed</span> <span class="o">=</span> <span class="n">pos_embed</span><span class="p">[:,</span> <span class="n">num_pos_tokens</span><span class="p">:,</span> <span class="p">:]</span>
+
+            <span class="c1"># Subsample patch positions</span>
+            <span class="n">patch_pos_embed</span> <span class="o">=</span> <span class="n">patch_pos_embed</span><span class="p">[:,</span> <span class="n">keep_idx</span><span class="p">,</span> <span class="p">:]</span>
+
+            <span class="k">if</span> <span class="n">num_pos_tokens</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
                 <span class="n">pos_embed</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">cat</span><span class="p">(</span>
                     <span class="p">[</span>
                         <span class="n">extra_tokens_pos</span><span class="o">.</span><span class="n">expand</span><span class="p">(</span><span class="n">B</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">),</span>
@@ -1451,14 +1528,15 @@ document.write(`
                 <span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">pos_embed</span> <span class="o">=</span> <span class="n">patch_pos_embed</span><span class="o">.</span><span class="n">expand</span><span class="p">(</span><span class="n">B</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
-
         <span class="k">elif</span> <span class="n">pos_embed</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">N</span><span class="p">:</span>
+            <span class="c1"># No extra tokens at all</span>
             <span class="n">patch_pos_embed</span> <span class="o">=</span> <span class="n">pos_embed</span><span class="p">[:,</span> <span class="n">keep_idx</span><span class="p">,</span> <span class="p">:]</span>
             <span class="n">pos_embed</span> <span class="o">=</span> <span class="n">patch_pos_embed</span><span class="o">.</span><span class="n">expand</span><span class="p">(</span><span class="n">B</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
                 <span class="sa">f</span><span class="s2">&quot;Unexpected pos_embed shape after interpolation: </span><span class="si">{</span><span class="n">pos_embed</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2">. &quot;</span>
-                <span class="sa">f</span><span class="s2">&quot;Expected shape[1] to be </span><span class="si">{</span><span class="n">N</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">num_extra_tokens</span><span class="si">}</span><span class="s2"> or </span><span class="si">{</span><span class="n">N</span><span class="si">}</span><span class="s2">&quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;Expected shape[1] to be </span><span class="si">{</span><span class="n">N</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">num_pos_tokens</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">num_register_tokens</span><span class="si">}</span><span class="s2">, &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">N</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">num_pos_tokens</span><span class="si">}</span><span class="s2">, or </span><span class="si">{</span><span class="n">N</span><span class="si">}</span><span class="s2">&quot;</span>
             <span class="p">)</span>
 
         <span class="k">return</span> <span class="n">pos_embed</span>
@@ -1468,22 +1546,37 @@ document.write(`
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Subsample positional embeddings when samples have different mask patterns.&quot;&quot;&quot;</span>
         <span class="n">pos_embed</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">vit</span><span class="o">.</span><span class="n">pos_embed</span>
-        <span class="n">num_extra_tokens</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_num_extra_tokens</span><span class="p">()</span>
+        <span class="n">num_pos_tokens</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_num_pos_tokens</span><span class="p">()</span>
 
-        <span class="c1"># ✨ NEW: Interpolate if needed for dynamic image sizes</span>
+        <span class="c1"># Check if model has register tokens</span>
+        <span class="n">num_register_tokens</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">vit</span><span class="p">,</span> <span class="s2">&quot;reg_token&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">vit</span><span class="o">.</span><span class="n">reg_token</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">num_register_tokens</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">vit</span><span class="o">.</span><span class="n">reg_token</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="k">elif</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">vit</span><span class="p">,</span> <span class="s2">&quot;num_reg_tokens&quot;</span><span class="p">):</span>
+            <span class="n">num_register_tokens</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">vit</span><span class="o">.</span><span class="n">num_reg_tokens</span>
+
+        <span class="c1"># Interpolate if needed for dynamic image sizes</span>
         <span class="n">pos_embed</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_interpolate_pos_embed</span><span class="p">(</span><span class="n">pos_embed</span><span class="p">,</span> <span class="n">N</span><span class="p">)</span>
 
         <span class="c1"># Determine positional embedding structure</span>
-        <span class="k">if</span> <span class="n">pos_embed</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">N</span> <span class="o">+</span> <span class="n">num_extra_tokens</span><span class="p">:</span>
-            <span class="n">extra_tokens_pos</span> <span class="o">=</span> <span class="n">pos_embed</span><span class="p">[:,</span> <span class="p">:</span><span class="n">num_extra_tokens</span><span class="p">,</span> <span class="p">:]</span>
-            <span class="n">patch_pos_embed</span> <span class="o">=</span> <span class="n">pos_embed</span><span class="p">[:,</span> <span class="n">num_extra_tokens</span><span class="p">:,</span> <span class="p">:]</span>
+        <span class="c1"># With dynamic_img_size=True, pos_embed may include register tokens</span>
+        <span class="k">if</span> <span class="n">pos_embed</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">N</span> <span class="o">+</span> <span class="n">num_pos_tokens</span> <span class="o">+</span> <span class="n">num_register_tokens</span><span class="p">:</span>
+            <span class="c1"># pos_embed includes register tokens: [CLS, REG, PATCHES]</span>
+            <span class="n">extra_tokens_pos</span> <span class="o">=</span> <span class="n">pos_embed</span><span class="p">[:,</span> <span class="p">:</span> <span class="n">num_pos_tokens</span> <span class="o">+</span> <span class="n">num_register_tokens</span><span class="p">,</span> <span class="p">:]</span>
+            <span class="n">patch_pos_embed</span> <span class="o">=</span> <span class="n">pos_embed</span><span class="p">[:,</span> <span class="n">num_pos_tokens</span> <span class="o">+</span> <span class="n">num_register_tokens</span> <span class="p">:,</span> <span class="p">:]</span>
+        <span class="k">elif</span> <span class="n">pos_embed</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">N</span> <span class="o">+</span> <span class="n">num_pos_tokens</span><span class="p">:</span>
+            <span class="c1"># pos_embed doesn&#39;t include register tokens: [CLS, PATCHES]</span>
+            <span class="n">extra_tokens_pos</span> <span class="o">=</span> <span class="n">pos_embed</span><span class="p">[:,</span> <span class="p">:</span><span class="n">num_pos_tokens</span><span class="p">,</span> <span class="p">:]</span>
+            <span class="n">patch_pos_embed</span> <span class="o">=</span> <span class="n">pos_embed</span><span class="p">[:,</span> <span class="n">num_pos_tokens</span><span class="p">:,</span> <span class="p">:]</span>
         <span class="k">elif</span> <span class="n">pos_embed</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">N</span><span class="p">:</span>
+            <span class="c1"># No extra tokens</span>
             <span class="n">extra_tokens_pos</span> <span class="o">=</span> <span class="kc">None</span>
             <span class="n">patch_pos_embed</span> <span class="o">=</span> <span class="n">pos_embed</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
                 <span class="sa">f</span><span class="s2">&quot;Unexpected pos_embed shape after interpolation: </span><span class="si">{</span><span class="n">pos_embed</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2">. &quot;</span>
-                <span class="sa">f</span><span class="s2">&quot;Expected shape[1] to be </span><span class="si">{</span><span class="n">N</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">num_extra_tokens</span><span class="si">}</span><span class="s2"> or </span><span class="si">{</span><span class="n">N</span><span class="si">}</span><span class="s2">&quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;Expected shape[1] to be </span><span class="si">{</span><span class="n">N</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">num_pos_tokens</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">num_register_tokens</span><span class="si">}</span><span class="s2">, &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">N</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">num_pos_tokens</span><span class="si">}</span><span class="s2">, or </span><span class="si">{</span><span class="n">N</span><span class="si">}</span><span class="s2">&quot;</span>
             <span class="p">)</span>
 
         <span class="c1"># Subsample patch positional embeddings per sample</span>
@@ -1491,7 +1584,7 @@ document.write(`
         <span class="n">batch_idx</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_batch_indices</span><span class="p">(</span><span class="n">B</span><span class="p">,</span> <span class="n">num_keep</span><span class="p">,</span> <span class="n">keep_indices</span><span class="o">.</span><span class="n">device</span><span class="p">)</span>
         <span class="n">patch_pos_embed</span> <span class="o">=</span> <span class="n">patch_pos_embed</span><span class="p">[</span><span class="n">batch_idx</span><span class="p">,</span> <span class="n">keep_indices</span><span class="p">,</span> <span class="p">:]</span>
 
-        <span class="k">if</span> <span class="n">extra_tokens_pos</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">num_extra_tokens</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">extra_tokens_pos</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">extra_tokens_pos</span> <span class="o">=</span> <span class="n">extra_tokens_pos</span><span class="o">.</span><span class="n">expand</span><span class="p">(</span><span class="n">B</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
             <span class="n">pos_embed</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">cat</span><span class="p">([</span><span class="n">extra_tokens_pos</span><span class="p">,</span> <span class="n">patch_pos_embed</span><span class="p">],</span> <span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
@@ -1547,11 +1640,12 @@ document.write(`
 <span class="sd">        - Optimized indexing for same masking patterns across batch</span>
 <span class="sd">        - Per-sample masking support with advanced indexing</span>
 <span class="sd">        - Automatic NaN replacement for partial NaN patches</span>
+<span class="sd">        - Support for register tokens (DINOv2 style)</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            x: Input tensor, either:</span>
-<span class="sd">               - Raw images: shape (B, C, H, W)</span>
-<span class="sd">               - Pre-patchified: shape (B, N, D) where N is number of patches</span>
+<span class="sd">            - Raw images: shape (B, C, H, W)</span>
+<span class="sd">            - Pre-patchified: shape (B, N, D) where N is number of patches</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            torch.Tensor: Model output (logits if head exists, features otherwise)</span>
@@ -1594,6 +1688,7 @@ document.write(`
                 <span class="sa">f</span><span class="s2">&quot;Input must be 4D (B, C, H, W) image or 3D (B, N, D) patches. &quot;</span>
                 <span class="sa">f</span><span class="s2">&quot;Got shape: </span><span class="si">{</span><span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2">&quot;</span>
             <span class="p">)</span>
+
         <span class="n">B</span><span class="p">,</span> <span class="n">N</span><span class="p">,</span> <span class="n">D</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">shape</span>
         <span class="n">device</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">device</span>
         <span class="n">nan_mask</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>  <span class="c1"># (B, N)</span>
@@ -1638,10 +1733,12 @@ document.write(`
         <span class="k">if</span> <span class="n">torch</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="o">.</span><span class="n">any</span><span class="p">():</span>
             <span class="n">x</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">nan_to_num</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">nan</span><span class="o">=</span><span class="mf">0.0</span><span class="p">)</span>
 
-        <span class="c1"># Add cls_token and/or dist_token</span>
+        <span class="c1"># Add cls_token, dist_token, and/or register tokens</span>
         <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_add_extra_tokens</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
 
         <span class="c1"># Add positional embeddings</span>
+        <span class="c1"># The subsample methods ensure pos_embed matches x in length</span>
+        <span class="c1"># (includes register tokens when using dynamic_img_size=True)</span>
         <span class="n">x</span> <span class="o">=</span> <span class="n">x</span> <span class="o">+</span> <span class="n">pos_embed</span>
 
         <span class="c1"># Apply positional dropout if it exists</span>
@@ -1725,22 +1822,48 @@ document.write(`
 <span class="sd">            N: Target number of patches</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            torch.Tensor: Interpolated positional embeddings, shape (1, N + num_extra, D)</span>
+<span class="sd">            torch.Tensor: Interpolated positional embeddings</span>
+
+<span class="sd">        Note:</span>
+<span class="sd">            When using timm with dynamic_img_size=True and reg_tokens, the pos_embed</span>
+<span class="sd">            INCLUDES register tokens: [CLS_pos, REG_pos, PATCH_pos]</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">num_extra_tokens</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_num_extra_tokens</span><span class="p">()</span>
+        <span class="n">num_pos_tokens</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_num_pos_tokens</span><span class="p">()</span>
+
+        <span class="c1"># Check if model has register tokens</span>
+        <span class="n">num_register_tokens</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">vit</span><span class="p">,</span> <span class="s2">&quot;reg_token&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">vit</span><span class="o">.</span><span class="n">reg_token</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">num_register_tokens</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">vit</span><span class="o">.</span><span class="n">reg_token</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="k">elif</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">vit</span><span class="p">,</span> <span class="s2">&quot;num_reg_tokens&quot;</span><span class="p">):</span>
+            <span class="n">num_register_tokens</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">vit</span><span class="o">.</span><span class="n">num_reg_tokens</span>
+
         <span class="n">N_orig</span> <span class="o">=</span> <span class="n">pos_embed</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
 
         <span class="c1"># If already correct size, return as-is</span>
-        <span class="k">if</span> <span class="n">N_orig</span> <span class="o">==</span> <span class="n">N</span> <span class="o">+</span> <span class="n">num_extra_tokens</span> <span class="ow">or</span> <span class="n">N_orig</span> <span class="o">==</span> <span class="n">N</span><span class="p">:</span>
+        <span class="c1"># Check both possibilities: with and without register tokens</span>
+        <span class="k">if</span> <span class="p">(</span>
+            <span class="n">N_orig</span> <span class="o">==</span> <span class="n">N</span> <span class="o">+</span> <span class="n">num_pos_tokens</span> <span class="o">+</span> <span class="n">num_register_tokens</span>
+            <span class="ow">or</span> <span class="n">N_orig</span> <span class="o">==</span> <span class="n">N</span> <span class="o">+</span> <span class="n">num_pos_tokens</span>
+            <span class="ow">or</span> <span class="n">N_orig</span> <span class="o">==</span> <span class="n">N</span>
+        <span class="p">):</span>
             <span class="k">return</span> <span class="n">pos_embed</span>
 
-        <span class="c1"># Separate extra tokens from patch embeddings</span>
-        <span class="k">if</span> <span class="n">N_orig</span> <span class="o">&gt;</span> <span class="n">num_extra_tokens</span><span class="p">:</span>
-            <span class="n">extra_tokens_pos</span> <span class="o">=</span> <span class="n">pos_embed</span><span class="p">[:,</span> <span class="p">:</span><span class="n">num_extra_tokens</span><span class="p">,</span> <span class="p">:]</span>  <span class="c1"># (1, num_extra, D)</span>
-            <span class="n">patch_pos_embed</span> <span class="o">=</span> <span class="n">pos_embed</span><span class="p">[</span>
-                <span class="p">:,</span> <span class="n">num_extra_tokens</span><span class="p">:,</span> <span class="p">:</span>
-            <span class="p">]</span>  <span class="c1"># (1, N_orig - num_extra, D)</span>
+        <span class="c1"># Determine structure: timm may include register tokens in pos_embed when dynamic_img_size=True</span>
+        <span class="c1"># Structure can be: [CLS_pos, REG_pos, PATCH_pos] or [CLS_pos, PATCH_pos]</span>
+
+        <span class="c1"># Calculate expected position with register tokens</span>
+        <span class="n">expected_with_reg</span> <span class="o">=</span> <span class="n">num_pos_tokens</span> <span class="o">+</span> <span class="n">num_register_tokens</span>
+
+        <span class="k">if</span> <span class="n">N_orig</span> <span class="o">&gt;</span> <span class="n">expected_with_reg</span> <span class="ow">and</span> <span class="n">num_register_tokens</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="c1"># pos_embed includes register tokens: [CLS, REG, PATCHES]</span>
+            <span class="n">extra_tokens_pos</span> <span class="o">=</span> <span class="n">pos_embed</span><span class="p">[:,</span> <span class="p">:</span><span class="n">expected_with_reg</span><span class="p">,</span> <span class="p">:]</span>
+            <span class="n">patch_pos_embed</span> <span class="o">=</span> <span class="n">pos_embed</span><span class="p">[:,</span> <span class="n">expected_with_reg</span><span class="p">:,</span> <span class="p">:]</span>
+        <span class="k">elif</span> <span class="n">num_pos_tokens</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">N_orig</span> <span class="o">&gt;</span> <span class="n">num_pos_tokens</span><span class="p">:</span>
+            <span class="c1"># pos_embed doesn&#39;t include register tokens: [CLS, PATCHES]</span>
+            <span class="n">extra_tokens_pos</span> <span class="o">=</span> <span class="n">pos_embed</span><span class="p">[:,</span> <span class="p">:</span><span class="n">num_pos_tokens</span><span class="p">,</span> <span class="p">:]</span>
+            <span class="n">patch_pos_embed</span> <span class="o">=</span> <span class="n">pos_embed</span><span class="p">[:,</span> <span class="n">num_pos_tokens</span><span class="p">:,</span> <span class="p">:]</span>
         <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># No extra tokens</span>
             <span class="n">extra_tokens_pos</span> <span class="o">=</span> <span class="kc">None</span>
             <span class="n">patch_pos_embed</span> <span class="o">=</span> <span class="n">pos_embed</span>
 
@@ -1773,14 +1896,14 @@ document.write(`
             <span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="n">gs_new</span><span class="p">,</span> <span class="n">gs_new</span><span class="p">),</span>
             <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;bicubic&quot;</span><span class="p">,</span>
             <span class="n">align_corners</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-            <span class="n">antialias</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>  <span class="c1"># Match timm behavior</span>
+            <span class="n">antialias</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
         <span class="p">)</span>
 
         <span class="c1"># Reshape back: (1, D, H_new, W_new) -&gt; (1, N, D)</span>
         <span class="n">patch_pos_embed</span> <span class="o">=</span> <span class="n">patch_pos_embed</span><span class="o">.</span><span class="n">permute</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">N</span><span class="p">,</span> <span class="n">D</span><span class="p">)</span>
 
-        <span class="c1"># Recombine with extra tokens</span>
-        <span class="k">if</span> <span class="n">extra_tokens_pos</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">num_extra_tokens</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="c1"># Recombine with extra token positions</span>
+        <span class="k">if</span> <span class="n">extra_tokens_pos</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">pos_embed</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">cat</span><span class="p">([</span><span class="n">extra_tokens_pos</span><span class="p">,</span> <span class="n">patch_pos_embed</span><span class="p">],</span> <span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">pos_embed</span> <span class="o">=</span> <span class="n">patch_pos_embed</span>
