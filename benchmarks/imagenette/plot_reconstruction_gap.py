@@ -32,8 +32,7 @@ def create_tube_plot(trajectories, output_path, title="MAE Reconstruction Tube")
     all_alpha_labels = []
     all_epochs = []
 
-    print("\nCollecting TRUE MSE-Accuracy pairs from trajectory files...")
-    print("(MSE from val/loss_rec, Accuracy from val/supervised_acc during pretraining)\n")
+    print("collecting mse-acc pairs from trajectories")
 
     for traj_data in trajectories:
         alpha = traj_data.get('alpha')
@@ -55,19 +54,14 @@ def create_tube_plot(trajectories, output_path, title="MAE Reconstruction Tube")
                 all_alpha_labels.append(alpha)
                 all_epochs.append(epoch)
 
-        print(f"Alpha {alpha}: {len(trajectory)} epochs, "
-              f"Final MSE: {trajectory[-1]['mse']:.4f}, Final Acc: {trajectory[-1]['accuracy']:.2f}%")
+        print(f"a={alpha}: {len(trajectory)} eps, mse={trajectory[-1]['mse']:.4f}, acc={trajectory[-1]['accuracy']:.2f}%")
 
     all_mse = np.array(all_mse)
     all_acc = np.array(all_acc)
     all_alpha_labels = np.array(all_alpha_labels)
     all_epochs = np.array(all_epochs)
 
-    print(f"\n{'='*70}")
-    print(f"Total TRUE (MSE, Accuracy) pairs: {len(all_mse)}")
-    print(f"MSE range: [{all_mse.min():.4f}, {all_mse.max():.4f}]")
-    print(f"Accuracy range: [{all_acc.min():.2f}%, {all_acc.max():.2f}%]")
-    print(f"{'='*70}\n")
+    print(f"{len(all_mse)} pts, mse [{all_mse.min():.4f}, {all_mse.max():.4f}], acc [{all_acc.min():.2f}%, {all_acc.max():.2f}%]")
 
     fig, ax = plt.subplots(figsize=(14, 8))
 
@@ -140,11 +134,7 @@ def create_tube_plot(trajectories, output_path, title="MAE Reconstruction Tube")
 
     plt.tight_layout()
     plt.savefig(output_path, dpi=300, bbox_inches='tight')
-    print(f"✓ TRUE tube plot saved to: {output_path}\n")
-
-    print(f"{'='*70}")
-    print("RECONSTRUCTION TUBE ANALYSIS")
-    print(f"{'='*70}")
+    print(f"saved: {output_path}")
 
     print(f"\n{'MSE Range':<30} {'Acc Range (%)':<25} {'Spread':<12} {'Points'}")
     print(f"{'-'*70}")
@@ -167,19 +157,11 @@ def create_tube_plot(trajectories, output_path, title="MAE Reconstruction Tube")
                 significant_bins.append((mse_bins[i], mse_bins[i+1], spread))
 
     print(f"{'-'*70}")
-    print(f"\n🎯 MAXIMUM VERTICAL SPREAD: {max_spread:.1f}%")
-    print(f"   → At similar reconstruction MSE, accuracy varies by up to {max_spread:.1f}%!")
+    print(f"max spread: {max_spread:.1f}%")
 
     if significant_bins:
-        print(f"\n📊 BINS WITH SIGNIFICANT SPREAD (>5%):")
         for mse_low, mse_high, spread in significant_bins:
-            print(f"   MSE [{mse_low:.3f}, {mse_high:.3f}]: {spread:.1f}% accuracy spread")
-
-    print(f"\n{'='*70}")
-    print("✅ This demonstrates MAE's ILL-POSED reconstruction objective:")
-    print("   Multiple encoder configurations achieve SIMILAR reconstruction MSE")
-    print("   but produce VERY DIFFERENT semantic representations (accuracies)!")
-    print(f"{'='*70}\n")
+            print(f"  [{mse_low:.3f}, {mse_high:.3f}]: {spread:.1f}%")
 
 
 def plot_individual_metrics(trajectories, output_dir):
@@ -218,7 +200,7 @@ def plot_individual_metrics(trajectories, output_dir):
     mse_plot_path = output_dir / 'mse_over_epochs.png'
     plt.savefig(mse_plot_path, dpi=300, bbox_inches='tight')
     plt.close(fig)
-    print(f"Saved MSE plot to: {mse_plot_path}")
+    print(f"saved: {mse_plot_path}")
 
     fig, ax = plt.subplots(figsize=(10, 6))
     for traj_data in trajectories:
@@ -244,7 +226,7 @@ def plot_individual_metrics(trajectories, output_dir):
     acc_plot_path = output_dir / 'accuracy_over_epochs.png'
     plt.savefig(acc_plot_path, dpi=300, bbox_inches='tight')
     plt.close(fig)
-    print(f"Saved accuracy plot to: {acc_plot_path}")
+    print(f"saved: {acc_plot_path}")
 
 
 def main():
@@ -274,9 +256,7 @@ def main():
 
     plot_individual_metrics(trajectories, plot_dir)
 
-    print(f"\n{'='*60}")
-    print(f"All plots saved to: {plot_dir}")
-    print(f"{'='*60}")
+    print(f"plots in {plot_dir}")
 
 
 if __name__ == "__main__":

@@ -166,8 +166,6 @@ def save_fixed_samples(dataloader, output_path, num_samples=16, seed=42):
         'seed': seed,
     }, output_file)
 
-    logging.info(f"✓ Saved {num_samples} fixed validation samples to {output_file}")
-    logging.info(f"  Unique labels: {len(set(labels))} classes")
-    logging.info(f"  Image shape: {images_tensor.shape}")
+    logging.info(f"saved {num_samples} samples to {output_file}")
 
     return images_tensor, labels_tensor

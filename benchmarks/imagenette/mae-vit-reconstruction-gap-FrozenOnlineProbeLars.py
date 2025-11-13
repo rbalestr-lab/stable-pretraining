@@ -112,7 +112,7 @@ class ReconstructionGapCallback(pl.Callback):
                     "trajectory": self.trajectory
                 }, f, indent=2)
 
-            print(f"Saved trajectory to {output_path}")
+            print(f"saved: {output_path}")
 
 
 class MAEVisualizationCallback(pl.Callback):
@@ -132,7 +132,7 @@ class MAEVisualizationCallback(pl.Callback):
 
         if self.fixed_images is None:
             if not self.fixed_samples_path.exists():
-                print(f"Warning: Fixed samples not found at {self.fixed_samples_path}")
+                print(f"no fixed samples at {self.fixed_samples_path}")
                 return
 
             data = torch.load(self.fixed_samples_path)
@@ -200,7 +200,7 @@ class MAEVisualizationCallback(pl.Callback):
             fig.savefig(save_path, dpi=100, bbox_inches='tight')
             plt.close(fig)
 
-            print(f"Saved reconstruction visualization for epoch {trainer.current_epoch} to {save_path}")
+            print(f"viz ep{trainer.current_epoch}: {save_path}")
 
             if trainer.logger is not None:
                 try:
@@ -210,7 +210,7 @@ class MAEVisualizationCallback(pl.Callback):
                         f"reconstructions/{alpha_str}/epoch_{trainer.current_epoch:03d}": wandb.Image(str(save_path))
                     })
                 except Exception as e:
-                    print(f"Warning: Failed to log reconstruction image to WandB: {e}")
+                    print(f"wandb log failed: {e}")
 
 
 def main():
@@ -250,10 +250,8 @@ def main():
     pl.seed_everything(args.seed)
 
     decoder_config = parse_decoder_type(args.decoder_type)
-    print(f"Decoder config: {decoder_config}")
 
     data_dir = get_data_dir("imagenette")
-    print(f"Data directory: {data_dir}")
 
     train_transform = transforms.Compose(
         transforms.RGB(),
@@ -269,7 +267,6 @@ def main():
         transforms.ToImage(**spt.data.static.ImageNet),
     )
 
-    print("Loading Imagenette dataset...")
     train_dataset = spt.data.HFDataset(
         "randall-lab/imagenette",
         "320px",
@@ -286,7 +283,7 @@ def main():
         transform=val_transform,
     )
 
-    print(f"Train size: {len(train_dataset)}, Val size: {len(val_dataset)}")
+    print(f"train {len(train_dataset)}, val {len(val_dataset)}")
 
     train_dataloader = torch.utils.data.DataLoader(
         dataset=train_dataset,
@@ -307,7 +304,6 @@ def main():
     data = spt.data.DataModule(train=train_dataloader, val=val_dataloader)
 
     fixed_samples_path = Path(args.fixed_samples_dir) / "fixed_val_samples.pt"
-    print(f"\nGenerating/loading fixed validation samples from {fixed_samples_path}")
     save_fixed_samples(
         val_dataloader,
         args.fixed_samples_dir,
@@ -315,16 +311,14 @@ def main():
         seed=args.seed
     )
 
-    print(f"Creating MAE model: {args.model} with decoder: {args.decoder_type}")
     backbone = create_mae_with_custom_decoder(args.model, decoder_config)
 
     model_dims = {"vit_tiny": 192, "vit_small": 384, "vit_base": 768, "vit_large": 1024}
     encoder_dim = model_dims[args.model]
     num_classes = 10
-    print(f"Encoder dim: {encoder_dim}, Num classes: {num_classes}")
 
     classifier = nn.Linear(encoder_dim, num_classes)
-    print(f"Created supervised classifier (alpha={args.alpha})")
+    print(f"{args.model}/{args.decoder_type}, a={args.alpha}")
 
     if args.alpha == 0.0:
         optim_config = {
@@ -404,17 +398,10 @@ def main():
         check_val_every_n_epoch=1,
     )
 
-    print("\n" + "="*60)
-    print(f"Starting training: {args.model} + {args.decoder_type} + alpha={args.alpha}")
-    print("="*60 + "\n")
-
     manager = spt.Manager(trainer=trainer, module=module, data=data)
     manager()
 
-    print(f"\n{'='*60}")
-    print(f"Training complete!")
-    print(f"Model: {args.model}, Decoder: {args.decoder_type}, Alpha: {args.alpha}")
-    print(f"{'='*60}\n")
+    print("done")
 
 
 if __name__ == "__main__":

@@ -294,16 +294,8 @@ def save_gap_statistics(trajectories: Dict[float, List[Dict]], gap: float, bin_s
     with open(output_path, "w") as f:
         json.dump(stats, f, indent=2)
 
-    print(f"Saved gap statistics to {output_path}")
-    print(f"\n{'='*60}")
-    print(f"RECONSTRUCTION GAP ANALYSIS")
-    print(f"{'='*60}")
-    print(f"Total Gap (Γ): {gap:.2f}%")
-    print(f"Overall Spearman correlation: {overall_corr:.4f} (p={overall_pval:.4e})")
-    print(f"Number of bins: {len(bin_stats)}")
-    print(f"Number of experiments: {len(trajectories)}")
-    print(f"Total data points: {len(all_mses)}")
-    print(f"{'='*60}\n")
+    print(f"saved: {output_path}")
+    print(f"gap: {gap:.2f}%, corr: {overall_corr:.4f}, bins: {len(bin_stats)}, exps: {len(trajectories)}, pts: {len(all_mses)}")
 
 
 def main():
@@ -397,11 +389,10 @@ def main():
             })
 
             wandb.finish()
-            print(f"✓ Successfully uploaded all results to WandB!")
+            print("uploaded to wandb")
 
         except Exception as e:
-            print(f"⚠ Warning: WandB upload failed: {e}")
-            print("  Results are still saved locally.")
+            print(f"wandb upload failed: {e}")
 
 
 if __name__ == "__main__":
