@@ -23,6 +23,14 @@ spec.loader.exec_module(imagenette_utils)
 parse_decoder_type = imagenette_utils.parse_decoder_type
 create_mae_with_custom_decoder = imagenette_utils.create_mae_with_custom_decoder
 save_fixed_samples = imagenette_utils.save_fixed_samples
+load_mae_dataset = imagenette_utils.load_mae_dataset
+detect_image_properties_from_dataset = imagenette_utils.detect_image_properties_from_dataset
+
+dataset_configs_path = Path(__file__).parent / "dataset_configs.py"
+spec = importlib.util.spec_from_file_location("dataset_configs", dataset_configs_path)
+dataset_configs = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(dataset_configs)
+get_dataset_config = dataset_configs.get_dataset_config
 
 benchmarks_utils_path = Path(__file__).parent.parent / "utils.py"
 spec = importlib.util.spec_from_file_location("benchmarks_utils", benchmarks_utils_path)
@@ -75,9 +83,11 @@ def mae_reconstruction_gap_forward(self, batch, stage):
 
 class ReconstructionGapCallback(pl.Callback):
 
-    def __init__(self):
+    def __init__(self, dataset_name="imagenette", log_dir=None):
         super().__init__()
         self.trajectory = []
+        self.dataset_name = dataset_name
+        self.log_dir = log_dir
 
     def on_validation_epoch_end(self, trainer, pl_module):
         metrics = trainer.callback_metrics
@@ -97,8 +107,11 @@ class ReconstructionGapCallback(pl.Callback):
 
     def on_train_end(self, trainer, pl_module):
         alpha_str = str(pl_module.alpha).replace("-", "neg")
-        lr_str = f"{pl_module.lr:.0e}".replace("-", "neg")  # Format as scientific notation
-        log_dir = Path("outputs") / "imagenette-mae-reconstruction-gap" / f"{alpha_str}_lr{lr_str}"
+        lr_str = f"{pl_module.lr:.0e}".replace("-", "neg")
+        if self.log_dir is not None:
+            log_dir = Path(self.log_dir) / f"{alpha_str}_lr{lr_str}"
+        else:
+            log_dir = Path("outputs") / f"{self.dataset_name}-mae-reconstruction-gap" / f"{alpha_str}_lr{lr_str}"
         output_path = log_dir / "trajectory.json"
         output_path.parent.mkdir(parents=True, exist_ok=True)
 
@@ -228,6 +241,10 @@ class MAEVisualizationCallback(pl.Callback):
 def main():
     parser = argparse.ArgumentParser(description="MAE Reconstruction Gap Benchmark")
 
+    parser.add_argument("--dataset", type=str, default="imagenette",
+                        choices=["imagenette", "tiny-imagenet", "imagenet100", "imagenet"],
+                        help="Dataset to use")
+
     parser.add_argument("--model", type=str, default="vit_tiny",
                         choices=["vit_tiny", "vit_small", "vit_base", "vit_large"],
                         help="Encoder model size")
@@ -236,8 +253,23 @@ def main():
     parser.add_argument("--mask_ratio", type=float, default=0.75,
                         help="Masking ratio (default: 0.75)")
 
+    parser.add_argument("--encoder_embed_dim", type=int, default=None,
+                        help="Override encoder embedding dimension")
+    parser.add_argument("--encoder_depth", type=int, default=None,
+                        help="Override encoder depth (number of layers)")
+    parser.add_argument("--encoder_num_heads", type=int, default=None,
+                        help="Override encoder number of attention heads")
+    parser.add_argument("--decoder_embed_dim", type=int, default=None,
+                        help="Override decoder embedding dimension")
+    parser.add_argument("--decoder_depth", type=int, default=None,
+                        help="Override decoder depth (number of layers)")
+    parser.add_argument("--decoder_num_heads", type=int, default=None,
+                        help="Override decoder number of attention heads")
+    parser.add_argument("--patch_size", type=int, default=16,
+                        help="Patch size for Vision Transformer")
+
     parser.add_argument("--alpha", type=float, default=0.0,
-                        help="Supervised regularization weight (can be negative)")
+                        help="Lambda: supervised regularization weight (can be negative)")
 
     parser.add_argument("--epochs", type=int, default=50, help="Number of epochs")
     parser.add_argument("--batch_size", type=int, default=64, help="Batch size")
@@ -248,9 +280,12 @@ def main():
     parser.add_argument("--num_workers", type=int, default=4, help="DataLoader workers")
     parser.add_argument("--seed", type=int, default=0, help="Random seed")
 
-    parser.add_argument("--project", type=str, default="imagenette-mae-reconstruction-gap")
+    parser.add_argument("--project", type=str, default=None,
+                        help="WandB project name (default: {dataset}-mae-reconstruction-gap)")
     parser.add_argument("--entity", type=str, default=None)
     parser.add_argument("--output_dir", type=str, default="outputs/")
+    parser.add_argument("--log_dir", type=str, default=None,
+                        help="Directory for trajectory logs (default: outputs/{dataset}-mae-reconstruction-gap)")
 
     parser.add_argument("--fixed_samples_dir", type=str, default="fixed_samples/",
                         help="Directory to save/load fixed validation samples")
@@ -261,40 +296,56 @@ def main():
 
     pl.seed_everything(args.seed)
 
+    dataset_config = get_dataset_config(args.dataset)
+
+    if args.project is None:
+        args.project = f"{args.dataset}-mae-reconstruction-gap"
+
     decoder_config = parse_decoder_type(args.decoder_type)
-    data_dir = get_data_dir("imagenette")
+    if args.decoder_embed_dim is not None:
+        decoder_config["embed_dim"] = args.decoder_embed_dim
+    if args.decoder_depth is not None:
+        decoder_config["depth"] = args.decoder_depth
+    if args.decoder_num_heads is not None:
+        decoder_config["num_heads"] = args.decoder_num_heads
+
+    data_dir = get_data_dir(args.dataset)
+
+    DEFAULT_IMG_SIZE = 224
+    default_resize_size = int(DEFAULT_IMG_SIZE * 256 / 224)
 
     train_transform = transforms.Compose(
         transforms.RGB(),
-        transforms.RandomResizedCrop((224, 224), scale=(0.2, 1.0)),
+        transforms.RandomResizedCrop((DEFAULT_IMG_SIZE, DEFAULT_IMG_SIZE), scale=(0.2, 1.0)),
         transforms.RandomHorizontalFlip(p=0.5),
         transforms.ToImage(**spt.data.static.ImageNet),
     )
 
     val_transform = transforms.Compose(
         transforms.RGB(),
-        transforms.Resize((256, 256)),
-        transforms.CenterCrop((224, 224)),
+        transforms.Resize((default_resize_size, default_resize_size)),
+        transforms.CenterCrop((DEFAULT_IMG_SIZE, DEFAULT_IMG_SIZE)),
         transforms.ToImage(**spt.data.static.ImageNet),
     )
 
-    train_dataset = spt.data.HFDataset(
-        "randall-lab/imagenette",
-        "320px",
-        split="train",
-        cache_dir=str(data_dir),
-        transform=train_transform,
+    train_dataset = load_mae_dataset(
+        args.dataset,
+        "train",
+        train_transform,
+        data_dir,
     )
 
-    val_dataset = spt.data.HFDataset(
-        "randall-lab/imagenette",
-        "320px",
-        split="test",
-        cache_dir=str(data_dir),
-        transform=val_transform,
+    val_dataset = load_mae_dataset(
+        args.dataset,
+        "val",
+        val_transform,
+        data_dir,
     )
 
     print(f"train {len(train_dataset)}, val {len(val_dataset)}")
+
+    img_properties = detect_image_properties_from_dataset(train_dataset)
+    detected_img_size = img_properties['img_size']
 
     train_dataloader = torch.utils.data.DataLoader(
         dataset=train_dataset,
@@ -314,26 +365,58 @@ def main():
 
     data = spt.data.DataModule(train=train_dataloader, val=val_dataloader)
 
-    fixed_samples_path = Path(args.fixed_samples_dir) / "fixed_val_samples.pt"
+    fixed_samples_dir_full = Path(args.fixed_samples_dir) / args.dataset / f"size_{detected_img_size}x{detected_img_size}"
+    fixed_samples_path = fixed_samples_dir_full / "fixed_val_samples.pt"
     save_fixed_samples(
         val_dataloader,
-        args.fixed_samples_dir,
+        str(fixed_samples_dir_full),
         num_samples=16,
         seed=args.seed
     )
 
-    backbone = create_mae_with_custom_decoder(args.model, decoder_config)
+    encoder_overrides = {}
+    encoder_overrides["img_size"] = detected_img_size
+
+    if args.encoder_embed_dim is not None:
+        encoder_overrides["embed_dim"] = args.encoder_embed_dim
+    if args.encoder_depth is not None:
+        encoder_overrides["depth"] = args.encoder_depth
+    if args.encoder_num_heads is not None:
+        encoder_overrides["num_heads"] = args.encoder_num_heads
+    if args.patch_size != 16:
+        encoder_overrides["patch_size"] = args.patch_size
+
+    backbone = create_mae_with_custom_decoder(args.model, decoder_config, encoder_overrides)
 
     model_dims = {"vit_tiny": 192, "vit_small": 384, "vit_base": 768, "vit_large": 1024}
-    encoder_dim = model_dims[args.model]
-    num_classes = 10
+    model_depths = {"vit_tiny": 12, "vit_small": 12, "vit_base": 12, "vit_large": 24}
+    model_heads = {"vit_tiny": 3, "vit_small": 6, "vit_base": 12, "vit_large": 16}
+
+    actual_encoder_dim = encoder_overrides.get("embed_dim", model_dims[args.model])
+    actual_encoder_depth = encoder_overrides.get("depth", model_depths[args.model])
+    actual_encoder_heads = encoder_overrides.get("num_heads", model_heads[args.model])
+    actual_patch_size = encoder_overrides.get("patch_size", 16)
+
+    actual_decoder_dim = decoder_config.get("embed_dim", 512)
+    actual_decoder_depth = decoder_config.get("depth", 8)
+    actual_decoder_heads = decoder_config.get("num_heads", 16)
+    decoder_type_name = decoder_config.get("type", "transformer")
+
+    encoder_name = f"enc{actual_encoder_dim}d{actual_encoder_depth}h{actual_encoder_heads}p{actual_patch_size}"
+    if decoder_type_name == "linear":
+        decoder_name = "dec-linear"
+    else:
+        decoder_name = f"dec{actual_decoder_dim}d{actual_decoder_depth}h{actual_decoder_heads}"
+
+    encoder_dim = actual_encoder_dim
+    num_classes = dataset_config["num_classes"]
 
     classifier = nn.Linear(encoder_dim, num_classes)
-    print(f"{args.model}/{args.decoder_type}, a={args.alpha}")
+    print(f"{encoder_name}/{decoder_name}, λ={args.alpha}")
 
     if args.alpha == 0.0:
         optim_config = {
-            "modules": "backbone",  # Only optimize backbone
+            "modules": "backbone",
             "optimizer": {
                 "type": "AdamW",
                 "lr": args.lr,
@@ -355,13 +438,13 @@ def main():
         forward=mae_reconstruction_gap_forward,
         alpha=args.alpha,
         mask_ratio=args.mask_ratio,
-        model_name=args.model,
-        decoder_type=args.decoder_type,
+        model_name=encoder_name,
+        decoder_type=decoder_name,
         lr=args.lr,
         optim=optim_config,
     )
 
-    gap_callback = ReconstructionGapCallback()
+    gap_callback = ReconstructionGapCallback(dataset_name=args.dataset, log_dir=args.log_dir)
 
     viz_callback = MAEVisualizationCallback(
         fixed_samples_path=fixed_samples_path,
@@ -371,8 +454,10 @@ def main():
 
     lr_monitor = LearningRateMonitor(logging_interval="step")
 
+    model_config_name = f"{encoder_name}_{decoder_name}"
+
     checkpoint_callback = ModelCheckpoint(
-        dirpath=Path(args.output_dir) / "checkpoints" / f"{args.model}_{args.decoder_type}_alpha{args.alpha}_seed{args.seed}",
+        dirpath=Path(args.output_dir) / f"{args.dataset}-checkpoints" / f"{model_config_name}_lambda{args.alpha}_seed{args.seed}",
         filename="epoch{epoch:03d}",
         every_n_epochs=10,
         save_last=True,
@@ -384,10 +469,31 @@ def main():
     wandb_logger = WandbLogger(
         entity=args.entity,
         project=args.project,
-        name=f"{args.model}-{args.decoder_type}-alpha{args.alpha}-lr{args.lr}-seed{args.seed}",
-        group=f"{args.model}-{args.decoder_type}-sweep",
-        tags=[f"alpha_{args.alpha}", f"lr_{args.lr}", f"model_{args.model}", f"decoder_{args.decoder_type}"],
-        config={"alpha": args.alpha, "lr": args.lr, "model": args.model, "decoder": args.decoder_type, "epochs": args.epochs},
+        name=f"{args.dataset}-{model_config_name}-lambda{args.alpha}-lr{args.lr}-seed{args.seed}",
+        group=f"{args.dataset}-{encoder_name}-{decoder_name}-sweep",
+        tags=[
+            f"dataset_{args.dataset}",
+            f"lambda_{args.alpha}",
+            f"lr_{args.lr}",
+            f"encoder_{encoder_name}",
+            f"decoder_{decoder_name}",
+        ],
+        config={
+            "dataset": args.dataset,
+            "lambda": args.alpha,
+            "lr": args.lr,
+            "encoder": encoder_name,
+            "decoder": decoder_name,
+            "encoder_dim": actual_encoder_dim,
+            "encoder_depth": actual_encoder_depth,
+            "encoder_heads": actual_encoder_heads,
+            "patch_size": actual_patch_size,
+            "decoder_dim": actual_decoder_dim,
+            "decoder_depth": actual_decoder_depth,
+            "decoder_heads": actual_decoder_heads,
+            "decoder_type": decoder_type_name,
+            "epochs": args.epochs,
+        },
     )
 
     trainer = pl.Trainer(
