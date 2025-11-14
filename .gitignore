@@ -155,6 +155,7 @@ wandb/
 *.lock
 
 *.sbatch
+*.sh
 *.err
 *.out
 
