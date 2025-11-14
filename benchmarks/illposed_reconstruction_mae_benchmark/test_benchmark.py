@@ -1,18 +1,6 @@
 #!/usr/bin/env python3
 """
 Unit tests for the illposed_reconstruction_mae_benchmark.
-
-Following stable-pretraining testing guidelines (TESTING.md):
-- Fast unit tests (no GPU, no downloads, no forward passes)
-- Test individual components in isolation
-- Use small tensors and mock data
-- Each test should run in < 1 second
-
-For proper testing with pytest, run:
-    python -m pytest benchmarks/illposed_reconstruction_mae_benchmark/test_benchmark.py -v -m unit
-
-For quick testing without pytest:
-    python benchmarks/illposed_reconstruction_mae_benchmark/test_benchmark.py
 """
 
 import sys
