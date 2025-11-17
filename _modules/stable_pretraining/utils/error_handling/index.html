@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>stable_pretraining.utils.error_handling &#8212; stable-pretraining 0.1.dev1+g148610e87.d20251117 documentation</title>
+    <title>stable_pretraining.utils.error_handling &#8212; stable-pretraining 0.1.dev1+ga592dbc9b.d20251117 documentation</title>
   
   
   
@@ -39,7 +39,7 @@
 <link rel="preload" as="script" href="../../../../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
   <script src="../../../../_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
 
-    <script src="../../../../_static/documentation_options.js?v=07cf327b"></script>
+    <script src="../../../../_static/documentation_options.js?v=250fc8fd"></script>
     <script src="../../../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../../_static/scripts/sphinx-book-theme.js?v=887ef09a"></script>
@@ -135,7 +135,7 @@
   
   
   
-    <p class="title logo__title">stable-pretraining 0.1.dev1+g148610e87.d20251117 documentation</p>
+    <p class="title logo__title">stable-pretraining 0.1.dev1+ga592dbc9b.d20251117 documentation</p>
   
 </a></div>
         <div class="sidebar-primary-item">
@@ -528,48 +528,57 @@ document.write(`
 
 <div class="viewcode-block" id="catch_errors_class">
 <a class="viewcode-back" href="../../../../stable_pretraining.utils/#stable_pretraining.utils.error_handling.catch_errors_class">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">catch_errors_class</span><span class="p">(</span><span class="n">exclude_methods</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Class decorator that wraps all methods with catch_errors.</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">catch_errors_class</span><span class="p">(</span><span class="n">exclude_methods</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">include_private</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Class decorator that wraps all public methods with catch_errors.</span>
+
+<span class="sd">    Only wraps methods defined in the class itself, not inherited methods.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        exclude_methods: Set/list of method names to exclude</span>
+<span class="sd">        include_private: If True, wrap private methods too (starting with _)</span>
 
 <span class="sd">    Usage:</span>
 <span class="sd">        @catch_errors_class()</span>
-<span class="sd">        class Manager(submitit.helpers.Checkpointable):</span>
-<span class="sd">            def train(self):</span>
+<span class="sd">        class MyClass:</span>
+<span class="sd">            def method(self):</span>
 <span class="sd">                ...</span>
-
-<span class="sd">    Args:</span>
-<span class="sd">        exclude_methods: List of method names to exclude from wrapping</span>
-<span class="sd">                        (default: excludes __init__, __new__, __del__, checkpoint)</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="n">exclude_methods</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="c1"># Default exclusions - dunder methods and checkpoint (for Submitit)</span>
         <span class="n">exclude_methods</span> <span class="o">=</span> <span class="p">{</span>
-            <span class="s2">&quot;__init__&quot;</span><span class="p">,</span>
             <span class="s2">&quot;__new__&quot;</span><span class="p">,</span>
             <span class="s2">&quot;__del__&quot;</span><span class="p">,</span>
             <span class="s2">&quot;__repr__&quot;</span><span class="p">,</span>
             <span class="s2">&quot;__str__&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;checkpoint&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;__call__&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;__dict__&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;__weakref__&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;__module__&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;__doc__&quot;</span><span class="p">,</span>
+            <span class="c1"># PyTorch methods - don&#39;t wrap these!</span>
+            <span class="s2">&quot;get_extra_state&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;set_extra_state&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;_apply&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;_save_to_state_dict&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;_load_from_state_dict&quot;</span><span class="p">,</span>
         <span class="p">}</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">exclude_methods</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">exclude_methods</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">decorator</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
-        <span class="c1"># Iterate over all attributes</span>
-        <span class="k">for</span> <span class="n">attr_name</span> <span class="ow">in</span> <span class="nb">dir</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
-            <span class="c1"># Skip excluded methods</span>
+        <span class="c1"># Only iterate over methods defined in THIS class, not inherited</span>
+        <span class="k">for</span> <span class="n">attr_name</span><span class="p">,</span> <span class="n">attr_value</span> <span class="ow">in</span> <span class="bp">cls</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="c1"># Skip excluded</span>
             <span class="k">if</span> <span class="n">attr_name</span> <span class="ow">in</span> <span class="n">exclude_methods</span><span class="p">:</span>
                 <span class="k">continue</span>
 
-            <span class="c1"># Skip private methods (starting with _)</span>
-            <span class="k">if</span> <span class="n">attr_name</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">):</span>
+            <span class="c1"># Skip private unless requested</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">include_private</span> <span class="ow">and</span> <span class="n">attr_name</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">):</span>
                 <span class="k">continue</span>
 
-            <span class="n">attr</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">attr_name</span><span class="p">)</span>
-
-            <span class="c1"># Only wrap callable methods</span>
-            <span class="k">if</span> <span class="nb">callable</span><span class="p">(</span><span class="n">attr</span><span class="p">):</span>
-                <span class="c1"># Wrap the method</span>
-                <span class="n">wrapped</span> <span class="o">=</span> <span class="n">catch_errors_decorator</span><span class="p">()(</span><span class="n">attr</span><span class="p">)</span>
+            <span class="c1"># Only wrap callable methods (not classmethods, staticmethods, properties)</span>
+            <span class="k">if</span> <span class="nb">callable</span><span class="p">(</span><span class="n">attr_value</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span>
+                <span class="n">attr_value</span><span class="p">,</span> <span class="p">(</span><span class="nb">classmethod</span><span class="p">,</span> <span class="nb">staticmethod</span><span class="p">,</span> <span class="nb">property</span><span class="p">)</span>
+            <span class="p">):</span>
+                <span class="n">wrapped</span> <span class="o">=</span> <span class="n">catch_errors_decorator</span><span class="p">()(</span><span class="n">attr_value</span><span class="p">)</span>
                 <span class="nb">setattr</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">attr_name</span><span class="p">,</span> <span class="n">wrapped</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="bp">cls</span>
