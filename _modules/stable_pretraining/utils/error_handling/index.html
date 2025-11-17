@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>stable_pretraining.utils.error_handling &#8212; stable-pretraining 0.1.dev1+g2aaddcf04.d20251114 documentation</title>
+    <title>stable_pretraining.utils.error_handling &#8212; stable-pretraining 0.1.dev1+g148610e87.d20251117 documentation</title>
   
   
   
@@ -39,7 +39,7 @@
 <link rel="preload" as="script" href="../../../../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
   <script src="../../../../_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
 
-    <script src="../../../../_static/documentation_options.js?v=ca755221"></script>
+    <script src="../../../../_static/documentation_options.js?v=07cf327b"></script>
     <script src="../../../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../../_static/scripts/sphinx-book-theme.js?v=887ef09a"></script>
@@ -135,7 +135,7 @@
   
   
   
-    <p class="title logo__title">stable-pretraining 0.1.dev1+g2aaddcf04.d20251114 documentation</p>
+    <p class="title logo__title">stable-pretraining 0.1.dev1+g148610e87.d20251117 documentation</p>
   
 </a></div>
         <div class="sidebar-primary-item">
@@ -346,6 +346,116 @@ document.write(`
 <span class="kn">from</span><span class="w"> </span><span class="nn">huggingface_hub.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">HfHubHTTPError</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">requests</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">loguru</span><span class="w"> </span><span class="kn">import</span> <span class="n">logger</span> <span class="k">as</span> <span class="n">logging</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">traceback</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">contextlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">contextmanager</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">functools</span><span class="w"> </span><span class="kn">import</span> <span class="n">wraps</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Any</span>
+
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">wandb</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+    <span class="n">wandb</span> <span class="o">=</span> <span class="kc">None</span>
+
+
+<div class="viewcode-block" id="get_rank">
+<a class="viewcode-back" href="../../../../stable_pretraining.utils/#stable_pretraining.utils.error_handling.get_rank">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_rank</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Get distributed training rank.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;RANK&quot;</span><span class="p">,</span> <span class="s2">&quot;0&quot;</span><span class="p">))</span></div>
+
+
+
+<div class="viewcode-block" id="is_main_process">
+<a class="viewcode-back" href="../../../../stable_pretraining.utils/#stable_pretraining.utils.error_handling.is_main_process">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">is_main_process</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Check if this is the main process.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">get_rank</span><span class="p">()</span> <span class="o">==</span> <span class="mi">0</span></div>
+
+
+
+<div class="viewcode-block" id="catch_errors">
+<a class="viewcode-back" href="../../../../stable_pretraining.utils/#stable_pretraining.utils.error_handling.catch_errors">[docs]</a>
+<span class="nd">@contextmanager</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">catch_errors</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Catch and log errors from all ranks before re-raising.</span>
+
+<span class="sd">    Ensures errors appear in Slurm logs, wandb, and everywhere else.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">yield</span>
+
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="n">rank</span> <span class="o">=</span> <span class="n">get_rank</span><span class="p">()</span>
+        <span class="n">rank_prefix</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;[Rank </span><span class="si">{</span><span class="n">rank</span><span class="si">}</span><span class="s2">] &quot;</span> <span class="k">if</span> <span class="n">rank</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="s2">&quot;&quot;</span>
+
+        <span class="n">error_msg</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="si">{</span><span class="s1">&#39;=&#39;</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">80</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">rank_prefix</span><span class="si">}</span><span class="s2">💥 EXCEPTION CAUGHT</span><span class="se">\n</span><span class="s2">&quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="s1">&#39;=&#39;</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">80</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;Type: </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;Message: </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="s1">&#39;=&#39;</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">80</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;TRACEBACK:</span><span class="se">\n</span><span class="s2">&quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="s1">&#39;=&#39;</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">80</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="p">)</span>
+
+        <span class="c1"># Log from ALL ranks (important for debugging distributed issues)</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">opt</span><span class="p">(</span><span class="n">depth</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">error_msg</span><span class="p">)</span>
+
+        <span class="c1"># Direct prints to stderr/stdout (backup for Slurm logs)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">error_msg</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">,</span> <span class="n">flush</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">error_msg</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="p">,</span> <span class="n">flush</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="c1"># Wandb logging (only from main process, with error handling)</span>
+        <span class="k">if</span> <span class="n">is_main_process</span><span class="p">()</span> <span class="ow">and</span> <span class="n">wandb</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="k">if</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">wandb</span><span class="p">,</span> <span class="s2">&quot;run&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="n">wandb</span><span class="o">.</span><span class="n">log</span><span class="p">(</span>
+                        <span class="p">{</span>
+                            <span class="s2">&quot;error_type&quot;</span><span class="p">:</span> <span class="nb">type</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span>
+                            <span class="s2">&quot;error_message&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">),</span>
+                            <span class="s2">&quot;traceback&quot;</span><span class="p">:</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">(),</span>
+                        <span class="p">}</span>
+                    <span class="p">)</span>
+                    <span class="n">wandb</span><span class="o">.</span><span class="n">finish</span><span class="p">(</span><span class="n">exit_code</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">wandb_error</span><span class="p">:</span>
+                <span class="c1"># Don&#39;t let wandb errors hide the original error</span>
+                <span class="nb">print</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;Warning: Failed to log to wandb: </span><span class="si">{</span><span class="n">wandb_error</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+                    <span class="n">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">,</span>
+                    <span class="n">flush</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                <span class="p">)</span>
+
+        <span class="c1"># Always re-raise</span>
+        <span class="k">raise</span></div>
+
+
+
+<div class="viewcode-block" id="catch_errors_decorator">
+<a class="viewcode-back" href="../../../../stable_pretraining.utils/#stable_pretraining.utils.error_handling.catch_errors_decorator">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">catch_errors_decorator</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Decorator version of catch_errors.</span>
+
+<span class="sd">    Usage:</span>
+<span class="sd">        @catch_errors_decorator()</span>
+<span class="sd">        def train():</span>
+<span class="sd">            ...</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">decorator</span><span class="p">(</span><span class="n">func</span><span class="p">:</span> <span class="n">Callable</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Callable</span><span class="p">:</span>
+        <span class="nd">@wraps</span><span class="p">(</span><span class="n">func</span><span class="p">)</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">wrapper</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+            <span class="k">with</span> <span class="n">catch_errors</span><span class="p">():</span>
+                <span class="k">return</span> <span class="n">func</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">wrapper</span>
+
+    <span class="k">return</span> <span class="n">decorator</span></div>
+
 
 
 <div class="viewcode-block" id="with_hf_retry_ratelimit">
@@ -413,6 +523,58 @@ document.write(`
                 <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="n">retry_after</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="k">raise</span></div>
+
+
+
+<div class="viewcode-block" id="catch_errors_class">
+<a class="viewcode-back" href="../../../../stable_pretraining.utils/#stable_pretraining.utils.error_handling.catch_errors_class">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">catch_errors_class</span><span class="p">(</span><span class="n">exclude_methods</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Class decorator that wraps all methods with catch_errors.</span>
+
+<span class="sd">    Usage:</span>
+<span class="sd">        @catch_errors_class()</span>
+<span class="sd">        class Manager(submitit.helpers.Checkpointable):</span>
+<span class="sd">            def train(self):</span>
+<span class="sd">                ...</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        exclude_methods: List of method names to exclude from wrapping</span>
+<span class="sd">                        (default: excludes __init__, __new__, __del__, checkpoint)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">exclude_methods</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="c1"># Default exclusions - dunder methods and checkpoint (for Submitit)</span>
+        <span class="n">exclude_methods</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;__init__&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;__new__&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;__del__&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;__repr__&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;__str__&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;checkpoint&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;__call__&quot;</span><span class="p">,</span>
+        <span class="p">}</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">decorator</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
+        <span class="c1"># Iterate over all attributes</span>
+        <span class="k">for</span> <span class="n">attr_name</span> <span class="ow">in</span> <span class="nb">dir</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
+            <span class="c1"># Skip excluded methods</span>
+            <span class="k">if</span> <span class="n">attr_name</span> <span class="ow">in</span> <span class="n">exclude_methods</span><span class="p">:</span>
+                <span class="k">continue</span>
+
+            <span class="c1"># Skip private methods (starting with _)</span>
+            <span class="k">if</span> <span class="n">attr_name</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">):</span>
+                <span class="k">continue</span>
+
+            <span class="n">attr</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">attr_name</span><span class="p">)</span>
+
+            <span class="c1"># Only wrap callable methods</span>
+            <span class="k">if</span> <span class="nb">callable</span><span class="p">(</span><span class="n">attr</span><span class="p">):</span>
+                <span class="c1"># Wrap the method</span>
+                <span class="n">wrapped</span> <span class="o">=</span> <span class="n">catch_errors_decorator</span><span class="p">()(</span><span class="n">attr</span><span class="p">)</span>
+                <span class="nb">setattr</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">attr_name</span><span class="p">,</span> <span class="n">wrapped</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="bp">cls</span>
+
+    <span class="k">return</span> <span class="n">decorator</span></div>
 
 </pre></div>
 

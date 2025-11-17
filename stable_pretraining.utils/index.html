@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>stable_pretraining.utils package &#8212; stable-pretraining 0.1.dev1+g2aaddcf04.d20251114 documentation</title>
+    <title>stable_pretraining.utils package &#8212; stable-pretraining 0.1.dev1+g148610e87.d20251117 documentation</title>
   
   
   
@@ -40,7 +40,7 @@
 <link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
   <script src="../_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
 
-    <script src="../_static/documentation_options.js?v=ca755221"></script>
+    <script src="../_static/documentation_options.js?v=07cf327b"></script>
     <script src="../_static/doctools.js?v=9bcbadda"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/scripts/sphinx-book-theme.js?v=887ef09a"></script>
@@ -134,7 +134,7 @@
   
   
   
-    <p class="title logo__title">stable-pretraining 0.1.dev1+g2aaddcf04.d20251114 documentation</p>
+    <p class="title logo__title">stable-pretraining 0.1.dev1+g148610e87.d20251117 documentation</p>
   
 </a></div>
         <div class="sidebar-primary-item">
@@ -427,6 +427,11 @@ document.write(`
 </ul>
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-stable_pretraining.utils.error_handling">stable_pretraining.utils.error_handling module</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#stable_pretraining.utils.error_handling.catch_errors"><code class="docutils literal notranslate"><span class="pre">catch_errors()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#stable_pretraining.utils.error_handling.catch_errors_class"><code class="docutils literal notranslate"><span class="pre">catch_errors_class()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#stable_pretraining.utils.error_handling.catch_errors_decorator"><code class="docutils literal notranslate"><span class="pre">catch_errors_decorator()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#stable_pretraining.utils.error_handling.get_rank"><code class="docutils literal notranslate"><span class="pre">get_rank()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#stable_pretraining.utils.error_handling.is_main_process"><code class="docutils literal notranslate"><span class="pre">is_main_process()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#stable_pretraining.utils.error_handling.with_hf_retry_ratelimit"><code class="docutils literal notranslate"><span class="pre">with_hf_retry_ratelimit()</span></code></a></li>
 </ul>
 </li>
@@ -1073,6 +1078,62 @@ if they are intended to be used for in <code class="docutils literal notranslate
 </section>
 <section id="module-stable_pretraining.utils.error_handling">
 <span id="stable-pretraining-utils-error-handling-module"></span><h2>stable_pretraining.utils.error_handling module<a class="headerlink" href="#module-stable_pretraining.utils.error_handling" title="Link to this heading">#</a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="stable_pretraining.utils.error_handling.catch_errors">
+<span class="sig-prename descclassname"><span class="pre">stable_pretraining.utils.error_handling.</span></span><span class="sig-name descname"><span class="pre">catch_errors</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/stable_pretraining/utils/error_handling/#catch_errors"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_pretraining.utils.error_handling.catch_errors" title="Link to this definition">#</a></dt>
+<dd><p>Catch and log errors from all ranks before re-raising.</p>
+<p>Ensures errors appear in Slurm logs, wandb, and everywhere else.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="stable_pretraining.utils.error_handling.catch_errors_class">
+<span class="sig-prename descclassname"><span class="pre">stable_pretraining.utils.error_handling.</span></span><span class="sig-name descname"><span class="pre">catch_errors_class</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">exclude_methods</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/stable_pretraining/utils/error_handling/#catch_errors_class"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_pretraining.utils.error_handling.catch_errors_class" title="Link to this definition">#</a></dt>
+<dd><p>Class decorator that wraps all methods with catch_errors.</p>
+<dl>
+<dt>Usage:</dt><dd><p>&#64;catch_errors_class()
+class Manager(submitit.helpers.Checkpointable):</p>
+<blockquote>
+<div><dl class="simple">
+<dt>def train(self):</dt><dd><p>…</p>
+</dd>
+</dl>
+</div></blockquote>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>exclude_methods</strong> – List of method names to exclude from wrapping
+(default: excludes __init__, __new__, __del__, checkpoint)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="stable_pretraining.utils.error_handling.catch_errors_decorator">
+<span class="sig-prename descclassname"><span class="pre">stable_pretraining.utils.error_handling.</span></span><span class="sig-name descname"><span class="pre">catch_errors_decorator</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/stable_pretraining/utils/error_handling/#catch_errors_decorator"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_pretraining.utils.error_handling.catch_errors_decorator" title="Link to this definition">#</a></dt>
+<dd><p>Decorator version of catch_errors.</p>
+<dl>
+<dt>Usage:</dt><dd><p>&#64;catch_errors_decorator()
+def train():</p>
+<blockquote>
+<div><p>…</p>
+</div></blockquote>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="stable_pretraining.utils.error_handling.get_rank">
+<span class="sig-prename descclassname"><span class="pre">stable_pretraining.utils.error_handling.</span></span><span class="sig-name descname"><span class="pre">get_rank</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/stable_pretraining/utils/error_handling/#get_rank"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_pretraining.utils.error_handling.get_rank" title="Link to this definition">#</a></dt>
+<dd><p>Get distributed training rank.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="stable_pretraining.utils.error_handling.is_main_process">
+<span class="sig-prename descclassname"><span class="pre">stable_pretraining.utils.error_handling.</span></span><span class="sig-name descname"><span class="pre">is_main_process</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/stable_pretraining/utils/error_handling/#is_main_process"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_pretraining.utils.error_handling.is_main_process" title="Link to this definition">#</a></dt>
+<dd><p>Check if this is the main process.</p>
+</dd></dl>
+
 <dl class="py function">
 <dt class="sig sig-object py" id="stable_pretraining.utils.error_handling.with_hf_retry_ratelimit">
 <span class="sig-prename descclassname"><span class="pre">stable_pretraining.utils.error_handling.</span></span><span class="sig-name descname"><span class="pre">with_hf_retry_ratelimit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">func</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delay</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_attempts</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/stable_pretraining/utils/error_handling/#with_hf_retry_ratelimit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_pretraining.utils.error_handling.with_hf_retry_ratelimit" title="Link to this definition">#</a></dt>
@@ -3247,6 +3308,11 @@ is not provided. Defaults to 10.</p></li>
 </ul>
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-stable_pretraining.utils.error_handling">stable_pretraining.utils.error_handling module</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#stable_pretraining.utils.error_handling.catch_errors"><code class="docutils literal notranslate"><span class="pre">catch_errors()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#stable_pretraining.utils.error_handling.catch_errors_class"><code class="docutils literal notranslate"><span class="pre">catch_errors_class()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#stable_pretraining.utils.error_handling.catch_errors_decorator"><code class="docutils literal notranslate"><span class="pre">catch_errors_decorator()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#stable_pretraining.utils.error_handling.get_rank"><code class="docutils literal notranslate"><span class="pre">get_rank()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#stable_pretraining.utils.error_handling.is_main_process"><code class="docutils literal notranslate"><span class="pre">is_main_process()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#stable_pretraining.utils.error_handling.with_hf_retry_ratelimit"><code class="docutils literal notranslate"><span class="pre">with_hf_retry_ratelimit()</span></code></a></li>
 </ul>
 </li>
