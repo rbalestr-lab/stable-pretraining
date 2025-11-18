@@ -106,6 +106,7 @@ Monitor and evaluate your models in real-time during training. Callbacks are key
 ```python
 # Monitor SSL representations with a linear probe
 linear_probe = spt.callbacks.OnlineProbe(
+    module,  # Pass the spt.Module instance
     name="linear_probe",  # Useful for retrieving metrics and values in logging
     input="embedding",  # Which output from forward to monitor
     target="label",      # Ground truth from batch
@@ -258,6 +259,7 @@ module = spt.Module(
 
 # Add callbacks for monitoring performance during training
 linear_probe = spt.callbacks.OnlineProbe(
+    module,
     name="linear_probe",
     input="embedding",
     target="label",

@@ -134,6 +134,7 @@ module = spt.Module(
 )
 
 linear_probe = spt.callbacks.OnlineProbe(
+    module,
     name="linear_probe",
     input="embedding",
     target="label",

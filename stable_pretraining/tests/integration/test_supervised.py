@@ -87,8 +87,8 @@ class TestSupervisedIntegration:
 
         # Create callbacks
         linear_probe = spt.callbacks.OnlineProbe(
-            "linear_probe",
             module,
+            "linear_probe",
             "embedding",
             "label",
             probe=torch.nn.Linear(512, 10),
@@ -100,7 +100,6 @@ class TestSupervisedIntegration:
         )
 
         knn_probe = spt.callbacks.OnlineKNN(
-            module,
             "knn_probe",
             "embedding",
             "label",

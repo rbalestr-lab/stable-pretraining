@@ -112,6 +112,7 @@ module = ssl.Module(
 
 # Configure callbacks
 linear_probe = ssl.callbacks.OnlineProbe(
+    module,
     name="linear_probe",
     input="embedding",
     target="label",

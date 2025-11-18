@@ -210,6 +210,7 @@ teacher_student_callback = spt.callbacks.TeacherStudentCallback(
 )
 
 linear_probe = spt.callbacks.OnlineProbe(
+    module,
     name="linear_probe",
     input="embedding",
     target="label",

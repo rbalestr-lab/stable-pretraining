@@ -123,6 +123,7 @@ module.optim = {
 }
 
 linear_probe = ssl.callbacks.OnlineProbe(
+    module,
     name="linear_probe",
     input="embedding",
     target="label",

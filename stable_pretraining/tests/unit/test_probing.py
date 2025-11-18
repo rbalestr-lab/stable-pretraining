@@ -15,11 +15,13 @@ class TestProbingUnit:
     def test_online_probe_initialization(self):
         """Test OnlineProbe callback initialization."""
         with patch("stable_pretraining.callbacks.OnlineProbe") as mock_probe:
+            mock_module = Mock()
             mock_linear = Mock(spec=nn.Linear)
             mock_loss_fn = Mock(spec=nn.CrossEntropyLoss)
             mock_metrics = Mock(spec=torchmetrics.classification.MulticlassAccuracy)
 
             mock_probe(
+                mock_module,
                 name="linear_probe",
                 input="embedding",
                 target="label",
@@ -29,6 +31,7 @@ class TestProbingUnit:
             )
 
             mock_probe.assert_called_once_with(
+                mock_module,
                 name="linear_probe",
                 input="embedding",
                 target="label",
@@ -40,9 +43,11 @@ class TestProbingUnit:
     def test_online_knn_initialization(self):
         """Test OnlineKNN callback initialization."""
         with patch("stable_pretraining.callbacks.OnlineKNN") as mock_knn:
+            mock_module = Mock()
             mock_metrics = Mock(spec=torchmetrics.classification.MulticlassAccuracy)
 
             mock_knn(
+                mock_module,
                 name="knn_probe",
                 input="embedding",
                 target="label",
@@ -53,6 +58,7 @@ class TestProbingUnit:
             )
 
             mock_knn.assert_called_once_with(
+                mock_module,
                 name="knn_probe",
                 input="embedding",
                 target="label",

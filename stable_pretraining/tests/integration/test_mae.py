@@ -87,8 +87,8 @@ class TestMAEIntegration:
 
         # Create online probe callback
         linear_probe = spt.callbacks.OnlineProbe(
-            "linear_probe",
             module,
+            "linear_probe",
             "embedding",
             "label",
             probe=torch.nn.Linear(768, 10),

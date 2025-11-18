@@ -115,8 +115,8 @@ class TestMAEUnit:
             }
 
             probe = mock_probe(
-                "linear_probe",
                 mock_module,
+                "linear_probe",
                 "embedding",
                 "label",
                 probe=mock_linear,
