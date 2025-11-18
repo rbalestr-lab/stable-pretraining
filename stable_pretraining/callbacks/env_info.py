@@ -459,6 +459,7 @@ class EnvironmentDumpCallback(Callback):
             "SLURM_GPUS_PER_NODE",
             "SLURM_SUBMIT_DIR",
             "SLURM_CLUSTER_NAME",
+            "SLURM_RESTART_COUNT",
         ]
 
         slurm_info = {}

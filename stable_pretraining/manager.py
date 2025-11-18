@@ -23,6 +23,7 @@ else:
     wandb = None
 
 from .utils import get_required_fn_parameters
+from stable_pretraining.utils.error_handling import catch_errors_class
 
 
 def print_logger_info(logger):
@@ -59,6 +60,7 @@ def print_signal_info():
     logging.info(f"\t\t- SIGTERM: `{signal.getsignal(signal.SIGTERM)}`")
 
 
+@catch_errors_class()
 class Manager(submitit.helpers.Checkpointable):
     """Manages training with logging, scheduling, and checkpointing support.
 

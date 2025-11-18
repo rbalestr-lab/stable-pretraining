@@ -14,8 +14,10 @@ from lightning.pytorch.core.optimizer import LightningOptimizer
 from .optim import create_optimizer, create_scheduler
 from typing import Any, Set
 import time
+from stable_pretraining.utils.error_handling import catch_errors_class
 
 
+@catch_errors_class()
 class Module(pl.LightningModule):
     """PyTorch Lightning module using manual optimization with multi-optimizer support.
 
