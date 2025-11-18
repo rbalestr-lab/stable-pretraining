@@ -20,250 +20,92 @@ Join our Discord: [https://discord.gg/8M6hT39X](https://discord.gg/adzpqWKM25)
 
 To reach flexibility, scalability and stability, we rely on battle-tested third party libraries: `PyTorch`, `Lightning`, `HuggingFace`, `TorchMetrics` amongst a few others. Those dependencies allow us to focus on assembling everything into a powerful ML framework. ``stable-pretraining`` adopts a flexible and modular design for seamless integration of components from external libraries, including architectures, loss functions, evaluation metrics, and augmentations.
 
-## 🚀 PyTorch Lightning → stable-pretraining
+## stable-pretraining example
 
-While PyTorch Lightning is powerful, `stable-pretraining` is specifically designed for multimodal pretraining with utilities that make self-supervised learning cleaner and more observable. The key difference: you only define a `forward` function that returns a dictionary with `"loss"` and any quantities to monitor—no need to override `training_step` or `validation_step`. All model components are passed as kwargs to `spt.Module`.
-
-<table>
-<tr>
-<th width="50%">PyTorch Lightning</th>
-<th width="50%">stable-pretraining</th>
-</tr>
-<tr>
-<td>
+Define the training workflow. Here's a SimCLR example on CIFAR-10 ([explore benchmarks](https://github.com/rbalestr-lab/stable-pretraining/tree/main/benchmarks) • [explore examples](https://github.com/rbalestr-lab/stable-pretraining/tree/main/examples)):
 
 ```python
-class SimCLRModule(LightningModule):
-    def __init__(self, backbone, projector):
-        super().__init__()
-        self.backbone = backbone
-        self.projector = projector
-        self.loss_fn = NTXentLoss(temperature=0.5)
-        # Manual probe setup
-        self.linear_probe = nn.Linear(512, 10)
-
-    def training_step(self, batch, batch_idx):
-        view1, view2 = batch
-        emb1 = self.backbone(view1["image"])
-        emb2 = self.backbone(view2["image"])
-        z1 = self.projector(emb1)
-        z2 = self.projector(emb2)
-        loss = self.loss_fn(z1, z2)
-
-        # Manual probe logic
-        probe_pred = self.linear_probe(emb1.detach())
-        probe_loss = F.cross_entropy(
-            probe_pred, view1["label"]
-        )
-        probe_loss.backward()
-
-        self.log("train/loss", loss)
-        self.log("train/probe_loss", probe_loss)
-        return loss
-
-    def validation_step(self, batch, batch_idx):
-        emb = self.backbone(batch["image"])
-        pred = self.linear_probe(emb)
-        self.log("val/acc", accuracy(pred, batch["label"]))
-
-    def configure_optimizers(self):
-        # Manual parameter management
-        main_params = (
-            list(self.backbone.parameters()) +
-            list(self.projector.parameters())
-        )
-        main_opt = LARS(main_params, lr=0.1)
-        probe_opt = Adam(
-            self.linear_probe.parameters(), lr=1e-3
-        )
-        return [main_opt, probe_opt], [scheduler, None]
-```
-
-</td>
-<td>
-
-```python
-# Define components
-module = spt.Module(
-    backbone=backbone,
-    projector=projector,
-    forward=forward.simclr_forward,
-    simclr_loss=spt.losses.NTXEntLoss(
-        temperature=0.5
-    ),
-    optim={
-        "optimizer": {"type": "LARS", "lr": 0.1},
-        "scheduler": {"type": "CosineAnnealingLR"}
-    }
-)
-
-# Add online probe as callback
-linear_probe = spt.callbacks.OnlineProbe(
-    module,
-    name="linear_probe",
-    input="embedding",
-    target="label",
-    probe=nn.Linear(512, 10),
-    optimizer={"type": "Adam", "lr": 1e-3},
-    metrics={
-        "top1": torchmetrics.MulticlassAccuracy(10),
-    },
-)
-
-```
-
-</td>
-</tr>
-</table>
-
-### Key Advantages
-
-| Feature | stable-pretraining Benefit |
-|---------|---------------------------|
-| **Declarative config** | Define models with simple dictionaries instead of class boilerplate |
-| **Dictionary outputs** | Forward returns dict with all intermediate values accessible to callbacks |
-| **Built-in callbacks** | `OnlineProbe`, `OnlineKNN`, `RankMe`, etc. for real-time monitoring |
-| **Parameter handling** | Callback parameters automatically excluded from main optimizer |
-| **Unified forward** | Single function for train/val instead of separate `training_step`/`validation_step` |
-| **Multimodal focus** | Pre-built utilities for contrastive learning, multi-view data, cross-modal alignment |
-
-<details>
-<summary><b>Advanced: Multi-Optimizer Regex Matching</b></summary>
-
-Need different learning rates for different components? SPT supports regex pattern matching for parameter groups:
-
-```python
-module = spt.Module(
-    backbone=backbone,
-    projector=projector,
-    forward=forward.simclr_forward,
-    simclr_loss=spt.losses.NTXEntLoss(temperature=0.5),
-    optim={
-        "backbone_opt": {
-            "modules": "backbone.*",  # Regex pattern
-            "optimizer": {"type": "SGD", "lr": 0.01},
-            "scheduler": {"type": "StepLR", "step_size": 30}
-        },
-        "projector_opt": {
-            "modules": "projector.*",
-            "optimizer": {"type": "Adam", "lr": 0.1},
-            "scheduler": {"type": "CosineAnnealingLR"}
-        }
-    }
-)
-```
-
-SPT automatically:
-- Matches parameters by module name using regex
-- Ensures no parameter duplication
-- Creates separate optimizer/scheduler pairs per group
-
-In Lightning, this requires manual parameter collection and grouping.
-
-</details>
-
----
-
-## Core Structure
-
-`stable-pretraining` simplifies complex ML workflows into 4 intuitive components:
-
-### 1 - Data
-Your dataset must follow a dictionary-structured format where each sample is a dictionary with named fields (e.g., `{"image": ..., "label": ...}`). This ensures consistent behavior across all components. You have multiple options for creating datasets:
-
-- **HuggingFace datasets** (if available on the Hub):
-```python
+# main.py
+import torch, torchvision, torchmetrics
+from torch import nn
+import lightning as pl
 import stable_pretraining as spt
-train_dataset = spt.data.HFDataset(
-    path="frgfm/imagenette",
-    name="160px",
-    split="train",
-    transform=train_transform,
-)
-```
-
-- **From PyTorch datasets**:
-```python
-train_dataset = spt.data.FromTorchDataset(
-    torchvision_dataset,
-    names=["image", "label"],  # Map tuple outputs to dictionary keys
-    transform=train_transform,
-)
-```
-
-- **Custom datasets**: Any dataset that returns dictionaries
-
-```python
-datamodule = spt.data.DataModule(train=train_dataloader, val=val_dataloader)
-```
-
-### 2 - Module
-Use pre-built forward functions or define your own custom logic:
-
-```python
 from stable_pretraining import forward
+from stable_pretraining.data import transforms
+
+# 1. Data - dictionary-structured format
+simclr_transform = transforms.MultiViewTransform([
+    transforms.Compose(
+        transforms.RGB(),
+        transforms.RandomResizedCrop((32, 32)),
+        transforms.RandomHorizontalFlip(p=0.5),
+        transforms.ColorJitter(brightness=0.4, contrast=0.4, saturation=0.2, hue=0.1, p=0.8),
+        transforms.ToImage(**spt.data.static.CIFAR10),
+    ),
+    transforms.Compose(
+        transforms.RGB(),
+        transforms.RandomResizedCrop((32, 32)),
+        transforms.RandomHorizontalFlip(p=0.5),
+        transforms.ColorJitter(brightness=0.4, contrast=0.4, saturation=0.2, hue=0.1, p=0.8),
+        transforms.ToImage(**spt.data.static.CIFAR10),
+    ),
+])
+
+train_dataset = spt.data.FromTorchDataset(
+    torchvision.datasets.CIFAR10(root="./data", train=True, download=True),
+    names=["image", "label"],
+    transform=simclr_transform,
+)
+val_dataset = spt.data.FromTorchDataset(
+    torchvision.datasets.CIFAR10(root="./data", train=False),
+    names=["image", "label"],
+    transform=transforms.Compose(transforms.RGB(), transforms.ToImage(**spt.data.static.CIFAR10)),
+)
+
+data = spt.data.DataModule(
+    train=torch.utils.data.DataLoader(train_dataset, batch_size=256, shuffle=True),
+    val=torch.utils.data.DataLoader(val_dataset, batch_size=256),
+)
+
+# 2. Module - declarative config, unified forward
+backbone = spt.backbone.from_torchvision("resnet18", low_resolution=True)
+backbone.fc = nn.Identity()
+projector = nn.Sequential(nn.Linear(512, 2048), nn.ReLU(), nn.Linear(2048, 256))
 
 module = spt.Module(
     backbone=backbone,
     projector=projector,
-    forward=forward.simclr_forward,  # Built-in: simclr, byol, vicreg, dino, etc.
+    forward=forward.simclr_forward,  # Built-in forward (or define your own)
     simclr_loss=spt.losses.NTXEntLoss(temperature=0.5),
     optim={
         "optimizer": {"type": "LARS", "lr": 0.1},
         "scheduler": {"type": "CosineAnnealingLR"},
     }
 )
-```
 
-### 3 - Callbacks
-Monitor and evaluate your models in real-time during training. Callbacks are key ingredients of `stable-pretraining`, providing rich insights without interrupting your training flow:
-
-```python
-# Monitor SSL representations with a linear probe
+# 3. Callbacks - real-time monitoring
 linear_probe = spt.callbacks.OnlineProbe(
-    module,  # Pass the spt.Module instance
-    name="linear_probe",  # Useful for retrieving metrics and values in logging
-    input="embedding",  # Which output from forward to monitor
-    target="label",      # Ground truth from batch
-    probe=torch.nn.Linear(512, 10),
-    loss_fn=torch.nn.CrossEntropyLoss(),
-    metrics={
-        "top1": torchmetrics.classification.MulticlassAccuracy(10),
-        "top5": torchmetrics.classification.MulticlassAccuracy(10, top_k=5),
-    },
+    module, name="linear_probe", input="embedding", target="label",
+    probe=nn.Linear(512, 10), optimizer={"type": "Adam", "lr": 1e-3},
+    metrics={"top1": torchmetrics.classification.MulticlassAccuracy(10)},
 )
 
-# Track representation quality with KNN evaluation
 knn_probe = spt.callbacks.OnlineKNN(
-    name="knn_probe",
-    input="embedding",
-    target="label",
-    queue_length=20000,
-    k=10,
+    name="knn_probe", input="embedding", target="label",
+    queue_length=20000, input_dim=512, k=10,
 )
-```
 
-Callbacks are powered by an intelligent queue management system that automatically shares memory between callbacks monitoring the same data thus eliminating redundant computations.
-
-**Why callbacks matter:** Get real-time feedback on representation quality, catch issues like collapse early, and track multiple metrics simultaneously for deeper insights.
-
-### 4 - Trainer
-Orchestrate everything together with PyTorch Lightning's `Trainer`:
-
-```python
-trainer = pl.Trainer(
-    max_epochs=10,
-    num_sanity_val_steps=1,
-    callbacks=[linear_probe, knn_probe, rankme],  # Your monitoring callbacks
-    precision="16-mixed",
-    logger=False,
-    enable_checkpointing=False,
-)
+# 4. Train
+trainer = pl.Trainer(max_epochs=100, callbacks=[linear_probe, knn_probe])
 manager = spt.Manager(trainer=trainer, module=module, data=data)
 manager()
 ```
 
-Once configured, the `Manager` connects all components and handles the training loop with precise logging and monitoring (optional).
+**Key features:**
+- **Unified forward**: Define a single `forward` function that returns a dict with `"loss"` and any quantities to monitor
+- **Declarative config**: Pass model components and optimizer as kwargs to `spt.Module`
+- **Built-in callbacks**: `OnlineProbe`, `OnlineKNN`, `RankMe`, etc. for real-time SSL monitoring
+- **Dictionary outputs**: All intermediate values accessible to callbacks for debugging and analysis
 
 ## Complete Example
 
