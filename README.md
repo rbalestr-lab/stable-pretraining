@@ -100,9 +100,201 @@ module = spt.Module(
 | **Boilerplate** | ~150 lines per model | ~15 lines |
 | **Logging** | Manual `self.log()` everywhere | Automatic for all outputs |
 | **Evaluation** | Write custom callbacks | Built-in `OnlineProbe`, `OnlineKNN`, `RankMe` |
+| **Parameter handling** | Manual collection, risk of duplicates | Automatic with callback exclusion |
+| **Multi-optimizer** | Error-prone manual lists | Regex pattern matching |
 | **Debugging** | Print statements, pdb | Full dictionary access to all intermediate values |
 | **Forward function** | Split across training/val steps | Single unified function |
 | **Optimizer config** | Imperative code | Declarative dict |
+
+### 🔍 The Parameter Handling Problem
+
+One of Lightning's most painful issues: **managing parameters across multiple optimizers**.
+
+<table>
+<tr>
+<th width="50%">❌ Lightning: Manual & Error-Prone</th>
+<th width="50%">✅ SPT: Automatic & Safe</th>
+</tr>
+<tr>
+<td>
+
+```python
+# You have to manually track what goes where
+def configure_optimizers(self):
+    # Main model parameters
+    main_params = (
+        list(self.backbone.parameters()) +
+        list(self.projector.parameters())
+    )
+    main_opt = LARS(main_params, lr=0.1)
+
+    # Separate probe optimizer
+    probe_opt = Adam(
+        self.linear_probe.parameters(),
+        lr=1e-3
+    )
+
+    # Easy to accidentally include
+    # probe params in main optimizer!
+    # Or forget to exclude callback params!
+
+    return [main_opt, probe_opt], [scheduler, None]
+```
+
+**Problems:**
+- ⚠️ Manual parameter collection
+- ⚠️ Risk of duplicate parameters
+- ⚠️ Have to remember which module has which params
+- ⚠️ Callback parameters can leak into optimizers
+
+</td>
+<td>
+
+```python
+# SPT handles everything automatically
+module = spt.Module(
+    backbone=backbone,
+    projector=projector,
+    optim={
+        "optimizer": {"type": "LARS", "lr": 0.1},
+        "scheduler": {"type": "CosineAnnealingLR"}
+    }
+)
+
+# OnlineProbe gets its own optimizer automatically
+linear_probe = spt.callbacks.OnlineProbe(
+    module,
+    name="linear_probe",
+    probe=nn.Linear(512, 10),
+    optimizer={"type": "Adam", "lr": 1e-3}
+    # Probe params automatically excluded
+    # from main optimizer!
+)
+```
+
+**Benefits:**
+- ✅ Automatic parameter collection
+- ✅ No duplicate parameters possible
+- ✅ Callback params automatically excluded
+- ✅ Each component manages its own optimizer
+
+</td>
+</tr>
+</table>
+
+### 💡 See The Difference (Git Diff Style)
+
+Here's what changes when you switch from Lightning to SPT:
+
+```diff
+- class SimCLRModule(LightningModule):
+-     def __init__(self, backbone, projector, ...):
+-         super().__init__()
+-         self.backbone = backbone
+-         self.projector = projector
+-         self.linear_probe = nn.Linear(512, 10)  # Manual registration
+-         self.loss_fn = NTXentLoss(...)
+-
+-     def training_step(self, batch, batch_idx):
+-         view1, view2 = batch
+-         emb1 = self.backbone(view1["image"])
+-         emb2 = self.backbone(view2["image"])
+-         z1 = self.projector(emb1)
+-         z2 = self.projector(emb2)
+-         loss = self.loss_fn(z1, z2)
+-
+-         # Manual probe training
+-         probe_pred = self.linear_probe(emb1.detach())
+-         probe_loss = F.cross_entropy(probe_pred, view1["label"])
+-
+-         # Manual logging
+-         self.log("train/loss", loss)
+-         self.log("train/probe_loss", probe_loss)
+-
+-         return loss
+-
+-     def validation_step(self, batch, batch_idx):
+-         # Separate validation logic
+-         emb = self.backbone(batch["image"])
+-         pred = self.linear_probe(emb)
+-         self.log("val/acc", accuracy(pred, batch["label"]))
+-
+-     def configure_optimizers(self):
+-         # Manual parameter collection (error-prone!)
+-         main_params = list(self.backbone.parameters()) + list(self.projector.parameters())
+-         main_opt = LARS(main_params, lr=0.1, weight_decay=1e-6)
+-
+-         # Separate optimizer for probe
+-         probe_opt = Adam(self.linear_probe.parameters(), lr=1e-3)
+-
+-         scheduler = CosineAnnealingLR(main_opt, T_max=self.trainer.max_epochs)
+-         return [main_opt, probe_opt], [scheduler, None]
+
++ # Just define components
++ module = spt.Module(
++     backbone=backbone,
++     projector=projector,
++     forward=forward.simclr_forward,  # Handles train/val automatically
++     simclr_loss=spt.losses.NTXEntLoss(temperature=0.5),
++     optim={  # Declarative config
++         "optimizer": {"type": "LARS", "lr": 0.1, "weight_decay": 1e-6},
++         "scheduler": {"type": "CosineAnnealingLR"}
++     }
++ )
++
++ # OnlineProbe handles everything automatically
++ linear_probe = spt.callbacks.OnlineProbe(
++     module,
++     name="linear_probe",
++     input="embedding",
++     target="label",
++     probe=nn.Linear(512, 10),
++     loss_fn=nn.CrossEntropyLoss(),
++     optimizer={"type": "Adam", "lr": 1e-3},  # Separate optimizer config
++     metrics={
++         "top1": torchmetrics.classification.MulticlassAccuracy(10),
++     }
++ )
++ # Probe params auto-excluded from main optimizer
++ # Train/val logic handled automatically
++ # Metrics tracked automatically
++ # Logging handled automatically
+```
+
+**Result**: ~150 lines → ~20 lines, with MORE functionality!
+
+### 🎯 Advanced: Multi-Optimizer with Regex (SPT Exclusive!)
+
+Need different learning rates for backbone vs projector? In Lightning, this requires manual parameter grouping. In SPT, use **regex pattern matching**:
+
+```python
+module = spt.Module(
+    backbone=backbone,
+    projector=projector,
+    forward=forward.simclr_forward,
+    simclr_loss=spt.losses.NTXEntLoss(temperature=0.5),
+    optim={
+        "backbone_opt": {
+            "modules": "backbone.*",  # Regex pattern!
+            "optimizer": {"type": "SGD", "lr": 0.01},  # Lower LR for backbone
+            "scheduler": {"type": "StepLR", "step_size": 30}
+        },
+        "projector_opt": {
+            "modules": "projector.*",  # Different pattern
+            "optimizer": {"type": "Adam", "lr": 0.1},  # Higher LR for projector
+            "scheduler": {"type": "CosineAnnealingLR"}
+        }
+    }
+)
+```
+
+**SPT automatically:**
+- ✅ Matches parameters by module name using regex
+- ✅ Ensures no parameter duplication
+- ✅ Handles child module inheritance
+- ✅ Creates separate optimizer/scheduler pairs
+
+**Lightning equivalent**: 30+ lines of manual parameter grouping and error checking!
 
 ### See Full Examples
 
