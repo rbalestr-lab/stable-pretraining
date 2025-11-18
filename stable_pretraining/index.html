@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>stable_pretraining package &#8212; stable-pretraining 0.1.dev1+ga592dbc9b.d20251117 documentation</title>
+    <title>stable_pretraining package &#8212; stable-pretraining 0.1.dev1+g00243f19a.d20251118 documentation</title>
   
   
   
@@ -40,7 +40,7 @@
 <link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
   <script src="../_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
 
-    <script src="../_static/documentation_options.js?v=250fc8fd"></script>
+    <script src="../_static/documentation_options.js?v=de10f019"></script>
     <script src="../_static/doctools.js?v=9bcbadda"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/scripts/sphinx-book-theme.js?v=887ef09a"></script>
@@ -134,7 +134,7 @@
   
   
   
-    <p class="title logo__title">stable-pretraining 0.1.dev1+ga592dbc9b.d20251117 documentation</p>
+    <p class="title logo__title">stable-pretraining 0.1.dev1+g00243f19a.d20251118 documentation</p>
   
 </a></div>
         <div class="sidebar-primary-item">
@@ -449,6 +449,14 @@ document.write(`
 </ul>
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-stable_pretraining.static">stable_pretraining.static module</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#stable_pretraining.static.HF_EMBEDDINGS"><code class="docutils literal notranslate"><span class="pre">HF_EMBEDDINGS</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#stable_pretraining.static.HF_EMBEDDINGS.data"><code class="docutils literal notranslate"><span class="pre">HF_EMBEDDINGS.data</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#stable_pretraining.static.HF_PARAMETERS"><code class="docutils literal notranslate"><span class="pre">HF_PARAMETERS</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#stable_pretraining.static.HF_PARAMETERS.data"><code class="docutils literal notranslate"><span class="pre">HF_PARAMETERS.data</span></code></a></li>
+</ul>
+</li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#stable_pretraining.static.MetaStatic"><code class="docutils literal notranslate"><span class="pre">MetaStatic</span></code></a><ul class="nav section-nav flex-column">
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#stable_pretraining.static.MetaStatic.clear"><code class="docutils literal notranslate"><span class="pre">MetaStatic.clear()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#stable_pretraining.static.MetaStatic.get"><code class="docutils literal notranslate"><span class="pre">MetaStatic.get()</span></code></a></li>
@@ -2612,6 +2620,91 @@ python -m stable_pretraining.run –multirun         –config-path ../examples 
 <section id="module-stable_pretraining.static">
 <span id="stable-pretraining-static-module"></span><h2>stable_pretraining.static module<a class="headerlink" href="#module-stable_pretraining.static" title="Link to this heading">#</a></h2>
 <dl class="py class">
+<dt class="sig sig-object py" id="stable_pretraining.static.HF_EMBEDDINGS">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">stable_pretraining.static.</span></span><span class="sig-name descname"><span class="pre">HF_EMBEDDINGS</span></span><a class="reference internal" href="../_modules/stable_pretraining/static/#HF_EMBEDDINGS"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_pretraining.static.HF_EMBEDDINGS" title="Link to this definition">#</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<p>Thread-safe, lazy-loaded registry for TIMM (PyTorch Image Models) embedding names, accessed via class-level indexing.</p>
+<p>This class provides a mapping from string keys to lists of embedding names, loaded on first access from a
+JSON file located at ‘assets/static_timm.json’ relative to the source file. The data is cached as a class
+attribute after the first load, and subsequent accesses are served from memory.
+The class is intended to be used as a static registry, e.g.:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">names</span> <span class="o">=</span> <span class="n">TIMM_EMBEDDINGS</span><span class="p">[</span><span class="s2">&quot;resnet50&quot;</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">names</span><span class="p">)</span>  <span class="c1"># List of embedding names for &#39;resnet50&#39;</span>
+</pre></div>
+</div>
+<p class="rubric">Notes</p>
+<ul class="simple">
+<li><p>The data is loaded only once per process and is shared across all uses of the class.</p></li>
+<li><p>Thread-safe: concurrent first-time access is protected by a class-level lock.</p></li>
+<li><p>The class depends on the presence of the ‘assets/static_timm.json’ file two directories above the source file.</p></li>
+<li><p>The class assumes the <cite>__file__</cite> attribute is available and points to the current file.</p></li>
+<li><p>The class attribute <cite>_data</cite> is private and shared.</p></li>
+<li><p>Logging and printing occur on first load for debugging.</p></li>
+<li><p>File system access and JSON parsing are required at runtime.</p></li>
+</ul>
+<dl class="field-list simple">
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#RuntimeError" title="(in Python v3.14)"><strong>RuntimeError</strong></a> – If the assets file is missing.</p></li>
+<li><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#OSError" title="(in Python v3.14)"><strong>OSError</strong></a><strong>, </strong><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#IOError" title="(in Python v3.14)"><strong>IOError</strong></a> – If the file cannot be read.</p></li>
+<li><p><a class="reference external" href="https://docs.python.org/3/library/json.html#json.JSONDecodeError" title="(in Python v3.14)"><strong>json.JSONDecodeError</strong></a> – If the file is not valid JSON.</p></li>
+<li><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#KeyError" title="(in Python v3.14)"><strong>KeyError</strong></a> – If the requested key is not present in the data.</p></li>
+</ul>
+</dd>
+</dl>
+<p class="rubric">Example</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">embeddings</span> <span class="o">=</span> <span class="n">TIMM_EMBEDDINGS</span><span class="p">[</span><span class="s2">&quot;vit_base_patch16_224&quot;</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">embeddings</span><span class="p">)</span>
+</pre></div>
+</div>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="stable_pretraining.static.HF_EMBEDDINGS.data">
+<span class="sig-name descname"><span class="pre">data</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><span class="pre">dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#stable_pretraining.static.HF_EMBEDDINGS.data" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="stable_pretraining.static.HF_PARAMETERS">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">stable_pretraining.static.</span></span><span class="sig-name descname"><span class="pre">HF_PARAMETERS</span></span><a class="reference internal" href="../_modules/stable_pretraining/static/#HF_PARAMETERS"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_pretraining.static.HF_PARAMETERS" title="Link to this definition">#</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<p>Thread-safe singleton class for accessing TIMM (Timm Image Models) parameters.</p>
+<p>This class provides lazy-loaded, cached access to TIMM model parameters stored
+in a static JSON file. It implements a dict-like interface with thread-safe
+initialization and defensive copying to prevent mutation of cached data.</p>
+<dl>
+<dt>Usage:</dt><dd><p># Access parameters by key
+params = HF_PARAMETERS[‘model_name’]</p>
+<p># Iterate over keys
+for key in HF_PARAMETERS.keys():</p>
+<blockquote>
+<div><p>print(key)</p>
+</div></blockquote>
+<p># Iterate over values
+for values in HF_PARAMETERS.values():</p>
+<blockquote>
+<div><p>print(values)</p>
+</div></blockquote>
+<p># Iterate over items
+for key, values in HF_PARAMETERS.items():</p>
+<blockquote>
+<div><p>print(f”{key}: {values}”)</p>
+</div></blockquote>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>All methods return copies of the data to prevent accidental mutation
+of the internal cache.</p>
+</div>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="stable_pretraining.static.HF_PARAMETERS.data">
+<span class="sig-name descname"><span class="pre">data</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><span class="pre">dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#stable_pretraining.static.HF_PARAMETERS.data" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
 <dt class="sig sig-object py" id="stable_pretraining.static.MetaStatic">
 <em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">stable_pretraining.static.</span></span><span class="sig-name descname"><span class="pre">MetaStatic</span></span><a class="reference internal" href="../_modules/stable_pretraining/static/#MetaStatic"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_pretraining.static.MetaStatic" title="Link to this definition">#</a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#type" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">type</span></code></a></p>
@@ -4073,6 +4166,14 @@ A warning is logged if using a custom DataModule without this method.</p>
 </ul>
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-stable_pretraining.static">stable_pretraining.static module</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#stable_pretraining.static.HF_EMBEDDINGS"><code class="docutils literal notranslate"><span class="pre">HF_EMBEDDINGS</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#stable_pretraining.static.HF_EMBEDDINGS.data"><code class="docutils literal notranslate"><span class="pre">HF_EMBEDDINGS.data</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#stable_pretraining.static.HF_PARAMETERS"><code class="docutils literal notranslate"><span class="pre">HF_PARAMETERS</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#stable_pretraining.static.HF_PARAMETERS.data"><code class="docutils literal notranslate"><span class="pre">HF_PARAMETERS.data</span></code></a></li>
+</ul>
+</li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#stable_pretraining.static.MetaStatic"><code class="docutils literal notranslate"><span class="pre">MetaStatic</span></code></a><ul class="nav section-nav flex-column">
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#stable_pretraining.static.MetaStatic.clear"><code class="docutils literal notranslate"><span class="pre">MetaStatic.clear()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#stable_pretraining.static.MetaStatic.get"><code class="docutils literal notranslate"><span class="pre">MetaStatic.get()</span></code></a></li>
