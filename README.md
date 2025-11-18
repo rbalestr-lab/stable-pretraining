@@ -22,7 +22,7 @@ To reach flexibility, scalability and stability, we rely on battle-tested third 
 
 ## 🚀 PyTorch Lightning → stable-pretraining
 
-While PyTorch Lightning is powerful, `stable-pretraining` is specifically designed for multimodal pretraining with utilities that make self-supervised learning cleaner and more observable.
+While PyTorch Lightning is powerful, `stable-pretraining` is specifically designed for multimodal pretraining with utilities that make self-supervised learning cleaner and more observable. The key difference: you only define a `forward` function that returns a dictionary with `"loss"` and any quantities to monitor—no need to override `training_step` or `validation_step`. All model components are passed as kwargs to `spt.Module`.
 
 <table>
 <tr>
@@ -162,8 +162,6 @@ In Lightning, this requires manual parameter collection and grouping.
 
 </details>
 
-**Working examples**: [`benchmarks/cifar10/simclr-resnet18.py`](https://github.com/rbalestr-lab/stable-pretraining/blob/main/benchmarks/cifar10/simclr-resnet18.py) | [All SSL methods](https://github.com/rbalestr-lab/stable-pretraining/tree/main/benchmarks)
-
 ---
 
 ## Core Structure
@@ -200,51 +198,22 @@ datamodule = spt.data.DataModule(train=train_dataloader, val=val_dataloader)
 ```
 
 ### 2 - Module
-The key differentiator from PyTorch Lightning - **you only define the `forward` function**, not `training_step`! This unified approach computes losses and generates useful quantities that can be retrieved for monitoring and analysis:
+Use pre-built forward functions or define your own custom logic:
 
 ```python
-# Use the pre-built forward functions from stable_pretraining
 from stable_pretraining import forward
 
-# Simply use the appropriate forward for your method
 module = spt.Module(
     backbone=backbone,
     projector=projector,
-    forward=forward.simclr_forward,  # Or byol_forward, vicreg_forward, etc.
+    forward=forward.simclr_forward,  # Built-in: simclr, byol, vicreg, dino, etc.
     simclr_loss=spt.losses.NTXEntLoss(temperature=0.5),
     optim={
-        "optimizer": {"type": "Adam", "lr": 0.001},
+        "optimizer": {"type": "LARS", "lr": 0.1},
         "scheduler": {"type": "CosineAnnealingLR"},
-        "interval": "epoch"
     }
 )
 ```
-
-Or define your own custom forward:
-```python
-def forward(self, batch, stage):
-    out = {}
-
-    if isinstance(batch, list):
-        # Multi-view training - batch is a list of view dicts
-        embeddings = [self.backbone(view["image"]) for view in batch]
-        out["embedding"] = torch.cat(embeddings, dim=0)
-
-        if self.training:
-            projections = [self.projector(emb) for emb in embeddings]
-            out["loss"] = self.simclr_loss(projections[0], projections[1])
-    else:
-        # Single-view validation
-        out["embedding"] = self.backbone(batch["image"])
-
-    return out
-```
-
-**Key points:**
-- The `forward` method defines both the loss and any quantities to monitor
-- No need to override `training_step`, `validation_step`, etc.
-- Return a dictionary with a `"loss"` key for training
-- All model components are passed as kwargs to `spt.Module`
 
 ### 3 - Callbacks
 Monitor and evaluate your models in real-time during training. Callbacks are key ingredients of `stable-pretraining`, providing rich insights without interrupting your training flow:
