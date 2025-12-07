@@ -323,6 +323,65 @@ class iBOTPatchLoss(torch.nn.Module):
         )
 
 
+class KoLeoLoss(torch.nn.Module):
+    """Kozachenko-Leonenko entropic loss regularizer :cite:`sablayrolles2018optimal`.
+
+    This regularizer maximizes the differential entropy of the feature distribution
+    to prevent collapse and encourage uniformity on the hypersphere.
+
+    Computes: - 1/N * sum_i log(min_j!=i ||x_i - x_j||)
+
+    Args:
+        epsilon (float): Small value for numerical stability in log. Default: 1e-8.
+    """
+
+    def __init__(self, epsilon: float = 1e-8):
+        super().__init__()
+        self.epsilon = epsilon
+        self.pdist = torch.nn.PairwiseDistance(2, eps=epsilon)
+
+    def pairwise_NNs_inner(self, x: torch.Tensor) -> torch.Tensor:
+        """Pairwise nearest neighbors for L2-normalized vectors."""
+        # pairwise dot products
+        dots = torch.mm(x, x.t())
+        n = x.shape[0]
+        # Trick to fill diagonal with -1
+        dots.view(-1)[:: (n + 1)].fill_(-1)
+        # max inner prod -> min distance
+        _, indices = torch.max(dots, dim=1)
+        return indices
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        """Compute KoLeo loss.
+
+        Args:
+            x: Input features [batch_size, dim] or [n_views, batch_size, dim].
+               Will be naturally L2-normalized.
+
+        Returns:
+            Scalar KoLeo loss
+        """
+        # Flatten views if present
+        if x.ndim == 3:
+            x = x.reshape(-1, x.shape[-1])
+
+        # Ensure L2 normalization
+        x = F.normalize(x, eps=self.epsilon, p=2, dim=-1)
+
+        batch_size = x.shape[0]
+        if batch_size < 2:
+            return torch.tensor(0.0, device=x.device)
+
+        # Get instances with minimum distance (maximum similarity)
+        indices = self.pairwise_NNs_inner(x)
+
+        # Compute distances for the gradients
+        distances = self.pdist(x, x[indices])  # [N]
+
+        # Loss = -mean(log(min_dist))
+        return -torch.log(distances + self.epsilon).mean()
+
+
 class DINOv2Loss(torch.nn.Module):
     """DINOv2 loss combining CLS token and masked patch losses.
 
@@ -335,6 +394,7 @@ class DINOv2Loss(torch.nn.Module):
     Args:
         dino_loss_weight (float): Weight for CLS token loss. Default is 1.0.
         ibot_loss_weight (float): Weight for iBOT patch loss. Default is 1.0.
+        koleo_loss_weight (float): Weight for KoLeo loss. Default is 0.0 (disabled).
         temperature_student (float): Temperature for student softmax in DINO. Default is 0.1.
         center_momentum (float): EMA momentum for DINO centering (not used by iBOT). Default is 0.9.
         student_temp (float): Temperature for student softmax in iBOT. Default is 0.1.
@@ -344,6 +404,7 @@ class DINOv2Loss(torch.nn.Module):
         self,
         dino_loss_weight: float = 1.0,
         ibot_loss_weight: float = 1.0,
+        koleo_loss_weight: float = 0.0,
         temperature_student: float = 0.1,
         center_momentum: float = 0.9,
         student_temp: float = 0.1,
@@ -351,6 +412,7 @@ class DINOv2Loss(torch.nn.Module):
         super().__init__()
         self.dino_loss_weight = dino_loss_weight
         self.ibot_loss_weight = ibot_loss_weight
+        self.koleo_loss_weight = koleo_loss_weight
 
         self.dino_loss = DINOv1Loss(
             temperature_student=temperature_student,
@@ -361,12 +423,15 @@ class DINOv2Loss(torch.nn.Module):
             student_temp=student_temp,
         )
 
+        self.koleo_loss = KoLeoLoss()
+
     def forward(
         self,
         student_cls_logits: torch.Tensor,
         teacher_cls_probs: torch.Tensor,
         student_patch_logits: torch.Tensor = None,
         teacher_patch_probs: torch.Tensor = None,
+        student_cls_features: torch.Tensor = None,
     ) -> torch.Tensor:
         """Compute combined DINOv2 loss.
 
@@ -375,14 +440,20 @@ class DINOv2Loss(torch.nn.Module):
             teacher_cls_probs: Teacher CLS probs [n_views, batch, out_dim]
             student_patch_logits: Student patch logits [n_masked_total, patch_out_dim] or None
             teacher_patch_probs: Teacher patch probs [n_masked_total, patch_out_dim] or None
+            student_cls_features: Student components separately for KoLeo loss [n_views, batch, embed_dim] or None
 
         Returns:
             Combined weighted loss
         """
         dino_loss = self.dino_loss(student_cls_logits, teacher_cls_probs)
+        loss = self.dino_loss_weight * dino_loss
 
-        if student_patch_logits is None or teacher_patch_probs is None:
-            return self.dino_loss_weight * dino_loss
+        if student_patch_logits is not None and teacher_patch_probs is not None:
+            ibot_loss = self.ibot_loss(student_patch_logits, teacher_patch_probs)
+            loss += self.ibot_loss_weight * ibot_loss
 
-        ibot_loss = self.ibot_loss(student_patch_logits, teacher_patch_probs)
-        return self.dino_loss_weight * dino_loss + self.ibot_loss_weight * ibot_loss
+        if self.koleo_loss_weight > 0.0:
+            koleo_loss = self.koleo_loss(student_cls_features)
+            loss += self.koleo_loss_weight * koleo_loss
+
+        return loss
