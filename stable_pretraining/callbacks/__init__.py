@@ -20,6 +20,7 @@ from .wd_schedule import WeightDecayUpdater
 from .cleanup import CleanUpCallback
 from .env_info import EnvironmentDumpCallback
 from .cpu_offload import CPUOffloadCallback
+from .registry import ModuleRegistryCallback
 
 __all__ = [
     OnlineProbe,
@@ -45,4 +46,5 @@ __all__ = [
     CleanUpCallback,
     StrictCheckpointCallback,
     EnvironmentDumpCallback,
+    ModuleRegistryCallback,
 ]

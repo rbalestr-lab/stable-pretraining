@@ -49,6 +49,7 @@ from .callbacks import (
     TeacherStudentCallback,
     TrainerInfo,
 )
+from .callbacks.registry import log
 from .manager import Manager
 from .module import Module
 from .utils.lightning_patch import apply_manual_optimization_patch
@@ -89,6 +90,7 @@ __all__ = [
     "Manager",
     "Module",
     "TeacherStudentWrapper",
+    "log",
     # Package info
     "__author__",
     "__license__",
