@@ -19,7 +19,7 @@
 
 Multi-layer probe for vision models.
 
-.. GENERATED FROM PYTHON SOURCE LINES 2-287
+.. GENERATED FROM PYTHON SOURCE LINES 2-291
 
 .. code-block:: Python
 
@@ -224,11 +224,14 @@ Multi-layer probe for vision models.
     # -----------------------------
 
 
-    def build_probes(emb_dim: int, num_classes: int, transformer_block_indices: List[int]):
+    def build_probes(
+        module, emb_dim: int, num_classes: int, transformer_block_indices: List[int]
+    ):
         probes = []
         for i in transformer_block_indices:
             probes.append(
                 spt.callbacks.OnlineProbe(
+                    module,
                     target="label",
                     name=f"linear_probe_block_{i}",
                     input=f"embedding_layer_{i}",
@@ -280,6 +283,7 @@ Multi-layer probe for vision models.
 
         # Probes
         probes = build_probes(
+            module,
             emb_dim=emb_dim,
             num_classes=100,
             transformer_block_indices=transformer_block_indices,

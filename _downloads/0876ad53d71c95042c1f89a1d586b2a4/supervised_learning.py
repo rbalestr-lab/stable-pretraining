@@ -131,6 +131,7 @@ def main(cfg: dict):
         },
     )
     linear_probe = spt.callbacks.OnlineProbe(
+        module,
         name="linear_probe",
         input="embedding",
         target="label",
@@ -139,6 +140,7 @@ def main(cfg: dict):
         metrics=torchmetrics.classification.MulticlassAccuracy(num_classes),
     )
     linear_probe_proj = spt.callbacks.OnlineProbe(
+        module,
         name="linear_probe_proj",
         input="projector",
         target="label",

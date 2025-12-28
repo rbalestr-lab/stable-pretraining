@@ -25,7 +25,7 @@ This example demonstrates how to train models using supervised learning
 with stable-pretraining, including support for various datasets like
 ImageNet-10, ImageNet-100, and ImageNet-1k.
 
-.. GENERATED FROM PYTHON SOURCE LINES 9-173
+.. GENERATED FROM PYTHON SOURCE LINES 9-175
 
 .. code-block:: Python
 
@@ -154,6 +154,7 @@ ImageNet-10, ImageNet-100, and ImageNet-1k.
             },
         )
         linear_probe = spt.callbacks.OnlineProbe(
+            module,
             name="linear_probe",
             input="embedding",
             target="label",
@@ -162,6 +163,7 @@ ImageNet-10, ImageNet-100, and ImageNet-1k.
             metrics=torchmetrics.classification.MulticlassAccuracy(num_classes),
         )
         linear_probe_proj = spt.callbacks.OnlineProbe(
+            module,
             name="linear_probe_proj",
             input="projector",
             target="label",

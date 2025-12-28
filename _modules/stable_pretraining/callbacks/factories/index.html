@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>stable_pretraining.callbacks.factories &#8212; stable-pretraining 0.1.dev1+g00243f19a.d20251118 documentation</title>
+    <title>stable_pretraining.callbacks.factories &#8212; stable-pretraining 0.1.dev1+g7a60d5886.d20251228 documentation</title>
   
   
   
@@ -39,7 +39,7 @@
 <link rel="preload" as="script" href="../../../../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
   <script src="../../../../_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
 
-    <script src="../../../../_static/documentation_options.js?v=de10f019"></script>
+    <script src="../../../../_static/documentation_options.js?v=144c0e9a"></script>
     <script src="../../../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../../_static/scripts/sphinx-book-theme.js?v=887ef09a"></script>
@@ -135,7 +135,7 @@
   
   
   
-    <p class="title logo__title">stable-pretraining 0.1.dev1+g00243f19a.d20251118 documentation</p>
+    <p class="title logo__title">stable-pretraining 0.1.dev1+g7a60d5886.d20251228 documentation</p>
   
 </a></div>
         <div class="sidebar-primary-item">
@@ -345,6 +345,7 @@ document.write(`
 <span></span><span class="kn">from</span><span class="w"> </span><span class="nn">.checkpoint_sklearn</span><span class="w"> </span><span class="kn">import</span> <span class="n">SklearnCheckpoint</span><span class="p">,</span> <span class="n">WandbCheckpoint</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.trainer_info</span><span class="w"> </span><span class="kn">import</span> <span class="n">LoggingCallback</span><span class="p">,</span> <span class="n">ModuleSummary</span><span class="p">,</span> <span class="n">TrainerInfo</span><span class="p">,</span> <span class="n">SLURMInfo</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.env_info</span><span class="w"> </span><span class="kn">import</span> <span class="n">EnvironmentDumpCallback</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.registry</span><span class="w"> </span><span class="kn">import</span> <span class="n">ModuleRegistryCallback</span>
 
 
 <div class="viewcode-block" id="default">
@@ -353,6 +354,7 @@ document.write(`
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Factory function that returns default callbacks.&quot;&quot;&quot;</span>
     <span class="n">callbacks</span> <span class="o">=</span> <span class="p">[</span>
         <span class="c1"># RichProgressBar(),</span>
+        <span class="n">ModuleRegistryCallback</span><span class="p">(),</span>
         <span class="n">LoggingCallback</span><span class="p">(),</span>
         <span class="n">EnvironmentDumpCallback</span><span class="p">(</span><span class="n">async_dump</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
         <span class="n">TrainerInfo</span><span class="p">(),</span>

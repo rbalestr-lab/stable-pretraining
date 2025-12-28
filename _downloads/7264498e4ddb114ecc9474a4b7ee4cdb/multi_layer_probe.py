@@ -200,11 +200,14 @@ def build_module(
 # -----------------------------
 
 
-def build_probes(emb_dim: int, num_classes: int, transformer_block_indices: List[int]):
+def build_probes(
+    module, emb_dim: int, num_classes: int, transformer_block_indices: List[int]
+):
     probes = []
     for i in transformer_block_indices:
         probes.append(
             spt.callbacks.OnlineProbe(
+                module,
                 target="label",
                 name=f"linear_probe_block_{i}",
                 input=f"embedding_layer_{i}",
@@ -256,6 +259,7 @@ def main(cfg: DictConfig):
 
     # Probes
     probes = build_probes(
+        module,
         emb_dim=emb_dim,
         num_classes=100,
         transformer_block_indices=transformer_block_indices,

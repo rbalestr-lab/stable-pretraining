@@ -124,6 +124,14 @@ stable\_pretraining.callbacks.rankme module
    :show-inheritance:
    :undoc-members:
 
+stable\_pretraining.callbacks.registry module
+---------------------------------------------
+
+.. automodule:: stable_pretraining.callbacks.registry
+   :members:
+   :show-inheritance:
+   :undoc-members:
+
 stable\_pretraining.callbacks.teacher\_student module
 -----------------------------------------------------
 

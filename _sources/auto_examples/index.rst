@@ -22,7 +22,7 @@ Configuration examples for stable-pretraining.
   .. image:: /auto_examples/images/thumb/sphx_glr_wandb_reader_thumb.png
     :alt:
 
-  :ref:`sphx_glr_auto_examples_wandb_reader.py`
+  :doc:`/auto_examples/wandb_reader`
 
 .. raw:: html
 
@@ -39,7 +39,7 @@ Configuration examples for stable-pretraining.
   .. image:: /auto_examples/images/thumb/sphx_glr_imbalance_supervised_learning_thumb.png
     :alt:
 
-  :ref:`sphx_glr_auto_examples_imbalance_supervised_learning.py`
+  :doc:`/auto_examples/imbalance_supervised_learning`
 
 .. raw:: html
 
@@ -56,7 +56,7 @@ Configuration examples for stable-pretraining.
   .. image:: /auto_examples/images/thumb/sphx_glr_wandb_figures_thumb.png
     :alt:
 
-  :ref:`sphx_glr_auto_examples_wandb_figures.py`
+  :doc:`/auto_examples/wandb_figures`
 
 .. raw:: html
 
@@ -73,7 +73,7 @@ Configuration examples for stable-pretraining.
   .. image:: /auto_examples/images/thumb/sphx_glr_supervised_learning_thumb.png
     :alt:
 
-  :ref:`sphx_glr_auto_examples_supervised_learning.py`
+  :doc:`/auto_examples/supervised_learning`
 
 .. raw:: html
 
@@ -90,7 +90,7 @@ Configuration examples for stable-pretraining.
   .. image:: /auto_examples/images/thumb/sphx_glr_multi_layer_probe_thumb.png
     :alt:
 
-  :ref:`sphx_glr_auto_examples_multi_layer_probe.py`
+  :doc:`/auto_examples/multi_layer_probe`
 
 .. raw:: html
 

@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>stable-pretraining &#8212; stable-pretraining 0.1.dev1+g00243f19a.d20251118 documentation</title>
+    <title>stable-pretraining &#8212; stable-pretraining 0.1.dev1+g7a60d5886.d20251228 documentation</title>
   
   
   
@@ -40,7 +40,7 @@
 <link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
   <script src="_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
 
-    <script src="_static/documentation_options.js?v=de10f019"></script>
+    <script src="_static/documentation_options.js?v=144c0e9a"></script>
     <script src="_static/doctools.js?v=9bcbadda"></script>
     <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/scripts/sphinx-book-theme.js?v=887ef09a"></script>
@@ -137,7 +137,7 @@
   
   
   
-    <p class="title logo__title">stable-pretraining 0.1.dev1+g00243f19a.d20251118 documentation</p>
+    <p class="title logo__title">stable-pretraining 0.1.dev1+g7a60d5886.d20251228 documentation</p>
   
 </a></div>
         <div class="sidebar-primary-item">
@@ -522,6 +522,7 @@ document.write(`
 <p>Monitor and evaluate your models in real-time during training. Callbacks are key ingredients of <code class="docutils literal notranslate"><span class="pre">stable-pretraining</span></code>, providing rich insights without interrupting your training flow:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Monitor SSL representations with a linear probe</span>
 <span class="n">linear_probe</span> <span class="o">=</span> <span class="n">spt</span><span class="o">.</span><span class="n">callbacks</span><span class="o">.</span><span class="n">OnlineProbe</span><span class="p">(</span>
+    <span class="n">module</span><span class="p">,</span>  <span class="c1"># Pass the spt.Module instance</span>
     <span class="n">name</span><span class="o">=</span><span class="s2">&quot;linear_probe&quot;</span><span class="p">,</span>  <span class="c1"># Useful for retrieving metrics and values in logging</span>
     <span class="nb">input</span><span class="o">=</span><span class="s2">&quot;embedding&quot;</span><span class="p">,</span>  <span class="c1"># Which output from forward to monitor</span>
     <span class="n">target</span><span class="o">=</span><span class="s2">&quot;label&quot;</span><span class="p">,</span>      <span class="c1"># Ground truth from batch</span>
@@ -670,6 +671,7 @@ document.write(`
 
 <span class="c1"># Add callbacks for monitoring performance during training</span>
 <span class="n">linear_probe</span> <span class="o">=</span> <span class="n">spt</span><span class="o">.</span><span class="n">callbacks</span><span class="o">.</span><span class="n">OnlineProbe</span><span class="p">(</span>
+    <span class="n">module</span><span class="p">,</span>
     <span class="n">name</span><span class="o">=</span><span class="s2">&quot;linear_probe&quot;</span><span class="p">,</span>
     <span class="nb">input</span><span class="o">=</span><span class="s2">&quot;embedding&quot;</span><span class="p">,</span>
     <span class="n">target</span><span class="o">=</span><span class="s2">&quot;label&quot;</span><span class="p">,</span>
