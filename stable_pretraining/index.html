@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>stable_pretraining package &#8212; stable-pretraining 0.1.dev1+g4e57db834.d20251228 documentation</title>
+    <title>stable_pretraining package &#8212; stable-pretraining 0.1.dev1+gb1102a8c6.d20251229 documentation</title>
   
   
   
@@ -40,7 +40,7 @@
 <link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
   <script src="../_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
 
-    <script src="../_static/documentation_options.js?v=f63f693e"></script>
+    <script src="../_static/documentation_options.js?v=87f6fe04"></script>
     <script src="../_static/doctools.js?v=9bcbadda"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/scripts/sphinx-book-theme.js?v=887ef09a"></script>
@@ -134,7 +134,7 @@
   
   
   
-    <p class="title logo__title">stable-pretraining 0.1.dev1+g4e57db834.d20251228 documentation</p>
+    <p class="title logo__title">stable-pretraining 0.1.dev1+gb1102a8c6.d20251229 documentation</p>
   
 </a></div>
         <div class="sidebar-primary-item">
@@ -691,6 +691,14 @@ document.write(`
 <li class="toctree-l4"><a class="reference internal" href="../stable_pretraining.backbone/#stable_pretraining.backbone.utils.EfficientMaskedTimmViT.forward"><code class="docutils literal notranslate"><span class="pre">EfficientMaskedTimmViT.forward()</span></code></a></li>
 </ul>
 </li>
+<li class="toctree-l3"><a class="reference internal" href="../stable_pretraining.backbone/#stable_pretraining.backbone.utils.EmbeddingOutput"><code class="docutils literal notranslate"><span class="pre">EmbeddingOutput</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../stable_pretraining.backbone/#stable_pretraining.backbone.utils.EmbeddingOutput.last_hidden_state"><code class="docutils literal notranslate"><span class="pre">EmbeddingOutput.last_hidden_state</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../stable_pretraining.backbone/#stable_pretraining.backbone.utils.EmbeddingOutput.hidden_states"><code class="docutils literal notranslate"><span class="pre">EmbeddingOutput.hidden_states</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../stable_pretraining.backbone/#id0"><code class="docutils literal notranslate"><span class="pre">EmbeddingOutput.hidden_states</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../stable_pretraining.backbone/#stable_pretraining.backbone.utils.EmbeddingOutput.keys"><code class="docutils literal notranslate"><span class="pre">EmbeddingOutput.keys()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../stable_pretraining.backbone/#id6"><code class="docutils literal notranslate"><span class="pre">EmbeddingOutput.last_hidden_state</span></code></a></li>
+</ul>
+</li>
 <li class="toctree-l3"><a class="reference internal" href="../stable_pretraining.backbone/#stable_pretraining.backbone.utils.EvalOnly"><code class="docutils literal notranslate"><span class="pre">EvalOnly</span></code></a><ul>
 <li class="toctree-l4"><a class="reference internal" href="../stable_pretraining.backbone/#stable_pretraining.backbone.utils.EvalOnly.forward"><code class="docutils literal notranslate"><span class="pre">EvalOnly.forward()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="../stable_pretraining.backbone/#stable_pretraining.backbone.utils.EvalOnly.train"><code class="docutils literal notranslate"><span class="pre">EvalOnly.train()</span></code></a></li>
@@ -701,8 +709,9 @@ document.write(`
 <li class="toctree-l4"><a class="reference internal" href="../stable_pretraining.backbone/#stable_pretraining.backbone.utils.FeaturesConcat.get_output_shape"><code class="docutils literal notranslate"><span class="pre">FeaturesConcat.get_output_shape()</span></code></a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="../stable_pretraining.backbone/#stable_pretraining.backbone.utils.ReturnEmbedding"><code class="docutils literal notranslate"><span class="pre">ReturnEmbedding</span></code></a><ul>
-<li class="toctree-l4"><a class="reference internal" href="../stable_pretraining.backbone/#stable_pretraining.backbone.utils.ReturnEmbedding.forward"><code class="docutils literal notranslate"><span class="pre">ReturnEmbedding.forward()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../stable_pretraining.backbone/#stable_pretraining.backbone.utils.HiddenStateExtractor"><code class="docutils literal notranslate"><span class="pre">HiddenStateExtractor</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../stable_pretraining.backbone/#stable_pretraining.backbone.utils.HiddenStateExtractor.forward"><code class="docutils literal notranslate"><span class="pre">HiddenStateExtractor.forward()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../stable_pretraining.backbone/#stable_pretraining.backbone.utils.HiddenStateExtractor.remove_hooks"><code class="docutils literal notranslate"><span class="pre">HiddenStateExtractor.remove_hooks()</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="../stable_pretraining.backbone/#stable_pretraining.backbone.utils.TeacherStudentWrapper"><code class="docutils literal notranslate"><span class="pre">TeacherStudentWrapper</span></code></a><ul>
@@ -721,6 +730,13 @@ document.write(`
 <li class="toctree-l3"><a class="reference internal" href="../stable_pretraining.backbone/#stable_pretraining.backbone.utils.register_lr_scale_hook"><code class="docutils literal notranslate"><span class="pre">register_lr_scale_hook()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="../stable_pretraining.backbone/#stable_pretraining.backbone.utils.set_embedding_dim"><code class="docutils literal notranslate"><span class="pre">set_embedding_dim()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="../stable_pretraining.backbone/#stable_pretraining.backbone.utils.vit_hf"><code class="docutils literal notranslate"><span class="pre">vit_hf()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../stable_pretraining.backbone/#module-stable_pretraining.backbone.vit">stable_pretraining.backbone.vit module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../stable_pretraining.backbone/#stable_pretraining.backbone.vit.PositionalEncoding2D"><code class="docutils literal notranslate"><span class="pre">PositionalEncoding2D</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../stable_pretraining.backbone/#stable_pretraining.backbone.vit.PositionalEncoding2D.forward"><code class="docutils literal notranslate"><span class="pre">PositionalEncoding2D.forward()</span></code></a></li>
+</ul>
+</li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="../stable_pretraining.backbone/#module-stable_pretraining.backbone">Module contents</a></li>

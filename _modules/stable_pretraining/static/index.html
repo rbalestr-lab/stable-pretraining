@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>stable_pretraining.static &#8212; stable-pretraining 0.1.dev1+g4e57db834.d20251228 documentation</title>
+    <title>stable_pretraining.static &#8212; stable-pretraining 0.1.dev1+gb1102a8c6.d20251229 documentation</title>
   
   
   
@@ -39,7 +39,7 @@
 <link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
   <script src="../../../_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
 
-    <script src="../../../_static/documentation_options.js?v=f63f693e"></script>
+    <script src="../../../_static/documentation_options.js?v=87f6fe04"></script>
     <script src="../../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/scripts/sphinx-book-theme.js?v=887ef09a"></script>
@@ -135,7 +135,7 @@
   
   
   
-    <p class="title logo__title">stable-pretraining 0.1.dev1+g4e57db834.d20251228 documentation</p>
+    <p class="title logo__title">stable-pretraining 0.1.dev1+gb1102a8c6.d20251229 documentation</p>
   
 </a></div>
         <div class="sidebar-primary-item">
@@ -1442,14 +1442,14 @@ document.write(`
     <span class="c1"># add last 3 blocks as separate output</span>
     <span class="n">names</span> <span class="o">=</span> <span class="n">spt</span><span class="o">.</span><span class="n">static</span><span class="o">.</span><span class="n">TIMM_EMBEDDINGS</span><span class="p">[</span><span class="s2">&quot;resnet34&quot;</span><span class="p">][</span><span class="o">-</span><span class="mi">3</span><span class="p">:]</span>
     <span class="c1"># names = [&#39;layers.2.blocks.17&#39;, &#39;layers.3.blocks.0&#39;, &#39;layers.3.blocks.1&#39;]</span>
-    <span class="n">model</span> <span class="o">=</span> <span class="n">spt</span><span class="o">.</span><span class="n">backbone</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">ReturnEmbedding</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">names</span><span class="p">)</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">spt</span><span class="o">.</span><span class="n">backbone</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">HiddenStateExtractor</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">names</span><span class="p">)</span>
     <span class="c1"># if you need shapes e.g. for probing definition</span>
     <span class="n">image</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">10</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">224</span><span class="p">,</span> <span class="mi">224</span><span class="p">))</span>
     <span class="n">output_shape</span><span class="p">,</span> <span class="n">embedding_shapes</span> <span class="o">=</span> <span class="n">spt</span><span class="o">.</span><span class="n">backbone</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">get_output_shape</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">image</span><span class="p">)</span>
     <span class="c1"># embedding_shapes = {&#39;layers.2.blocks.17&#39;: torch.Size([10, 14, 14, 768]),</span>
     <span class="c1"># &#39;layers.3.blocks.0&#39;: torch.Size([10, 7, 7, 1536]),</span>
     <span class="c1"># &#39;layers.3.blocks.1&#39;: torch.Size([10, 7, 7, 1536])}</span>
-    <span class="n">output</span><span class="p">,</span> <span class="n">embeddings</span> <span class="o">=</span> <span class="n">model</span><span class="p">(</span><span class="n">image</span><span class="p">)</span>
+    <span class="n">output</span> <span class="o">=</span> <span class="n">model</span><span class="p">(</span><span class="n">image</span><span class="p">)</span>
     <span class="c1"># output = tensor([[ 1.1009 ...</span>
     <span class="c1"># embeddings = {&#39;layers.3.blocks.1&#39;: tensor([[[[-0.6236, ...}</span>
 </pre></div>

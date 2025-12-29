@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Index &#8212; stable-pretraining 0.1.dev1+g4e57db834.d20251228 documentation</title>
+    <title>Index &#8212; stable-pretraining 0.1.dev1+gb1102a8c6.d20251229 documentation</title>
   
   
   
@@ -39,7 +39,7 @@
 <link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
   <script src="../_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
 
-    <script src="../_static/documentation_options.js?v=f63f693e"></script>
+    <script src="../_static/documentation_options.js?v=87f6fe04"></script>
     <script src="../_static/doctools.js?v=9bcbadda"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/scripts/sphinx-book-theme.js?v=887ef09a"></script>
@@ -135,7 +135,7 @@
   
   
   
-    <p class="title logo__title">stable-pretraining 0.1.dev1+g4e57db834.d20251228 documentation</p>
+    <p class="title logo__title">stable-pretraining 0.1.dev1+gb1102a8c6.d20251229 documentation</p>
   
 </a></div>
         <div class="sidebar-primary-item">
@@ -731,12 +731,14 @@ document.write(`
       </ul></li>
       <li><a href="../stable_pretraining.callbacks/#stable_pretraining.callbacks.embedding_cache.EmbeddingCache">EmbeddingCache (class in stable_pretraining.callbacks.embedding_cache)</a>
 </li>
-      <li><a href="../stable_pretraining.callbacks/#stable_pretraining.callbacks.env_info.EnvironmentDumpCallback">EnvironmentDumpCallback (class in stable_pretraining.callbacks.env_info)</a>
+      <li><a href="../stable_pretraining.backbone/#stable_pretraining.backbone.utils.EmbeddingOutput">EmbeddingOutput (class in stable_pretraining.backbone.utils)</a>
 </li>
-      <li><a href="../stable_pretraining.callbacks/#stable_pretraining.callbacks.earlystop.EpochMilestones">EpochMilestones (class in stable_pretraining.callbacks.earlystop)</a>
+      <li><a href="../stable_pretraining.callbacks/#stable_pretraining.callbacks.env_info.EnvironmentDumpCallback">EnvironmentDumpCallback (class in stable_pretraining.callbacks.env_info)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="../stable_pretraining.callbacks/#stable_pretraining.callbacks.earlystop.EpochMilestones">EpochMilestones (class in stable_pretraining.callbacks.earlystop)</a>
+</li>
       <li><a href="../stable_pretraining.utils/#stable_pretraining.utils.visualization.escape_labels">escape_labels() (in module stable_pretraining.utils.visualization)</a>
 </li>
       <li><a href="../api/gen_modules/stable_pretraining.backbone.EvalOnly/#stable_pretraining.backbone.EvalOnly">EvalOnly (class in stable_pretraining.backbone)</a>
@@ -836,9 +838,11 @@ document.write(`
 </li>
         <li><a href="../stable_pretraining.backbone/#stable_pretraining.backbone.utils.FeaturesConcat.forward">(stable_pretraining.backbone.utils.FeaturesConcat method)</a>
 </li>
-        <li><a href="../stable_pretraining.backbone/#stable_pretraining.backbone.utils.ReturnEmbedding.forward">(stable_pretraining.backbone.utils.ReturnEmbedding method)</a>
+        <li><a href="../stable_pretraining.backbone/#stable_pretraining.backbone.utils.HiddenStateExtractor.forward">(stable_pretraining.backbone.utils.HiddenStateExtractor method)</a>
 </li>
         <li><a href="../stable_pretraining.backbone/#stable_pretraining.backbone.utils.TeacherStudentWrapper.forward">(stable_pretraining.backbone.utils.TeacherStudentWrapper method)</a>
+</li>
+        <li><a href="../stable_pretraining.backbone/#stable_pretraining.backbone.vit.PositionalEncoding2D.forward">(stable_pretraining.backbone.vit.PositionalEncoding2D method)</a>
 </li>
         <li><a href="../stable_pretraining.data/#stable_pretraining.data.transforms.UniformTemporalSubsample.forward">(stable_pretraining.data.transforms.UniformTemporalSubsample method)</a>
 </li>
@@ -1109,14 +1113,18 @@ document.write(`
 </li>
       <li><a href="../stable_pretraining/#stable_pretraining.static.HF_PARAMETERS">HF_PARAMETERS (class in stable_pretraining.static)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="../api/gen_modules/stable_pretraining.data.HFDataset/#stable_pretraining.data.HFDataset">HFDataset (class in stable_pretraining.data)</a>, <a href="../stable_pretraining.data/#stable_pretraining.data.HFDataset">[1]</a>
 
       <ul>
         <li><a href="../stable_pretraining.data/#stable_pretraining.data.datasets.HFDataset">(class in stable_pretraining.data.datasets)</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="../stable_pretraining.backbone/#id0">hidden_states (stable_pretraining.backbone.utils.EmbeddingOutput attribute)</a>, <a href="../stable_pretraining.backbone/#stable_pretraining.backbone.utils.EmbeddingOutput.hidden_states">[1]</a>
+</li>
+      <li><a href="../stable_pretraining.backbone/#stable_pretraining.backbone.utils.HiddenStateExtractor">HiddenStateExtractor (class in stable_pretraining.backbone.utils)</a>
+</li>
       <li><a href="../stable_pretraining.callbacks/#stable_pretraining.callbacks.cleanup.human_size">human_size() (in module stable_pretraining.callbacks.cleanup)</a>
 </li>
   </ul></td>
@@ -1212,6 +1220,8 @@ document.write(`
       <li><a href="../stable_pretraining.backbone/#stable_pretraining.backbone.probe.AutoTuneMLP.keys">keys() (stable_pretraining.backbone.probe.AutoTuneMLP method)</a>
 
       <ul>
+        <li><a href="../stable_pretraining.backbone/#stable_pretraining.backbone.utils.EmbeddingOutput.keys">(stable_pretraining.backbone.utils.EmbeddingOutput method)</a>
+</li>
         <li><a href="../stable_pretraining/#stable_pretraining.static.MetaStatic.keys">(stable_pretraining.static.MetaStatic method)</a>
 </li>
       </ul></li>
@@ -1235,6 +1245,8 @@ document.write(`
         <li><a href="../stable_pretraining.optim/#stable_pretraining.optim.lars.LARS">(class in stable_pretraining.optim.lars)</a>
 </li>
       </ul></li>
+      <li><a href="../stable_pretraining.backbone/#id6">last_hidden_state (stable_pretraining.backbone.utils.EmbeddingOutput attribute)</a>, <a href="../stable_pretraining.backbone/#stable_pretraining.backbone.utils.EmbeddingOutput.last_hidden_state">[1]</a>
+</li>
       <li><a href="../stable_pretraining.callbacks/#stable_pretraining.callbacks.latent_viz.LatentViz">LatentViz (class in stable_pretraining.callbacks.latent_viz)</a>
 </li>
       <li><a href="../stable_pretraining.utils/#stable_pretraining.utils.visualization.latex_escape">latex_escape() (in module stable_pretraining.utils.visualization)</a>
@@ -1384,6 +1396,8 @@ document.write(`
         <li><a href="../stable_pretraining.backbone/#module-stable_pretraining.backbone.resnet9">stable_pretraining.backbone.resnet9</a>
 </li>
         <li><a href="../stable_pretraining.backbone/#module-stable_pretraining.backbone.utils">stable_pretraining.backbone.utils</a>
+</li>
+        <li><a href="../stable_pretraining.backbone/#module-stable_pretraining.backbone.vit">stable_pretraining.backbone.vit</a>
 </li>
         <li><a href="../api/monitors/#module-stable_pretraining.callbacks">stable_pretraining.callbacks</a>, <a href="../stable_pretraining.callbacks/#module-stable_pretraining.callbacks">[1]</a>
 </li>
@@ -1866,20 +1880,22 @@ document.write(`
       </ul></li>
       <li><a href="../stable_pretraining.data/#stable_pretraining.data.transforms.PILGaussianBlur">PILGaussianBlur (class in stable_pretraining.data.transforms)</a>
 </li>
+      <li><a href="../stable_pretraining.backbone/#stable_pretraining.backbone.vit.PositionalEncoding2D">PositionalEncoding2D (class in stable_pretraining.backbone.vit)</a>
+</li>
       <li><a href="../stable_pretraining/#stable_pretraining.Manager.predict">predict() (stable_pretraining.Manager method)</a>
 
       <ul>
         <li><a href="../stable_pretraining/#stable_pretraining.manager.Manager.predict">(stable_pretraining.manager.Manager method)</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="../api/gen_modules/stable_pretraining.data.DataModule/#stable_pretraining.data.DataModule.predict_dataloader">predict_dataloader() (stable_pretraining.data.DataModule method)</a>, <a href="../stable_pretraining.data/#stable_pretraining.data.DataModule.predict_dataloader">[1]</a>
 
       <ul>
         <li><a href="../stable_pretraining.data/#stable_pretraining.data.module.DataModule.predict_dataloader">(stable_pretraining.data.module.DataModule method)</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="../stable_pretraining/#stable_pretraining.Module.predict_step">predict_step() (stable_pretraining.Module method)</a>
 
       <ul>
@@ -1980,6 +1996,8 @@ document.write(`
 </li>
       <li><a href="../stable_pretraining.backbone/#stable_pretraining.backbone.utils.register_lr_scale_hook">register_lr_scale_hook() (in module stable_pretraining.backbone.utils)</a>
 </li>
+      <li><a href="../stable_pretraining.backbone/#stable_pretraining.backbone.utils.HiddenStateExtractor.remove_hooks">remove_hooks() (stable_pretraining.backbone.utils.HiddenStateExtractor method)</a>
+</li>
       <li><a href="../api/gen_modules/stable_pretraining.data.RepeatedRandomSampler/#stable_pretraining.data.RepeatedRandomSampler">RepeatedRandomSampler (class in stable_pretraining.data)</a>, <a href="../stable_pretraining.data/#stable_pretraining.data.RepeatedRandomSampler">[1]</a>
 
       <ul>
@@ -2009,8 +2027,6 @@ document.write(`
 </li>
       </ul></li>
       <li><a href="../stable_pretraining.utils/#stable_pretraining.utils.lightning_patch.restore_original_validation">restore_original_validation() (in module stable_pretraining.utils.lightning_patch)</a>
-</li>
-      <li><a href="../stable_pretraining.backbone/#stable_pretraining.backbone.utils.ReturnEmbedding">ReturnEmbedding (class in stable_pretraining.backbone.utils)</a>
 </li>
       <li><a href="../stable_pretraining.data/#stable_pretraining.data.transforms.RGB">RGB (class in stable_pretraining.data.transforms)</a>
 </li>
@@ -2263,6 +2279,13 @@ document.write(`
 
       <ul>
         <li><a href="../stable_pretraining.backbone/#module-stable_pretraining.backbone.utils">module</a>
+</li>
+      </ul></li>
+      <li>
+    stable_pretraining.backbone.vit
+
+      <ul>
+        <li><a href="../stable_pretraining.backbone/#module-stable_pretraining.backbone.vit">module</a>
 </li>
       </ul></li>
       <li>

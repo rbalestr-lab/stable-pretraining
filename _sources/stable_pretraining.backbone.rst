@@ -60,6 +60,14 @@ stable\_pretraining.backbone.utils module
    :show-inheritance:
    :undoc-members:
 
+stable\_pretraining.backbone.vit module
+---------------------------------------
+
+.. automodule:: stable_pretraining.backbone.vit
+   :members:
+   :show-inheritance:
+   :undoc-members:
+
 Module contents
 ---------------
 
