@@ -7,6 +7,7 @@ from .image_retrieval import ImageRetrieval
 from .knn import OnlineKNN
 from .latent_viz import LatentViz
 from .lidar import LiDAR
+from .mae_reconstruction_viz import MAEReconstructionViz
 from .probe import OnlineProbe
 from .rankme import RankMe
 from .teacher_student import TeacherStudentCallback
@@ -38,6 +39,7 @@ __all__ = [
     RankMe,
     LiDAR,
     ImageRetrieval,
+    MAEReconstructionViz,
     CPUOffloadCallback,
     TeacherStudentCallback,
     CLIPZeroShot,

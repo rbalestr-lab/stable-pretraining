@@ -1,0 +1,23 @@
+defaults:
+  - mae_reconstruction_gap
+  - override hydra/launcher: submitit_slurm
+
+trainer:
+  max_epochs: 100
+
+hydra:
+  sweep:
+    dir: outputs/mae_gap_slurm/${now:%Y-%m-%d}/${now:%H-%M-%S}
+    subdir: ${hydra.job.num}_model=${model_name}_decoder=${decoder_type}_alpha=${alpha}
+
+  launcher:
+    partition: YOUR_PARTITION
+    qos: YOUR_QOS
+
+    timeout_min: 720
+    cpus_per_task: 8
+    mem_gb: 64
+    gpus_per_node: 1
+    tasks_per_node: 1
+
+    comment: "MAE Reconstruction Gap - Alpha Sweep"

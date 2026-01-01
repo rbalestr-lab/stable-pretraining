@@ -78,6 +78,7 @@ class OnlineProbe(TrainableCallback):
         gradient_clip_val: float = None,
         gradient_clip_algorithm: str = "norm",
         metrics: Optional[Union[dict, tuple, list, torchmetrics.Metric]] = None,
+        add_to_loss: bool = True,
     ) -> None:
         # Initialize base class
         self.input = input
@@ -85,6 +86,7 @@ class OnlineProbe(TrainableCallback):
         if loss_fn is None:
             logging.warning(f"Not loss given to {name}, will use output of `probe`")
         self.loss_fn = loss_fn
+        self.add_to_loss = add_to_loss
 
         # Store probe configuration for later initialization
         self._probe_config = probe
@@ -156,10 +158,13 @@ class OnlineProbe(TrainableCallback):
             if stage == "fit":
                 loss = callback.loss_fn(preds, y)
                 assert f"train/{callback.name}_loss" not in logs
-                if "loss" not in outputs:
-                    outputs["loss"] = 0
-                outputs["loss"] = outputs["loss"] + loss
                 logs[f"train/{callback.name}_loss"] = loss.item()
+
+                # Only add to main model loss if add_to_loss is True
+                if callback.add_to_loss:
+                    if "loss" not in outputs:
+                        outputs["loss"] = 0
+                    outputs["loss"] = outputs["loss"] + loss
 
                 my_metrics = self.callbacks_metrics[callback.name]["_train"]
                 for metric_name, metric in my_metrics.items():
