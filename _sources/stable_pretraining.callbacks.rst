@@ -148,6 +148,14 @@ stable\_pretraining.callbacks.trainer\_info module
    :show-inheritance:
    :undoc-members:
 
+stable\_pretraining.callbacks.unused\_parameters module
+-------------------------------------------------------
+
+.. automodule:: stable_pretraining.callbacks.unused_parameters
+   :members:
+   :show-inheritance:
+   :undoc-members:
+
 stable\_pretraining.callbacks.utils module
 ------------------------------------------
 

@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>stable_pretraining.callbacks.checkpoint_sklearn &#8212; stable-pretraining 0.1.dev1+geab93959d documentation</title>
+    <title>stable_pretraining.callbacks.checkpoint_sklearn &#8212; stable-pretraining 0.1.dev1+g1f4e9fd57 documentation</title>
   
   
   
@@ -39,7 +39,7 @@
 <link rel="preload" as="script" href="../../../../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
   <script src="../../../../_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
 
-    <script src="../../../../_static/documentation_options.js?v=7eeb88ae"></script>
+    <script src="../../../../_static/documentation_options.js?v=08283e98"></script>
     <script src="../../../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../../_static/scripts/sphinx-book-theme.js?v=887ef09a"></script>
@@ -135,7 +135,7 @@
   
   
   
-    <p class="title logo__title">stable-pretraining 0.1.dev1+geab93959d documentation</p>
+    <p class="title logo__title">stable-pretraining 0.1.dev1+g1f4e9fd57 documentation</p>
   
 </a></div>
         <div class="sidebar-primary-item">
@@ -655,6 +655,11 @@ document.write(`
             <span class="k">if</span> <span class="n">wandb</span><span class="o">.</span><span class="n">run</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">trainer</span><span class="o">.</span><span class="n">global_rank</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
                 <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
                     <span class="s2">&quot;Run not initialized yet, skipping since this is a slave process!&quot;</span>
+                <span class="p">)</span>
+                <span class="k">return</span>
+            <span class="k">if</span> <span class="n">wandb</span><span class="o">.</span><span class="n">run</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">wandb</span><span class="o">.</span><span class="n">run</span><span class="o">.</span><span class="n">id</span> <span class="o">==</span> <span class="n">checkpoint</span><span class="p">[</span><span class="s2">&quot;wandb&quot;</span><span class="p">][</span><span class="s2">&quot;id&quot;</span><span class="p">]:</span>
+                <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+                    <span class="s2">&quot;Run already property initialized, skipping deletion and setup!&quot;</span>
                 <span class="p">)</span>
                 <span class="k">return</span>
             <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
