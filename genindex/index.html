@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Index &#8212; stable-pretraining 0.1.dev1+g1f4e9fd57 documentation</title>
+    <title>Index &#8212; stable-pretraining 0.1.dev1+g9e5056c82 documentation</title>
   
   
   
@@ -39,7 +39,7 @@
 <link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
   <script src="../_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
 
-    <script src="../_static/documentation_options.js?v=08283e98"></script>
+    <script src="../_static/documentation_options.js?v=3c5fd455"></script>
     <script src="../_static/doctools.js?v=9bcbadda"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/scripts/sphinx-book-theme.js?v=887ef09a"></script>
@@ -135,7 +135,7 @@
   
   
   
-    <p class="title logo__title">stable-pretraining 0.1.dev1+g1f4e9fd57 documentation</p>
+    <p class="title logo__title">stable-pretraining 0.1.dev1+g9e5056c82 documentation</p>
   
 </a></div>
         <div class="sidebar-primary-item">
@@ -385,6 +385,12 @@ document.write(`
       </ul></li>
       <li><a href="../stable_pretraining.data/#stable_pretraining.data.transforms.AdditiveGaussian">AdditiveGaussian (class in stable_pretraining.data.transforms)</a>
 </li>
+      <li><a href="../stable_pretraining/#stable_pretraining.Module.after_manual_backward">after_manual_backward() (stable_pretraining.Module method)</a>
+
+      <ul>
+        <li><a href="../stable_pretraining/#stable_pretraining.module.Module.after_manual_backward">(stable_pretraining.module.Module method)</a>
+</li>
+      </ul></li>
       <li><a href="../stable_pretraining.utils/#stable_pretraining.utils.all_gather">all_gather() (in module stable_pretraining.utils)</a>
 
       <ul>
@@ -397,10 +403,10 @@ document.write(`
         <li><a href="../stable_pretraining.utils/#stable_pretraining.utils.distributed.all_reduce">(in module stable_pretraining.utils.distributed)</a>
 </li>
       </ul></li>
-      <li><a href="../stable_pretraining.utils/#stable_pretraining.utils.log_reader.alphanum_key">alphanum_key() (in module stable_pretraining.utils.log_reader)</a>
-</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="../stable_pretraining.utils/#stable_pretraining.utils.log_reader.alphanum_key">alphanum_key() (in module stable_pretraining.utils.log_reader)</a>
+</li>
       <li><a href="../stable_pretraining.utils/#stable_pretraining.utils.nn_modules.OrderedQueue.append">append() (stable_pretraining.utils.nn_modules.OrderedQueue method)</a>
 
       <ul>
@@ -453,14 +459,16 @@ document.write(`
         <li><a href="../stable_pretraining.utils/#stable_pretraining.utils.nn_modules.BatchNorm1dNoBias">(class in stable_pretraining.utils.nn_modules)</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="../stable_pretraining.utils/#stable_pretraining.utils.broadcast_param_to_list">broadcast_param_to_list() (in module stable_pretraining.utils)</a>
 
       <ul>
         <li><a href="../stable_pretraining.utils/#stable_pretraining.utils.inspection_utils.broadcast_param_to_list">(in module stable_pretraining.utils.inspection_utils)</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="../stable_pretraining.utils/#stable_pretraining.utils.flops.BudgetedFlopCounterMode">BudgetedFlopCounterMode (class in stable_pretraining.utils.flops)</a>
+</li>
       <li><a href="../api/gen_modules/stable_pretraining.data.bulk_download/#stable_pretraining.data.bulk_download">bulk_download() (in module stable_pretraining.data)</a>, <a href="../stable_pretraining.data/#stable_pretraining.data.bulk_download">[1]</a>
 
       <ul>
@@ -790,6 +798,10 @@ document.write(`
       <li><a href="../stable_pretraining.callbacks/#stable_pretraining.callbacks.queue.find_or_create_queue_callback">find_or_create_queue_callback() (in module stable_pretraining.callbacks.queue)</a>
 </li>
       <li><a href="../stable_pretraining.utils/#stable_pretraining.utils.log_reader.flatten_config">flatten_config() (in module stable_pretraining.utils.log_reader)</a>
+</li>
+      <li><a href="../stable_pretraining.utils/#stable_pretraining.utils.flops.flop_budget">flop_budget() (in module stable_pretraining.utils.flops)</a>
+</li>
+      <li><a href="../stable_pretraining.utils/#stable_pretraining.utils.flops.FLOPBudgetExceeded">FLOPBudgetExceeded</a>
 </li>
       <li><a href="../api/gen_modules/stable_pretraining.data.fold_views/#stable_pretraining.data.fold_views">fold_views() (in module stable_pretraining.data)</a>, <a href="../stable_pretraining.data/#stable_pretraining.data.fold_views">[1]</a>
 
@@ -1516,6 +1528,8 @@ document.write(`
         <li><a href="../stable_pretraining.utils/#module-stable_pretraining.utils.distributed">stable_pretraining.utils.distributed</a>
 </li>
         <li><a href="../stable_pretraining.utils/#module-stable_pretraining.utils.error_handling">stable_pretraining.utils.error_handling</a>
+</li>
+        <li><a href="../stable_pretraining.utils/#module-stable_pretraining.utils.flops">stable_pretraining.utils.flops</a>
 </li>
         <li><a href="../stable_pretraining.utils/#module-stable_pretraining.utils.gdrive_utils">stable_pretraining.utils.gdrive_utils</a>
 </li>
@@ -2424,8 +2438,6 @@ document.write(`
         <li><a href="../stable_pretraining.callbacks/#module-stable_pretraining.callbacks.teacher_student">module</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     stable_pretraining.callbacks.trainer_info
 
@@ -2433,6 +2445,8 @@ document.write(`
         <li><a href="../stable_pretraining.callbacks/#module-stable_pretraining.callbacks.trainer_info">module</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     stable_pretraining.callbacks.unused_parameters
 
@@ -2707,6 +2721,13 @@ document.write(`
 </li>
       </ul></li>
       <li>
+    stable_pretraining.utils.flops
+
+      <ul>
+        <li><a href="../stable_pretraining.utils/#module-stable_pretraining.utils.flops">module</a>
+</li>
+      </ul></li>
+      <li>
     stable_pretraining.utils.gdrive_utils
 
       <ul>
@@ -2903,6 +2924,8 @@ document.write(`
       <li><a href="../stable_pretraining.callbacks/#stable_pretraining.callbacks.earlystop.to_scalar">to_scalar() (in module stable_pretraining.callbacks.earlystop)</a>
 </li>
       <li><a href="../stable_pretraining.data/#stable_pretraining.data.transforms.ToImage">ToImage (class in stable_pretraining.data.transforms)</a>
+</li>
+      <li><a href="../stable_pretraining.utils/#stable_pretraining.utils.flops.BudgetedFlopCounterMode.total_flops">total_flops (stable_pretraining.utils.flops.BudgetedFlopCounterMode property)</a>
 </li>
       <li><a href="../api/gen_modules/stable_pretraining.backbone.EvalOnly/#stable_pretraining.backbone.EvalOnly.train">train() (stable_pretraining.backbone.EvalOnly method)</a>
 

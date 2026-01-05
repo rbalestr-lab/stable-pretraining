@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>stable_pretraining.module &#8212; stable-pretraining 0.1.dev1+g1f4e9fd57 documentation</title>
+    <title>stable_pretraining.module &#8212; stable-pretraining 0.1.dev1+g9e5056c82 documentation</title>
   
   
   
@@ -39,7 +39,7 @@
 <link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
   <script src="../../../_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
 
-    <script src="../../../_static/documentation_options.js?v=08283e98"></script>
+    <script src="../../../_static/documentation_options.js?v=3c5fd455"></script>
     <script src="../../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/scripts/sphinx-book-theme.js?v=887ef09a"></script>
@@ -135,7 +135,7 @@
   
   
   
-    <p class="title logo__title">stable-pretraining 0.1.dev1+g1f4e9fd57 documentation</p>
+    <p class="title logo__title">stable-pretraining 0.1.dev1+g9e5056c82 documentation</p>
   
 </a></div>
         <div class="sidebar-primary-item">
@@ -552,6 +552,12 @@ document.write(`
         <span class="k">return</span> <span class="n">loss</span> <span class="o">/</span> <span class="n">accum</span></div>
 
 
+<div class="viewcode-block" id="Module.after_manual_backward">
+<a class="viewcode-back" href="../../../stable_pretraining/#stable_pretraining.module.Module.after_manual_backward">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">after_manual_backward</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">pass</span></div>
+
+
 <div class="viewcode-block" id="Module.training_step">
 <a class="viewcode-back" href="../../../stable_pretraining/#stable_pretraining.module.Module.training_step">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">training_step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">batch</span><span class="p">,</span> <span class="n">batch_idx</span><span class="p">):</span>
@@ -588,6 +594,7 @@ document.write(`
 
         <span class="c1"># Compute gradients once for the joint loss</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">manual_backward</span><span class="p">(</span><span class="n">state</span><span class="p">[</span><span class="s2">&quot;loss&quot;</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">after_manual_backward</span><span class="p">()</span>
 
         <span class="n">zero_grad_opts</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="c1"># Stepping and gradient clipping at accumulation boundary</span>

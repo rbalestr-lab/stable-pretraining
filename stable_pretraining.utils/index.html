@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>stable_pretraining.utils package &#8212; stable-pretraining 0.1.dev1+g1f4e9fd57 documentation</title>
+    <title>stable_pretraining.utils package &#8212; stable-pretraining 0.1.dev1+g9e5056c82 documentation</title>
   
   
   
@@ -40,7 +40,7 @@
 <link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
   <script src="../_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
 
-    <script src="../_static/documentation_options.js?v=08283e98"></script>
+    <script src="../_static/documentation_options.js?v=3c5fd455"></script>
     <script src="../_static/doctools.js?v=9bcbadda"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/scripts/sphinx-book-theme.js?v=887ef09a"></script>
@@ -134,7 +134,7 @@
   
   
   
-    <p class="title logo__title">stable-pretraining 0.1.dev1+g1f4e9fd57 documentation</p>
+    <p class="title logo__title">stable-pretraining 0.1.dev1+g9e5056c82 documentation</p>
   
 </a></div>
         <div class="sidebar-primary-item">
@@ -433,6 +433,15 @@ document.write(`
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#stable_pretraining.utils.error_handling.get_rank"><code class="docutils literal notranslate"><span class="pre">get_rank()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#stable_pretraining.utils.error_handling.is_main_process"><code class="docutils literal notranslate"><span class="pre">is_main_process()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#stable_pretraining.utils.error_handling.with_hf_retry_ratelimit"><code class="docutils literal notranslate"><span class="pre">with_hf_retry_ratelimit()</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-stable_pretraining.utils.flops">stable_pretraining.utils.flops module</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#stable_pretraining.utils.flops.BudgetedFlopCounterMode"><code class="docutils literal notranslate"><span class="pre">BudgetedFlopCounterMode</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#stable_pretraining.utils.flops.BudgetedFlopCounterMode.total_flops"><code class="docutils literal notranslate"><span class="pre">BudgetedFlopCounterMode.total_flops</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#stable_pretraining.utils.flops.FLOPBudgetExceeded"><code class="docutils literal notranslate"><span class="pre">FLOPBudgetExceeded</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#stable_pretraining.utils.flops.flop_budget"><code class="docutils literal notranslate"><span class="pre">flop_budget()</span></code></a></li>
 </ul>
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-stable_pretraining.utils.gdrive_utils">stable_pretraining.utils.gdrive_utils module</a><ul class="nav section-nav flex-column">
@@ -1185,6 +1194,60 @@ is not provided. Defaults to 10.</p></li>
 <span class="gp">... </span><span class="p">)</span>
 </pre></div>
 </div>
+</dd></dl>
+
+</section>
+<section id="module-stable_pretraining.utils.flops">
+<span id="stable-pretraining-utils-flops-module"></span><h2>stable_pretraining.utils.flops module<a class="headerlink" href="#module-stable_pretraining.utils.flops" title="Link to this heading">#</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="stable_pretraining.utils.flops.BudgetedFlopCounterMode">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">stable_pretraining.utils.flops.</span></span><span class="sig-name descname"><span class="pre">BudgetedFlopCounterMode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">flop_counter</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">FlopCounterMode</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">budget</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/stable_pretraining/utils/flops/#BudgetedFlopCounterMode"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_pretraining.utils.flops.BudgetedFlopCounterMode" title="Link to this definition">#</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">TorchDispatchMode</span></code></p>
+<p>FLOP counter with budget enforcement using composition.</p>
+<p>Wraps FlopCounterMode for counting, adds budget checking.</p>
+<dl class="py property">
+<dt class="sig sig-object py" id="stable_pretraining.utils.flops.BudgetedFlopCounterMode.total_flops">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">total_flops</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></em><a class="headerlink" href="#stable_pretraining.utils.flops.BudgetedFlopCounterMode.total_flops" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py exception">
+<dt class="sig sig-object py" id="stable_pretraining.utils.flops.FLOPBudgetExceeded">
+<em class="property"><span class="k"><span class="pre">exception</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">stable_pretraining.utils.flops.</span></span><span class="sig-name descname"><span class="pre">FLOPBudgetExceeded</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">budget</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">current</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">operation</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/stable_pretraining/utils/flops/#FLOPBudgetExceeded"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_pretraining.utils.flops.FLOPBudgetExceeded" title="Link to this definition">#</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/exceptions.html#Exception" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Exception</span></code></a></p>
+<p>Exception raised when FLOP budget is exceeded.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="stable_pretraining.utils.flops.flop_budget">
+<span class="sig-prename descclassname"><span class="pre">stable_pretraining.utils.flops.</span></span><span class="sig-name descname"><span class="pre">flop_budget</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">budget</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">display</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/stable_pretraining/utils/flops/#flop_budget"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_pretraining.utils.flops.flop_budget" title="Link to this definition">#</a></dt>
+<dd><p>Context manager that counts FLOPs and raises when budget is exceeded.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>budget</strong> – Maximum number of FLOPs allowed</p></li>
+<li><p><strong>display</strong> – Whether to print FLOP breakdown on exit</p></li>
+</ul>
+</dd>
+<dt class="field-even">Yields<span class="colon">:</span></dt>
+<dd class="field-even"><p>Counter object with .total_flops property</p>
+</dd>
+</dl>
+<p class="rubric">Example</p>
+<dl class="simple">
+<dt>try:</dt><dd><dl class="simple">
+<dt>with flop_budget(1e9) as counter:</dt><dd><dl class="simple">
+<dt>for i in range(1000):</dt><dd><p>out = model(x)
+print(f”FLOPs so far: {counter.total_flops:,}”)</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd>
+<dt>except FLOPBudgetExceeded as e:</dt><dd><p>print(f”Stopped at {e.current:,} FLOPs”)</p>
+</dd>
+</dl>
 </dd></dl>
 
 </section>
@@ -3317,6 +3380,15 @@ is not provided. Defaults to 10.</p></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#stable_pretraining.utils.error_handling.get_rank"><code class="docutils literal notranslate"><span class="pre">get_rank()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#stable_pretraining.utils.error_handling.is_main_process"><code class="docutils literal notranslate"><span class="pre">is_main_process()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#stable_pretraining.utils.error_handling.with_hf_retry_ratelimit"><code class="docutils literal notranslate"><span class="pre">with_hf_retry_ratelimit()</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-stable_pretraining.utils.flops">stable_pretraining.utils.flops module</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#stable_pretraining.utils.flops.BudgetedFlopCounterMode"><code class="docutils literal notranslate"><span class="pre">BudgetedFlopCounterMode</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#stable_pretraining.utils.flops.BudgetedFlopCounterMode.total_flops"><code class="docutils literal notranslate"><span class="pre">BudgetedFlopCounterMode.total_flops</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#stable_pretraining.utils.flops.FLOPBudgetExceeded"><code class="docutils literal notranslate"><span class="pre">FLOPBudgetExceeded</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#stable_pretraining.utils.flops.flop_budget"><code class="docutils literal notranslate"><span class="pre">flop_budget()</span></code></a></li>
 </ul>
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-stable_pretraining.utils.gdrive_utils">stable_pretraining.utils.gdrive_utils module</a><ul class="nav section-nav flex-column">

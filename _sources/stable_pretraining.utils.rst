@@ -52,6 +52,14 @@ stable\_pretraining.utils.error\_handling module
    :show-inheritance:
    :undoc-members:
 
+stable\_pretraining.utils.flops module
+--------------------------------------
+
+.. automodule:: stable_pretraining.utils.flops
+   :members:
+   :show-inheritance:
+   :undoc-members:
+
 stable\_pretraining.utils.gdrive\_utils module
 ----------------------------------------------
 
