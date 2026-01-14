@@ -36,6 +36,14 @@ stable\_pretraining.backbone.mlp module
    :show-inheritance:
    :undoc-members:
 
+stable\_pretraining.backbone.pos\_embed module
+----------------------------------------------
+
+.. automodule:: stable_pretraining.backbone.pos_embed
+   :members:
+   :show-inheritance:
+   :undoc-members:
+
 stable\_pretraining.backbone.probe module
 -----------------------------------------
 

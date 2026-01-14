@@ -108,6 +108,14 @@ stable\_pretraining.utils.read\_csv\_logger module
    :show-inheritance:
    :undoc-members:
 
+stable\_pretraining.utils.stats module
+--------------------------------------
+
+.. automodule:: stable_pretraining.utils.stats
+   :members:
+   :show-inheritance:
+   :undoc-members:
+
 stable\_pretraining.utils.timm\_to\_hf\_hub module
 --------------------------------------------------
 

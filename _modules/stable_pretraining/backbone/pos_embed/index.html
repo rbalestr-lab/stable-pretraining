@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>stable_pretraining.data.collate &#8212; stable-pretraining 0.1.dev1+g6d09f6bdd documentation</title>
+    <title>stable_pretraining.backbone.pos_embed &#8212; stable-pretraining 0.1.dev1+g6d09f6bdd documentation</title>
   
   
   
@@ -43,7 +43,7 @@
     <script src="../../../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../../_static/scripts/sphinx-book-theme.js?v=887ef09a"></script>
-    <script>DOCUMENTATION_OPTIONS.pagename = '_modules/stable_pretraining/data/collate';</script>
+    <script>DOCUMENTATION_OPTIONS.pagename = '_modules/stable_pretraining/backbone/pos_embed';</script>
     <link rel="index" title="Index" href="../../../../genindex/" />
     <link rel="search" title="Search" href="../../../../search/" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
@@ -341,110 +341,100 @@ document.write(`
 <div id="searchbox"></div>
                 <article class="bd-article">
                   
-  <h1>Source code for stable_pretraining.data.collate</h1><div class="highlight"><pre>
-<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+  <h1>Source code for stable_pretraining.backbone.pos_embed</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Positional embedding utilities for vision transformers.&quot;&quot;&quot;</span>
+
 <span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Literal</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;get_sincos_pos_embed&quot;</span><span class="p">,</span> <span class="s2">&quot;get_1d_sincos_pos_embed&quot;</span><span class="p">,</span> <span class="s2">&quot;get_2d_sincos_pos_embed&quot;</span><span class="p">]</span>
 
 
-<span class="k">def</span><span class="w"> </span><span class="nf">_collapse_nested_dict</span><span class="p">(</span><span class="n">base</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
-    <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">base</span><span class="p">)</span> <span class="ow">in</span> <span class="p">[</span><span class="nb">list</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">]:</span>
-        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">base</span><span class="p">)):</span>
-            <span class="n">base</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">_collapse_nested_dict</span><span class="p">(</span><span class="n">base</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">other</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
-        <span class="k">return</span> <span class="n">base</span>
-    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">base</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
-        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">base</span><span class="p">:</span>
-            <span class="n">base</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">_collapse_nested_dict</span><span class="p">(</span><span class="n">base</span><span class="p">[</span><span class="n">key</span><span class="p">],</span> <span class="n">other</span><span class="p">[</span><span class="n">key</span><span class="p">])</span>
-        <span class="k">return</span> <span class="n">base</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="n">base</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">cat</span><span class="p">([</span><span class="n">base</span><span class="p">,</span> <span class="n">other</span><span class="p">],</span> <span class="mi">0</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">base</span>
+<div class="viewcode-block" id="get_1d_sincos_pos_embed">
+<a class="viewcode-back" href="../../../../stable_pretraining.backbone/#stable_pretraining.backbone.pos_embed.get_1d_sincos_pos_embed">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_1d_sincos_pos_embed</span><span class="p">(</span>
+    <span class="n">embed_dim</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">cls_token</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;1D sinusoidal positional embeddings.</span>
+
+<span class="sd">    :param embed_dim: Embedding dimension</span>
+<span class="sd">    :param length: Sequence length</span>
+<span class="sd">    :param cls_token: Prepend a zero embedding for CLS token</span>
+<span class="sd">    :return: Shape (length, embed_dim) or (length+1, embed_dim) if cls_token</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">pos</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">length</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">dim</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">embed_dim</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+    <span class="n">inv_freq</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="p">(</span><span class="mi">10000</span> <span class="o">**</span> <span class="p">(</span><span class="n">dim</span> <span class="o">/</span> <span class="n">embed_dim</span><span class="p">))</span>
+
+    <span class="n">pe</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">length</span><span class="p">,</span> <span class="n">embed_dim</span><span class="p">)</span>
+    <span class="n">pe</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">::</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">pos</span> <span class="o">*</span> <span class="n">inv_freq</span><span class="p">)</span>
+    <span class="n">pe</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">::</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">pos</span> <span class="o">*</span> <span class="n">inv_freq</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">cls_token</span><span class="p">:</span>
+        <span class="n">pe</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">cat</span><span class="p">([</span><span class="n">torch</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">embed_dim</span><span class="p">),</span> <span class="n">pe</span><span class="p">],</span> <span class="n">dim</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">pe</span></div>
 
 
-<div class="viewcode-block" id="Collator">
-<a class="viewcode-back" href="../../../../stable_pretraining.data/#stable_pretraining.data.Collator">[docs]</a>
-<span class="k">class</span><span class="w"> </span><span class="nc">Collator</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Custom collate function that optionally builds an affinity (or “graph”) matrix based on a specified field.&quot;&quot;&quot;</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">G_from</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">G_from</span> <span class="o">=</span> <span class="n">G_from</span>
+<div class="viewcode-block" id="get_2d_sincos_pos_embed">
+<a class="viewcode-back" href="../../../../stable_pretraining.backbone/#stable_pretraining.backbone.pos_embed.get_2d_sincos_pos_embed">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_2d_sincos_pos_embed</span><span class="p">(</span>
+    <span class="n">embed_dim</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">grid_size</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">cls_token</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;2D sinusoidal positional embeddings for image patches (used by MAE encoder).</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">_flatten</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
-        <span class="n">batch</span> <span class="o">=</span> <span class="p">{}</span>
-        <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
-            <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="n">name</span><span class="p">])</span> <span class="ow">is</span> <span class="nb">list</span><span class="p">:</span>
-                <span class="n">flattened</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">([</span><span class="n">s</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">x</span><span class="p">],</span> <span class="p">[])</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="n">flattened</span> <span class="o">=</span> <span class="p">[</span><span class="n">s</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">x</span><span class="p">]</span>
-            <span class="k">if</span> <span class="n">torch</span><span class="o">.</span><span class="n">is_tensor</span><span class="p">(</span><span class="n">flattened</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
-                <span class="n">batch</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span><span class="n">flattened</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
-            <span class="k">elif</span> <span class="nb">type</span><span class="p">(</span><span class="n">flattened</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="ow">is</span> <span class="nb">dict</span><span class="p">:</span>
-                <span class="n">batch</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_flatten</span><span class="p">(</span><span class="n">flattened</span><span class="p">)</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="n">batch</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">from_numpy</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">flattened</span><span class="p">))</span>
-        <span class="k">return</span> <span class="n">batch</span>
+<span class="sd">    :param embed_dim: Embedding dimension (must be divisible by 4)</span>
+<span class="sd">    :param grid_size: Grid height/width (assumes square)</span>
+<span class="sd">    :param cls_token: Prepend a zero embedding for CLS token</span>
+<span class="sd">    :return: Shape (grid_size^2, embed_dim) or (grid_size^2+1, embed_dim)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">assert</span> <span class="n">embed_dim</span> <span class="o">%</span> <span class="mi">4</span> <span class="o">==</span> <span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;embed_dim must be divisible by 4&quot;</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">samples</span><span class="p">):</span>
-        <span class="n">single_view</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">is_tensor</span><span class="p">(</span><span class="n">samples</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s2">&quot;image&quot;</span><span class="p">])</span>
-        <span class="k">if</span> <span class="n">single_view</span><span class="p">:</span>
-            <span class="n">samples</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">default_collate</span><span class="p">(</span><span class="n">samples</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">samples</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_flatten</span><span class="p">(</span><span class="n">samples</span><span class="p">)</span>
+    <span class="n">grid_h</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">grid_size</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+    <span class="n">grid_w</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">grid_size</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+    <span class="n">grid</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">meshgrid</span><span class="p">(</span><span class="n">grid_h</span><span class="p">,</span> <span class="n">grid_w</span><span class="p">,</span> <span class="n">indexing</span><span class="o">=</span><span class="s2">&quot;ij&quot;</span><span class="p">)</span>
+    <span class="n">grid</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span><span class="n">grid</span><span class="p">,</span> <span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>  <span class="c1"># (H*W, 2)</span>
 
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">G_from</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">t</span> <span class="o">=</span> <span class="n">samples</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">G_from</span><span class="p">]</span>
-            <span class="k">if</span> <span class="n">t</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">and</span> <span class="n">t</span><span class="o">.</span><span class="n">dtype</span> <span class="ow">in</span> <span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">long</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">int</span><span class="p">]:</span>
-                <span class="n">G</span> <span class="o">=</span> <span class="p">(</span><span class="n">t</span><span class="p">[:,</span> <span class="kc">None</span><span class="p">]</span><span class="o">.</span><span class="n">eq</span><span class="p">(</span><span class="n">t</span><span class="p">))</span><span class="o">.</span><span class="n">to</span><span class="p">(</span>
-                    <span class="n">device</span><span class="o">=</span><span class="n">samples</span><span class="p">[</span><span class="s2">&quot;image&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">device</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">samples</span><span class="p">[</span><span class="s2">&quot;image&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">dtype</span>
-                <span class="p">)</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="n">G</span> <span class="o">=</span> <span class="n">t</span><span class="o">.</span><span class="n">flatten</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="o">@</span> <span class="n">t</span><span class="o">.</span><span class="n">flatten</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
-            <span class="n">samples</span><span class="p">[</span><span class="s2">&quot;G&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">G</span>
-        <span class="k">return</span> <span class="n">samples</span>
+    <span class="n">dim</span> <span class="o">=</span> <span class="n">embed_dim</span> <span class="o">//</span> <span class="mi">4</span>
+    <span class="n">omega</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">dim</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span> <span class="o">/</span> <span class="n">dim</span>
+    <span class="n">omega</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="p">(</span><span class="mi">10000</span><span class="o">**</span><span class="n">omega</span><span class="p">)</span>  <span class="c1"># (D/4,)</span>
 
-    <span class="nd">@staticmethod</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">_test</span><span class="p">():</span>
-        <span class="n">indices</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">randperm</span><span class="p">(</span><span class="mi">50000</span><span class="p">)[:</span><span class="mi">128</span><span class="p">]</span>
-        <span class="n">images</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">randn</span><span class="p">((</span><span class="mi">128</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">28</span><span class="p">,</span> <span class="mi">28</span><span class="p">))</span>
-        <span class="n">labels</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="mi">128</span><span class="p">,))</span>
-        <span class="c1"># single view</span>
-        <span class="n">data</span> <span class="o">=</span> <span class="p">[</span>
-            <span class="nb">dict</span><span class="p">(</span>
-                <span class="n">image</span><span class="o">=</span><span class="n">images</span><span class="p">[</span><span class="n">i</span><span class="p">],</span>
-                <span class="n">label</span><span class="o">=</span><span class="n">labels</span><span class="p">[</span><span class="n">i</span><span class="p">],</span>
-                <span class="n">idx</span><span class="o">=</span><span class="n">indices</span><span class="p">[</span><span class="n">i</span><span class="p">],</span>
-            <span class="p">)</span>
-            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">128</span><span class="p">)</span>
-        <span class="p">]</span>
-        <span class="n">collator</span> <span class="o">=</span> <span class="n">Collator</span><span class="p">(</span><span class="n">G_from</span><span class="o">=</span><span class="s2">&quot;label&quot;</span><span class="p">)</span>
-        <span class="n">collected</span> <span class="o">=</span> <span class="n">collator</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
-        <span class="k">assert</span> <span class="n">collected</span><span class="p">[</span><span class="s2">&quot;image&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">eq</span><span class="p">(</span><span class="n">images</span><span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
-        <span class="k">assert</span> <span class="n">collected</span><span class="p">[</span><span class="s2">&quot;label&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">eq</span><span class="p">(</span><span class="n">labels</span><span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
-        <span class="k">assert</span> <span class="n">collected</span><span class="p">[</span><span class="s2">&quot;idx&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">eq</span><span class="p">(</span><span class="n">indices</span><span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
-        <span class="k">assert</span> <span class="n">collected</span><span class="p">[</span><span class="s2">&quot;G&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">eq</span><span class="p">(</span><span class="n">labels</span><span class="p">[:,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">==</span> <span class="n">labels</span><span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
+    <span class="c1"># (H*W, 1) @ (1, D/4) -&gt; (H*W, D/4)</span>
+    <span class="n">out_h</span> <span class="o">=</span> <span class="n">grid</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">:</span><span class="mi">1</span><span class="p">]</span> <span class="o">@</span> <span class="n">omega</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">out_w</span> <span class="o">=</span> <span class="n">grid</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">:</span><span class="mi">2</span><span class="p">]</span> <span class="o">@</span> <span class="n">omega</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
 
-        <span class="n">collator</span> <span class="o">=</span> <span class="n">Collator</span><span class="p">(</span><span class="n">G_from</span><span class="o">=</span><span class="s2">&quot;idx&quot;</span><span class="p">)</span>
-        <span class="n">collected</span> <span class="o">=</span> <span class="n">collator</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
-        <span class="k">assert</span> <span class="n">collected</span><span class="p">[</span><span class="s2">&quot;G&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">eq</span><span class="p">(</span><span class="n">indices</span><span class="p">[:,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">==</span> <span class="n">indices</span><span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
+    <span class="n">pe</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">cat</span><span class="p">(</span>
+        <span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">out_h</span><span class="p">),</span> <span class="n">torch</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">out_h</span><span class="p">),</span> <span class="n">torch</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">out_w</span><span class="p">),</span> <span class="n">torch</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">out_w</span><span class="p">)],</span> <span class="n">dim</span><span class="o">=</span><span class="mi">1</span>
+    <span class="p">)</span>
 
-        <span class="c1"># multi-view</span>
-        <span class="n">data</span> <span class="o">=</span> <span class="p">[</span>
-            <span class="nb">dict</span><span class="p">(</span>
-                <span class="n">image</span><span class="o">=</span><span class="p">[</span><span class="n">images</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">+</span> <span class="n">torch</span><span class="o">.</span><span class="n">randn</span><span class="p">((</span><span class="mi">3</span><span class="p">,</span> <span class="mi">28</span><span class="p">,</span> <span class="mi">28</span><span class="p">))</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">2</span><span class="p">)],</span>
-                <span class="n">label</span><span class="o">=</span><span class="p">[</span><span class="n">labels</span><span class="p">[</span><span class="n">i</span><span class="p">]]</span> <span class="o">*</span> <span class="mi">2</span><span class="p">,</span>
-                <span class="n">idx</span><span class="o">=</span><span class="p">[</span><span class="n">indices</span><span class="p">[</span><span class="n">i</span><span class="p">]]</span> <span class="o">*</span> <span class="mi">2</span><span class="p">,</span>
-            <span class="p">)</span>
-            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">128</span><span class="p">)</span>
-        <span class="p">]</span>
-        <span class="n">indices</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">repeat_interleave</span><span class="p">(</span><span class="n">indices</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
-        <span class="n">labels</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">repeat_interleave</span><span class="p">(</span><span class="n">labels</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
-        <span class="n">collator</span> <span class="o">=</span> <span class="n">Collator</span><span class="p">(</span><span class="n">G_from</span><span class="o">=</span><span class="s2">&quot;label&quot;</span><span class="p">)</span>
-        <span class="n">collected</span> <span class="o">=</span> <span class="n">collator</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
-        <span class="k">assert</span> <span class="n">collected</span><span class="p">[</span><span class="s2">&quot;G&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">eq</span><span class="p">(</span><span class="n">labels</span><span class="p">[:,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">==</span> <span class="n">labels</span><span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">cls_token</span><span class="p">:</span>
+        <span class="n">pe</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">cat</span><span class="p">([</span><span class="n">torch</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">embed_dim</span><span class="p">),</span> <span class="n">pe</span><span class="p">],</span> <span class="n">dim</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">pe</span></div>
 
-        <span class="n">collator</span> <span class="o">=</span> <span class="n">Collator</span><span class="p">(</span><span class="n">G_from</span><span class="o">=</span><span class="s2">&quot;idx&quot;</span><span class="p">)</span>
-        <span class="n">collected</span> <span class="o">=</span> <span class="n">collator</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
-        <span class="k">assert</span> <span class="n">collected</span><span class="p">[</span><span class="s2">&quot;G&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">eq</span><span class="p">(</span><span class="n">indices</span><span class="p">[:,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">==</span> <span class="n">indices</span><span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
-        <span class="k">return</span> <span class="kc">True</span></div>
+
+
+<div class="viewcode-block" id="get_sincos_pos_embed">
+<a class="viewcode-back" href="../../../../stable_pretraining.backbone/#stable_pretraining.backbone.pos_embed.get_sincos_pos_embed">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_sincos_pos_embed</span><span class="p">(</span>
+    <span class="n">embed_dim</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="n">num_patches</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="n">mode</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;1d&quot;</span><span class="p">,</span> <span class="s2">&quot;2d&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;1d&quot;</span><span class="p">,</span>
+    <span class="n">grid_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">cls_token</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Unified interface for sinusoidal positional embeddings.</span>
+
+<span class="sd">    :param embed_dim: Embedding dimension</span>
+<span class="sd">    :param num_patches: Total number of patches (used for 1d)</span>
+<span class="sd">    :param mode: &#39;1d&#39; or &#39;2d&#39;</span>
+<span class="sd">    :param grid_size: Required for &#39;2d&#39; mode</span>
+<span class="sd">    :param cls_token: Prepend CLS token position</span>
+<span class="sd">    :return: Positional embeddings tensor</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="s2">&quot;2d&quot;</span><span class="p">:</span>
+        <span class="k">assert</span> <span class="n">grid_size</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">,</span> <span class="s2">&quot;grid_size required for 2d mode&quot;</span>
+        <span class="k">return</span> <span class="n">get_2d_sincos_pos_embed</span><span class="p">(</span><span class="n">embed_dim</span><span class="p">,</span> <span class="n">grid_size</span><span class="p">,</span> <span class="n">cls_token</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">get_1d_sincos_pos_embed</span><span class="p">(</span><span class="n">embed_dim</span><span class="p">,</span> <span class="n">num_patches</span><span class="p">,</span> <span class="n">cls_token</span><span class="p">)</span></div>
 
 </pre></div>
 

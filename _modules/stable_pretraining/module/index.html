@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>stable_pretraining.module &#8212; stable-pretraining 0.1.dev1+g9e5056c82 documentation</title>
+    <title>stable_pretraining.module &#8212; stable-pretraining 0.1.dev1+g6d09f6bdd documentation</title>
   
   
   
@@ -39,7 +39,7 @@
 <link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
   <script src="../../../_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
 
-    <script src="../../../_static/documentation_options.js?v=3c5fd455"></script>
+    <script src="../../../_static/documentation_options.js?v=5e8bbf8f"></script>
     <script src="../../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/scripts/sphinx-book-theme.js?v=887ef09a"></script>
@@ -135,7 +135,7 @@
   
   
   
-    <p class="title logo__title">stable-pretraining 0.1.dev1+g9e5056c82 documentation</p>
+    <p class="title logo__title">stable-pretraining 0.1.dev1+g6d09f6bdd documentation</p>
   
 </a></div>
         <div class="sidebar-primary-item">
@@ -569,6 +569,7 @@ document.write(`
 <span class="sd">        When multiple optimizers are configured, the same loss is used for all of them.</span>
 <span class="sd">        Each optimizer updates its assigned parameters based on gradients from this joint loss.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">batch</span><span class="p">[</span><span class="s2">&quot;batch_idx&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">batch_idx</span>
         <span class="n">state</span> <span class="o">=</span> <span class="bp">self</span><span class="p">(</span><span class="n">batch</span><span class="p">,</span> <span class="n">stage</span><span class="o">=</span><span class="s2">&quot;fit&quot;</span><span class="p">)</span>
 
         <span class="c1"># Resolve optimizers and schedulers (can be single or list)</span>
@@ -688,18 +689,21 @@ document.write(`
 <div class="viewcode-block" id="Module.validation_step">
 <a class="viewcode-back" href="../../../stable_pretraining/#stable_pretraining.module.Module.validation_step">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">validation_step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">batch</span><span class="p">,</span> <span class="n">batch_idx</span><span class="p">):</span>
+        <span class="n">batch</span><span class="p">[</span><span class="s2">&quot;batch_idx&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">batch_idx</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">forward</span><span class="p">(</span><span class="n">batch</span><span class="p">,</span> <span class="n">stage</span><span class="o">=</span><span class="s2">&quot;validate&quot;</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="Module.test_step">
 <a class="viewcode-back" href="../../../stable_pretraining/#stable_pretraining.module.Module.test_step">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">test_step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">batch</span><span class="p">,</span> <span class="n">batch_idx</span><span class="p">):</span>
+        <span class="n">batch</span><span class="p">[</span><span class="s2">&quot;batch_idx&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">batch_idx</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">forward</span><span class="p">(</span><span class="n">batch</span><span class="p">,</span> <span class="n">stage</span><span class="o">=</span><span class="s2">&quot;test&quot;</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="Module.predict_step">
 <a class="viewcode-back" href="../../../stable_pretraining/#stable_pretraining.module.Module.predict_step">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">predict_step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">batch</span><span class="p">,</span> <span class="n">batch_idx</span><span class="p">):</span>
+        <span class="n">batch</span><span class="p">[</span><span class="s2">&quot;batch_idx&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">batch_idx</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">forward</span><span class="p">(</span><span class="n">batch</span><span class="p">,</span> <span class="n">stage</span><span class="o">=</span><span class="s2">&quot;predict&quot;</span><span class="p">)</span></div>
 
 
