@@ -92,6 +92,14 @@ stable\_pretraining.utils.log\_reader module
    :show-inheritance:
    :undoc-members:
 
+stable\_pretraining.utils.mae\_loss module
+------------------------------------------
+
+.. automodule:: stable_pretraining.utils.mae_loss
+   :members:
+   :show-inheritance:
+   :undoc-members:
+
 stable\_pretraining.utils.nn\_modules module
 --------------------------------------------
 

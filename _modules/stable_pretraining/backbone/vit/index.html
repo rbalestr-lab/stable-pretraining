@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>stable_pretraining.backbone.vit &#8212; stable-pretraining 0.1.dev1+g6d09f6bdd documentation</title>
+    <title>stable_pretraining.backbone.vit &#8212; stable-pretraining 0.1.dev1+g4557ee0f9 documentation</title>
   
   
   
@@ -39,7 +39,7 @@
 <link rel="preload" as="script" href="../../../../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
   <script src="../../../../_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
 
-    <script src="../../../../_static/documentation_options.js?v=5e8bbf8f"></script>
+    <script src="../../../../_static/documentation_options.js?v=7a2a2cdd"></script>
     <script src="../../../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../../_static/scripts/sphinx-book-theme.js?v=887ef09a"></script>
@@ -135,7 +135,7 @@
   
   
   
-    <p class="title logo__title">stable-pretraining 0.1.dev1+g6d09f6bdd documentation</p>
+    <p class="title logo__title">stable-pretraining 0.1.dev1+g4557ee0f9 documentation</p>
   
 </a></div>
         <div class="sidebar-primary-item">
@@ -359,29 +359,28 @@ document.write(`
 <span class="k">class</span><span class="w"> </span><span class="nc">MAEDecoder</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;MAE-style ViT Decoder.</span>
 
-<span class="sd">    Takes encoded visible tokens (N, T&#39;, D) and mask (N, T) with 0=kept, 1=masked,</span>
-<span class="sd">    returns full reconstructed sequence (N, T, D).</span>
-
-<span class="sd">    :param embed_dim: Encoder embedding dimension (input/output D)</span>
-<span class="sd">    :param decoder_embed_dim: Internal decoder dimension (default: 512)</span>
+<span class="sd">    :param embed_dim: Encoder embedding dimension (input D)</span>
+<span class="sd">    :param decoder_embed_dim: Internal decoder dimension</span>
+<span class="sd">    :param output_dim: Output dimension (e.g., patch_size² × in_chans for pixels)</span>
 <span class="sd">    :param num_patches: Total sequence length T</span>
-<span class="sd">    :param depth: Number of transformer blocks (default: 8)</span>
-<span class="sd">    :param num_heads: Attention heads (default: 16)</span>
-<span class="sd">    :param mlp_ratio: MLP expansion ratio (default: 4.0)</span>
-<span class="sd">    :param pos_embed_type: &#39;sincos_1d&#39; (MAE default), &#39;sincos_2d&#39;, or &#39;learned&#39;</span>
-<span class="sd">    :param grid_size: Grid size for 2D pos embed</span>
-<span class="sd">    :param kwargs: Additional args passed to timm.Block (qkv_bias, drop, attn_drop, drop_path, etc.)</span>
+<span class="sd">    :param depth: Number of transformer blocks</span>
+<span class="sd">    :param num_heads: Attention heads</span>
+<span class="sd">    :param mlp_ratio: MLP expansion ratio</span>
+<span class="sd">    :param pos_embed_type: &#39;sincos_1d&#39;, &#39;sincos_2d&#39;, or &#39;learned&#39;</span>
+<span class="sd">    :param grid_size: Grid size for 2D pos embed (auto-inferred if None)</span>
+<span class="sd">    :param kwargs: Additional args passed to timm.Block</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">embed_dim</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">768</span><span class="p">,</span>
         <span class="n">decoder_embed_dim</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">512</span><span class="p">,</span>
+        <span class="n">output_dim</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">768</span><span class="p">,</span>
         <span class="n">num_patches</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">196</span><span class="p">,</span>
-        <span class="n">depth</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">8</span><span class="p">,</span>
+        <span class="n">depth</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">4</span><span class="p">,</span>
         <span class="n">num_heads</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">16</span><span class="p">,</span>
         <span class="n">mlp_ratio</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">4.0</span><span class="p">,</span>
-        <span class="n">pos_embed_type</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;sincos_1d&quot;</span><span class="p">,</span> <span class="s2">&quot;sincos_2d&quot;</span><span class="p">,</span> <span class="s2">&quot;learned&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;sincos_1d&quot;</span><span class="p">,</span>
+        <span class="n">pos_embed_type</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;sincos_1d&quot;</span><span class="p">,</span> <span class="s2">&quot;sincos_2d&quot;</span><span class="p">,</span> <span class="s2">&quot;learned&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;sincos_2d&quot;</span><span class="p">,</span>
         <span class="n">grid_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
     <span class="p">):</span>
@@ -390,11 +389,18 @@ document.write(`
 
         <span class="c1"># Projection layers</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">decoder_embed</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="n">embed_dim</span><span class="p">,</span> <span class="n">decoder_embed_dim</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">decoder_pred</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="n">decoder_embed_dim</span><span class="p">,</span> <span class="n">embed_dim</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">decoder_pred</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="n">decoder_embed_dim</span><span class="p">,</span> <span class="n">output_dim</span><span class="p">)</span>
 
         <span class="c1"># Learnable mask token</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">mask_token</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Parameter</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">decoder_embed_dim</span><span class="p">))</span>
         <span class="n">trunc_normal_</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mask_token</span><span class="p">,</span> <span class="n">std</span><span class="o">=</span><span class="mf">0.02</span><span class="p">)</span>
+
+        <span class="c1"># Auto-infer grid_size if not provided</span>
+        <span class="k">if</span> <span class="n">pos_embed_type</span> <span class="o">==</span> <span class="s2">&quot;sincos_2d&quot;</span> <span class="ow">and</span> <span class="n">grid_size</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">grid_size</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">num_patches</span><span class="o">**</span><span class="mf">0.5</span><span class="p">)</span>
+            <span class="k">assert</span> <span class="n">grid_size</span><span class="o">**</span><span class="mi">2</span> <span class="o">==</span> <span class="n">num_patches</span><span class="p">,</span> <span class="p">(</span>
+                <span class="s2">&quot;num_patches must be a perfect square for 2D pos embed&quot;</span>
+            <span class="p">)</span>
 
         <span class="c1"># Positional embeddings</span>
         <span class="k">if</span> <span class="n">pos_embed_type</span> <span class="o">==</span> <span class="s2">&quot;learned&quot;</span><span class="p">:</span>
