@@ -1,11 +1,11 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from typing import Optional, Tuple, Literal, Union
+from typing import Optional, Tuple, Literal, Union, Type
 import timm
 from timm.models.vision_transformer import Block
 from timm.layers import trunc_normal_, Mlp
-from spt.backbone.patch_masking import PatchMasking
+from .patch_masking import PatchMasking
 from dataclasses import dataclass
 from .pos_embed import (
     get_sincos_pos_embed,
@@ -19,10 +19,74 @@ __all__ = [
     "MAEDecoder",
     "TransformerPredictor",
     "AdaLNDecoderBlock",
-    "FlowMatchingDecoder",
     "MaskedEncoder",
     "MaskedEncoderOutput",
+    "AdaLNCrossAttentionBlock",
+    "CrossAttentionBlock",
+    "CrossAttentionDecoder",
 ]
+
+
+class CrossAttentionBlock(nn.Module):
+    """Pure cross-attention block (no self-attention among queries).
+
+    Faster than full decoder block when queries don't need to interact.
+    """
+
+    def __init__(self, dim: int, num_heads: int, mlp_ratio: float = 4.0):
+        super().__init__()
+        self.norm1 = nn.LayerNorm(dim)
+        self.norm1_ctx = nn.LayerNorm(dim)
+        self.cross_attn = nn.MultiheadAttention(dim, num_heads, batch_first=True)
+        self.norm2 = nn.LayerNorm(dim)
+        self.mlp = nn.Sequential(
+            nn.Linear(dim, int(dim * mlp_ratio)),
+            nn.GELU(),
+            nn.Linear(int(dim * mlp_ratio), dim),
+        )
+
+    def forward(self, x: torch.Tensor, context: torch.Tensor) -> torch.Tensor:
+        x = x + self.cross_attn(self.norm1(x), self.norm1_ctx(context), context)[0]
+        x = x + self.mlp(self.norm2(x))
+        return x
+
+
+class AdaLNCrossAttentionBlock(nn.Module):
+    """Pure cross-attention with AdaLN (no self-attention)."""
+
+    def __init__(self, dim: int, num_heads: int, mlp_ratio: float = 4.0):
+        super().__init__()
+        self.norm1_q = nn.LayerNorm(dim, elementwise_affine=False)
+        self.norm1_kv = nn.LayerNorm(dim, elementwise_affine=False)
+        self.cross_attn = nn.MultiheadAttention(dim, num_heads, batch_first=True)
+
+        self.norm2 = nn.LayerNorm(dim, elementwise_affine=False)
+        self.mlp = nn.Sequential(
+            nn.Linear(dim, int(dim * mlp_ratio)),
+            nn.GELU(),
+            nn.Linear(int(dim * mlp_ratio), dim),
+        )
+
+        # AdaLN: (γ1, β1, α1, γ2, β2, α2)
+        self.adaln = nn.Sequential(nn.SiLU(), nn.Linear(dim, 6 * dim))
+        nn.init.zeros_(self.adaln[1].weight)
+        nn.init.zeros_(self.adaln[1].bias)
+
+    def forward(
+        self, x: torch.Tensor, context: torch.Tensor, cond: torch.Tensor
+    ) -> torch.Tensor:
+        assert cond is not None
+        γ1, β1, α1, γ2, β2, α2 = [
+            m.unsqueeze(1) for m in self.adaln(cond).chunk(6, dim=-1)
+        ]
+
+        h = self.norm1_q(x) * (1 + γ1) + β1
+        kv = self.norm1_kv(context)
+        x = x + α1 * self.cross_attn(h, kv, kv, need_weights=False)[0]
+
+        h = self.norm2(x) * (1 + γ2) + β2
+        x = x + α2 * self.mlp(h)
+        return x
 
 
 @dataclass
@@ -286,94 +350,114 @@ class AdaLNDecoderBlock(nn.Module):
         return x
 
 
-class FlowMatchingDecoder(nn.Module):
-    """Cross-attention decoder with optional flow matching time conditioning.
+class CrossAttentionDecoder(nn.Module):
+    """Cross-attention decoder with pluggable block type.
 
-    :param embed_dim: Encoder embedding dimension (input)
-    :param decoder_embed_dim: Internal decoder dimension
+    :param input_dim: Input dimension
+    :param hidden_dim: Internal dimension
     :param output_dim: Output dimension
-    :param num_patches: Total sequence length (for positional embeddings)
-    :param depth: Number of transformer blocks
+    :param num_patches: Total patches (for pos embed)
+    :param depth: Number of blocks
     :param num_heads: Attention heads
-    :param mlp_ratio: MLP expansion ratio
-    :param use_adaln: Use AdaLN conditioning (requires t in forward)
+    :param mlp_ratio: MLP expansion
+    :param block_class: Block class to use (e.g., CrossAttentionBlock, AdaLNCrossAttentionBlock)
     :param pos_embed_type: 'sincos_1d', 'sincos_2d', or 'learned'
-    :param grid_size: Grid size for 2D pos embed (auto-inferred if None)
+    :param grid_size: Grid size for 2D pos embed
+    :param zero_init_output: Zero-init output projection
+    :param num_prefix_tokens: extra tokens passed in forward
+    Example::
+        # Pure cross-attention (no conditioning)
+        decoder = CrossAttentionDecoder(
+            768, 384, 768, 196, depth=4, block_class=CrossAttentionBlock
+        )
+        # With AdaLN for flow matching
+        decoder = CrossAttentionDecoder(
+            768, 384, 768, 196, depth=4, block_class=AdaLNCrossAttentionBlock
+        )
+        # With your full decoder block (self + cross attn)
+        decoder = CrossAttentionDecoder(
+            768, 384, 768, 196, depth=4, block_class=AdaLNDecoderBlock
+        )
     """
 
     def __init__(
         self,
-        embed_dim: int = 768,
-        decoder_embed_dim: int = 384,
+        input_dim: int = 768,
+        hidden_dim: int = 384,
         output_dim: int = 768,
         num_patches: int = 196,
         depth: int = 4,
         num_heads: int = 6,
         mlp_ratio: float = 4.0,
-        use_adaln: bool = False,
+        block_class: Type[nn.Module] = AdaLNCrossAttentionBlock,
         pos_embed_type: Literal["sincos_1d", "sincos_2d", "learned"] = "sincos_2d",
-        grid_size: int | None = None,
+        grid_size: Optional[int] = None,
+        zero_init_output: bool = True,
+        num_prefix_tokens: int = 1,
     ):
         super().__init__()
-        self.decoder_embed_dim = decoder_embed_dim
-        self.use_adaln = use_adaln
-
+        if hidden_dim % num_heads != 0:
+            raise ValueError(
+                f"hidden_dim ({hidden_dim}) must be divisible by num_heads ({num_heads})"
+            )
+        self.hidden_dim = hidden_dim
         # Projections
-        self.context_proj = nn.Linear(embed_dim, decoder_embed_dim)
-        self.query_proj = nn.Linear(embed_dim, decoder_embed_dim)
-        self.output_proj = nn.Linear(decoder_embed_dim, output_dim)
-        nn.init.zeros_(self.output_proj.weight)
-        nn.init.zeros_(self.output_proj.bias)
-
+        self.context_proj = nn.Linear(input_dim, hidden_dim)
+        self.query_proj = nn.Linear(input_dim, hidden_dim)
+        self.output_proj = nn.Linear(hidden_dim, output_dim)
+        if zero_init_output:
+            nn.init.zeros_(self.output_proj.weight)
+            nn.init.zeros_(self.output_proj.bias)
         # Positional embeddings
         if pos_embed_type == "sincos_2d" and grid_size is None:
             grid_size = int(num_patches**0.5)
             assert grid_size**2 == num_patches
-
         if pos_embed_type == "learned":
-            self.pos_embed = nn.Parameter(
-                torch.zeros(1, num_patches, decoder_embed_dim)
-            )
+            self.pos_embed = nn.Parameter(torch.zeros(1, num_patches, hidden_dim))
             trunc_normal_(self.pos_embed, std=0.02)
         else:
             mode = "2d" if pos_embed_type == "sincos_2d" else "1d"
             pe = get_sincos_pos_embed(
-                decoder_embed_dim, num_patches, mode=mode, grid_size=grid_size
+                hidden_dim, num_patches, mode=mode, grid_size=grid_size
             )
             self.register_buffer("pos_embed", pe.unsqueeze(0))
-
-        # Time conditioning (only if needed)
+        # Time MLP
         self.time_mlp = nn.Sequential(
-            nn.Linear(decoder_embed_dim, decoder_embed_dim * 4),
+            nn.Linear(hidden_dim, hidden_dim * 4),
             nn.GELU(),
-            nn.Linear(decoder_embed_dim * 4, decoder_embed_dim),
+            nn.Linear(hidden_dim * 4, hidden_dim),
         )
+        # Blocks
+        self.blocks = nn.ModuleList(
+            [block_class(hidden_dim, num_heads, mlp_ratio) for _ in range(depth)]
+        )
+        # Final norm
+        self.final_norm = nn.LayerNorm(hidden_dim)
+        # Learnable position embedding for CLS/prefix tokens
+        self.num_prefix_tokens = num_prefix_tokens
+        if num_prefix_tokens > 0:
+            self.prefix_pos_embed = nn.Parameter(
+                torch.zeros(1, num_prefix_tokens, hidden_dim)
+            )
+            nn.init.normal_(self.prefix_pos_embed, std=0.02)
 
-        # Decoder blocks
-        if use_adaln:
-            self.blocks = nn.ModuleList(
-                [
-                    AdaLNDecoderBlock(decoder_embed_dim, num_heads, mlp_ratio)
-                    for _ in range(depth)
-                ]
+    def _gather_pos(self, idx: torch.Tensor, num_prefix: int = 0) -> torch.Tensor:
+        B = idx.shape[0]
+
+        if num_prefix > 0:
+            # Prefix tokens get learnable pos embed
+            prefix_pos = self.prefix_pos_embed.expand(B, -1, -1)
+            # Patch tokens get gathered pos embed
+            patch_idx = idx[:, num_prefix:]
+            patch_pos = torch.gather(
+                self.pos_embed.expand(B, -1, -1),
+                dim=1,
+                index=patch_idx.unsqueeze(-1).expand(-1, -1, self.hidden_dim),
             )
-            self.final_norm = nn.LayerNorm(decoder_embed_dim, elementwise_affine=False)
-            self.final_adaln = nn.Sequential(
-                nn.SiLU(), nn.Linear(decoder_embed_dim, 2 * decoder_embed_dim)
-            )
-            nn.init.zeros_(self.final_adaln[1].weight)
-            nn.init.zeros_(self.final_adaln[1].bias)
+            return torch.cat([prefix_pos, patch_pos], dim=1)
         else:
-            self.decoder = nn.TransformerDecoder(
-                nn.TransformerDecoderLayer(
-                    d_model=decoder_embed_dim,
-                    nhead=num_heads,
-                    dim_feedforward=int(decoder_embed_dim * mlp_ratio),
-                    batch_first=True,
-                    norm_first=True,
-                ),
-                num_layers=depth,
-            )
+            idx = idx.unsqueeze(-1).expand(-1, -1, self.hidden_dim)
+            return torch.gather(self.pos_embed.expand(B, -1, -1), 1, idx)
 
     def forward(
         self,
@@ -381,44 +465,26 @@ class FlowMatchingDecoder(nn.Module):
         queries: torch.Tensor,
         context_idx: torch.Tensor,
         query_idx: torch.Tensor,
-        t: torch.Tensor | None = None,
+        t: Optional[torch.Tensor] = None,
+        num_prefix: int = None,
     ) -> torch.Tensor:
-        """Computes forward pass.
-
-        :param context: Visible token embeddings (B, N_vis, D)
-        :param queries: Query embeddings for masked positions (B, N_mask, D)
-        :param context_idx: Position indices for visible tokens (B, N_vis)
-        :param query_idx: Position indices for masked tokens (B, N_mask)
-        :param t: Optional timesteps (B,) in [0, 1] for flow matching
-        :return: Output embeddings (B, N_mask, D_out)
-        """
-        # Project + positional embed
-        context = self.context_proj(context) + self._gather_pos(context_idx)
+        if num_prefix is None:
+            num_prefix = self.num_prefix_tokens
+        # Project + pos embed
+        context = self.context_proj(context) + self._gather_pos(
+            context_idx, self.num_prefix_tokens
+        )
         queries = self.query_proj(queries) + self._gather_pos(query_idx)
-
-        # Time conditioning
-        if t is not None:
-            t_emb = self.time_mlp(get_timestep_embed(t, self.decoder_embed_dim))
-        else:
-            t_emb = None
-
-        if self.use_adaln:
-            if t_emb is None:
-                raise ValueError("AdaLN requires timestep t")
-            for block in self.blocks:
-                queries = block(queries, context, t_emb)
-            γ, β = self.final_adaln(t_emb).chunk(2, dim=-1)
-            queries = self.final_norm(queries) * (1 + γ.unsqueeze(1)) + β.unsqueeze(1)
-        else:
-            if t_emb is not None:
-                queries = queries + t_emb.unsqueeze(1)
-            queries = self.decoder(tgt=queries, memory=context)
-
-        return self.output_proj(queries)
-
-    def _gather_pos(self, idx: torch.Tensor) -> torch.Tensor:
-        idx = idx.unsqueeze(-1).expand(-1, -1, self.decoder_embed_dim)
-        return torch.gather(self.pos_embed.expand(idx.shape[0], -1, -1), 1, idx)
+        # Time embedding (passed to blocks, they decide whether to use it)
+        cond = (
+            self.time_mlp(get_timestep_embed(t, self.hidden_dim))
+            if t is not None
+            else None
+        )
+        # Blocks
+        for block in self.blocks:
+            queries = block(queries, context, cond)
+        return self.output_proj(self.final_norm(queries))
 
 
 class TransformerPredictor(nn.Module):
@@ -745,29 +811,37 @@ class MAEDecoder(nn.Module):
     def forward(self, x: torch.Tensor, mask: torch.Tensor) -> torch.Tensor:
         """Applies the decoder transform.
 
-        :param x: Visible tokens (N, T', D)
+        :param x: Either visible tokens only (N, T', D) or all tokens (N, T, D).
+                Automatically inferred from shape: if x.shape[1] == mask.shape[1],
+                assumes full sequence with masked positions to be replaced by [MSK].
         :param mask: Binary mask (N, T), 0=kept, 1=masked
         :return: Reconstructed full sequence (N, T, D)
         """
         N, T = mask.shape
+        full_sequence = x.shape[1] == T
 
         # Project to decoder dim
-        x = self.decoder_embed(x)  # (N, T', decoder_embed_dim)
+        x = self.decoder_embed(x)
 
-        # Build full sequence: place visible tokens and mask tokens
-        tokens = self.mask_token.to(x.dtype).expand(N, T, -1).clone()
-        visible_mask = ~mask.bool()
+        if full_sequence:
+            # x is (N, T, decoder_embed_dim) - replace masked positions with mask token
+            mask_tokens = self.mask_token.to(x.dtype).expand(N, T, -1)
+            tokens = torch.where(mask.unsqueeze(-1).bool(), mask_tokens, x)
+        else:
+            # x is (N, T', decoder_embed_dim) with T' visible tokens
+            tokens = self.mask_token.to(x.dtype).expand(N, T, -1).clone()
+            visible_mask = ~mask.bool()
 
-        # Scatter visible tokens back to original positions
-        batch_indices = torch.arange(N, device=x.device)[:, None].expand_as(
-            visible_mask
-        )
-        seq_indices = torch.arange(T, device=x.device)[None, :].expand_as(visible_mask)
+            batch_indices = torch.arange(N, device=x.device)[:, None].expand_as(
+                visible_mask
+            )
+            seq_indices = torch.arange(T, device=x.device)[None, :].expand_as(
+                visible_mask
+            )
 
-        # Efficient vectorized scatter
-        tokens[batch_indices[visible_mask], seq_indices[visible_mask]] = x.reshape(
-            -1, x.shape[-1]
-        )
+            tokens[batch_indices[visible_mask], seq_indices[visible_mask]] = x.reshape(
+                -1, x.shape[-1]
+            )
 
         # Add positional embeddings + transform
         tokens = tokens + self.pos_embed

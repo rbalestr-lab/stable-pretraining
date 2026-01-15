@@ -29,7 +29,17 @@ from .utils import (
     register_lr_scale_hook,
     HiddenStateExtractor,
 )
-from .vit import MAEDecoder, FlowMatchingDecoder, TransformerPredictor
+from .vit import (
+    MAEDecoder,
+    MaskedEncoder,
+    MaskedEncoderOutput,
+    TransformerPredictor,
+    AdaLNDecoderBlock,
+    AdaLNCrossAttentionBlock,
+    CrossAttentionBlock,
+    CrossAttentionDecoder,
+)
+
 from .aggregator import TensorAggregator
 
 __all__ = [
@@ -51,10 +61,16 @@ __all__ = [
     register_lr_scale_hook,
     AutoTuneMLP,
     HiddenStateExtractor,
-    MAEDecoder,
     PatchMasking,
-    FlowMatchingDecoder,
     TransformerPredictor,
+    MAEDecoder,
+    MaskedEncoder,
+    MaskedEncoderOutput,
+    TransformerPredictor,
+    AdaLNDecoderBlock,
+    AdaLNCrossAttentionBlock,
+    CrossAttentionBlock,
+    CrossAttentionDecoder,
 ]
 
 if _MAE_AVAILABLE:

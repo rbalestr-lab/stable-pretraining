@@ -118,7 +118,7 @@ class PatchMasking(nn.Module):
                 f"{grid_h} x {grid_w} = {grid_h * grid_w}"
             )
 
-        if self.mask_ratio == 0:
+        if self.mask_ratio == 0 or not self.training:
             # No masking - return all patches as visible
             return MaskingOutput(
                 visible=x,
