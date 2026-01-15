@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>stable_pretraining.backbone package &#8212; stable-pretraining 0.1.dev1+g739d196dc documentation</title>
+    <title>stable_pretraining.backbone package &#8212; stable-pretraining 0.1.dev1+g0ef8079a7 documentation</title>
   
   
   
@@ -40,7 +40,7 @@
 <link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
   <script src="../_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
 
-    <script src="../_static/documentation_options.js?v=ac5f65b1"></script>
+    <script src="../_static/documentation_options.js?v=ce13a338"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/scripts/sphinx-book-theme.js?v=887ef09a"></script>
@@ -134,7 +134,7 @@
   
   
   
-    <p class="title logo__title">stable-pretraining 0.1.dev1+g739d196dc documentation</p>
+    <p class="title logo__title">stable-pretraining 0.1.dev1+g0ef8079a7 documentation</p>
   
 </a></div>
         <div class="sidebar-primary-item">
@@ -541,20 +541,16 @@ document.write(`
 </ul>
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-stable_pretraining.backbone.vit">stable_pretraining.backbone.vit module</a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#stable_pretraining.backbone.vit.AdaLNCrossAttentionBlock"><code class="docutils literal notranslate"><span class="pre">AdaLNCrossAttentionBlock</span></code></a><ul class="nav section-nav flex-column">
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#stable_pretraining.backbone.vit.AdaLNCrossAttentionBlock.forward"><code class="docutils literal notranslate"><span class="pre">AdaLNCrossAttentionBlock.forward()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#stable_pretraining.backbone.vit.AdaLNBlock"><code class="docutils literal notranslate"><span class="pre">AdaLNBlock</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#stable_pretraining.backbone.vit.AdaLNBlock.forward"><code class="docutils literal notranslate"><span class="pre">AdaLNBlock.forward()</span></code></a></li>
 </ul>
 </li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#stable_pretraining.backbone.vit.AdaLNDecoderBlock"><code class="docutils literal notranslate"><span class="pre">AdaLNDecoderBlock</span></code></a><ul class="nav section-nav flex-column">
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#stable_pretraining.backbone.vit.AdaLNDecoderBlock.forward"><code class="docutils literal notranslate"><span class="pre">AdaLNDecoderBlock.forward()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#stable_pretraining.backbone.vit.AdaLNTransformer"><code class="docutils literal notranslate"><span class="pre">AdaLNTransformer</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#stable_pretraining.backbone.vit.AdaLNTransformer.forward"><code class="docutils literal notranslate"><span class="pre">AdaLNTransformer.forward()</span></code></a></li>
 </ul>
 </li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#stable_pretraining.backbone.vit.CrossAttentionBlock"><code class="docutils literal notranslate"><span class="pre">CrossAttentionBlock</span></code></a><ul class="nav section-nav flex-column">
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#stable_pretraining.backbone.vit.CrossAttentionBlock.forward"><code class="docutils literal notranslate"><span class="pre">CrossAttentionBlock.forward()</span></code></a></li>
-</ul>
-</li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#stable_pretraining.backbone.vit.CrossAttentionDecoder"><code class="docutils literal notranslate"><span class="pre">CrossAttentionDecoder</span></code></a><ul class="nav section-nav flex-column">
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#stable_pretraining.backbone.vit.CrossAttentionDecoder.forward"><code class="docutils literal notranslate"><span class="pre">CrossAttentionDecoder.forward()</span></code></a></li>
 </ul>
 </li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#stable_pretraining.backbone.vit.MAEDecoder"><code class="docutils literal notranslate"><span class="pre">MAEDecoder</span></code></a><ul class="nav section-nav flex-column">
@@ -2243,43 +2239,209 @@ After execution, the original parameters and buffers are restored. No real compu
 <section id="module-stable_pretraining.backbone.vit">
 <span id="stable-pretraining-backbone-vit-module"></span><h2>stable_pretraining.backbone.vit module<a class="headerlink" href="#module-stable_pretraining.backbone.vit" title="Link to this heading">#</a></h2>
 <dl class="py class">
-<dt class="sig sig-object py" id="stable_pretraining.backbone.vit.AdaLNCrossAttentionBlock">
-<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">stable_pretraining.backbone.vit.</span></span><span class="sig-name descname"><span class="pre">AdaLNCrossAttentionBlock</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dim</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_heads</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">mlp_ratio</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">4.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/stable_pretraining/backbone/vit/#AdaLNCrossAttentionBlock"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_pretraining.backbone.vit.AdaLNCrossAttentionBlock" title="Link to this definition">#</a></dt>
+<dt class="sig sig-object py" id="stable_pretraining.backbone.vit.AdaLNBlock">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">stable_pretraining.backbone.vit.</span></span><span class="sig-name descname"><span class="pre">AdaLNBlock</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dim</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_heads</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">mlp_ratio</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">4.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">self_attn</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cross_attn</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/stable_pretraining/backbone/vit/#AdaLNBlock"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_pretraining.backbone.vit.AdaLNBlock" title="Link to this definition">#</a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.pytorch.org/docs/stable/generated/torch.nn.Module.html#torch.nn.Module" title="(in PyTorch v2.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code></a></p>
-<p>Pure cross-attention with AdaLN (no self-attention).</p>
-<dl class="py method">
-<dt class="sig sig-object py" id="stable_pretraining.backbone.vit.AdaLNCrossAttentionBlock.forward">
-<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v2.9)"><span class="pre">Tensor</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">context</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v2.9)"><span class="pre">Tensor</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">cond</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v2.9)"><span class="pre">Tensor</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v2.9)"><span class="pre">Tensor</span></a></span></span><a class="reference internal" href="../_modules/stable_pretraining/backbone/vit/#AdaLNCrossAttentionBlock.forward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_pretraining.backbone.vit.AdaLNCrossAttentionBlock.forward" title="Link to this definition">#</a></dt>
-<dd><p>Define the computation performed at every call.</p>
-<p>Should be overridden by all subclasses.</p>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>Although the recipe for forward pass needs to be defined within
-this function, one should call the <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code> instance afterwards
-instead of this since the former takes care of running the
-registered hooks while the latter silently ignores them.</p>
+<p>Unified transformer block with configurable attention pattern and AdaLN-Zero conditioning.</p>
+<p>This block supports three attention configurations for different use cases in
+flow matching / diffusion models:</p>
+<p><strong>Mode 1: Pure Cross-Attention</strong> (<cite>self_attn=False, cross_attn=True</cite>)</p>
+<blockquote>
+<div><dl class="simple">
+<dt>Information flow:</dt><dd><p>x (queries) ──cross_attn──&gt; context (keys/values) ──&gt; MLP ──&gt; output</p>
+</dd>
+</dl>
+<ul class="simple">
+<li><p>Queries attend to context but NOT to each other</p></li>
+<li><p>Each query token independently gathers information from context</p></li>
+<li><p>Use case: Lightweight decoder where query tokens don’t need to coordinate</p></li>
+<li><p>Limitation: No communication between query tokens (e.g., masked patches
+can’t see what other masked patches are predicting)</p></li>
+</ul>
+</div></blockquote>
+<p><strong>Mode 2: Decoder-Style</strong> (<cite>self_attn=True, cross_attn=True</cite>)</p>
+<blockquote>
+<div><dl class="simple">
+<dt>Information flow:</dt><dd><p>x ──self_attn(x,x)──&gt; cross_attn(x, context) ──&gt; MLP ──&gt; output
+(context remains frozen, not updated)</p>
+</dd>
+</dl>
+<ul class="simple">
+<li><p>Queries first attend to each other (self-attention)</p></li>
+<li><p>Then queries attend to context (cross-attention)</p></li>
+<li><p>Context is read-only: same context tensor passed to every layer</p></li>
+<li><p>Use case: Standard decoder where queries need to coordinate AND
+gather info from a fixed context</p></li>
+<li><p>Limitation: Context can’t adapt based on what queries are generating</p></li>
+</ul>
+</div></blockquote>
+<p><strong>Mode 3: Joint Attention</strong> (<cite>self_attn=True, cross_attn=False</cite>)</p>
+<blockquote>
+<div><dl class="simple">
+<dt>Information flow:</dt><dd><p>x = [context; queries]  (concatenated before passing to blocks)
+x ──self_attn(x,x)──&gt; MLP ──&gt; output
+(both context and queries are updated each layer)</p>
+</dd>
+</dl>
+<ul class="simple">
+<li><p>All tokens (context + queries) attend to all other tokens</p></li>
+<li><p>Requires concatenating context and queries BEFORE passing to block</p></li>
+<li><p>Both context and query representations evolve through layers</p></li>
+<li><p>Use case: Full bidirectional flow, best for high masking ratios where
+context benefits from seeing query predictions</p></li>
+<li><p>Note: Caller must handle concatenation/splitting; block just sees one sequence</p></li>
+</ul>
+</div></blockquote>
+<p><strong>AdaLN-Zero Conditioning:</strong></p>
+<blockquote>
+<div><p>Each operation (self-attn, cross-attn, MLP) is modulated by learned
+(γ, β, α) parameters predicted from the conditioning signal:</p>
+<blockquote>
+<div><p>h = LayerNorm(x) * (1 + γ) + β   # scale and shift
+x = x + α * operation(h)          # gated residual (α starts at 0)</p>
+</div></blockquote>
+<p>The α parameters are initialized to zero, so at init the block is
+an identity function (DiT-style “zero init”).</p>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>dim</strong> – Hidden dimension</p></li>
+<li><p><strong>num_heads</strong> – Number of attention heads</p></li>
+<li><p><strong>mlp_ratio</strong> – MLP hidden dim = dim * mlp_ratio</p></li>
+<li><p><strong>self_attn</strong> – Enable self-attention on x</p></li>
+<li><p><strong>cross_attn</strong> – Enable cross-attention from x to context</p></li>
+</ul>
+</dd>
+</dl>
+<p>Example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Mode 1: Pure cross-attention</span>
+<span class="n">block</span> <span class="o">=</span> <span class="n">AdaLNBlock</span><span class="p">(</span><span class="mi">384</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="n">self_attn</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">cross_attn</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">out</span> <span class="o">=</span> <span class="n">block</span><span class="p">(</span><span class="n">queries</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="n">ctx</span><span class="p">,</span> <span class="n">cond</span><span class="o">=</span><span class="n">t_emb</span><span class="p">)</span>
+
+<span class="c1"># Mode 2: Decoder-style</span>
+<span class="n">block</span> <span class="o">=</span> <span class="n">AdaLNBlock</span><span class="p">(</span><span class="mi">384</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="n">self_attn</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">cross_attn</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">out</span> <span class="o">=</span> <span class="n">block</span><span class="p">(</span><span class="n">queries</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="n">ctx</span><span class="p">,</span> <span class="n">cond</span><span class="o">=</span><span class="n">t_emb</span><span class="p">)</span>
+
+<span class="c1"># Mode 3: Joint attention (caller concatenates)</span>
+<span class="n">block</span> <span class="o">=</span> <span class="n">AdaLNBlock</span><span class="p">(</span><span class="mi">384</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="n">self_attn</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">cross_attn</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="n">x</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">cat</span><span class="p">([</span><span class="n">ctx</span><span class="p">,</span> <span class="n">queries</span><span class="p">],</span> <span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">out</span> <span class="o">=</span> <span class="n">block</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">cond</span><span class="o">=</span><span class="n">t_emb</span><span class="p">)</span>  <span class="c1"># no context arg needed</span>
+<span class="n">queries_out</span> <span class="o">=</span> <span class="n">out</span><span class="p">[:,</span> <span class="o">-</span><span class="n">n_queries</span><span class="p">:]</span>  <span class="c1"># caller extracts query positions</span>
+</pre></div>
 </div>
+<dl class="py method">
+<dt class="sig sig-object py" id="stable_pretraining.backbone.vit.AdaLNBlock.forward">
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v2.9)"><span class="pre">Tensor</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">context</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v2.9)"><span class="pre">Tensor</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cond</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v2.9)"><span class="pre">Tensor</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v2.9)"><span class="pre">Tensor</span></a></span></span><a class="reference internal" href="../_modules/stable_pretraining/backbone/vit/#AdaLNBlock.forward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_pretraining.backbone.vit.AdaLNBlock.forward" title="Link to this definition">#</a></dt>
+<dd><p>Compute forward pass.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> – Input tensor [B, N, D]. For joint attention mode, this should
+be the concatenated [context; queries] sequence.</p></li>
+<li><p><strong>context</strong> – Context tensor [B, M, D] for cross-attention modes.
+Required if cross_attn=True, ignored otherwise.</p></li>
+<li><p><strong>cond</strong> – Conditioning tensor [B, D] (e.g., timestep embedding).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Output tensor [B, N, D], same shape as x.</p>
+</dd>
+</dl>
 </dd></dl>
 
 </dd></dl>
 
 <dl class="py class">
-<dt class="sig sig-object py" id="stable_pretraining.backbone.vit.AdaLNDecoderBlock">
-<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">stable_pretraining.backbone.vit.</span></span><span class="sig-name descname"><span class="pre">AdaLNDecoderBlock</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dim</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_heads</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">mlp_ratio</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">4.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/stable_pretraining/backbone/vit/#AdaLNDecoderBlock"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_pretraining.backbone.vit.AdaLNDecoderBlock" title="Link to this definition">#</a></dt>
+<dt class="sig sig-object py" id="stable_pretraining.backbone.vit.AdaLNTransformer">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">stable_pretraining.backbone.vit.</span></span><span class="sig-name descname"><span class="pre">AdaLNTransformer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_dim</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">768</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hidden_dim</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">384</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_dim</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">768</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_patches</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">196</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">depth</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">4</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_heads</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">6</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mlp_ratio</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">4.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">self_attn</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cross_attn</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pos_embed_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Literal" title="(in Python v3.14)"><span class="pre">Literal</span></a><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">'sincos_1d'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'sincos_2d'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'learned'</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'sincos_2d'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">zero_init_output</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_prefix_tokens</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/stable_pretraining/backbone/vit/#AdaLNTransformer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_pretraining.backbone.vit.AdaLNTransformer" title="Link to this definition">#</a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.pytorch.org/docs/stable/generated/torch.nn.Module.html#torch.nn.Module" title="(in PyTorch v2.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code></a></p>
-<p>Decoder block with AdaLN-Zero conditioning (DiT-style).</p>
-<dl class="py method">
-<dt class="sig sig-object py" id="stable_pretraining.backbone.vit.AdaLNDecoderBlock.forward">
-<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v2.9)"><span class="pre">Tensor</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">context</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v2.9)"><span class="pre">Tensor</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">cond</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v2.9)"><span class="pre">Tensor</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/stable_pretraining/backbone/vit/#AdaLNDecoderBlock.forward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_pretraining.backbone.vit.AdaLNDecoderBlock.forward" title="Link to this definition">#</a></dt>
-<dd><p>Define the computation performed at every call.</p>
-<p>Should be overridden by all subclasses.</p>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>Although the recipe for forward pass needs to be defined within
-this function, one should call the <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code> instance afterwards
-instead of this since the former takes care of running the
-registered hooks while the latter silently ignores them.</p>
+<p>Transformer decoder with AdaLN-Zero conditioning for flow matching / diffusion.</p>
+<p>Supports three attention modes controlled by <cite>self_attn</cite> and <cite>cross_attn</cite> flags:</p>
+<p><strong>Mode 1: Pure Cross-Attention</strong> (<cite>self_attn=False, cross_attn=True</cite>)</p>
+<blockquote>
+<div><p>queries ──[cross-attn to context]──&gt; output</p>
+<ul class="simple">
+<li><p>Queries independently attend to context, no query-query communication</p></li>
+<li><p>Fastest, but limited for complex distributions</p></li>
+</ul>
+</div></blockquote>
+<p><strong>Mode 2: Decoder-Style</strong> (<cite>self_attn=True, cross_attn=True</cite>)</p>
+<blockquote>
+<div><p>queries ──[self-attn]──[cross-attn to context]──&gt; output</p>
+<ul class="simple">
+<li><p>Queries communicate with each other, then attend to frozen context</p></li>
+<li><p>Good balance of expressivity and efficiency</p></li>
+</ul>
+</div></blockquote>
+<p><strong>Mode 3: Joint Attention</strong> (<cite>self_attn=True, cross_attn=False</cite>)</p>
+<blockquote>
+<div><p>[context; queries] ──[joint self-attn]──&gt; output (query positions extracted)</p>
+<ul class="simple">
+<li><p>Full bidirectional attention: all tokens attend to all tokens</p></li>
+<li><p>Context representations evolve through layers</p></li>
+<li><p>Best for high masking ratios / complex distributions</p></li>
+<li><p>Highest compute cost</p></li>
+</ul>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>input_dim</strong> – Input embedding dimension (from encoder)</p></li>
+<li><p><strong>hidden_dim</strong> – Internal transformer dimension</p></li>
+<li><p><strong>output_dim</strong> – Output dimension (typically same as input_dim)</p></li>
+<li><p><strong>num_patches</strong> – Total number of patches (for positional embeddings)</p></li>
+<li><p><strong>depth</strong> – Number of transformer blocks</p></li>
+<li><p><strong>num_heads</strong> – Number of attention heads</p></li>
+<li><p><strong>mlp_ratio</strong> – MLP hidden dim multiplier</p></li>
+<li><p><strong>self_attn</strong> – Enable self-attention in blocks</p></li>
+<li><p><strong>cross_attn</strong> – Enable cross-attention in blocks</p></li>
+<li><p><strong>pos_embed_type</strong> – ‘sincos_1d’, ‘sincos_2d’, or ‘learned’</p></li>
+<li><p><strong>grid_size</strong> – Grid size for 2D positional embeddings</p></li>
+<li><p><strong>zero_init_output</strong> – Zero-initialize output projection (for residual learning)</p></li>
+<li><p><strong>num_prefix_tokens</strong> – Number of prefix tokens (e.g., CLS token)</p></li>
+</ul>
+</dd>
+</dl>
+<p>Example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Mode 1: Pure cross-attention (lightweight)</span>
+<span class="n">model</span> <span class="o">=</span> <span class="n">AdaLNTransformer</span><span class="p">(</span>
+    <span class="mi">768</span><span class="p">,</span> <span class="mi">384</span><span class="p">,</span> <span class="mi">768</span><span class="p">,</span> <span class="mi">196</span><span class="p">,</span> <span class="n">depth</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">self_attn</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">cross_attn</span><span class="o">=</span><span class="kc">True</span>
+<span class="p">)</span>
+
+<span class="c1"># Mode 2: Decoder-style (balanced)</span>
+<span class="n">model</span> <span class="o">=</span> <span class="n">AdaLNTransformer</span><span class="p">(</span>
+    <span class="mi">768</span><span class="p">,</span> <span class="mi">384</span><span class="p">,</span> <span class="mi">768</span><span class="p">,</span> <span class="mi">196</span><span class="p">,</span> <span class="n">depth</span><span class="o">=</span><span class="mi">6</span><span class="p">,</span> <span class="n">self_attn</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">cross_attn</span><span class="o">=</span><span class="kc">True</span>
+<span class="p">)</span>
+
+<span class="c1"># Mode 3: Joint attention (most expressive)</span>
+<span class="n">model</span> <span class="o">=</span> <span class="n">AdaLNTransformer</span><span class="p">(</span>
+    <span class="mi">768</span><span class="p">,</span> <span class="mi">384</span><span class="p">,</span> <span class="mi">768</span><span class="p">,</span> <span class="mi">196</span><span class="p">,</span> <span class="n">depth</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span> <span class="n">self_attn</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">cross_attn</span><span class="o">=</span><span class="kc">False</span>
+<span class="p">)</span>
+
+<span class="c1"># Forward call is the same for all modes</span>
+<span class="n">output</span> <span class="o">=</span> <span class="n">model</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="n">queries</span><span class="p">,</span> <span class="n">context_idx</span><span class="p">,</span> <span class="n">query_idx</span><span class="p">,</span> <span class="n">t</span><span class="o">=</span><span class="n">timesteps</span><span class="p">)</span>
+</pre></div>
 </div>
+<dl class="py method">
+<dt class="sig sig-object py" id="stable_pretraining.backbone.vit.AdaLNTransformer.forward">
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">context</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v2.9)"><span class="pre">Tensor</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">queries</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v2.9)"><span class="pre">Tensor</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">context_idx</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v2.9)"><span class="pre">Tensor</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">query_idx</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v2.9)"><span class="pre">Tensor</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">t</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v2.9)"><span class="pre">Tensor</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_prefix</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v2.9)"><span class="pre">Tensor</span></a></span></span><a class="reference internal" href="../_modules/stable_pretraining/backbone/vit/#AdaLNTransformer.forward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_pretraining.backbone.vit.AdaLNTransformer.forward" title="Link to this definition">#</a></dt>
+<dd><p>Computes forward pass.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>context</strong> – Unmasked/clean token embeddings [B, N_ctx, input_dim]</p></li>
+<li><p><strong>queries</strong> – Masked/noisy token embeddings [B, N_qry, input_dim]</p></li>
+<li><p><strong>context_idx</strong> – Patch indices for context tokens [B, N_ctx]</p></li>
+<li><p><strong>query_idx</strong> – Patch indices for query tokens [B, N_qry]</p></li>
+<li><p><strong>t</strong> – Timesteps for flow matching [B]</p></li>
+<li><p><strong>num_prefix</strong> – Override for number of prefix tokens</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Predicted embeddings for query positions [B, N_qry, output_dim]</p>
+</dd>
+</dl>
 </dd></dl>
 
 </dd></dl>
@@ -2293,66 +2455,6 @@ registered hooks while the latter silently ignores them.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="stable_pretraining.backbone.vit.CrossAttentionBlock.forward">
 <span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v2.9)"><span class="pre">Tensor</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">context</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v2.9)"><span class="pre">Tensor</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v2.9)"><span class="pre">Tensor</span></a></span></span><a class="reference internal" href="../_modules/stable_pretraining/backbone/vit/#CrossAttentionBlock.forward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_pretraining.backbone.vit.CrossAttentionBlock.forward" title="Link to this definition">#</a></dt>
-<dd><p>Define the computation performed at every call.</p>
-<p>Should be overridden by all subclasses.</p>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>Although the recipe for forward pass needs to be defined within
-this function, one should call the <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code> instance afterwards
-instead of this since the former takes care of running the
-registered hooks while the latter silently ignores them.</p>
-</div>
-</dd></dl>
-
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="stable_pretraining.backbone.vit.CrossAttentionDecoder">
-<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">stable_pretraining.backbone.vit.</span></span><span class="sig-name descname"><span class="pre">CrossAttentionDecoder</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_dim</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">768</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hidden_dim</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">384</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_dim</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">768</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_patches</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">196</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">depth</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">4</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_heads</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">6</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mlp_ratio</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">4.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">block_class</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Type" title="(in Python v3.14)"><span class="pre">Type</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.pytorch.org/docs/stable/generated/torch.nn.Module.html#torch.nn.Module" title="(in PyTorch v2.9)"><span class="pre">Module</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">&lt;class</span> <span class="pre">'stable_pretraining.backbone.vit.AdaLNCrossAttentionBlock'&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pos_embed_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Literal['sincos_1d'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">'sincos_2d'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">'learned']</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'sincos_2d'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">zero_init_output</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_prefix_tokens</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/stable_pretraining/backbone/vit/#CrossAttentionDecoder"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_pretraining.backbone.vit.CrossAttentionDecoder" title="Link to this definition">#</a></dt>
-<dd><p>Bases: <a class="reference external" href="https://docs.pytorch.org/docs/stable/generated/torch.nn.Module.html#torch.nn.Module" title="(in PyTorch v2.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code></a></p>
-<p>Cross-attention decoder with pluggable block type.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>input_dim</strong> – Input dimension</p></li>
-<li><p><strong>hidden_dim</strong> – Internal dimension</p></li>
-<li><p><strong>output_dim</strong> – Output dimension</p></li>
-<li><p><strong>num_patches</strong> – Total patches (for pos embed)</p></li>
-<li><p><strong>depth</strong> – Number of blocks</p></li>
-<li><p><strong>num_heads</strong> – Attention heads</p></li>
-<li><p><strong>mlp_ratio</strong> – MLP expansion</p></li>
-<li><p><strong>block_class</strong> – Block class to use (e.g., CrossAttentionBlock, AdaLNCrossAttentionBlock)</p></li>
-<li><p><strong>pos_embed_type</strong> – ‘sincos_1d’, ‘sincos_2d’, or ‘learned’</p></li>
-<li><p><strong>grid_size</strong> – Grid size for 2D pos embed</p></li>
-<li><p><strong>zero_init_output</strong> – Zero-init output projection</p></li>
-<li><p><strong>num_prefix_tokens</strong> – extra tokens passed in forward</p></li>
-</ul>
-</dd>
-</dl>
-<dl>
-<dt>Example::</dt><dd><p># Pure cross-attention (no conditioning)
-decoder = CrossAttentionDecoder(</p>
-<blockquote>
-<div><p>768, 384, 768, 196, depth=4, block_class=CrossAttentionBlock</p>
-</div></blockquote>
-<p>)
-# With AdaLN for flow matching
-decoder = CrossAttentionDecoder(</p>
-<blockquote>
-<div><p>768, 384, 768, 196, depth=4, block_class=AdaLNCrossAttentionBlock</p>
-</div></blockquote>
-<p>)
-# With your full decoder block (self + cross attn)
-decoder = CrossAttentionDecoder(</p>
-<blockquote>
-<div><p>768, 384, 768, 196, depth=4, block_class=AdaLNDecoderBlock</p>
-</div></blockquote>
-<p>)</p>
-</dd>
-</dl>
-<dl class="py method">
-<dt class="sig sig-object py" id="stable_pretraining.backbone.vit.CrossAttentionDecoder.forward">
-<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">context</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v2.9)"><span class="pre">Tensor</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">queries</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v2.9)"><span class="pre">Tensor</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">context_idx</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v2.9)"><span class="pre">Tensor</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">query_idx</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v2.9)"><span class="pre">Tensor</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">t</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v2.9)"><span class="pre">Tensor</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_prefix</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v2.9)"><span class="pre">Tensor</span></a></span></span><a class="reference internal" href="../_modules/stable_pretraining/backbone/vit/#CrossAttentionDecoder.forward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_pretraining.backbone.vit.CrossAttentionDecoder.forward" title="Link to this definition">#</a></dt>
 <dd><p>Define the computation performed at every call.</p>
 <p>Should be overridden by all subclasses.</p>
 <div class="admonition note">
@@ -2768,20 +2870,16 @@ strings are acceptable.</p>
 </ul>
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-stable_pretraining.backbone.vit">stable_pretraining.backbone.vit module</a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#stable_pretraining.backbone.vit.AdaLNCrossAttentionBlock"><code class="docutils literal notranslate"><span class="pre">AdaLNCrossAttentionBlock</span></code></a><ul class="nav section-nav flex-column">
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#stable_pretraining.backbone.vit.AdaLNCrossAttentionBlock.forward"><code class="docutils literal notranslate"><span class="pre">AdaLNCrossAttentionBlock.forward()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#stable_pretraining.backbone.vit.AdaLNBlock"><code class="docutils literal notranslate"><span class="pre">AdaLNBlock</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#stable_pretraining.backbone.vit.AdaLNBlock.forward"><code class="docutils literal notranslate"><span class="pre">AdaLNBlock.forward()</span></code></a></li>
 </ul>
 </li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#stable_pretraining.backbone.vit.AdaLNDecoderBlock"><code class="docutils literal notranslate"><span class="pre">AdaLNDecoderBlock</span></code></a><ul class="nav section-nav flex-column">
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#stable_pretraining.backbone.vit.AdaLNDecoderBlock.forward"><code class="docutils literal notranslate"><span class="pre">AdaLNDecoderBlock.forward()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#stable_pretraining.backbone.vit.AdaLNTransformer"><code class="docutils literal notranslate"><span class="pre">AdaLNTransformer</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#stable_pretraining.backbone.vit.AdaLNTransformer.forward"><code class="docutils literal notranslate"><span class="pre">AdaLNTransformer.forward()</span></code></a></li>
 </ul>
 </li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#stable_pretraining.backbone.vit.CrossAttentionBlock"><code class="docutils literal notranslate"><span class="pre">CrossAttentionBlock</span></code></a><ul class="nav section-nav flex-column">
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#stable_pretraining.backbone.vit.CrossAttentionBlock.forward"><code class="docutils literal notranslate"><span class="pre">CrossAttentionBlock.forward()</span></code></a></li>
-</ul>
-</li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#stable_pretraining.backbone.vit.CrossAttentionDecoder"><code class="docutils literal notranslate"><span class="pre">CrossAttentionDecoder</span></code></a><ul class="nav section-nav flex-column">
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#stable_pretraining.backbone.vit.CrossAttentionDecoder.forward"><code class="docutils literal notranslate"><span class="pre">CrossAttentionDecoder.forward()</span></code></a></li>
 </ul>
 </li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#stable_pretraining.backbone.vit.MAEDecoder"><code class="docutils literal notranslate"><span class="pre">MAEDecoder</span></code></a><ul class="nav section-nav flex-column">
