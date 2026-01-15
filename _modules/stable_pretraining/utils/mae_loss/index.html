@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>stable_pretraining.utils.mae_loss &#8212; stable-pretraining 0.1.dev1+g4557ee0f9 documentation</title>
+    <title>stable_pretraining.utils.mae_loss &#8212; stable-pretraining 0.1.dev1+gfc1f2d2aa documentation</title>
   
   
   
@@ -39,7 +39,7 @@
 <link rel="preload" as="script" href="../../../../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
   <script src="../../../../_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
 
-    <script src="../../../../_static/documentation_options.js?v=7a2a2cdd"></script>
+    <script src="../../../../_static/documentation_options.js?v=1f3bd61a"></script>
     <script src="../../../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../../_static/scripts/sphinx-book-theme.js?v=887ef09a"></script>
@@ -135,7 +135,7 @@
   
   
   
-    <p class="title logo__title">stable-pretraining 0.1.dev1+g4557ee0f9 documentation</p>
+    <p class="title logo__title">stable-pretraining 0.1.dev1+gfc1f2d2aa documentation</p>
   
 </a></div>
         <div class="sidebar-primary-item">
@@ -345,15 +345,100 @@ document.write(`
 <span></span><span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
 
 
+<div class="viewcode-block" id="unpatchify">
+<a class="viewcode-back" href="../../../../stable_pretraining.utils/#stable_pretraining.utils.mae_loss.unpatchify">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">unpatchify</span><span class="p">(</span><span class="n">patches</span><span class="p">,</span> <span class="n">patch_size</span><span class="o">=</span><span class="mi">16</span><span class="p">,</span> <span class="n">channels</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Reconstruct image from patches (inverse of patchify).</span>
+
+<span class="sd">    :param patches: Patch tokens, shape (N, T, patch_size² × C)</span>
+<span class="sd">    :param patch_size: Size of each patch (default: 16)</span>
+<span class="sd">    :param channels: Number of image channels (default: 3)</span>
+<span class="sd">    :param height: Target image height. If None, assumes square image.</span>
+<span class="sd">    :param width: Target image width. If None, assumes square image.</span>
+<span class="sd">    :return: Reconstructed images, shape (N, C, H, W)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">p</span> <span class="o">=</span> <span class="n">patch_size</span>
+    <span class="n">C</span> <span class="o">=</span> <span class="n">channels</span>
+
+    <span class="c1"># =========================================================================</span>
+    <span class="c1"># Input validation</span>
+    <span class="c1"># =========================================================================</span>
+
+    <span class="k">assert</span> <span class="n">patches</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">3</span><span class="p">,</span> <span class="p">(</span>
+        <span class="sa">f</span><span class="s2">&quot;patches must be 3D (N, T, D), got </span><span class="si">{</span><span class="n">patches</span><span class="o">.</span><span class="n">ndim</span><span class="si">}</span><span class="s2">D with shape </span><span class="si">{</span><span class="n">patches</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2">&quot;</span>
+    <span class="p">)</span>
+
+    <span class="n">N</span><span class="p">,</span> <span class="n">T</span><span class="p">,</span> <span class="n">D</span> <span class="o">=</span> <span class="n">patches</span><span class="o">.</span><span class="n">shape</span>
+    <span class="n">pixels_per_patch</span> <span class="o">=</span> <span class="n">p</span> <span class="o">*</span> <span class="n">p</span> <span class="o">*</span> <span class="n">C</span>
+
+    <span class="k">assert</span> <span class="n">D</span> <span class="o">==</span> <span class="n">pixels_per_patch</span><span class="p">,</span> <span class="p">(</span>
+        <span class="sa">f</span><span class="s2">&quot;patches last dim </span><span class="si">{</span><span class="n">D</span><span class="si">}</span><span class="s2"> != expected </span><span class="si">{</span><span class="n">pixels_per_patch</span><span class="si">}</span><span class="s2"> &quot;</span>
+        <span class="sa">f</span><span class="s2">&quot;(patch_size² × channels = </span><span class="si">{</span><span class="n">p</span><span class="si">}</span><span class="s2">² × </span><span class="si">{</span><span class="n">C</span><span class="si">}</span><span class="s2"> = </span><span class="si">{</span><span class="n">pixels_per_patch</span><span class="si">}</span><span class="s2">)&quot;</span>
+    <span class="p">)</span>
+
+    <span class="c1"># Infer grid dimensions</span>
+    <span class="k">if</span> <span class="n">height</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">width</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="c1"># Assume square image</span>
+        <span class="n">grid_size</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">T</span><span class="o">**</span><span class="mf">0.5</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="n">grid_size</span><span class="o">**</span><span class="mi">2</span> <span class="o">==</span> <span class="n">T</span><span class="p">,</span> <span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Cannot infer square grid: num_patches </span><span class="si">{</span><span class="n">T</span><span class="si">}</span><span class="s2"> is not a perfect square. &quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;Please provide height and width explicitly.&quot;</span>
+        <span class="p">)</span>
+        <span class="n">num_patches_h</span> <span class="o">=</span> <span class="n">num_patches_w</span> <span class="o">=</span> <span class="n">grid_size</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">assert</span> <span class="n">height</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">width</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">,</span> <span class="p">(</span>
+            <span class="s2">&quot;Must provide both height and width, or neither (for square images)&quot;</span>
+        <span class="p">)</span>
+        <span class="k">assert</span> <span class="n">height</span> <span class="o">%</span> <span class="n">p</span> <span class="o">==</span> <span class="mi">0</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;height </span><span class="si">{</span><span class="n">height</span><span class="si">}</span><span class="s2"> must be divisible by patch_size </span><span class="si">{</span><span class="n">p</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="k">assert</span> <span class="n">width</span> <span class="o">%</span> <span class="n">p</span> <span class="o">==</span> <span class="mi">0</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;width </span><span class="si">{</span><span class="n">width</span><span class="si">}</span><span class="s2"> must be divisible by patch_size </span><span class="si">{</span><span class="n">p</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="n">num_patches_h</span> <span class="o">=</span> <span class="n">height</span> <span class="o">//</span> <span class="n">p</span>
+        <span class="n">num_patches_w</span> <span class="o">=</span> <span class="n">width</span> <span class="o">//</span> <span class="n">p</span>
+        <span class="k">assert</span> <span class="n">num_patches_h</span> <span class="o">*</span> <span class="n">num_patches_w</span> <span class="o">==</span> <span class="n">T</span><span class="p">,</span> <span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;height </span><span class="si">{</span><span class="n">height</span><span class="si">}</span><span class="s2"> × width </span><span class="si">{</span><span class="n">width</span><span class="si">}</span><span class="s2"> with patch_size </span><span class="si">{</span><span class="n">p</span><span class="si">}</span><span class="s2"> gives &quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">num_patches_h</span><span class="si">}</span><span class="s2">×</span><span class="si">{</span><span class="n">num_patches_w</span><span class="si">}</span><span class="s2">=</span><span class="si">{</span><span class="n">num_patches_h</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">num_patches_w</span><span class="si">}</span><span class="s2"> patches, &quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;but got </span><span class="si">{</span><span class="n">T</span><span class="si">}</span><span class="s2"> patches&quot;</span>
+        <span class="p">)</span>
+
+    <span class="n">H</span> <span class="o">=</span> <span class="n">num_patches_h</span> <span class="o">*</span> <span class="n">p</span>
+    <span class="n">W</span> <span class="o">=</span> <span class="n">num_patches_w</span> <span class="o">*</span> <span class="n">p</span>
+
+    <span class="c1"># =========================================================================</span>
+    <span class="c1"># Step 1: Reshape to grid of patches</span>
+    <span class="c1"># =========================================================================</span>
+    <span class="c1"># patches: (N, T, p*p*C)</span>
+    <span class="c1"># → (N, num_patches_h, num_patches_w, p, p, C)</span>
+    <span class="n">imgs</span> <span class="o">=</span> <span class="n">patches</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">N</span><span class="p">,</span> <span class="n">num_patches_h</span><span class="p">,</span> <span class="n">num_patches_w</span><span class="p">,</span> <span class="n">p</span><span class="p">,</span> <span class="n">p</span><span class="p">,</span> <span class="n">C</span><span class="p">)</span>
+
+    <span class="c1"># =========================================================================</span>
+    <span class="c1"># Step 2: Rearrange to image format</span>
+    <span class="c1"># =========================================================================</span>
+    <span class="c1"># (N, num_patches_h, num_patches_w, p, p, C)</span>
+    <span class="c1"># → (N, C, num_patches_h, p, num_patches_w, p)</span>
+    <span class="c1"># → (N, C, H, W)</span>
+    <span class="n">imgs</span> <span class="o">=</span> <span class="n">imgs</span><span class="o">.</span><span class="n">permute</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span>  <span class="c1"># (N, C, nh, p, nw, p)</span>
+    <span class="n">imgs</span> <span class="o">=</span> <span class="n">imgs</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">N</span><span class="p">,</span> <span class="n">C</span><span class="p">,</span> <span class="n">H</span><span class="p">,</span> <span class="n">W</span><span class="p">)</span>
+
+    <span class="c1"># Sanity check</span>
+    <span class="k">assert</span> <span class="n">imgs</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="p">(</span><span class="n">N</span><span class="p">,</span> <span class="n">C</span><span class="p">,</span> <span class="n">H</span><span class="p">,</span> <span class="n">W</span><span class="p">),</span> <span class="p">(</span>
+        <span class="sa">f</span><span class="s2">&quot;Output shape </span><span class="si">{</span><span class="n">imgs</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2"> != expected </span><span class="si">{</span><span class="p">(</span><span class="n">N</span><span class="p">,</span><span class="w"> </span><span class="n">C</span><span class="p">,</span><span class="w"> </span><span class="n">H</span><span class="p">,</span><span class="w"> </span><span class="n">W</span><span class="p">)</span><span class="si">}</span><span class="s2">. &quot;</span>
+        <span class="s2">&quot;This should never happen — please report this bug.&quot;</span>
+    <span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">imgs</span></div>
+
+
+
 <div class="viewcode-block" id="mae_loss">
 <a class="viewcode-back" href="../../../../stable_pretraining.utils/#stable_pretraining.utils.mae_loss.mae_loss">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">mae_loss</span><span class="p">(</span><span class="n">pred</span><span class="p">,</span> <span class="n">imgs</span><span class="p">,</span> <span class="n">mask</span><span class="p">,</span> <span class="n">patch_size</span><span class="o">=</span><span class="mi">16</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">mae_loss</span><span class="p">(</span><span class="n">pred</span><span class="p">,</span> <span class="n">imgs</span><span class="p">,</span> <span class="n">mask</span><span class="p">,</span> <span class="n">patch_size</span><span class="o">=</span><span class="mi">16</span><span class="p">,</span> <span class="n">mask_only</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">patch_normalize</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Compute MAE reconstruction loss with per-patch normalization.</span>
 
 <span class="sd">    :param pred: Decoder predictions, shape (N, T, patch_size² × C)</span>
 <span class="sd">    :param imgs: Original images, shape (N, C, H, W)</span>
 <span class="sd">    :param mask: Binary mask, shape (N, T), where 1 = masked (compute loss), 0 = visible (ignore)</span>
 <span class="sd">    :param patch_size: Size of each patch (default: 16)</span>
+<span class="sd">    :param mask_only: If True, compute loss only on masked patches. If False, compute on all patches. (default: True)</span>
+<span class="sd">    :param patch_normalize: If True, normalize each patch to zero mean/unit var. If False, use raw pixels. (default: True)</span>
 <span class="sd">    :return: Scalar loss value</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">p</span> <span class="o">=</span> <span class="n">patch_size</span>
@@ -410,16 +495,14 @@ document.write(`
         <span class="sa">f</span><span class="s2">&quot;mask values must be in [0, 1], got min=</span><span class="si">{</span><span class="n">mask</span><span class="o">.</span><span class="n">min</span><span class="p">()</span><span class="si">}</span><span class="s2">, max=</span><span class="si">{</span><span class="n">mask</span><span class="o">.</span><span class="n">max</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span>
     <span class="p">)</span>
 
-    <span class="c1"># Check at least one masked patch</span>
-    <span class="n">num_masked</span> <span class="o">=</span> <span class="n">mask</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span><span class="o">.</span><span class="n">item</span><span class="p">()</span>
-    <span class="k">assert</span> <span class="n">num_masked</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">,</span> <span class="p">(</span>
-        <span class="s2">&quot;mask has no masked patches (all zeros). Need at least one masked patch to compute loss.&quot;</span>
-    <span class="p">)</span>
-
-    <span class="c1"># Check dtypes match</span>
-    <span class="k">assert</span> <span class="n">pred</span><span class="o">.</span><span class="n">dtype</span> <span class="o">==</span> <span class="n">imgs</span><span class="o">.</span><span class="n">dtype</span><span class="p">,</span> <span class="p">(</span>
-        <span class="sa">f</span><span class="s2">&quot;pred dtype </span><span class="si">{</span><span class="n">pred</span><span class="o">.</span><span class="n">dtype</span><span class="si">}</span><span class="s2"> != imgs dtype </span><span class="si">{</span><span class="n">imgs</span><span class="o">.</span><span class="n">dtype</span><span class="si">}</span><span class="s2">&quot;</span>
-    <span class="p">)</span>
+    <span class="c1"># Check at least one masked patch (only if mask_only=True)</span>
+    <span class="k">if</span> <span class="n">mask_only</span><span class="p">:</span>
+        <span class="n">num_masked</span> <span class="o">=</span> <span class="n">mask</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span><span class="o">.</span><span class="n">item</span><span class="p">()</span>
+        <span class="k">assert</span> <span class="n">num_masked</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">,</span> <span class="p">(</span>
+            <span class="s2">&quot;mask has no masked patches (all zeros). &quot;</span>
+            <span class="s2">&quot;Need at least one masked patch to compute loss when mask_only=True. &quot;</span>
+            <span class="s2">&quot;Set mask_only=False to compute loss on all patches.&quot;</span>
+        <span class="p">)</span>
 
     <span class="c1"># Check devices match</span>
     <span class="k">assert</span> <span class="n">pred</span><span class="o">.</span><span class="n">device</span> <span class="o">==</span> <span class="n">imgs</span><span class="o">.</span><span class="n">device</span><span class="p">,</span> <span class="p">(</span>
@@ -455,27 +538,33 @@ document.write(`
     <span class="p">)</span>
 
     <span class="c1"># =========================================================================</span>
-    <span class="c1"># Step 2: Per-patch normalization</span>
+    <span class="c1"># Step 2: Per-patch normalization (optional)</span>
     <span class="c1"># =========================================================================</span>
     <span class="c1"># Normalize each patch independently to zero mean and unit variance.</span>
     <span class="c1"># This forces the model to predict texture/structure rather than mean color.</span>
     <span class="c1">#</span>
     <span class="c1"># mean/var computed over last dim (the 768 pixel values within each patch)</span>
-    <span class="n">mean</span> <span class="o">=</span> <span class="n">target</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span> <span class="n">keepdim</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>  <span class="c1"># (N, T, 1)</span>
-    <span class="n">var</span> <span class="o">=</span> <span class="n">target</span><span class="o">.</span><span class="n">var</span><span class="p">(</span><span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span> <span class="n">keepdim</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>  <span class="c1"># (N, T, 1)</span>
-    <span class="n">target</span> <span class="o">=</span> <span class="p">(</span><span class="n">target</span> <span class="o">-</span> <span class="n">mean</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">var</span> <span class="o">+</span> <span class="mf">1e-6</span><span class="p">)</span><span class="o">.</span><span class="n">sqrt</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">patch_normalize</span><span class="p">:</span>
+        <span class="n">mean</span> <span class="o">=</span> <span class="n">target</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span> <span class="n">keepdim</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>  <span class="c1"># (N, T, 1)</span>
+        <span class="n">var</span> <span class="o">=</span> <span class="n">target</span><span class="o">.</span><span class="n">var</span><span class="p">(</span><span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span> <span class="n">keepdim</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>  <span class="c1"># (N, T, 1)</span>
+        <span class="n">target</span> <span class="o">=</span> <span class="p">(</span><span class="n">target</span> <span class="o">-</span> <span class="n">mean</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">var</span> <span class="o">+</span> <span class="mf">1e-6</span><span class="p">)</span><span class="o">.</span><span class="n">sqrt</span><span class="p">()</span>
 
     <span class="c1"># =========================================================================</span>
-    <span class="c1"># Step 3: Compute MSE loss only on masked patches</span>
+    <span class="c1"># Step 3: Compute MSE loss</span>
     <span class="c1"># =========================================================================</span>
-    <span class="c1"># pred: (N, T, 768) — decoder predictions (already in normalized pixel space)</span>
-    <span class="c1"># target: (N, T, 768) — normalized ground truth</span>
+    <span class="c1"># pred: (N, T, 768) — decoder predictions (normalized if patch_normalize=True)</span>
+    <span class="c1"># target: (N, T, 768) — ground truth (normalized if patch_normalize=True)</span>
     <span class="n">loss</span> <span class="o">=</span> <span class="p">(</span><span class="n">pred</span> <span class="o">-</span> <span class="n">target</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span>  <span class="c1"># (N, T, 768)</span>
     <span class="n">loss</span> <span class="o">=</span> <span class="n">loss</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>  <span class="c1"># (N, T) — average over pixels within each patch</span>
 
-    <span class="c1"># Only compute loss where mask=1 (masked/reconstructed patches)</span>
-    <span class="c1"># Visible patches (mask=0) are ignored — no loss signal from them</span>
-    <span class="n">loss</span> <span class="o">=</span> <span class="p">(</span><span class="n">loss</span> <span class="o">*</span> <span class="n">mask</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">/</span> <span class="n">mask</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>  <span class="c1"># scalar</span>
+    <span class="c1"># Apply mask or compute on all patches</span>
+    <span class="k">if</span> <span class="n">mask_only</span><span class="p">:</span>
+        <span class="c1"># Only compute loss where mask=1 (masked/reconstructed patches)</span>
+        <span class="c1"># Visible patches (mask=0) are ignored — no loss signal from them</span>
+        <span class="n">loss</span> <span class="o">=</span> <span class="p">(</span><span class="n">loss</span> <span class="o">*</span> <span class="n">mask</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">/</span> <span class="n">mask</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>  <span class="c1"># scalar</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c1"># Compute loss on all patches (ignores mask)</span>
+        <span class="n">loss</span> <span class="o">=</span> <span class="n">loss</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>  <span class="c1"># scalar</span>
 
     <span class="c1"># Final sanity check</span>
     <span class="k">assert</span> <span class="ow">not</span> <span class="n">torch</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">loss</span><span class="p">),</span> <span class="p">(</span>

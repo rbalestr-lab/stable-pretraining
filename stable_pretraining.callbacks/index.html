@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>stable_pretraining.callbacks package &#8212; stable-pretraining 0.1.dev1+g4557ee0f9 documentation</title>
+    <title>stable_pretraining.callbacks package &#8212; stable-pretraining 0.1.dev1+gfc1f2d2aa documentation</title>
   
   
   
@@ -40,7 +40,7 @@
 <link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
   <script src="../_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
 
-    <script src="../_static/documentation_options.js?v=7a2a2cdd"></script>
+    <script src="../_static/documentation_options.js?v=1f3bd61a"></script>
     <script src="../_static/doctools.js?v=9bcbadda"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/scripts/sphinx-book-theme.js?v=887ef09a"></script>
@@ -134,7 +134,7 @@
   
   
   
-    <p class="title logo__title">stable-pretraining 0.1.dev1+g4557ee0f9 documentation</p>
+    <p class="title logo__title">stable-pretraining 0.1.dev1+gfc1f2d2aa documentation</p>
   
 </a></div>
         <div class="sidebar-primary-item">
@@ -584,6 +584,7 @@ document.write(`
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-stable_pretraining.callbacks.unused_parameters">stable_pretraining.callbacks.unused_parameters module</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#stable_pretraining.callbacks.unused_parameters.LogUnusedParametersOnce"><code class="docutils literal notranslate"><span class="pre">LogUnusedParametersOnce</span></code></a><ul class="nav section-nav flex-column">
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#stable_pretraining.callbacks.unused_parameters.LogUnusedParametersOnce.on_after_backward"><code class="docutils literal notranslate"><span class="pre">LogUnusedParametersOnce.on_after_backward()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#stable_pretraining.callbacks.unused_parameters.LogUnusedParametersOnce.on_train_batch_end"><code class="docutils literal notranslate"><span class="pre">LogUnusedParametersOnce.on_train_batch_end()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#stable_pretraining.callbacks.unused_parameters.LogUnusedParametersOnce.on_train_batch_start"><code class="docutils literal notranslate"><span class="pre">LogUnusedParametersOnce.on_train_batch_start()</span></code></a></li>
 </ul>
 </li>
@@ -1895,10 +1896,17 @@ A warning is logged if using a custom DataModule without this method.</p>
 <li><p>After the first backward pass, logs unused parameters via loguru.</p></li>
 <li><p>Removes all hooks and disables itself for the rest of training.</p></li>
 </ul>
+<p>Works with both automatic and manual optimization.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="stable_pretraining.callbacks.unused_parameters.LogUnusedParametersOnce.on_after_backward">
 <span class="sig-name descname"><span class="pre">on_after_backward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">trainer</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pl_module</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/stable_pretraining/callbacks/unused_parameters/#LogUnusedParametersOnce.on_after_backward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_pretraining.callbacks.unused_parameters.LogUnusedParametersOnce.on_after_backward" title="Link to this definition">#</a></dt>
-<dd><p>After the first backward pass, report unused params and detach hooks.</p>
+<dd><p>After backward pass, report unused params (automatic optimization).</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="stable_pretraining.callbacks.unused_parameters.LogUnusedParametersOnce.on_train_batch_end">
+<span class="sig-name descname"><span class="pre">on_train_batch_end</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">trainer</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pl_module</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">outputs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch_idx</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/stable_pretraining/callbacks/unused_parameters/#LogUnusedParametersOnce.on_train_batch_end"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_pretraining.callbacks.unused_parameters.LogUnusedParametersOnce.on_train_batch_end" title="Link to this definition">#</a></dt>
+<dd><p>Fallback for manual optimization - check after first batch completes.</p>
 </dd></dl>
 
 <dl class="py method">
@@ -2417,6 +2425,7 @@ loss returned from <code class="docutils literal notranslate"><span class="pre">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-stable_pretraining.callbacks.unused_parameters">stable_pretraining.callbacks.unused_parameters module</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#stable_pretraining.callbacks.unused_parameters.LogUnusedParametersOnce"><code class="docutils literal notranslate"><span class="pre">LogUnusedParametersOnce</span></code></a><ul class="nav section-nav flex-column">
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#stable_pretraining.callbacks.unused_parameters.LogUnusedParametersOnce.on_after_backward"><code class="docutils literal notranslate"><span class="pre">LogUnusedParametersOnce.on_after_backward()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#stable_pretraining.callbacks.unused_parameters.LogUnusedParametersOnce.on_train_batch_end"><code class="docutils literal notranslate"><span class="pre">LogUnusedParametersOnce.on_train_batch_end()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#stable_pretraining.callbacks.unused_parameters.LogUnusedParametersOnce.on_train_batch_start"><code class="docutils literal notranslate"><span class="pre">LogUnusedParametersOnce.on_train_batch_start()</span></code></a></li>
 </ul>
 </li>

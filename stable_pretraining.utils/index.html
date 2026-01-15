@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>stable_pretraining.utils package &#8212; stable-pretraining 0.1.dev1+g4557ee0f9 documentation</title>
+    <title>stable_pretraining.utils package &#8212; stable-pretraining 0.1.dev1+gfc1f2d2aa documentation</title>
   
   
   
@@ -40,7 +40,7 @@
 <link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
   <script src="../_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
 
-    <script src="../_static/documentation_options.js?v=7a2a2cdd"></script>
+    <script src="../_static/documentation_options.js?v=1f3bd61a"></script>
     <script src="../_static/doctools.js?v=9bcbadda"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/scripts/sphinx-book-theme.js?v=887ef09a"></script>
@@ -134,7 +134,7 @@
   
   
   
-    <p class="title logo__title">stable-pretraining 0.1.dev1+g4557ee0f9 documentation</p>
+    <p class="title logo__title">stable-pretraining 0.1.dev1+gfc1f2d2aa documentation</p>
   
 </a></div>
         <div class="sidebar-primary-item">
@@ -499,6 +499,7 @@ document.write(`
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-stable_pretraining.utils.mae_loss">stable_pretraining.utils.mae_loss module</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#stable_pretraining.utils.mae_loss.mae_loss"><code class="docutils literal notranslate"><span class="pre">mae_loss()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#stable_pretraining.utils.mae_loss.unpatchify"><code class="docutils literal notranslate"><span class="pre">unpatchify()</span></code></a></li>
 </ul>
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-stable_pretraining.utils.nn_modules">stable_pretraining.utils.nn_modules module</a><ul class="nav section-nav flex-column">
@@ -631,6 +632,7 @@ document.write(`
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#stable_pretraining.utils.replace_module"><code class="docutils literal notranslate"><span class="pre">replace_module()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#stable_pretraining.utils.rgetattr"><code class="docutils literal notranslate"><span class="pre">rgetattr()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#stable_pretraining.utils.rsetattr"><code class="docutils literal notranslate"><span class="pre">rsetattr()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#stable_pretraining.utils.unpatchify"><code class="docutils literal notranslate"><span class="pre">unpatchify()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#stable_pretraining.utils.with_hf_retry_ratelimit"><code class="docutils literal notranslate"><span class="pre">with_hf_retry_ratelimit()</span></code></a></li>
 </ul>
 </li>
@@ -1759,7 +1761,7 @@ If return_summary is True: Summary DataFrame</p>
 <span id="stable-pretraining-utils-mae-loss-module"></span><h2>stable_pretraining.utils.mae_loss module<a class="headerlink" href="#module-stable_pretraining.utils.mae_loss" title="Link to this heading">#</a></h2>
 <dl class="py function">
 <dt class="sig sig-object py" id="stable_pretraining.utils.mae_loss.mae_loss">
-<span class="sig-prename descclassname"><span class="pre">stable_pretraining.utils.mae_loss.</span></span><span class="sig-name descname"><span class="pre">mae_loss</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pred</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">imgs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mask</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">patch_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">16</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/stable_pretraining/utils/mae_loss/#mae_loss"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_pretraining.utils.mae_loss.mae_loss" title="Link to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">stable_pretraining.utils.mae_loss.</span></span><span class="sig-name descname"><span class="pre">mae_loss</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pred</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">imgs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mask</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">patch_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">16</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mask_only</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">patch_normalize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/stable_pretraining/utils/mae_loss/#mae_loss"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_pretraining.utils.mae_loss.mae_loss" title="Link to this definition">#</a></dt>
 <dd><p>Compute MAE reconstruction loss with per-patch normalization.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -1768,10 +1770,32 @@ If return_summary is True: Summary DataFrame</p>
 <li><p><strong>imgs</strong> – Original images, shape (N, C, H, W)</p></li>
 <li><p><strong>mask</strong> – Binary mask, shape (N, T), where 1 = masked (compute loss), 0 = visible (ignore)</p></li>
 <li><p><strong>patch_size</strong> – Size of each patch (default: 16)</p></li>
+<li><p><strong>mask_only</strong> – If True, compute loss only on masked patches. If False, compute on all patches. (default: True)</p></li>
+<li><p><strong>patch_normalize</strong> – If True, normalize each patch to zero mean/unit var. If False, use raw pixels. (default: True)</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>Scalar loss value</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="stable_pretraining.utils.mae_loss.unpatchify">
+<span class="sig-prename descclassname"><span class="pre">stable_pretraining.utils.mae_loss.</span></span><span class="sig-name descname"><span class="pre">unpatchify</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">patches</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">patch_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">16</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">channels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">height</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">width</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/stable_pretraining/utils/mae_loss/#unpatchify"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_pretraining.utils.mae_loss.unpatchify" title="Link to this definition">#</a></dt>
+<dd><p>Reconstruct image from patches (inverse of patchify).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>patches</strong> – Patch tokens, shape (N, T, patch_size² × C)</p></li>
+<li><p><strong>patch_size</strong> – Size of each patch (default: 16)</p></li>
+<li><p><strong>channels</strong> – Number of image channels (default: 3)</p></li>
+<li><p><strong>height</strong> – Target image height. If None, assumes square image.</p></li>
+<li><p><strong>width</strong> – Target image width. If None, assumes square image.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Reconstructed images, shape (N, C, H, W)</p>
 </dd>
 </dl>
 </dd></dl>
@@ -3278,7 +3302,7 @@ then broadcasts to all other ranks.</p></li>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="stable_pretraining.utils.mae_loss">
-<span class="sig-prename descclassname"><span class="pre">stable_pretraining.utils.</span></span><span class="sig-name descname"><span class="pre">mae_loss</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pred</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">imgs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mask</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">patch_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">16</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/stable_pretraining/utils/mae_loss/#mae_loss"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_pretraining.utils.mae_loss" title="Link to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">stable_pretraining.utils.</span></span><span class="sig-name descname"><span class="pre">mae_loss</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pred</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">imgs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mask</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">patch_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">16</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mask_only</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">patch_normalize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/stable_pretraining/utils/mae_loss/#mae_loss"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_pretraining.utils.mae_loss" title="Link to this definition">#</a></dt>
 <dd><p>Compute MAE reconstruction loss with per-patch normalization.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -3287,6 +3311,8 @@ then broadcasts to all other ranks.</p></li>
 <li><p><strong>imgs</strong> – Original images, shape (N, C, H, W)</p></li>
 <li><p><strong>mask</strong> – Binary mask, shape (N, T), where 1 = masked (compute loss), 0 = visible (ignore)</p></li>
 <li><p><strong>patch_size</strong> – Size of each patch (default: 16)</p></li>
+<li><p><strong>mask_only</strong> – If True, compute loss only on masked patches. If False, compute on all patches. (default: True)</p></li>
+<li><p><strong>patch_normalize</strong> – If True, normalize each patch to zero mean/unit var. If False, use raw pixels. (default: True)</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -3379,6 +3405,26 @@ the replacement module</p></li>
 <li><p><strong>attr</strong> – Attribute path (e.g., “module.layer.weight”)</p></li>
 <li><p><strong>val</strong> – Value to set</p></li>
 </ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="stable_pretraining.utils.unpatchify">
+<span class="sig-prename descclassname"><span class="pre">stable_pretraining.utils.</span></span><span class="sig-name descname"><span class="pre">unpatchify</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">patches</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">patch_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">16</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">channels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">height</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">width</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/stable_pretraining/utils/mae_loss/#unpatchify"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_pretraining.utils.unpatchify" title="Link to this definition">#</a></dt>
+<dd><p>Reconstruct image from patches (inverse of patchify).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>patches</strong> – Patch tokens, shape (N, T, patch_size² × C)</p></li>
+<li><p><strong>patch_size</strong> – Size of each patch (default: 16)</p></li>
+<li><p><strong>channels</strong> – Number of image channels (default: 3)</p></li>
+<li><p><strong>height</strong> – Target image height. If None, assumes square image.</p></li>
+<li><p><strong>width</strong> – Target image width. If None, assumes square image.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Reconstructed images, shape (N, C, H, W)</p>
 </dd>
 </dl>
 </dd></dl>
@@ -3576,6 +3622,7 @@ is not provided. Defaults to 10.</p></li>
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-stable_pretraining.utils.mae_loss">stable_pretraining.utils.mae_loss module</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#stable_pretraining.utils.mae_loss.mae_loss"><code class="docutils literal notranslate"><span class="pre">mae_loss()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#stable_pretraining.utils.mae_loss.unpatchify"><code class="docutils literal notranslate"><span class="pre">unpatchify()</span></code></a></li>
 </ul>
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-stable_pretraining.utils.nn_modules">stable_pretraining.utils.nn_modules module</a><ul class="nav section-nav flex-column">
@@ -3708,6 +3755,7 @@ is not provided. Defaults to 10.</p></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#stable_pretraining.utils.replace_module"><code class="docutils literal notranslate"><span class="pre">replace_module()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#stable_pretraining.utils.rgetattr"><code class="docutils literal notranslate"><span class="pre">rgetattr()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#stable_pretraining.utils.rsetattr"><code class="docutils literal notranslate"><span class="pre">rsetattr()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#stable_pretraining.utils.unpatchify"><code class="docutils literal notranslate"><span class="pre">unpatchify()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#stable_pretraining.utils.with_hf_retry_ratelimit"><code class="docutils literal notranslate"><span class="pre">with_hf_retry_ratelimit()</span></code></a></li>
 </ul>
 </li>

@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>stable_pretraining.backbone.pos_embed &#8212; stable-pretraining 0.1.dev1+g4557ee0f9 documentation</title>
+    <title>stable_pretraining.backbone.pos_embed &#8212; stable-pretraining 0.1.dev1+gfc1f2d2aa documentation</title>
   
   
   
@@ -39,7 +39,7 @@
 <link rel="preload" as="script" href="../../../../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
   <script src="../../../../_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
 
-    <script src="../../../../_static/documentation_options.js?v=7a2a2cdd"></script>
+    <script src="../../../../_static/documentation_options.js?v=1f3bd61a"></script>
     <script src="../../../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../../_static/scripts/sphinx-book-theme.js?v=887ef09a"></script>
@@ -135,7 +135,7 @@
   
   
   
-    <p class="title logo__title">stable-pretraining 0.1.dev1+g4557ee0f9 documentation</p>
+    <p class="title logo__title">stable-pretraining 0.1.dev1+gfc1f2d2aa documentation</p>
   
 </a></div>
         <div class="sidebar-primary-item">
@@ -345,30 +345,75 @@ document.write(`
 <span></span><span class="sd">&quot;&quot;&quot;Positional embedding utilities for vision transformers.&quot;&quot;&quot;</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">torch.nn.functional</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">F</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Literal</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">math</span>
 
-<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;get_sincos_pos_embed&quot;</span><span class="p">,</span> <span class="s2">&quot;get_1d_sincos_pos_embed&quot;</span><span class="p">,</span> <span class="s2">&quot;get_2d_sincos_pos_embed&quot;</span><span class="p">]</span>
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="s2">&quot;get_sincos_pos_embed&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;get_1d_sincos_pos_embed&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;get_2d_sincos_pos_embed&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;interpolate_pos_embed&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;get_timestep_embed&quot;</span><span class="p">,</span>
+<span class="p">]</span>
+
+
+<div class="viewcode-block" id="get_timestep_embed">
+<a class="viewcode-back" href="../../../../stable_pretraining.backbone/#stable_pretraining.backbone.pos_embed.get_timestep_embed">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_timestep_embed</span><span class="p">(</span>
+    <span class="n">t</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">dim</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">max_period</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">10000</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Generate sinusoidal embeddings for continuous timesteps.</span>
+
+<span class="sd">    Unlike positional embeddings for sequences, this embeds scalar timestep values.</span>
+<span class="sd">    Used for diffusion/flow matching time conditioning.</span>
+<span class="sd">    :param t: Timestep values (B,) or (B, 1), typically in [0, 1]</span>
+<span class="sd">    :param dim: Embedding dimension</span>
+<span class="sd">    :param max_period: Maximum period for frequency scaling</span>
+<span class="sd">    :return: Timestep embeddings of shape (B, dim)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">t</span> <span class="o">=</span> <span class="n">t</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">float</span><span class="p">()</span>
+    <span class="n">half</span> <span class="o">=</span> <span class="n">dim</span> <span class="o">//</span> <span class="mi">2</span>
+    <span class="n">freqs</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span>
+        <span class="o">-</span><span class="n">math</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">max_period</span><span class="p">)</span>
+        <span class="o">*</span> <span class="n">torch</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">half</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">t</span><span class="o">.</span><span class="n">device</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">t</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>
+        <span class="o">/</span> <span class="n">half</span>
+    <span class="p">)</span>
+    <span class="n">args</span> <span class="o">=</span> <span class="n">t</span><span class="p">[:,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">*</span> <span class="n">freqs</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="p">:]</span>
+    <span class="n">embedding</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">cat</span><span class="p">([</span><span class="n">args</span><span class="o">.</span><span class="n">cos</span><span class="p">(),</span> <span class="n">args</span><span class="o">.</span><span class="n">sin</span><span class="p">()],</span> <span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">dim</span> <span class="o">%</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="n">embedding</span> <span class="o">=</span> <span class="n">F</span><span class="o">.</span><span class="n">pad</span><span class="p">(</span><span class="n">embedding</span><span class="p">,</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">embedding</span></div>
+
 
 
 <div class="viewcode-block" id="get_1d_sincos_pos_embed">
 <a class="viewcode-back" href="../../../../stable_pretraining.backbone/#stable_pretraining.backbone.pos_embed.get_1d_sincos_pos_embed">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">get_1d_sincos_pos_embed</span><span class="p">(</span>
-    <span class="n">embed_dim</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">cls_token</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">embed_dim</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="n">length</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="n">cls_token</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;1D sinusoidal positional embeddings.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Generate 1D sinusoidal positional embeddings.</span>
 
 <span class="sd">    :param embed_dim: Embedding dimension</span>
-<span class="sd">    :param length: Sequence length</span>
-<span class="sd">    :param cls_token: Prepend a zero embedding for CLS token</span>
-<span class="sd">    :return: Shape (length, embed_dim) or (length+1, embed_dim) if cls_token</span>
+<span class="sd">    :param length: Sequence length (number of positions)</span>
+<span class="sd">    :param cls_token: If True, prepend a zero embedding for CLS token</span>
+<span class="sd">    :return: Positional embeddings of shape (length, embed_dim) or</span>
+<span class="sd">             (length + 1, embed_dim) if cls_token=True</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">embed_dim</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;embed_dim must be positive, got </span><span class="si">{</span><span class="n">embed_dim</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">length</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;length must be positive, got </span><span class="si">{</span><span class="n">length</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
     <span class="n">pos</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">length</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
     <span class="n">dim</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">embed_dim</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
     <span class="n">inv_freq</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="p">(</span><span class="mi">10000</span> <span class="o">**</span> <span class="p">(</span><span class="n">dim</span> <span class="o">/</span> <span class="n">embed_dim</span><span class="p">))</span>
 
     <span class="n">pe</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">length</span><span class="p">,</span> <span class="n">embed_dim</span><span class="p">)</span>
     <span class="n">pe</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">::</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">pos</span> <span class="o">*</span> <span class="n">inv_freq</span><span class="p">)</span>
-    <span class="n">pe</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">::</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">pos</span> <span class="o">*</span> <span class="n">inv_freq</span><span class="p">)</span>
+    <span class="n">pe</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">::</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">pos</span> <span class="o">*</span> <span class="n">inv_freq</span><span class="p">[:</span> <span class="n">embed_dim</span> <span class="o">//</span> <span class="mi">2</span><span class="p">])</span>
 
     <span class="k">if</span> <span class="n">cls_token</span><span class="p">:</span>
         <span class="n">pe</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">cat</span><span class="p">([</span><span class="n">torch</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">embed_dim</span><span class="p">),</span> <span class="n">pe</span><span class="p">],</span> <span class="n">dim</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
@@ -379,32 +424,46 @@ document.write(`
 <div class="viewcode-block" id="get_2d_sincos_pos_embed">
 <a class="viewcode-back" href="../../../../stable_pretraining.backbone/#stable_pretraining.backbone.pos_embed.get_2d_sincos_pos_embed">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">get_2d_sincos_pos_embed</span><span class="p">(</span>
-    <span class="n">embed_dim</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">grid_size</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">cls_token</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">embed_dim</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="n">grid_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">],</span>
+    <span class="n">cls_token</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;2D sinusoidal positional embeddings for image patches (used by MAE encoder).</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Generate 2D sinusoidal positional embeddings for image patches.</span>
 
 <span class="sd">    :param embed_dim: Embedding dimension (must be divisible by 4)</span>
-<span class="sd">    :param grid_size: Grid height/width (assumes square)</span>
-<span class="sd">    :param cls_token: Prepend a zero embedding for CLS token</span>
-<span class="sd">    :return: Shape (grid_size^2, embed_dim) or (grid_size^2+1, embed_dim)</span>
+<span class="sd">    :param grid_size: Grid height/width as int (square) or (height, width) tuple</span>
+<span class="sd">    :param cls_token: If True, prepend a zero embedding for CLS token</span>
+<span class="sd">    :return: Positional embeddings of shape (H*W, embed_dim) or</span>
+<span class="sd">             (H*W + 1, embed_dim) if cls_token=True</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">assert</span> <span class="n">embed_dim</span> <span class="o">%</span> <span class="mi">4</span> <span class="o">==</span> <span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;embed_dim must be divisible by 4&quot;</span>
+    <span class="k">if</span> <span class="n">embed_dim</span> <span class="o">&lt;=</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">embed_dim</span> <span class="o">%</span> <span class="mi">4</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;embed_dim must be positive and divisible by 4, got </span><span class="si">{</span><span class="n">embed_dim</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="p">)</span>
 
-    <span class="n">grid_h</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">grid_size</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
-    <span class="n">grid_w</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">grid_size</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
-    <span class="n">grid</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">meshgrid</span><span class="p">(</span><span class="n">grid_h</span><span class="p">,</span> <span class="n">grid_w</span><span class="p">,</span> <span class="n">indexing</span><span class="o">=</span><span class="s2">&quot;ij&quot;</span><span class="p">)</span>
-    <span class="n">grid</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span><span class="n">grid</span><span class="p">,</span> <span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>  <span class="c1"># (H*W, 2)</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">grid_size</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
+        <span class="n">grid_h</span> <span class="o">=</span> <span class="n">grid_w</span> <span class="o">=</span> <span class="n">grid_size</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">grid_h</span><span class="p">,</span> <span class="n">grid_w</span> <span class="o">=</span> <span class="n">grid_size</span>
+
+    <span class="k">if</span> <span class="n">grid_h</span> <span class="o">&lt;=</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">grid_w</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;grid dimensions must be positive, got (</span><span class="si">{</span><span class="n">grid_h</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="n">grid_w</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">)</span>
+
+    <span class="n">grid_y</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">grid_h</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+    <span class="n">grid_x</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">grid_w</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+    <span class="n">grid</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">meshgrid</span><span class="p">(</span><span class="n">grid_y</span><span class="p">,</span> <span class="n">grid_x</span><span class="p">,</span> <span class="n">indexing</span><span class="o">=</span><span class="s2">&quot;ij&quot;</span><span class="p">)</span>
+    <span class="n">grid</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span><span class="n">grid</span><span class="p">,</span> <span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
 
     <span class="n">dim</span> <span class="o">=</span> <span class="n">embed_dim</span> <span class="o">//</span> <span class="mi">4</span>
     <span class="n">omega</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">dim</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span> <span class="o">/</span> <span class="n">dim</span>
-    <span class="n">omega</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="p">(</span><span class="mi">10000</span><span class="o">**</span><span class="n">omega</span><span class="p">)</span>  <span class="c1"># (D/4,)</span>
+    <span class="n">omega</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="p">(</span><span class="mi">10000</span><span class="o">**</span><span class="n">omega</span><span class="p">)</span>
 
-    <span class="c1"># (H*W, 1) @ (1, D/4) -&gt; (H*W, D/4)</span>
     <span class="n">out_h</span> <span class="o">=</span> <span class="n">grid</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">:</span><span class="mi">1</span><span class="p">]</span> <span class="o">@</span> <span class="n">omega</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
     <span class="n">out_w</span> <span class="o">=</span> <span class="n">grid</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">:</span><span class="mi">2</span><span class="p">]</span> <span class="o">@</span> <span class="n">omega</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
 
     <span class="n">pe</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">cat</span><span class="p">(</span>
-        <span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">out_h</span><span class="p">),</span> <span class="n">torch</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">out_h</span><span class="p">),</span> <span class="n">torch</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">out_w</span><span class="p">),</span> <span class="n">torch</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">out_w</span><span class="p">)],</span> <span class="n">dim</span><span class="o">=</span><span class="mi">1</span>
+        <span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">out_h</span><span class="p">),</span> <span class="n">torch</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">out_h</span><span class="p">),</span> <span class="n">torch</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">out_w</span><span class="p">),</span> <span class="n">torch</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">out_w</span><span class="p">)],</span>
+        <span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
     <span class="p">)</span>
 
     <span class="k">if</span> <span class="n">cls_token</span><span class="p">:</span>
@@ -419,22 +478,95 @@ document.write(`
     <span class="n">embed_dim</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
     <span class="n">num_patches</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
     <span class="n">mode</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;1d&quot;</span><span class="p">,</span> <span class="s2">&quot;2d&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;1d&quot;</span><span class="p">,</span>
-    <span class="n">grid_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">grid_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">cls_token</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Unified interface for sinusoidal positional embeddings.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Unified interface for generating sinusoidal positional embeddings.</span>
 
 <span class="sd">    :param embed_dim: Embedding dimension</span>
-<span class="sd">    :param num_patches: Total number of patches (used for 1d)</span>
-<span class="sd">    :param mode: &#39;1d&#39; or &#39;2d&#39;</span>
+<span class="sd">    :param num_patches: Total number of patches (used for 1d mode)</span>
+<span class="sd">    :param mode: Embedding type - &#39;1d&#39; for sequence, &#39;2d&#39; for image grid</span>
 <span class="sd">    :param grid_size: Required for &#39;2d&#39; mode</span>
-<span class="sd">    :param cls_token: Prepend CLS token position</span>
+<span class="sd">    :param cls_token: If True, prepend a zero embedding for CLS token</span>
 <span class="sd">    :return: Positional embeddings tensor</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="s2">&quot;2d&quot;</span><span class="p">:</span>
-        <span class="k">assert</span> <span class="n">grid_size</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">,</span> <span class="s2">&quot;grid_size required for 2d mode&quot;</span>
+        <span class="k">if</span> <span class="n">grid_size</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;grid_size is required for 2d mode&quot;</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">get_2d_sincos_pos_embed</span><span class="p">(</span><span class="n">embed_dim</span><span class="p">,</span> <span class="n">grid_size</span><span class="p">,</span> <span class="n">cls_token</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">get_1d_sincos_pos_embed</span><span class="p">(</span><span class="n">embed_dim</span><span class="p">,</span> <span class="n">num_patches</span><span class="p">,</span> <span class="n">cls_token</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="interpolate_pos_embed">
+<a class="viewcode-back" href="../../../../stable_pretraining.backbone/#stable_pretraining.backbone.pos_embed.interpolate_pos_embed">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">interpolate_pos_embed</span><span class="p">(</span>
+    <span class="n">pos_embed</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span>
+    <span class="n">src_size</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">],</span>
+    <span class="n">tgt_size</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">],</span>
+    <span class="n">num_prefix_tokens</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+    <span class="n">mode</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;bicubic&quot;</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Interpolate positional embeddings to a new grid size.</span>
+
+<span class="sd">    :param pos_embed: Original positional embeddings of shape</span>
+<span class="sd">                      (1, num_prefix + src_h*src_w, embed_dim) or</span>
+<span class="sd">                      (num_prefix + src_h*src_w, embed_dim)</span>
+<span class="sd">    :param src_size: Source grid size as (height, width)</span>
+<span class="sd">    :param tgt_size: Target grid size as (height, width)</span>
+<span class="sd">    :param num_prefix_tokens: Number of prefix tokens (CLS, registers) to preserve</span>
+<span class="sd">    :param mode: Interpolation mode (&#39;nearest&#39;, &#39;bilinear&#39;, &#39;bicubic&#39;, &#39;area&#39;)</span>
+<span class="sd">    :return: Interpolated positional embeddings</span>
+
+<span class="sd">    Example::</span>
+
+<span class="sd">        old_pos = model.pos_embed  # (1, 197, 768) = 1 + 14*14</span>
+<span class="sd">        new_pos = interpolate_pos_embed(</span>
+<span class="sd">            old_pos, src_size=(14, 14), tgt_size=(16, 16), num_prefix_tokens=1</span>
+<span class="sd">        )  # (1, 257, 768) = 1 + 16*16</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">pos_embed</span><span class="o">.</span><span class="n">dim</span><span class="p">()</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;pos_embed must be 2D or 3D, got </span><span class="si">{</span><span class="n">pos_embed</span><span class="o">.</span><span class="n">dim</span><span class="p">()</span><span class="si">}</span><span class="s2">D&quot;</span><span class="p">)</span>
+
+    <span class="n">src_h</span><span class="p">,</span> <span class="n">src_w</span> <span class="o">=</span> <span class="n">src_size</span>
+    <span class="n">tgt_h</span><span class="p">,</span> <span class="n">tgt_w</span> <span class="o">=</span> <span class="n">tgt_size</span>
+
+    <span class="k">if</span> <span class="n">src_h</span> <span class="o">&lt;=</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">src_w</span> <span class="o">&lt;=</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">tgt_h</span> <span class="o">&lt;=</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">tgt_w</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;All grid dims must be positive, src=</span><span class="si">{</span><span class="n">src_size</span><span class="si">}</span><span class="s2">, tgt=</span><span class="si">{</span><span class="n">tgt_size</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="p">)</span>
+
+    <span class="n">squeeze_output</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="k">if</span> <span class="n">pos_embed</span><span class="o">.</span><span class="n">dim</span><span class="p">()</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="n">pos_embed</span> <span class="o">=</span> <span class="n">pos_embed</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">squeeze_output</span> <span class="o">=</span> <span class="kc">True</span>
+
+    <span class="n">expected_src_len</span> <span class="o">=</span> <span class="n">num_prefix_tokens</span> <span class="o">+</span> <span class="n">src_h</span> <span class="o">*</span> <span class="n">src_w</span>
+    <span class="k">if</span> <span class="n">pos_embed</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">!=</span> <span class="n">expected_src_len</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;pos_embed length </span><span class="si">{</span><span class="n">pos_embed</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="si">}</span><span class="s2"> doesn&#39;t match expected </span><span class="si">{</span><span class="n">expected_src_len</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">src_h</span> <span class="o">==</span> <span class="n">tgt_h</span> <span class="ow">and</span> <span class="n">src_w</span> <span class="o">==</span> <span class="n">tgt_w</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">pos_embed</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="k">if</span> <span class="n">squeeze_output</span> <span class="k">else</span> <span class="n">pos_embed</span>
+
+    <span class="n">prefix_pos</span> <span class="o">=</span> <span class="n">pos_embed</span><span class="p">[:,</span> <span class="p">:</span><span class="n">num_prefix_tokens</span><span class="p">,</span> <span class="p">:]</span>
+    <span class="n">patch_pos</span> <span class="o">=</span> <span class="n">pos_embed</span><span class="p">[:,</span> <span class="n">num_prefix_tokens</span><span class="p">:,</span> <span class="p">:]</span>
+
+    <span class="n">embed_dim</span> <span class="o">=</span> <span class="n">patch_pos</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">patch_pos</span> <span class="o">=</span> <span class="n">patch_pos</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">src_h</span><span class="p">,</span> <span class="n">src_w</span><span class="p">,</span> <span class="n">embed_dim</span><span class="p">)</span><span class="o">.</span><span class="n">permute</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+
+    <span class="n">patch_pos</span> <span class="o">=</span> <span class="n">F</span><span class="o">.</span><span class="n">interpolate</span><span class="p">(</span>
+        <span class="n">patch_pos</span><span class="p">,</span>
+        <span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="n">tgt_h</span><span class="p">,</span> <span class="n">tgt_w</span><span class="p">),</span>
+        <span class="n">mode</span><span class="o">=</span><span class="n">mode</span><span class="p">,</span>
+        <span class="n">align_corners</span><span class="o">=</span><span class="kc">False</span> <span class="k">if</span> <span class="n">mode</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;bilinear&quot;</span><span class="p">,</span> <span class="s2">&quot;bicubic&quot;</span><span class="p">)</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="n">patch_pos</span> <span class="o">=</span> <span class="n">patch_pos</span><span class="o">.</span><span class="n">permute</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">tgt_h</span> <span class="o">*</span> <span class="n">tgt_w</span><span class="p">,</span> <span class="n">embed_dim</span><span class="p">)</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">cat</span><span class="p">([</span><span class="n">prefix_pos</span><span class="p">,</span> <span class="n">patch_pos</span><span class="p">],</span> <span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">result</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="k">if</span> <span class="n">squeeze_output</span> <span class="k">else</span> <span class="n">result</span></div>
 
 </pre></div>
 

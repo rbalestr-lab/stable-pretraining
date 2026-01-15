@@ -36,6 +36,14 @@ stable\_pretraining.backbone.mlp module
    :show-inheritance:
    :undoc-members:
 
+stable\_pretraining.backbone.patch\_masking module
+--------------------------------------------------
+
+.. automodule:: stable_pretraining.backbone.patch_masking
+   :members:
+   :show-inheritance:
+   :undoc-members:
+
 stable\_pretraining.backbone.pos\_embed module
 ----------------------------------------------
 

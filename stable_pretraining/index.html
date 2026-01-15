@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>stable_pretraining package &#8212; stable-pretraining 0.1.dev1+g4557ee0f9 documentation</title>
+    <title>stable_pretraining package &#8212; stable-pretraining 0.1.dev1+gfc1f2d2aa documentation</title>
   
   
   
@@ -40,7 +40,7 @@
 <link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
   <script src="../_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
 
-    <script src="../_static/documentation_options.js?v=7a2a2cdd"></script>
+    <script src="../_static/documentation_options.js?v=1f3bd61a"></script>
     <script src="../_static/doctools.js?v=9bcbadda"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/scripts/sphinx-book-theme.js?v=887ef09a"></script>
@@ -134,7 +134,7 @@
   
   
   
-    <p class="title logo__title">stable-pretraining 0.1.dev1+g4557ee0f9 documentation</p>
+    <p class="title logo__title">stable-pretraining 0.1.dev1+gfc1f2d2aa documentation</p>
   
 </a></div>
         <div class="sidebar-primary-item">
@@ -645,10 +645,27 @@ document.write(`
 <li class="toctree-l3"><a class="reference internal" href="../stable_pretraining.backbone/#stable_pretraining.backbone.mlp.MLP"><code class="docutils literal notranslate"><span class="pre">MLP</span></code></a></li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="../stable_pretraining.backbone/#module-stable_pretraining.backbone.patch_masking">stable_pretraining.backbone.patch_masking module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../stable_pretraining.backbone/#stable_pretraining.backbone.patch_masking.MaskingOutput"><code class="docutils literal notranslate"><span class="pre">MaskingOutput</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../stable_pretraining.backbone/#stable_pretraining.backbone.patch_masking.MaskingOutput.ids_keep"><code class="docutils literal notranslate"><span class="pre">MaskingOutput.ids_keep</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../stable_pretraining.backbone/#stable_pretraining.backbone.patch_masking.MaskingOutput.ids_restore"><code class="docutils literal notranslate"><span class="pre">MaskingOutput.ids_restore</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../stable_pretraining.backbone/#stable_pretraining.backbone.patch_masking.MaskingOutput.mask"><code class="docutils literal notranslate"><span class="pre">MaskingOutput.mask</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../stable_pretraining.backbone/#stable_pretraining.backbone.patch_masking.MaskingOutput.visible"><code class="docutils literal notranslate"><span class="pre">MaskingOutput.visible</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../stable_pretraining.backbone/#stable_pretraining.backbone.patch_masking.PatchMasking"><code class="docutils literal notranslate"><span class="pre">PatchMasking</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../stable_pretraining.backbone/#stable_pretraining.backbone.patch_masking.PatchMasking.extra_repr"><code class="docutils literal notranslate"><span class="pre">PatchMasking.extra_repr()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../stable_pretraining.backbone/#stable_pretraining.backbone.patch_masking.PatchMasking.forward"><code class="docutils literal notranslate"><span class="pre">PatchMasking.forward()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="../stable_pretraining.backbone/#module-stable_pretraining.backbone.pos_embed">stable_pretraining.backbone.pos_embed module</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="../stable_pretraining.backbone/#stable_pretraining.backbone.pos_embed.get_1d_sincos_pos_embed"><code class="docutils literal notranslate"><span class="pre">get_1d_sincos_pos_embed()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="../stable_pretraining.backbone/#stable_pretraining.backbone.pos_embed.get_2d_sincos_pos_embed"><code class="docutils literal notranslate"><span class="pre">get_2d_sincos_pos_embed()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="../stable_pretraining.backbone/#stable_pretraining.backbone.pos_embed.get_sincos_pos_embed"><code class="docutils literal notranslate"><span class="pre">get_sincos_pos_embed()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../stable_pretraining.backbone/#stable_pretraining.backbone.pos_embed.get_timestep_embed"><code class="docutils literal notranslate"><span class="pre">get_timestep_embed()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../stable_pretraining.backbone/#stable_pretraining.backbone.pos_embed.interpolate_pos_embed"><code class="docutils literal notranslate"><span class="pre">interpolate_pos_embed()</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="../stable_pretraining.backbone/#module-stable_pretraining.backbone.probe">stable_pretraining.backbone.probe module</a><ul>
@@ -741,8 +758,21 @@ document.write(`
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="../stable_pretraining.backbone/#module-stable_pretraining.backbone.vit">stable_pretraining.backbone.vit module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../stable_pretraining.backbone/#stable_pretraining.backbone.vit.AdaLNDecoderBlock"><code class="docutils literal notranslate"><span class="pre">AdaLNDecoderBlock</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../stable_pretraining.backbone/#stable_pretraining.backbone.vit.AdaLNDecoderBlock.forward"><code class="docutils literal notranslate"><span class="pre">AdaLNDecoderBlock.forward()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../stable_pretraining.backbone/#stable_pretraining.backbone.vit.FlowMatchingDecoder"><code class="docutils literal notranslate"><span class="pre">FlowMatchingDecoder</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../stable_pretraining.backbone/#stable_pretraining.backbone.vit.FlowMatchingDecoder.forward"><code class="docutils literal notranslate"><span class="pre">FlowMatchingDecoder.forward()</span></code></a></li>
+</ul>
+</li>
 <li class="toctree-l3"><a class="reference internal" href="../stable_pretraining.backbone/#stable_pretraining.backbone.vit.MAEDecoder"><code class="docutils literal notranslate"><span class="pre">MAEDecoder</span></code></a><ul>
 <li class="toctree-l4"><a class="reference internal" href="../stable_pretraining.backbone/#stable_pretraining.backbone.vit.MAEDecoder.forward"><code class="docutils literal notranslate"><span class="pre">MAEDecoder.forward()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../stable_pretraining.backbone/#stable_pretraining.backbone.vit.TransformerPredictor"><code class="docutils literal notranslate"><span class="pre">TransformerPredictor</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../stable_pretraining.backbone/#stable_pretraining.backbone.vit.TransformerPredictor.extra_repr"><code class="docutils literal notranslate"><span class="pre">TransformerPredictor.extra_repr()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../stable_pretraining.backbone/#stable_pretraining.backbone.vit.TransformerPredictor.forward"><code class="docutils literal notranslate"><span class="pre">TransformerPredictor.forward()</span></code></a></li>
 </ul>
 </li>
 </ul>
@@ -949,6 +979,7 @@ document.write(`
 <li class="toctree-l2"><a class="reference internal" href="../stable_pretraining.callbacks/#module-stable_pretraining.callbacks.unused_parameters">stable_pretraining.callbacks.unused_parameters module</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="../stable_pretraining.callbacks/#stable_pretraining.callbacks.unused_parameters.LogUnusedParametersOnce"><code class="docutils literal notranslate"><span class="pre">LogUnusedParametersOnce</span></code></a><ul>
 <li class="toctree-l4"><a class="reference internal" href="../stable_pretraining.callbacks/#stable_pretraining.callbacks.unused_parameters.LogUnusedParametersOnce.on_after_backward"><code class="docutils literal notranslate"><span class="pre">LogUnusedParametersOnce.on_after_backward()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../stable_pretraining.callbacks/#stable_pretraining.callbacks.unused_parameters.LogUnusedParametersOnce.on_train_batch_end"><code class="docutils literal notranslate"><span class="pre">LogUnusedParametersOnce.on_train_batch_end()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="../stable_pretraining.callbacks/#stable_pretraining.callbacks.unused_parameters.LogUnusedParametersOnce.on_train_batch_start"><code class="docutils literal notranslate"><span class="pre">LogUnusedParametersOnce.on_train_batch_start()</span></code></a></li>
 </ul>
 </li>
@@ -1508,6 +1539,7 @@ document.write(`
 </li>
 <li class="toctree-l2"><a class="reference internal" href="../stable_pretraining.utils/#module-stable_pretraining.utils.mae_loss">stable_pretraining.utils.mae_loss module</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="../stable_pretraining.utils/#stable_pretraining.utils.mae_loss.mae_loss"><code class="docutils literal notranslate"><span class="pre">mae_loss()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../stable_pretraining.utils/#stable_pretraining.utils.mae_loss.unpatchify"><code class="docutils literal notranslate"><span class="pre">unpatchify()</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="../stable_pretraining.utils/#module-stable_pretraining.utils.nn_modules">stable_pretraining.utils.nn_modules module</a><ul>
@@ -1640,6 +1672,7 @@ document.write(`
 <li class="toctree-l3"><a class="reference internal" href="../stable_pretraining.utils/#stable_pretraining.utils.replace_module"><code class="docutils literal notranslate"><span class="pre">replace_module()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="../stable_pretraining.utils/#stable_pretraining.utils.rgetattr"><code class="docutils literal notranslate"><span class="pre">rgetattr()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="../stable_pretraining.utils/#stable_pretraining.utils.rsetattr"><code class="docutils literal notranslate"><span class="pre">rsetattr()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../stable_pretraining.utils/#stable_pretraining.utils.unpatchify"><code class="docutils literal notranslate"><span class="pre">unpatchify()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="../stable_pretraining.utils/#stable_pretraining.utils.with_hf_retry_ratelimit"><code class="docutils literal notranslate"><span class="pre">with_hf_retry_ratelimit()</span></code></a></li>
 </ul>
 </li>
