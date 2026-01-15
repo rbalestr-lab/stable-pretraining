@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>stable_pretraining.backbone.vit &#8212; stable-pretraining 0.1.dev1+gfc1f2d2aa documentation</title>
+    <title>stable_pretraining.backbone.vit &#8212; stable-pretraining 0.1.dev1+g739d196dc documentation</title>
   
   
   
@@ -39,9 +39,9 @@
 <link rel="preload" as="script" href="../../../../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
   <script src="../../../../_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
 
-    <script src="../../../../_static/documentation_options.js?v=1f3bd61a"></script>
-    <script src="../../../../_static/doctools.js?v=9bcbadda"></script>
-    <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../../_static/documentation_options.js?v=ac5f65b1"></script>
+    <script src="../../../../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../../_static/scripts/sphinx-book-theme.js?v=887ef09a"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = '_modules/stable_pretraining/backbone/vit';</script>
     <link rel="index" title="Index" href="../../../../genindex/" />
@@ -135,7 +135,7 @@
   
   
   
-    <p class="title logo__title">stable-pretraining 0.1.dev1+gfc1f2d2aa documentation</p>
+    <p class="title logo__title">stable-pretraining 0.1.dev1+g739d196dc documentation</p>
   
 </a></div>
         <div class="sidebar-primary-item">
@@ -345,23 +345,343 @@ document.write(`
 <span></span><span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">torch.nn</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">nn</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">torch.nn.functional</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">F</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Literal</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Literal</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">Type</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">timm</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">timm.models.vision_transformer</span><span class="w"> </span><span class="kn">import</span> <span class="n">Block</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">timm.layers</span><span class="w"> </span><span class="kn">import</span> <span class="n">trunc_normal_</span><span class="p">,</span> <span class="n">Mlp</span>
-
+<span class="kn">from</span><span class="w"> </span><span class="nn">.patch_masking</span><span class="w"> </span><span class="kn">import</span> <span class="n">PatchMasking</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataclass</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.pos_embed</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
     <span class="n">get_sincos_pos_embed</span><span class="p">,</span>
     <span class="n">get_1d_sincos_pos_embed</span><span class="p">,</span>
     <span class="n">get_2d_sincos_pos_embed</span><span class="p">,</span>
     <span class="n">get_timestep_embed</span><span class="p">,</span>
+    <span class="n">interpolate_pos_embed</span><span class="p">,</span>
 <span class="p">)</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
     <span class="s2">&quot;MAEDecoder&quot;</span><span class="p">,</span>
     <span class="s2">&quot;TransformerPredictor&quot;</span><span class="p">,</span>
     <span class="s2">&quot;AdaLNDecoderBlock&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;FlowMatchingDecoder&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;MaskedEncoder&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;MaskedEncoderOutput&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;AdaLNCrossAttentionBlock&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;CrossAttentionBlock&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;CrossAttentionDecoder&quot;</span><span class="p">,</span>
 <span class="p">]</span>
+
+
+<div class="viewcode-block" id="CrossAttentionBlock">
+<a class="viewcode-back" href="../../../../stable_pretraining.backbone/#stable_pretraining.backbone.vit.CrossAttentionBlock">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">CrossAttentionBlock</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Pure cross-attention block (no self-attention among queries).</span>
+
+<span class="sd">    Faster than full decoder block when queries don&#39;t need to interact.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dim</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">num_heads</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">mlp_ratio</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">4.0</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">norm1</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">LayerNorm</span><span class="p">(</span><span class="n">dim</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">norm1_ctx</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">LayerNorm</span><span class="p">(</span><span class="n">dim</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cross_attn</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">MultiheadAttention</span><span class="p">(</span><span class="n">dim</span><span class="p">,</span> <span class="n">num_heads</span><span class="p">,</span> <span class="n">batch_first</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">norm2</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">LayerNorm</span><span class="p">(</span><span class="n">dim</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mlp</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Sequential</span><span class="p">(</span>
+            <span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="n">dim</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">dim</span> <span class="o">*</span> <span class="n">mlp_ratio</span><span class="p">)),</span>
+            <span class="n">nn</span><span class="o">.</span><span class="n">GELU</span><span class="p">(),</span>
+            <span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">dim</span> <span class="o">*</span> <span class="n">mlp_ratio</span><span class="p">),</span> <span class="n">dim</span><span class="p">),</span>
+        <span class="p">)</span>
+
+<div class="viewcode-block" id="CrossAttentionBlock.forward">
+<a class="viewcode-back" href="../../../../stable_pretraining.backbone/#stable_pretraining.backbone.vit.CrossAttentionBlock.forward">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">context</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">x</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">cross_attn</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">norm1</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">norm1_ctx</span><span class="p">(</span><span class="n">context</span><span class="p">),</span> <span class="n">context</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">x</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">mlp</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">norm2</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">x</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="AdaLNCrossAttentionBlock">
+<a class="viewcode-back" href="../../../../stable_pretraining.backbone/#stable_pretraining.backbone.vit.AdaLNCrossAttentionBlock">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">AdaLNCrossAttentionBlock</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Pure cross-attention with AdaLN (no self-attention).&quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dim</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">num_heads</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">mlp_ratio</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">4.0</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">norm1_q</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">LayerNorm</span><span class="p">(</span><span class="n">dim</span><span class="p">,</span> <span class="n">elementwise_affine</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">norm1_kv</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">LayerNorm</span><span class="p">(</span><span class="n">dim</span><span class="p">,</span> <span class="n">elementwise_affine</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cross_attn</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">MultiheadAttention</span><span class="p">(</span><span class="n">dim</span><span class="p">,</span> <span class="n">num_heads</span><span class="p">,</span> <span class="n">batch_first</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">norm2</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">LayerNorm</span><span class="p">(</span><span class="n">dim</span><span class="p">,</span> <span class="n">elementwise_affine</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mlp</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Sequential</span><span class="p">(</span>
+            <span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="n">dim</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">dim</span> <span class="o">*</span> <span class="n">mlp_ratio</span><span class="p">)),</span>
+            <span class="n">nn</span><span class="o">.</span><span class="n">GELU</span><span class="p">(),</span>
+            <span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">dim</span> <span class="o">*</span> <span class="n">mlp_ratio</span><span class="p">),</span> <span class="n">dim</span><span class="p">),</span>
+        <span class="p">)</span>
+
+        <span class="c1"># AdaLN: (γ1, β1, α1, γ2, β2, α2)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">adaln</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Sequential</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">SiLU</span><span class="p">(),</span> <span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="n">dim</span><span class="p">,</span> <span class="mi">6</span> <span class="o">*</span> <span class="n">dim</span><span class="p">))</span>
+        <span class="n">nn</span><span class="o">.</span><span class="n">init</span><span class="o">.</span><span class="n">zeros_</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">adaln</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">weight</span><span class="p">)</span>
+        <span class="n">nn</span><span class="o">.</span><span class="n">init</span><span class="o">.</span><span class="n">zeros_</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">adaln</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">bias</span><span class="p">)</span>
+
+<div class="viewcode-block" id="AdaLNCrossAttentionBlock.forward">
+<a class="viewcode-back" href="../../../../stable_pretraining.backbone/#stable_pretraining.backbone.vit.AdaLNCrossAttentionBlock.forward">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">forward</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">context</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">cond</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
+        <span class="k">assert</span> <span class="n">cond</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+        <span class="n">γ1</span><span class="p">,</span> <span class="n">β1</span><span class="p">,</span> <span class="n">α1</span><span class="p">,</span> <span class="n">γ2</span><span class="p">,</span> <span class="n">β2</span><span class="p">,</span> <span class="n">α2</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">m</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">adaln</span><span class="p">(</span><span class="n">cond</span><span class="p">)</span><span class="o">.</span><span class="n">chunk</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+        <span class="p">]</span>
+
+        <span class="n">h</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">norm1_q</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">γ1</span><span class="p">)</span> <span class="o">+</span> <span class="n">β1</span>
+        <span class="n">kv</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">norm1_kv</span><span class="p">(</span><span class="n">context</span><span class="p">)</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">x</span> <span class="o">+</span> <span class="n">α1</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">cross_attn</span><span class="p">(</span><span class="n">h</span><span class="p">,</span> <span class="n">kv</span><span class="p">,</span> <span class="n">kv</span><span class="p">,</span> <span class="n">need_weights</span><span class="o">=</span><span class="kc">False</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="n">h</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">norm2</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">γ2</span><span class="p">)</span> <span class="o">+</span> <span class="n">β2</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">x</span> <span class="o">+</span> <span class="n">α2</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">mlp</span><span class="p">(</span><span class="n">h</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">x</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="MaskedEncoderOutput">
+<a class="viewcode-back" href="../../../../stable_pretraining.backbone/#stable_pretraining.backbone.vit.MaskedEncoderOutput">[docs]</a>
+<span class="nd">@dataclass</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">MaskedEncoderOutput</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Output from MaskedEncoder forward pass.</span>
+
+<span class="sd">    :ivar encoded: Encoded token representations (B, num_prefix + N_visible, D)</span>
+<span class="sd">    :ivar mask: Binary mask where 1 = masked, 0 = visible (B, N_patches)</span>
+<span class="sd">    :ivar ids_keep: Indices of visible patches (B, N_visible)</span>
+<span class="sd">    :ivar grid_size: Patch grid dimensions (height, width)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">encoded</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span>
+    <span class="n">mask</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span>
+    <span class="n">ids_keep</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span>
+    <span class="n">grid_size</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span></div>
+
+
+
+<div class="viewcode-block" id="MaskedEncoder">
+<a class="viewcode-back" href="../../../../stable_pretraining.backbone/#stable_pretraining.backbone.vit.MaskedEncoder">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">MaskedEncoder</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Vision Transformer encoder with optional masking support.</span>
+
+<span class="sd">    Wraps a timm ViT model and adds flexible masking via :class:`PatchMasking`.</span>
+<span class="sd">    Handles all ViT internals: patch embedding, positional embeddings, prefix</span>
+<span class="sd">    tokens (CLS, registers), and transformer blocks.</span>
+<span class="sd">    :param model_or_model_name: timm model name string or pre-instantiated nn.Module</span>
+<span class="sd">    :param masking: PatchMasking instance. If None, no masking is applied.</span>
+<span class="sd">    :param pretrained: Load pretrained weights (only when model_or_model_name is str)</span>
+<span class="sd">    :param img_size: Override default image size</span>
+<span class="sd">    :param patch_size: Override default patch size (will reinitialize patch_embed)</span>
+<span class="sd">    :param dynamic_img_size: Enable dynamic image size support with pos_embed interpolation</span>
+<span class="sd">    Example::</span>
+<span class="sd">        from spt.backbone import PatchMasking, MaskedEncoder</span>
+
+<span class="sd">        masking = PatchMasking(mask_ratio=0.75, block_size=4)</span>
+<span class="sd">        encoder = MaskedEncoder(</span>
+<span class="sd">            model_or_model_name=&quot;vit_base_patch16_224&quot;,</span>
+<span class="sd">            masking=masking,</span>
+<span class="sd">            pretrained=True,</span>
+<span class="sd">        )</span>
+<span class="sd">        images = torch.randn(4, 3, 224, 224)</span>
+<span class="sd">        output = encoder(images)</span>
+<span class="sd">        print(output.encoded.shape)  # (4, 1 + 49, 768) with 75% masking</span>
+<span class="sd">        print(output.mask.shape)  # (4, 196)</span>
+<span class="sd">        print(output.ids_keep.shape)  # (4, 49)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">model_or_model_name</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;vit_base_patch16_224&quot;</span><span class="p">,</span>
+        <span class="n">masking</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">PatchMasking</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">pretrained</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">img_size</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">patch_size</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">dynamic_img_size</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dynamic_img_size</span> <span class="o">=</span> <span class="n">dynamic_img_size</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">masking</span> <span class="o">=</span> <span class="n">masking</span>
+        <span class="c1"># === Load or use provided encoder ===</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">model_or_model_name</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="n">create_kwargs</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="s2">&quot;pretrained&quot;</span><span class="p">:</span> <span class="n">pretrained</span><span class="p">,</span>
+                <span class="s2">&quot;num_classes&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+                <span class="s2">&quot;dynamic_img_size&quot;</span><span class="p">:</span> <span class="n">dynamic_img_size</span><span class="p">,</span>
+            <span class="p">}</span>
+            <span class="k">if</span> <span class="n">img_size</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">create_kwargs</span><span class="p">[</span><span class="s2">&quot;img_size&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">img_size</span>
+            <span class="k">if</span> <span class="n">patch_size</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">create_kwargs</span><span class="p">[</span><span class="s2">&quot;patch_size&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">patch_size</span>
+                <span class="k">if</span> <span class="n">pretrained</span><span class="p">:</span>
+                    <span class="nb">print</span><span class="p">(</span>
+                        <span class="sa">f</span><span class="s2">&quot;Warning: Changing patch_size to </span><span class="si">{</span><span class="n">patch_size</span><span class="si">}</span><span class="s2"> will reinitialize &quot;</span>
+                        <span class="sa">f</span><span class="s2">&quot;patch_embed weights. Pretrained weights won&#39;t fully apply.&quot;</span>
+                    <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">vit</span> <span class="o">=</span> <span class="n">timm</span><span class="o">.</span><span class="n">create_model</span><span class="p">(</span><span class="n">model_or_model_name</span><span class="p">,</span> <span class="o">**</span><span class="n">create_kwargs</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">vit</span> <span class="o">=</span> <span class="n">model_or_model_name</span>
+            <span class="k">if</span> <span class="n">patch_size</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_rebuild_patch_embed</span><span class="p">(</span><span class="n">patch_size</span><span class="p">,</span> <span class="n">img_size</span><span class="p">)</span>
+            <span class="c1"># Remove classification head if present</span>
+            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">vit</span><span class="p">,</span> <span class="s2">&quot;head&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">vit</span><span class="o">.</span><span class="n">head</span><span class="p">,</span> <span class="s2">&quot;in_features&quot;</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">vit</span><span class="o">.</span><span class="n">head</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Identity</span><span class="p">()</span>
+        <span class="c1"># === Cache encoder properties ===</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">embed_dim</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">vit</span><span class="o">.</span><span class="n">embed_dim</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">patch_embed</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">vit</span><span class="o">.</span><span class="n">patch_embed</span>
+        <span class="n">ps</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">patch_embed</span><span class="o">.</span><span class="n">patch_size</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">patch_size_h</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">patch_size_w</span> <span class="o">=</span> <span class="p">(</span><span class="n">ps</span><span class="p">,</span> <span class="n">ps</span><span class="p">)</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">ps</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span> <span class="k">else</span> <span class="n">ps</span>
+        <span class="n">gs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">patch_embed</span><span class="o">.</span><span class="n">grid_size</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">default_grid_h</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">default_grid_w</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="p">(</span><span class="n">gs</span><span class="p">,</span> <span class="n">gs</span><span class="p">)</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">gs</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span> <span class="k">else</span> <span class="n">gs</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">num_prefix_tokens</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">vit</span><span class="p">,</span> <span class="s2">&quot;num_prefix_tokens&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">has_class_token</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">vit</span><span class="p">,</span> <span class="s2">&quot;has_class_token&quot;</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">num_reg_tokens</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">vit</span><span class="p">,</span> <span class="s2">&quot;num_reg_tokens&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">no_embed_class</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">vit</span><span class="p">,</span> <span class="s2">&quot;no_embed_class&quot;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_rebuild_patch_embed</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">patch_size</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]],</span>
+        <span class="n">img_size</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Rebuild patch embedding with new patch size.&quot;&quot;&quot;</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">timm.layers</span><span class="w"> </span><span class="kn">import</span> <span class="n">PatchEmbed</span>
+
+        <span class="n">old</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">vit</span><span class="o">.</span><span class="n">patch_embed</span>
+        <span class="k">if</span> <span class="n">img_size</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">og</span><span class="p">,</span> <span class="n">op</span> <span class="o">=</span> <span class="n">old</span><span class="o">.</span><span class="n">grid_size</span><span class="p">,</span> <span class="n">old</span><span class="o">.</span><span class="n">patch_size</span>
+            <span class="n">img_size</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="p">(</span><span class="n">og</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">op</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">og</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">op</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">og</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)</span> <span class="k">else</span> <span class="n">og</span> <span class="o">*</span> <span class="n">op</span>
+            <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">vit</span><span class="o">.</span><span class="n">patch_embed</span> <span class="o">=</span> <span class="n">PatchEmbed</span><span class="p">(</span>
+            <span class="n">img_size</span><span class="o">=</span><span class="n">img_size</span><span class="p">,</span>
+            <span class="n">patch_size</span><span class="o">=</span><span class="n">patch_size</span><span class="p">,</span>
+            <span class="n">in_chans</span><span class="o">=</span><span class="n">old</span><span class="o">.</span><span class="n">proj</span><span class="o">.</span><span class="n">in_channels</span><span class="p">,</span>
+            <span class="n">embed_dim</span><span class="o">=</span><span class="n">old</span><span class="o">.</span><span class="n">proj</span><span class="o">.</span><span class="n">out_channels</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">if</span> <span class="n">old</span><span class="o">.</span><span class="n">num_patches</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">vit</span><span class="o">.</span><span class="n">patch_embed</span><span class="o">.</span><span class="n">num_patches</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_resize_pos_embed</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">vit</span><span class="o">.</span><span class="n">patch_embed</span><span class="o">.</span><span class="n">grid_size</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_resize_pos_embed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_grid_size</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Resize positional embeddings to new grid size.&quot;&quot;&quot;</span>
+        <span class="n">old_pos</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">vit</span><span class="o">.</span><span class="n">pos_embed</span>
+        <span class="n">num_prefix</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_prefix_tokens</span> <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">no_embed_class</span> <span class="k">else</span> <span class="mi">0</span>
+        <span class="n">src_patches</span> <span class="o">=</span> <span class="n">old_pos</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">num_prefix</span>
+        <span class="n">src_size</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">src_patches</span><span class="o">**</span><span class="mf">0.5</span><span class="p">)</span>
+        <span class="n">new_pos</span> <span class="o">=</span> <span class="n">interpolate_pos_embed</span><span class="p">(</span>
+            <span class="n">old_pos</span><span class="p">,</span> <span class="p">(</span><span class="n">src_size</span><span class="p">,</span> <span class="n">src_size</span><span class="p">),</span> <span class="n">new_grid_size</span><span class="p">,</span> <span class="n">num_prefix</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">vit</span><span class="o">.</span><span class="n">pos_embed</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Parameter</span><span class="p">(</span><span class="n">new_pos</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_get_grid_size</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">images</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Compute patch grid size from image dimensions.&quot;&quot;&quot;</span>
+        <span class="n">H</span><span class="p">,</span> <span class="n">W</span> <span class="o">=</span> <span class="n">images</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">:]</span>
+        <span class="k">return</span> <span class="n">H</span> <span class="o">//</span> <span class="bp">self</span><span class="o">.</span><span class="n">patch_size_h</span><span class="p">,</span> <span class="n">W</span> <span class="o">//</span> <span class="bp">self</span><span class="o">.</span><span class="n">patch_size_w</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_get_pos_embed</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">grid_h</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">grid_w</span><span class="p">:</span> <span class="nb">int</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Optional</span><span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">],</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get positional embeddings, interpolating if needed for dynamic size.&quot;&quot;&quot;</span>
+        <span class="n">pos_embed</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">vit</span><span class="o">.</span><span class="n">pos_embed</span>
+        <span class="n">num_prefix</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_prefix_tokens</span> <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">no_embed_class</span> <span class="k">else</span> <span class="mi">0</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">dynamic_img_size</span> <span class="ow">and</span> <span class="p">(</span>
+            <span class="n">grid_h</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">default_grid_h</span> <span class="ow">or</span> <span class="n">grid_w</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">default_grid_w</span>
+        <span class="p">):</span>
+            <span class="n">src_patches</span> <span class="o">=</span> <span class="n">pos_embed</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">num_prefix</span>
+            <span class="n">src_size</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">src_patches</span><span class="o">**</span><span class="mf">0.5</span><span class="p">)</span>
+            <span class="n">pos_embed</span> <span class="o">=</span> <span class="n">interpolate_pos_embed</span><span class="p">(</span>
+                <span class="n">pos_embed</span><span class="p">,</span> <span class="p">(</span><span class="n">src_size</span><span class="p">,</span> <span class="n">src_size</span><span class="p">),</span> <span class="p">(</span><span class="n">grid_h</span><span class="p">,</span> <span class="n">grid_w</span><span class="p">),</span> <span class="n">num_prefix</span>
+            <span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">no_embed_class</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span><span class="p">,</span> <span class="n">pos_embed</span>
+        <span class="k">return</span> <span class="p">(</span>
+            <span class="n">pos_embed</span><span class="p">[:,</span> <span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_prefix_tokens</span><span class="p">],</span>
+            <span class="n">pos_embed</span><span class="p">[:,</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_prefix_tokens</span> <span class="p">:],</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_get_prefix_tokens</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">B</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get CLS and register tokens expanded to batch size.&quot;&quot;&quot;</span>
+        <span class="n">tokens</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">has_class_token</span><span class="p">:</span>
+            <span class="n">tokens</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">vit</span><span class="o">.</span><span class="n">cls_token</span><span class="o">.</span><span class="n">expand</span><span class="p">(</span><span class="n">B</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">))</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_reg_tokens</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">tokens</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">vit</span><span class="o">.</span><span class="n">reg_token</span><span class="o">.</span><span class="n">expand</span><span class="p">(</span><span class="n">B</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">torch</span><span class="o">.</span><span class="n">cat</span><span class="p">(</span><span class="n">tokens</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span> <span class="k">if</span> <span class="n">tokens</span> <span class="k">else</span> <span class="kc">None</span>
+
+<div class="viewcode-block" id="MaskedEncoder.forward">
+<a class="viewcode-back" href="../../../../stable_pretraining.backbone/#stable_pretraining.backbone.vit.MaskedEncoder.forward">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">images</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">MaskedEncoderOutput</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Encode images with optional masking.</span>
+
+<span class="sd">        :param images: Input images (B, C, H, W)</span>
+<span class="sd">        :return: MaskedEncoderOutput with encoded tokens and mask info</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">B</span> <span class="o">=</span> <span class="n">images</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">device</span> <span class="o">=</span> <span class="n">images</span><span class="o">.</span><span class="n">device</span>
+        <span class="n">grid_h</span><span class="p">,</span> <span class="n">grid_w</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_grid_size</span><span class="p">(</span><span class="n">images</span><span class="p">)</span>
+        <span class="n">num_patches</span> <span class="o">=</span> <span class="n">grid_h</span> <span class="o">*</span> <span class="n">grid_w</span>
+        <span class="c1"># Patch embed + positional embed</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">patch_embed</span><span class="p">(</span><span class="n">images</span><span class="p">)</span>
+        <span class="n">prefix_pos</span><span class="p">,</span> <span class="n">patch_pos</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_pos_embed</span><span class="p">(</span><span class="n">grid_h</span><span class="p">,</span> <span class="n">grid_w</span><span class="p">)</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">x</span> <span class="o">+</span> <span class="n">patch_pos</span>
+        <span class="c1"># Apply masking (training only)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">training</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">masking</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">mask_out</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">masking</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">grid_h</span><span class="p">,</span> <span class="n">grid_w</span><span class="p">)</span>
+            <span class="n">x</span> <span class="o">=</span> <span class="n">mask_out</span><span class="o">.</span><span class="n">visible</span>
+            <span class="n">mask</span> <span class="o">=</span> <span class="n">mask_out</span><span class="o">.</span><span class="n">mask</span>
+            <span class="n">ids_keep</span> <span class="o">=</span> <span class="n">mask_out</span><span class="o">.</span><span class="n">ids_keep</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">mask</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">B</span><span class="p">,</span> <span class="n">num_patches</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">)</span>
+            <span class="n">ids_keep</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">torch</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">num_patches</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">)</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">expand</span><span class="p">(</span><span class="n">B</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+            <span class="p">)</span>
+        <span class="c1"># Prepend prefix tokens</span>
+        <span class="n">prefix</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_prefix_tokens</span><span class="p">(</span><span class="n">B</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">prefix</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">prefix_pos</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">no_embed_class</span><span class="p">:</span>
+                <span class="n">prefix</span> <span class="o">=</span> <span class="n">prefix</span> <span class="o">+</span> <span class="n">prefix_pos</span>
+            <span class="n">x</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">cat</span><span class="p">([</span><span class="n">prefix</span><span class="p">,</span> <span class="n">x</span><span class="p">],</span> <span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="c1"># Transformer blocks</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">vit</span><span class="o">.</span><span class="n">pos_drop</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">vit</span><span class="o">.</span><span class="n">blocks</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">vit</span><span class="p">,</span> <span class="s2">&quot;blocks&quot;</span><span class="p">)</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">vit</span><span class="o">.</span><span class="n">layers</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">vit</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">MaskedEncoderOutput</span><span class="p">(</span>
+            <span class="n">encoded</span><span class="o">=</span><span class="n">x</span><span class="p">,</span>
+            <span class="n">mask</span><span class="o">=</span><span class="n">mask</span><span class="p">,</span>
+            <span class="n">ids_keep</span><span class="o">=</span><span class="n">ids_keep</span><span class="p">,</span>
+            <span class="n">grid_size</span><span class="o">=</span><span class="p">(</span><span class="n">grid_h</span><span class="p">,</span> <span class="n">grid_w</span><span class="p">),</span>
+        <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="MaskedEncoder.forward_features">
+<a class="viewcode-back" href="../../../../stable_pretraining.backbone/#stable_pretraining.backbone.vit.MaskedEncoder.forward_features">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">forward_features</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">images</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Encode without masking (for inference).&quot;&quot;&quot;</span>
+        <span class="n">was_training</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">training</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">eval</span><span class="p">()</span>
+        <span class="k">with</span> <span class="n">torch</span><span class="o">.</span><span class="n">no_grad</span><span class="p">():</span>
+            <span class="n">output</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">forward</span><span class="p">(</span><span class="n">images</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">was_training</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">train</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">output</span><span class="o">.</span><span class="n">encoded</span></div>
+
+
+<div class="viewcode-block" id="MaskedEncoder.extra_repr">
+<a class="viewcode-back" href="../../../../stable_pretraining.backbone/#stable_pretraining.backbone.vit.MaskedEncoder.extra_repr">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">extra_repr</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;embed_dim=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">embed_dim</span><span class="si">}</span><span class="s2">, &quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;patch_size=(</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">patch_size_h</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">patch_size_w</span><span class="si">}</span><span class="s2">), &quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;num_prefix_tokens=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">num_prefix_tokens</span><span class="si">}</span><span class="s2">, &quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;has_masking=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">masking</span><span class="w"> </span><span class="ow">is</span><span class="w"> </span><span class="ow">not</span><span class="w"> </span><span class="kc">None</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="p">)</span></div>
+</div>
+
 
 
 <div class="viewcode-block" id="AdaLNDecoderBlock">
@@ -407,144 +727,146 @@ document.write(`
 
 
 
-<div class="viewcode-block" id="FlowMatchingDecoder">
-<a class="viewcode-back" href="../../../../stable_pretraining.backbone/#stable_pretraining.backbone.vit.FlowMatchingDecoder">[docs]</a>
-<span class="k">class</span><span class="w"> </span><span class="nc">FlowMatchingDecoder</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Cross-attention decoder with optional flow matching time conditioning.</span>
+<div class="viewcode-block" id="CrossAttentionDecoder">
+<a class="viewcode-back" href="../../../../stable_pretraining.backbone/#stable_pretraining.backbone.vit.CrossAttentionDecoder">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">CrossAttentionDecoder</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Cross-attention decoder with pluggable block type.</span>
 
-<span class="sd">    :param embed_dim: Encoder embedding dimension (input)</span>
-<span class="sd">    :param decoder_embed_dim: Internal decoder dimension</span>
+<span class="sd">    :param input_dim: Input dimension</span>
+<span class="sd">    :param hidden_dim: Internal dimension</span>
 <span class="sd">    :param output_dim: Output dimension</span>
-<span class="sd">    :param num_patches: Total sequence length (for positional embeddings)</span>
-<span class="sd">    :param depth: Number of transformer blocks</span>
+<span class="sd">    :param num_patches: Total patches (for pos embed)</span>
+<span class="sd">    :param depth: Number of blocks</span>
 <span class="sd">    :param num_heads: Attention heads</span>
-<span class="sd">    :param mlp_ratio: MLP expansion ratio</span>
-<span class="sd">    :param use_adaln: Use AdaLN conditioning (requires t in forward)</span>
+<span class="sd">    :param mlp_ratio: MLP expansion</span>
+<span class="sd">    :param block_class: Block class to use (e.g., CrossAttentionBlock, AdaLNCrossAttentionBlock)</span>
 <span class="sd">    :param pos_embed_type: &#39;sincos_1d&#39;, &#39;sincos_2d&#39;, or &#39;learned&#39;</span>
-<span class="sd">    :param grid_size: Grid size for 2D pos embed (auto-inferred if None)</span>
+<span class="sd">    :param grid_size: Grid size for 2D pos embed</span>
+<span class="sd">    :param zero_init_output: Zero-init output projection</span>
+<span class="sd">    :param num_prefix_tokens: extra tokens passed in forward</span>
+<span class="sd">    Example::</span>
+<span class="sd">        # Pure cross-attention (no conditioning)</span>
+<span class="sd">        decoder = CrossAttentionDecoder(</span>
+<span class="sd">            768, 384, 768, 196, depth=4, block_class=CrossAttentionBlock</span>
+<span class="sd">        )</span>
+<span class="sd">        # With AdaLN for flow matching</span>
+<span class="sd">        decoder = CrossAttentionDecoder(</span>
+<span class="sd">            768, 384, 768, 196, depth=4, block_class=AdaLNCrossAttentionBlock</span>
+<span class="sd">        )</span>
+<span class="sd">        # With your full decoder block (self + cross attn)</span>
+<span class="sd">        decoder = CrossAttentionDecoder(</span>
+<span class="sd">            768, 384, 768, 196, depth=4, block_class=AdaLNDecoderBlock</span>
+<span class="sd">        )</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
-        <span class="n">embed_dim</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">768</span><span class="p">,</span>
-        <span class="n">decoder_embed_dim</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">384</span><span class="p">,</span>
+        <span class="n">input_dim</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">768</span><span class="p">,</span>
+        <span class="n">hidden_dim</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">384</span><span class="p">,</span>
         <span class="n">output_dim</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">768</span><span class="p">,</span>
         <span class="n">num_patches</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">196</span><span class="p">,</span>
         <span class="n">depth</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">4</span><span class="p">,</span>
         <span class="n">num_heads</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">6</span><span class="p">,</span>
         <span class="n">mlp_ratio</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">4.0</span><span class="p">,</span>
-        <span class="n">use_adaln</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">block_class</span><span class="p">:</span> <span class="n">Type</span><span class="p">[</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">]</span> <span class="o">=</span> <span class="n">AdaLNCrossAttentionBlock</span><span class="p">,</span>
         <span class="n">pos_embed_type</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;sincos_1d&quot;</span><span class="p">,</span> <span class="s2">&quot;sincos_2d&quot;</span><span class="p">,</span> <span class="s2">&quot;learned&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;sincos_2d&quot;</span><span class="p">,</span>
-        <span class="n">grid_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">grid_size</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">zero_init_output</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="n">num_prefix_tokens</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
     <span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">decoder_embed_dim</span> <span class="o">=</span> <span class="n">decoder_embed_dim</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">use_adaln</span> <span class="o">=</span> <span class="n">use_adaln</span>
-
+        <span class="k">if</span> <span class="n">hidden_dim</span> <span class="o">%</span> <span class="n">num_heads</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;hidden_dim (</span><span class="si">{</span><span class="n">hidden_dim</span><span class="si">}</span><span class="s2">) must be divisible by num_heads (</span><span class="si">{</span><span class="n">num_heads</span><span class="si">}</span><span class="s2">)&quot;</span>
+            <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">hidden_dim</span> <span class="o">=</span> <span class="n">hidden_dim</span>
         <span class="c1"># Projections</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">context_proj</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="n">embed_dim</span><span class="p">,</span> <span class="n">decoder_embed_dim</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">query_proj</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="n">embed_dim</span><span class="p">,</span> <span class="n">decoder_embed_dim</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">output_proj</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="n">decoder_embed_dim</span><span class="p">,</span> <span class="n">output_dim</span><span class="p">)</span>
-        <span class="n">nn</span><span class="o">.</span><span class="n">init</span><span class="o">.</span><span class="n">zeros_</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">output_proj</span><span class="o">.</span><span class="n">weight</span><span class="p">)</span>
-        <span class="n">nn</span><span class="o">.</span><span class="n">init</span><span class="o">.</span><span class="n">zeros_</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">output_proj</span><span class="o">.</span><span class="n">bias</span><span class="p">)</span>
-
+        <span class="bp">self</span><span class="o">.</span><span class="n">context_proj</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="n">input_dim</span><span class="p">,</span> <span class="n">hidden_dim</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">query_proj</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="n">input_dim</span><span class="p">,</span> <span class="n">hidden_dim</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">output_proj</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="n">hidden_dim</span><span class="p">,</span> <span class="n">output_dim</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">zero_init_output</span><span class="p">:</span>
+            <span class="n">nn</span><span class="o">.</span><span class="n">init</span><span class="o">.</span><span class="n">zeros_</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">output_proj</span><span class="o">.</span><span class="n">weight</span><span class="p">)</span>
+            <span class="n">nn</span><span class="o">.</span><span class="n">init</span><span class="o">.</span><span class="n">zeros_</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">output_proj</span><span class="o">.</span><span class="n">bias</span><span class="p">)</span>
         <span class="c1"># Positional embeddings</span>
         <span class="k">if</span> <span class="n">pos_embed_type</span> <span class="o">==</span> <span class="s2">&quot;sincos_2d&quot;</span> <span class="ow">and</span> <span class="n">grid_size</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">grid_size</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">num_patches</span><span class="o">**</span><span class="mf">0.5</span><span class="p">)</span>
             <span class="k">assert</span> <span class="n">grid_size</span><span class="o">**</span><span class="mi">2</span> <span class="o">==</span> <span class="n">num_patches</span>
-
         <span class="k">if</span> <span class="n">pos_embed_type</span> <span class="o">==</span> <span class="s2">&quot;learned&quot;</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">pos_embed</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Parameter</span><span class="p">(</span>
-                <span class="n">torch</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">num_patches</span><span class="p">,</span> <span class="n">decoder_embed_dim</span><span class="p">)</span>
-            <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">pos_embed</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Parameter</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">num_patches</span><span class="p">,</span> <span class="n">hidden_dim</span><span class="p">))</span>
             <span class="n">trunc_normal_</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pos_embed</span><span class="p">,</span> <span class="n">std</span><span class="o">=</span><span class="mf">0.02</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">mode</span> <span class="o">=</span> <span class="s2">&quot;2d&quot;</span> <span class="k">if</span> <span class="n">pos_embed_type</span> <span class="o">==</span> <span class="s2">&quot;sincos_2d&quot;</span> <span class="k">else</span> <span class="s2">&quot;1d&quot;</span>
             <span class="n">pe</span> <span class="o">=</span> <span class="n">get_sincos_pos_embed</span><span class="p">(</span>
-                <span class="n">decoder_embed_dim</span><span class="p">,</span> <span class="n">num_patches</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="n">mode</span><span class="p">,</span> <span class="n">grid_size</span><span class="o">=</span><span class="n">grid_size</span>
+                <span class="n">hidden_dim</span><span class="p">,</span> <span class="n">num_patches</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="n">mode</span><span class="p">,</span> <span class="n">grid_size</span><span class="o">=</span><span class="n">grid_size</span>
             <span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">register_buffer</span><span class="p">(</span><span class="s2">&quot;pos_embed&quot;</span><span class="p">,</span> <span class="n">pe</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="mi">0</span><span class="p">))</span>
-
-        <span class="c1"># Time conditioning (only if needed)</span>
+        <span class="c1"># Time MLP</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">time_mlp</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Sequential</span><span class="p">(</span>
-            <span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="n">decoder_embed_dim</span><span class="p">,</span> <span class="n">decoder_embed_dim</span> <span class="o">*</span> <span class="mi">4</span><span class="p">),</span>
+            <span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="n">hidden_dim</span><span class="p">,</span> <span class="n">hidden_dim</span> <span class="o">*</span> <span class="mi">4</span><span class="p">),</span>
             <span class="n">nn</span><span class="o">.</span><span class="n">GELU</span><span class="p">(),</span>
-            <span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="n">decoder_embed_dim</span> <span class="o">*</span> <span class="mi">4</span><span class="p">,</span> <span class="n">decoder_embed_dim</span><span class="p">),</span>
+            <span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="n">hidden_dim</span> <span class="o">*</span> <span class="mi">4</span><span class="p">,</span> <span class="n">hidden_dim</span><span class="p">),</span>
         <span class="p">)</span>
+        <span class="c1"># Blocks</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">blocks</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">ModuleList</span><span class="p">(</span>
+            <span class="p">[</span><span class="n">block_class</span><span class="p">(</span><span class="n">hidden_dim</span><span class="p">,</span> <span class="n">num_heads</span><span class="p">,</span> <span class="n">mlp_ratio</span><span class="p">)</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">depth</span><span class="p">)]</span>
+        <span class="p">)</span>
+        <span class="c1"># Final norm</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">final_norm</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">LayerNorm</span><span class="p">(</span><span class="n">hidden_dim</span><span class="p">)</span>
+        <span class="c1"># Learnable position embedding for CLS/prefix tokens</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">num_prefix_tokens</span> <span class="o">=</span> <span class="n">num_prefix_tokens</span>
+        <span class="k">if</span> <span class="n">num_prefix_tokens</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">prefix_pos_embed</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Parameter</span><span class="p">(</span>
+                <span class="n">torch</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">num_prefix_tokens</span><span class="p">,</span> <span class="n">hidden_dim</span><span class="p">)</span>
+            <span class="p">)</span>
+            <span class="n">nn</span><span class="o">.</span><span class="n">init</span><span class="o">.</span><span class="n">normal_</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">prefix_pos_embed</span><span class="p">,</span> <span class="n">std</span><span class="o">=</span><span class="mf">0.02</span><span class="p">)</span>
 
-        <span class="c1"># Decoder blocks</span>
-        <span class="k">if</span> <span class="n">use_adaln</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">blocks</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">ModuleList</span><span class="p">(</span>
-                <span class="p">[</span>
-                    <span class="n">AdaLNDecoderBlock</span><span class="p">(</span><span class="n">decoder_embed_dim</span><span class="p">,</span> <span class="n">num_heads</span><span class="p">,</span> <span class="n">mlp_ratio</span><span class="p">)</span>
-                    <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">depth</span><span class="p">)</span>
-                <span class="p">]</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_gather_pos</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">idx</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">num_prefix</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
+        <span class="n">B</span> <span class="o">=</span> <span class="n">idx</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="n">num_prefix</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="c1"># Prefix tokens get learnable pos embed</span>
+            <span class="n">prefix_pos</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">prefix_pos_embed</span><span class="o">.</span><span class="n">expand</span><span class="p">(</span><span class="n">B</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+            <span class="c1"># Patch tokens get gathered pos embed</span>
+            <span class="n">patch_idx</span> <span class="o">=</span> <span class="n">idx</span><span class="p">[:,</span> <span class="n">num_prefix</span><span class="p">:]</span>
+            <span class="n">patch_pos</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">gather</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">pos_embed</span><span class="o">.</span><span class="n">expand</span><span class="p">(</span><span class="n">B</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">),</span>
+                <span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+                <span class="n">index</span><span class="o">=</span><span class="n">patch_idx</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">expand</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">hidden_dim</span><span class="p">),</span>
             <span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">final_norm</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">LayerNorm</span><span class="p">(</span><span class="n">decoder_embed_dim</span><span class="p">,</span> <span class="n">elementwise_affine</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">final_adaln</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Sequential</span><span class="p">(</span>
-                <span class="n">nn</span><span class="o">.</span><span class="n">SiLU</span><span class="p">(),</span> <span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="n">decoder_embed_dim</span><span class="p">,</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">decoder_embed_dim</span><span class="p">)</span>
-            <span class="p">)</span>
-            <span class="n">nn</span><span class="o">.</span><span class="n">init</span><span class="o">.</span><span class="n">zeros_</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">final_adaln</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">weight</span><span class="p">)</span>
-            <span class="n">nn</span><span class="o">.</span><span class="n">init</span><span class="o">.</span><span class="n">zeros_</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">final_adaln</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">bias</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">torch</span><span class="o">.</span><span class="n">cat</span><span class="p">([</span><span class="n">prefix_pos</span><span class="p">,</span> <span class="n">patch_pos</span><span class="p">],</span> <span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">decoder</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">TransformerDecoder</span><span class="p">(</span>
-                <span class="n">nn</span><span class="o">.</span><span class="n">TransformerDecoderLayer</span><span class="p">(</span>
-                    <span class="n">d_model</span><span class="o">=</span><span class="n">decoder_embed_dim</span><span class="p">,</span>
-                    <span class="n">nhead</span><span class="o">=</span><span class="n">num_heads</span><span class="p">,</span>
-                    <span class="n">dim_feedforward</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">decoder_embed_dim</span> <span class="o">*</span> <span class="n">mlp_ratio</span><span class="p">),</span>
-                    <span class="n">batch_first</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-                    <span class="n">norm_first</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-                <span class="p">),</span>
-                <span class="n">num_layers</span><span class="o">=</span><span class="n">depth</span><span class="p">,</span>
-            <span class="p">)</span>
+            <span class="n">idx</span> <span class="o">=</span> <span class="n">idx</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">expand</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">hidden_dim</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">torch</span><span class="o">.</span><span class="n">gather</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pos_embed</span><span class="o">.</span><span class="n">expand</span><span class="p">(</span><span class="n">B</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">),</span> <span class="mi">1</span><span class="p">,</span> <span class="n">idx</span><span class="p">)</span>
 
-<div class="viewcode-block" id="FlowMatchingDecoder.forward">
-<a class="viewcode-back" href="../../../../stable_pretraining.backbone/#stable_pretraining.backbone.vit.FlowMatchingDecoder.forward">[docs]</a>
+<div class="viewcode-block" id="CrossAttentionDecoder.forward">
+<a class="viewcode-back" href="../../../../stable_pretraining.backbone/#stable_pretraining.backbone.vit.CrossAttentionDecoder.forward">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">forward</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">context</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span>
         <span class="n">queries</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span>
         <span class="n">context_idx</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span>
         <span class="n">query_idx</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span>
-        <span class="n">t</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">t</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">num_prefix</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Computes forward pass.</span>
-
-<span class="sd">        :param context: Visible token embeddings (B, N_vis, D)</span>
-<span class="sd">        :param queries: Query embeddings for masked positions (B, N_mask, D)</span>
-<span class="sd">        :param context_idx: Position indices for visible tokens (B, N_vis)</span>
-<span class="sd">        :param query_idx: Position indices for masked tokens (B, N_mask)</span>
-<span class="sd">        :param t: Optional timesteps (B,) in [0, 1] for flow matching</span>
-<span class="sd">        :return: Output embeddings (B, N_mask, D_out)</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="c1"># Project + positional embed</span>
-        <span class="n">context</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">context_proj</span><span class="p">(</span><span class="n">context</span><span class="p">)</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">_gather_pos</span><span class="p">(</span><span class="n">context_idx</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">num_prefix</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">num_prefix</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_prefix_tokens</span>
+        <span class="c1"># Project + pos embed</span>
+        <span class="n">context</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">context_proj</span><span class="p">(</span><span class="n">context</span><span class="p">)</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">_gather_pos</span><span class="p">(</span>
+            <span class="n">context_idx</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_prefix_tokens</span>
+        <span class="p">)</span>
         <span class="n">queries</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">query_proj</span><span class="p">(</span><span class="n">queries</span><span class="p">)</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">_gather_pos</span><span class="p">(</span><span class="n">query_idx</span><span class="p">)</span>
-
-        <span class="c1"># Time conditioning</span>
-        <span class="k">if</span> <span class="n">t</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">t_emb</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">time_mlp</span><span class="p">(</span><span class="n">get_timestep_embed</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">decoder_embed_dim</span><span class="p">))</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">t_emb</span> <span class="o">=</span> <span class="kc">None</span>
-
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">use_adaln</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">t_emb</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;AdaLN requires timestep t&quot;</span><span class="p">)</span>
-            <span class="k">for</span> <span class="n">block</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">blocks</span><span class="p">:</span>
-                <span class="n">queries</span> <span class="o">=</span> <span class="n">block</span><span class="p">(</span><span class="n">queries</span><span class="p">,</span> <span class="n">context</span><span class="p">,</span> <span class="n">t_emb</span><span class="p">)</span>
-            <span class="n">γ</span><span class="p">,</span> <span class="n">β</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">final_adaln</span><span class="p">(</span><span class="n">t_emb</span><span class="p">)</span><span class="o">.</span><span class="n">chunk</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
-            <span class="n">queries</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">final_norm</span><span class="p">(</span><span class="n">queries</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">γ</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span> <span class="o">+</span> <span class="n">β</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">t_emb</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="n">queries</span> <span class="o">=</span> <span class="n">queries</span> <span class="o">+</span> <span class="n">t_emb</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
-            <span class="n">queries</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">decoder</span><span class="p">(</span><span class="n">tgt</span><span class="o">=</span><span class="n">queries</span><span class="p">,</span> <span class="n">memory</span><span class="o">=</span><span class="n">context</span><span class="p">)</span>
-
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_proj</span><span class="p">(</span><span class="n">queries</span><span class="p">)</span></div>
-
-
-    <span class="k">def</span><span class="w"> </span><span class="nf">_gather_pos</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">idx</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
-        <span class="n">idx</span> <span class="o">=</span> <span class="n">idx</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">expand</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">decoder_embed_dim</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">torch</span><span class="o">.</span><span class="n">gather</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pos_embed</span><span class="o">.</span><span class="n">expand</span><span class="p">(</span><span class="n">idx</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">),</span> <span class="mi">1</span><span class="p">,</span> <span class="n">idx</span><span class="p">)</span></div>
+        <span class="c1"># Time embedding (passed to blocks, they decide whether to use it)</span>
+        <span class="n">cond</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">time_mlp</span><span class="p">(</span><span class="n">get_timestep_embed</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">hidden_dim</span><span class="p">))</span>
+            <span class="k">if</span> <span class="n">t</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+            <span class="k">else</span> <span class="kc">None</span>
+        <span class="p">)</span>
+        <span class="c1"># Blocks</span>
+        <span class="k">for</span> <span class="n">block</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">blocks</span><span class="p">:</span>
+            <span class="n">queries</span> <span class="o">=</span> <span class="n">block</span><span class="p">(</span><span class="n">queries</span><span class="p">,</span> <span class="n">context</span><span class="p">,</span> <span class="n">cond</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_proj</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">final_norm</span><span class="p">(</span><span class="n">queries</span><span class="p">))</span></div>
+</div>
 
 
 
@@ -885,29 +1207,37 @@ document.write(`
     <span class="k">def</span><span class="w"> </span><span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">mask</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Applies the decoder transform.</span>
 
-<span class="sd">        :param x: Visible tokens (N, T&#39;, D)</span>
+<span class="sd">        :param x: Either visible tokens only (N, T&#39;, D) or all tokens (N, T, D).</span>
+<span class="sd">                Automatically inferred from shape: if x.shape[1] == mask.shape[1],</span>
+<span class="sd">                assumes full sequence with masked positions to be replaced by [MSK].</span>
 <span class="sd">        :param mask: Binary mask (N, T), 0=kept, 1=masked</span>
 <span class="sd">        :return: Reconstructed full sequence (N, T, D)</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">N</span><span class="p">,</span> <span class="n">T</span> <span class="o">=</span> <span class="n">mask</span><span class="o">.</span><span class="n">shape</span>
+        <span class="n">full_sequence</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">T</span>
 
         <span class="c1"># Project to decoder dim</span>
-        <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">decoder_embed</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>  <span class="c1"># (N, T&#39;, decoder_embed_dim)</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">decoder_embed</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
 
-        <span class="c1"># Build full sequence: place visible tokens and mask tokens</span>
-        <span class="n">tokens</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mask_token</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span><span class="o">.</span><span class="n">expand</span><span class="p">(</span><span class="n">N</span><span class="p">,</span> <span class="n">T</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">clone</span><span class="p">()</span>
-        <span class="n">visible_mask</span> <span class="o">=</span> <span class="o">~</span><span class="n">mask</span><span class="o">.</span><span class="n">bool</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">full_sequence</span><span class="p">:</span>
+            <span class="c1"># x is (N, T, decoder_embed_dim) - replace masked positions with mask token</span>
+            <span class="n">mask_tokens</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mask_token</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span><span class="o">.</span><span class="n">expand</span><span class="p">(</span><span class="n">N</span><span class="p">,</span> <span class="n">T</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+            <span class="n">tokens</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">mask</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">bool</span><span class="p">(),</span> <span class="n">mask_tokens</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># x is (N, T&#39;, decoder_embed_dim) with T&#39; visible tokens</span>
+            <span class="n">tokens</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mask_token</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span><span class="o">.</span><span class="n">expand</span><span class="p">(</span><span class="n">N</span><span class="p">,</span> <span class="n">T</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">clone</span><span class="p">()</span>
+            <span class="n">visible_mask</span> <span class="o">=</span> <span class="o">~</span><span class="n">mask</span><span class="o">.</span><span class="n">bool</span><span class="p">()</span>
 
-        <span class="c1"># Scatter visible tokens back to original positions</span>
-        <span class="n">batch_indices</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">N</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">x</span><span class="o">.</span><span class="n">device</span><span class="p">)[:,</span> <span class="kc">None</span><span class="p">]</span><span class="o">.</span><span class="n">expand_as</span><span class="p">(</span>
-            <span class="n">visible_mask</span>
-        <span class="p">)</span>
-        <span class="n">seq_indices</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">T</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">x</span><span class="o">.</span><span class="n">device</span><span class="p">)[</span><span class="kc">None</span><span class="p">,</span> <span class="p">:]</span><span class="o">.</span><span class="n">expand_as</span><span class="p">(</span><span class="n">visible_mask</span><span class="p">)</span>
+            <span class="n">batch_indices</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">N</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">x</span><span class="o">.</span><span class="n">device</span><span class="p">)[:,</span> <span class="kc">None</span><span class="p">]</span><span class="o">.</span><span class="n">expand_as</span><span class="p">(</span>
+                <span class="n">visible_mask</span>
+            <span class="p">)</span>
+            <span class="n">seq_indices</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">T</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">x</span><span class="o">.</span><span class="n">device</span><span class="p">)[</span><span class="kc">None</span><span class="p">,</span> <span class="p">:]</span><span class="o">.</span><span class="n">expand_as</span><span class="p">(</span>
+                <span class="n">visible_mask</span>
+            <span class="p">)</span>
 
-        <span class="c1"># Efficient vectorized scatter</span>
-        <span class="n">tokens</span><span class="p">[</span><span class="n">batch_indices</span><span class="p">[</span><span class="n">visible_mask</span><span class="p">],</span> <span class="n">seq_indices</span><span class="p">[</span><span class="n">visible_mask</span><span class="p">]]</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span>
-            <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
-        <span class="p">)</span>
+            <span class="n">tokens</span><span class="p">[</span><span class="n">batch_indices</span><span class="p">[</span><span class="n">visible_mask</span><span class="p">],</span> <span class="n">seq_indices</span><span class="p">[</span><span class="n">visible_mask</span><span class="p">]]</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span>
+                <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+            <span class="p">)</span>
 
         <span class="c1"># Add positional embeddings + transform</span>
         <span class="n">tokens</span> <span class="o">=</span> <span class="n">tokens</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">pos_embed</span>
