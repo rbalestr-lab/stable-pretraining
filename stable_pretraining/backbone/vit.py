@@ -1,15 +1,18 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from typing import Optional, Tuple, Literal
+from typing import Optional, Tuple, Literal, Union
+import timm
 from timm.models.vision_transformer import Block
 from timm.layers import trunc_normal_, Mlp
-
+from spt.backbone.patch_masking import PatchMasking
+from dataclasses import dataclass
 from .pos_embed import (
     get_sincos_pos_embed,
     get_1d_sincos_pos_embed,
     get_2d_sincos_pos_embed,
     get_timestep_embed,
+    interpolate_pos_embed,
 )
 
 __all__ = [
@@ -17,7 +20,233 @@ __all__ = [
     "TransformerPredictor",
     "AdaLNDecoderBlock",
     "FlowMatchingDecoder",
+    "MaskedEncoder",
+    "MaskedEncoderOutput",
 ]
+
+
+@dataclass
+class MaskedEncoderOutput:
+    """Output from MaskedEncoder forward pass.
+
+    :ivar encoded: Encoded token representations (B, num_prefix + N_visible, D)
+    :ivar mask: Binary mask where 1 = masked, 0 = visible (B, N_patches)
+    :ivar ids_keep: Indices of visible patches (B, N_visible)
+    :ivar grid_size: Patch grid dimensions (height, width)
+    """
+
+    encoded: torch.Tensor
+    mask: torch.Tensor
+    ids_keep: torch.Tensor
+    grid_size: Tuple[int, int]
+
+
+class MaskedEncoder(nn.Module):
+    """Vision Transformer encoder with optional masking support.
+
+    Wraps a timm ViT model and adds flexible masking via :class:`PatchMasking`.
+    Handles all ViT internals: patch embedding, positional embeddings, prefix
+    tokens (CLS, registers), and transformer blocks.
+    :param model_or_model_name: timm model name string or pre-instantiated nn.Module
+    :param masking: PatchMasking instance. If None, no masking is applied.
+    :param pretrained: Load pretrained weights (only when model_or_model_name is str)
+    :param img_size: Override default image size
+    :param patch_size: Override default patch size (will reinitialize patch_embed)
+    :param dynamic_img_size: Enable dynamic image size support with pos_embed interpolation
+    Example::
+        from spt.backbone import PatchMasking, MaskedEncoder
+
+        masking = PatchMasking(mask_ratio=0.75, block_size=4)
+        encoder = MaskedEncoder(
+            model_or_model_name="vit_base_patch16_224",
+            masking=masking,
+            pretrained=True,
+        )
+        images = torch.randn(4, 3, 224, 224)
+        output = encoder(images)
+        print(output.encoded.shape)  # (4, 1 + 49, 768) with 75% masking
+        print(output.mask.shape)  # (4, 196)
+        print(output.ids_keep.shape)  # (4, 49)
+    """
+
+    def __init__(
+        self,
+        model_or_model_name: Union[str, nn.Module] = "vit_base_patch16_224",
+        masking: Optional[PatchMasking] = None,
+        pretrained: bool = False,
+        img_size: Optional[Union[int, Tuple[int, int]]] = None,
+        patch_size: Optional[Union[int, Tuple[int, int]]] = None,
+        dynamic_img_size: bool = False,
+    ):
+        super().__init__()
+        self.dynamic_img_size = dynamic_img_size
+        self.masking = masking
+        # === Load or use provided encoder ===
+        if isinstance(model_or_model_name, str):
+            create_kwargs = {
+                "pretrained": pretrained,
+                "num_classes": 0,
+                "dynamic_img_size": dynamic_img_size,
+            }
+            if img_size is not None:
+                create_kwargs["img_size"] = img_size
+            if patch_size is not None:
+                create_kwargs["patch_size"] = patch_size
+                if pretrained:
+                    print(
+                        f"Warning: Changing patch_size to {patch_size} will reinitialize "
+                        f"patch_embed weights. Pretrained weights won't fully apply."
+                    )
+            self.vit = timm.create_model(model_or_model_name, **create_kwargs)
+        else:
+            self.vit = model_or_model_name
+            if patch_size is not None:
+                self._rebuild_patch_embed(patch_size, img_size)
+            # Remove classification head if present
+            if hasattr(self.vit, "head") and hasattr(self.vit.head, "in_features"):
+                self.vit.head = nn.Identity()
+        # === Cache encoder properties ===
+        self.embed_dim = self.vit.embed_dim
+        self.patch_embed = self.vit.patch_embed
+        ps = self.patch_embed.patch_size
+        self.patch_size_h, self.patch_size_w = (ps, ps) if isinstance(ps, int) else ps
+        gs = self.patch_embed.grid_size
+        self.default_grid_h, self.default_grid_w = (
+            (gs, gs) if isinstance(gs, int) else gs
+        )
+        self.num_prefix_tokens = getattr(self.vit, "num_prefix_tokens", 1)
+        self.has_class_token = getattr(self.vit, "has_class_token", True)
+        self.num_reg_tokens = getattr(self.vit, "num_reg_tokens", 0)
+        self.no_embed_class = getattr(self.vit, "no_embed_class", False)
+
+    def _rebuild_patch_embed(
+        self,
+        patch_size: Union[int, Tuple[int, int]],
+        img_size: Optional[Union[int, Tuple[int, int]]] = None,
+    ) -> None:
+        """Rebuild patch embedding with new patch size."""
+        from timm.layers import PatchEmbed
+
+        old = self.vit.patch_embed
+        if img_size is None:
+            og, op = old.grid_size, old.patch_size
+            img_size = (
+                (og[0] * op[0], og[1] * op[1]) if isinstance(og, tuple) else og * op
+            )
+        self.vit.patch_embed = PatchEmbed(
+            img_size=img_size,
+            patch_size=patch_size,
+            in_chans=old.proj.in_channels,
+            embed_dim=old.proj.out_channels,
+        )
+        if old.num_patches != self.vit.patch_embed.num_patches:
+            self._resize_pos_embed(self.vit.patch_embed.grid_size)
+
+    def _resize_pos_embed(self, new_grid_size: Tuple[int, int]) -> None:
+        """Resize positional embeddings to new grid size."""
+        old_pos = self.vit.pos_embed
+        num_prefix = self.num_prefix_tokens if not self.no_embed_class else 0
+        src_patches = old_pos.shape[1] - num_prefix
+        src_size = int(src_patches**0.5)
+        new_pos = interpolate_pos_embed(
+            old_pos, (src_size, src_size), new_grid_size, num_prefix
+        )
+        self.vit.pos_embed = nn.Parameter(new_pos)
+
+    def _get_grid_size(self, images: torch.Tensor) -> Tuple[int, int]:
+        """Compute patch grid size from image dimensions."""
+        H, W = images.shape[-2:]
+        return H // self.patch_size_h, W // self.patch_size_w
+
+    def _get_pos_embed(
+        self, grid_h: int, grid_w: int
+    ) -> Tuple[Optional[torch.Tensor], torch.Tensor]:
+        """Get positional embeddings, interpolating if needed for dynamic size."""
+        pos_embed = self.vit.pos_embed
+        num_prefix = self.num_prefix_tokens if not self.no_embed_class else 0
+        if self.dynamic_img_size and (
+            grid_h != self.default_grid_h or grid_w != self.default_grid_w
+        ):
+            src_patches = pos_embed.shape[1] - num_prefix
+            src_size = int(src_patches**0.5)
+            pos_embed = interpolate_pos_embed(
+                pos_embed, (src_size, src_size), (grid_h, grid_w), num_prefix
+            )
+        if self.no_embed_class:
+            return None, pos_embed
+        return (
+            pos_embed[:, : self.num_prefix_tokens],
+            pos_embed[:, self.num_prefix_tokens :],
+        )
+
+    def _get_prefix_tokens(self, B: int) -> Optional[torch.Tensor]:
+        """Get CLS and register tokens expanded to batch size."""
+        tokens = []
+        if self.has_class_token:
+            tokens.append(self.vit.cls_token.expand(B, -1, -1))
+        if self.num_reg_tokens > 0:
+            tokens.append(self.vit.reg_token.expand(B, -1, -1))
+        return torch.cat(tokens, dim=1) if tokens else None
+
+    def forward(self, images: torch.Tensor) -> MaskedEncoderOutput:
+        """Encode images with optional masking.
+
+        :param images: Input images (B, C, H, W)
+        :return: MaskedEncoderOutput with encoded tokens and mask info
+        """
+        B = images.shape[0]
+        device = images.device
+        grid_h, grid_w = self._get_grid_size(images)
+        num_patches = grid_h * grid_w
+        # Patch embed + positional embed
+        x = self.patch_embed(images)
+        prefix_pos, patch_pos = self._get_pos_embed(grid_h, grid_w)
+        x = x + patch_pos
+        # Apply masking (training only)
+        if self.training and self.masking is not None:
+            mask_out = self.masking(x, grid_h, grid_w)
+            x = mask_out.visible
+            mask = mask_out.mask
+            ids_keep = mask_out.ids_keep
+        else:
+            mask = torch.zeros(B, num_patches, device=device)
+            ids_keep = (
+                torch.arange(num_patches, device=device).unsqueeze(0).expand(B, -1)
+            )
+        # Prepend prefix tokens
+        prefix = self._get_prefix_tokens(B)
+        if prefix is not None:
+            if prefix_pos is not None and not self.no_embed_class:
+                prefix = prefix + prefix_pos
+            x = torch.cat([prefix, x], dim=1)
+        # Transformer blocks
+        x = self.vit.pos_drop(x)
+        x = self.vit.blocks(x) if hasattr(self.vit, "blocks") else self.vit.layers(x)
+        x = self.vit.norm(x)
+        return MaskedEncoderOutput(
+            encoded=x,
+            mask=mask,
+            ids_keep=ids_keep,
+            grid_size=(grid_h, grid_w),
+        )
+
+    def forward_features(self, images: torch.Tensor) -> torch.Tensor:
+        """Encode without masking (for inference)."""
+        was_training = self.training
+        self.eval()
+        with torch.no_grad():
+            output = self.forward(images)
+        if was_training:
+            self.train()
+        return output.encoded
+
+    def extra_repr(self) -> str:
+        return (
+            f"embed_dim={self.embed_dim}, "
+            f"patch_size=({self.patch_size_h}, {self.patch_size_w}), "
+            f"num_prefix_tokens={self.num_prefix_tokens}, "
+            f"has_masking={self.masking is not None}"
+        )
 
 
 class AdaLNDecoderBlock(nn.Module):

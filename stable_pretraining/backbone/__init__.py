@@ -29,7 +29,7 @@ from .utils import (
     register_lr_scale_hook,
     HiddenStateExtractor,
 )
-from .vit import MAEDecoder
+from .vit import MAEDecoder, FlowMatchingDecoder, TransformerPredictor
 from .aggregator import TensorAggregator
 
 __all__ = [
@@ -53,6 +53,8 @@ __all__ = [
     HiddenStateExtractor,
     MAEDecoder,
     PatchMasking,
+    FlowMatchingDecoder,
+    TransformerPredictor,
 ]
 
 if _MAE_AVAILABLE:
