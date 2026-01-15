@@ -206,6 +206,10 @@ class Module(pl.LightningModule):
         When multiple optimizers are configured, the same loss is used for all of them.
         Each optimizer updates its assigned parameters based on gradients from this joint loss.
         """
+        if type(batch) is not dict:
+            msg = f"batch is expected to be a dict! Not as {type(batch)}"
+            logging.warning(msg)
+            raise ValueError(msg)
         batch["batch_idx"] = batch_idx
         state = self(batch, stage="fit")
 
@@ -223,12 +227,15 @@ class Module(pl.LightningModule):
         elif not isinstance(schedulers, (list, tuple)):
             schedulers = [schedulers]
 
-        if len(optimizers) != len(schedulers):
+        if len(optimizers) > 1 and (len(optimizers) != len(schedulers)):
             raise ValueError(
-                "We need as many schedulers as optimizers!"
+                "When using more than one optimizer,"
+                " we need as many schedulers as optimizers!"
                 "if you don't want to use one, either use a "
                 "ConstantLR, or return None"
             )
+        elif len(optimizers) == 1 and len(schedulers) == 0:
+            schedulers = [None]
 
         # Compute gradients once for the joint loss
         self.manual_backward(state["loss"])
@@ -303,7 +310,10 @@ class Module(pl.LightningModule):
                 freq = getattr(self.trainer, "accumulate_grad_batches_", freq)
                 freq = max(int(freq), 1)
                 # config priority
-                freq = self.optim.get("frequency", freq)
+                if hasattr(self, "optim"):
+                    freq = self.optim.get("frequency", freq)
+                else:
+                    freq = 1
                 self._optimizer_frequencies[name] = int(freq)
 
         table = PrettyTable()

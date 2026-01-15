@@ -16,6 +16,7 @@ from .probe import (
     AutoLinearClassifier,
     AutoTuneMLP,
 )
+from .patch_masking import PatchMasking
 from .utils import (
     EvalOnly,
     FeaturesConcat,
@@ -51,6 +52,7 @@ __all__ = [
     AutoTuneMLP,
     HiddenStateExtractor,
     MAEDecoder,
+    PatchMasking,
 ]
 
 if _MAE_AVAILABLE:

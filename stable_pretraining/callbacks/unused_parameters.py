@@ -12,6 +12,8 @@ class LogUnusedParametersOnce(Callback):
     - Registers hooks on all leaf parameters (requires_grad=True).
     - After the first backward pass, logs unused parameters via loguru.
     - Removes all hooks and disables itself for the rest of training.
+
+    Works with both automatic and manual optimization.
     """
 
     def __init__(self, verbose: bool = True):
@@ -20,16 +22,17 @@ class LogUnusedParametersOnce(Callback):
         self._used_flags: Dict[nn.Parameter, bool] = {}
         self._enabled: bool = True
         self._verbose = verbose
+        self._backward_called: bool = False
 
     def _register_hooks(self, model: nn.Module):
         """Attach hooks to all leaf parameters that require gradient."""
         assert not self._hooks, "Hooks already registered"
+        self._backward_called = False
 
         for name, p in model.named_parameters():
             if not p.requires_grad:
                 continue
             if not p.is_leaf:
-                # Only track leaf parameters, those are relevant for DDP warnings
                 continue
 
             self._used_flags[p] = False
@@ -37,6 +40,7 @@ class LogUnusedParametersOnce(Callback):
             def make_hook(param):
                 def hook(grad):
                     self._used_flags[param] = True
+                    self._backward_called = True
 
                 return hook
 
@@ -58,7 +62,6 @@ class LogUnusedParametersOnce(Callback):
 
     def _report_and_disable(self, pl_module: nn.Module):
         """Report unused parameters to loguru and disable further tracking."""
-        # Build map name -> param for convenience
         name_by_param = {p: n for n, p in pl_module.named_parameters()}
 
         unused_names = [
@@ -79,30 +82,48 @@ class LogUnusedParametersOnce(Callback):
             for name in unused_names:
                 logger.warning(f"  - {name}")
 
-        # Clean up hooks and disable
         self._remove_hooks()
         self._enabled = False
         if self._verbose:
             logger.info("[LogUnusedParametersOnce] Hooks removed, callback disabled.")
-
-    # --- Lightning hooks ---
 
     def on_train_batch_start(self, trainer, pl_module, batch, batch_idx):
         """Register hooks right before the first training batch starts."""
         if not self._enabled:
             return
 
-        # Only do this once, on the very first train batch of the whole run
         if trainer.global_step == 0 and batch_idx == 0:
-            # Ensure clean state
             self._remove_hooks()
             self._used_flags.clear()
             self._register_hooks(pl_module)
 
     def on_after_backward(self, trainer, pl_module):
-        """After the first backward pass, report unused params and detach hooks."""
+        """After backward pass, report unused params (automatic optimization)."""
         if not self._enabled:
             return
 
-        # Only report once, right after the first backward call
         self._report_and_disable(pl_module)
+
+    def on_train_batch_end(self, trainer, pl_module, outputs, batch, batch_idx):
+        """Fallback for manual optimization - check after first batch completes."""
+        if not self._enabled:
+            return
+
+        # If hooks are still registered, on_after_backward wasn't called (manual optimization)
+        if len(self._hooks) == 0:
+            return
+
+        if not self._backward_called:
+            logger.warning(
+                "[LogUnusedParametersOnce] No gradient hooks fired during the first "
+                "training step. This likely means backward() was never called. "
+                "Cannot verify unused parameters."
+            )
+            self._remove_hooks()
+            self._enabled = False
+            if self._verbose:
+                logger.info(
+                    "[LogUnusedParametersOnce] Hooks removed, callback disabled."
+                )
+        else:
+            self._report_and_disable(pl_module)

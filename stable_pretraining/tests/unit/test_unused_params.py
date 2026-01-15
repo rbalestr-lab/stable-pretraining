@@ -1,115 +1,38 @@
 # test_log_unused_parameters_once.py
 
 import pytest
+import sys
+import tempfile
 import torch
 from torch import nn
 from torch.utils.data import DataLoader, Dataset
+from contextlib import contextmanager
 
 import lightning.pytorch as pl
-from lightning.pytorch.callbacks import Callback
+import stable_pretraining as spt
 
 from loguru import logger
 
 
-# ---- Bring in the callback implementation under test ----
+@contextmanager
+def capture_loguru():
+    """Context manager to capture loguru logs."""
+    messages = []
 
+    def sink(message):
+        messages.append(str(message))
 
-class LogUnusedParametersOnce(Callback):
-    """Lightning callback that logs parameters which do NOT receive gradients.
-
-    on the first training batch only.
-
-    - Registers hooks on all leaf parameters (requires_grad=True).
-    - After the first backward pass, logs unused parameters via loguru.
-    - Removes all hooks and disables itself for the rest of training.
-    """
-
-    def __init__(self, verbose: bool = True):
-        super().__init__()
-        self._hooks = []
-        self._used_flags = {}
-        self._enabled = True
-        self._verbose = verbose
-
-    def _register_hooks(self, model: nn.Module):
-        assert not self._hooks, "Hooks already registered"
-
-        for name, p in model.named_parameters():
-            if not p.requires_grad:
-                continue
-            if not p.is_leaf:
-                continue
-
-            self._used_flags[p] = False
-
-            def make_hook(param):
-                def hook(grad):
-                    self._used_flags[param] = True
-
-                return hook
-
-            h = p.register_hook(make_hook(p))
-            self._hooks.append(h)
-
-        if self._verbose:
-            logger.info(
-                f"[LogUnusedParametersOnce] Registered hooks on "
-                f"{len(self._used_flags)} leaf parameters."
-            )
-
-    def _remove_hooks(self):
-        for h in self._hooks:
-            h.remove()
-        self._hooks.clear()
-        self._used_flags.clear()
-
-    def _report_and_disable(self, pl_module: nn.Module):
-        name_by_param = {p: n for n, p in pl_module.named_parameters()}
-
-        unused_names = [
-            name_by_param[p] for p, used in self._used_flags.items() if not used
-        ]
-
-        if not unused_names:
-            logger.info(
-                "[LogUnusedParametersOnce] All tracked parameters received gradients "
-                "on the first backward pass."
-            )
-        else:
-            logger.warning(
-                "[LogUnusedParametersOnce] The following parameters did NOT receive "
-                "gradients on the first backward pass (potentially causing "
-                "Lightning's 'unused parameters' error):"
-            )
-            for name in unused_names:
-                logger.warning(f"  - {name}")
-
-        self._remove_hooks()
-        self._enabled = False
-        if self._verbose:
-            logger.info("[LogUnusedParametersOnce] Hooks removed, callback disabled.")
-
-    def on_train_batch_start(self, trainer, pl_module, batch, batch_idx):
-        if not self._enabled:
-            return
-
-        if trainer.global_step == 0 and batch_idx == 0:
-            self._remove_hooks()
-            self._used_flags.clear()
-            self._register_hooks(pl_module)
-
-    def on_after_backward(self, trainer, pl_module):
-        if not self._enabled:
-            return
-
-        self._report_and_disable(pl_module)
-
-
-# ---- Minimal dataset and LightningModule fixtures ----
+    logger.remove()
+    handler_id = logger.add(sink, format="{message}")
+    try:
+        yield messages
+    finally:
+        logger.remove(handler_id)
+        logger.add(sys.stderr)
 
 
 class RandomDataset(Dataset):
-    """Minimal testing class."""
+    """Minimal testing class that returns dict batches."""
 
     def __init__(self, length: int = 16, in_dim: int = 8, out_dim: int = 4):
         self.length = length
@@ -120,13 +43,17 @@ class RandomDataset(Dataset):
         return self.length
 
     def __getitem__(self, idx):
-        x = torch.randn(self.in_dim)
-        y = torch.randint(0, self.out_dim, (1,)).item()
-        return x, y
+        return {
+            "x": torch.randn(self.in_dim),
+            "y": torch.randint(0, self.out_dim, (1,)).item(),
+        }
 
 
-class SimpleModelAllUsed(pl.LightningModule):
-    """Model where all parameters are used for the loss."""
+# ---- Automatic Optimization Models (plain LightningModule) ----
+
+
+class AutoModelAllUsed(pl.LightningModule):
+    """Model with automatic optimization where all parameters are used."""
 
     def __init__(self, in_dim: int = 8, out_dim: int = 4):
         super().__init__()
@@ -137,9 +64,8 @@ class SimpleModelAllUsed(pl.LightningModule):
         return self.layer(x)
 
     def training_step(self, batch, batch_idx):
-        x, y = batch
-        logits = self(x)
-        loss = self.loss_fn(logits, y)
+        logits = self(batch["x"])
+        loss = self.loss_fn(logits, batch["y"])
         self.log("train_loss", loss)
         return loss
 
@@ -147,24 +73,21 @@ class SimpleModelAllUsed(pl.LightningModule):
         return torch.optim.SGD(self.parameters(), lr=0.1)
 
 
-class ModelWithUnusedParam(pl.LightningModule):
-    """Model that contains a parameter that does not affect the loss."""
+class AutoModelWithUnusedParam(pl.LightningModule):
+    """Model with automatic optimization that has unused parameters."""
 
     def __init__(self, in_dim: int = 8, out_dim: int = 4):
         super().__init__()
         self.used_layer = nn.Linear(in_dim, out_dim)
-        # This layer is never used in forward -> its parameters should remain without gradients
         self.unused_layer = nn.Linear(in_dim, out_dim)
         self.loss_fn = nn.CrossEntropyLoss()
 
     def forward(self, x):
-        # Only use used_layer
         return self.used_layer(x)
 
     def training_step(self, batch, batch_idx):
-        x, y = batch
-        logits = self(x)
-        loss = self.loss_fn(logits, y)
+        logits = self(batch["x"])
+        loss = self.loss_fn(logits, batch["y"])
         self.log("train_loss", loss)
         return loss
 
@@ -172,102 +95,181 @@ class ModelWithUnusedParam(pl.LightningModule):
         return torch.optim.SGD(self.parameters(), lr=0.1)
 
 
-def _make_trainer(callback: Callback, max_steps: int = 1):
+# ---- Manual Optimization Models (spt.Module) ----
+
+
+class ManualModelAllUsed(spt.Module):
+    """Model with manual optimization where all parameters are used."""
+
+    def __init__(self, in_dim: int = 8, out_dim: int = 4):
+        super().__init__()
+        self.layer = nn.Linear(in_dim, out_dim)
+        self.loss_fn = nn.CrossEntropyLoss()
+
+    def forward(self, batch, stage):
+        logits = self.layer(batch["x"])
+        loss = self.loss_fn(logits, batch["y"])
+        return {"loss": loss}
+
+    def configure_optimizers(self):
+        return torch.optim.SGD(self.parameters(), lr=0.1)
+
+
+class ManualModelWithUnusedParam(spt.Module):
+    """Model with manual optimization that has unused parameters."""
+
+    def __init__(self, in_dim: int = 8, out_dim: int = 4):
+        super().__init__()
+        self.used_layer = nn.Linear(in_dim, out_dim)
+        self.unused_layer = nn.Linear(in_dim, out_dim)
+        self.loss_fn = nn.CrossEntropyLoss()
+
+    def forward(self, batch, stage):
+        logits = self.used_layer(batch["x"])
+        loss = self.loss_fn(logits, batch["y"])
+        return {"loss": loss}
+
+    def configure_optimizers(self):
+        return torch.optim.SGD(self.parameters(), lr=0.1)
+
+
+class ManualModelNoBackward(spt.Module):
+    """Model with manual optimization that never calls backward."""
+
+    def __init__(self, in_dim: int = 8, out_dim: int = 4):
+        super().__init__()
+        self.layer = nn.Linear(in_dim, out_dim)
+        self.loss_fn = nn.CrossEntropyLoss()
+
+    def forward(self, batch, stage):
+        logits = self.layer(batch["x"])
+        loss = self.loss_fn(logits, batch["y"])
+        return {"loss": loss.detach()}  # Detached = no gradients flow
+
+    def configure_optimizers(self):
+        return torch.optim.SGD(self.parameters(), lr=0.1)
+
+
+# ---- Trainer Utilities ----
+
+
+def _make_trainer(limit_train_batches: int = 1):
     """Utility to create a tiny trainer for unit tests."""
     return pl.Trainer(
         accelerator="cpu",
         max_epochs=1,
-        limit_train_batches=1,
+        limit_train_batches=limit_train_batches,
         limit_val_batches=0,
         enable_checkpointing=False,
-        logger=False,
         enable_model_summary=False,
-        callbacks=[callback],
+        enable_progress_bar=False,
+        logger=False,
         log_every_n_steps=1,
+        default_root_dir=tempfile.gettempdir(),
     )
 
 
-# ---- Tests ----
+# ---- Tests: Automatic Optimization ----
 
 
 @pytest.mark.unit
-def test_all_parameters_used(caplog):
-    """All parameters receive grads -> callback should log 'all used' and no unused names."""
-    callback = LogUnusedParametersOnce(verbose=True)
-    model = SimpleModelAllUsed()
+def test_auto_all_parameters_used():
+    """Automatic optimization: all parameters receive grads."""
+    model = AutoModelAllUsed()
     dataset = RandomDataset()
     loader = DataLoader(dataset, batch_size=4)
+    trainer = _make_trainer()
 
-    trainer = _make_trainer(callback)
-    trainer.fit(model, train_dataloaders=loader)
+    with capture_loguru() as messages:
+        trainer.fit(model, train_dataloaders=loader)
 
-    # Ensure callback disabled after first backward
-    assert not callback._enabled
-    assert len(callback._hooks) == 0
-    assert callback._used_flags == {}
-
-    # Check logs contain "All tracked parameters received gradients"
-    text = caplog.text
-    assert "[LogUnusedParametersOnce] All tracked parameters received gradients" in text
-    # Should not contain per-parameter "did NOT receive gradients" warnings
+    text = "\n".join(messages)
+    assert "All tracked parameters received gradients" in text
     assert "did NOT receive gradients" not in text
 
 
 @pytest.mark.unit
-def test_unused_parameters_logged(caplog):
-    """ModelWithUnusedParam has some parameters unused -> they should be logged."""
-    callback = LogUnusedParametersOnce(verbose=True)
-    model = ModelWithUnusedParam()
+def test_auto_unused_parameters_logged():
+    """Automatic optimization: unused parameters are logged."""
+    model = AutoModelWithUnusedParam()
     dataset = RandomDataset()
     loader = DataLoader(dataset, batch_size=4)
+    trainer = _make_trainer()
 
-    trainer = _make_trainer(callback)
-    trainer.fit(model, train_dataloaders=loader)
+    with capture_loguru() as messages:
+        trainer.fit(model, train_dataloaders=loader)
 
-    assert not callback._enabled
-    assert len(callback._hooks) == 0
-    assert callback._used_flags == {}
-
-    text = caplog.text
-
-    # Should contain the main warning header
+    text = "\n".join(messages)
     assert "did NOT receive gradients on the first backward pass" in text
 
-    # All params of unused_layer should appear in logs
     for name, _ in model.unused_layer.named_parameters():
         full_name = f"unused_layer.{name}"
         assert full_name in text
 
 
 @pytest.mark.unit
-def test_callback_runs_only_once(caplog):
-    """Callback should register hooks and report only once, even if trainer runs multiple steps."""
-
-    # Make a trainer that will do 2 steps, but callback should disable after first step
-    class TwoStepTrainer(pl.Trainer):
-        pass
-
-    callback = LogUnusedParametersOnce(verbose=True)
-    model = SimpleModelAllUsed()
+def test_auto_callback_runs_only_once():
+    """Automatic optimization: callback only runs once across multiple batches."""
+    model = AutoModelAllUsed()
     dataset = RandomDataset(length=32)
     loader = DataLoader(dataset, batch_size=4)
+    trainer = _make_trainer(limit_train_batches=2)
 
-    trainer = pl.Trainer(
-        accelerator="cpu",
-        max_epochs=1,
-        limit_train_batches=2,
-        enable_checkpointing=False,
-        logger=False,
-        enable_model_summary=False,
-        callbacks=[callback],
-        log_every_n_steps=1,
-    )
+    with capture_loguru() as messages:
+        trainer.fit(model, train_dataloaders=loader)
 
-    trainer.fit(model, train_dataloaders=loader)
+    text = "\n".join(messages)
+    assert text.count("Hooks removed, callback disabled.") == 1
 
-    text = caplog.text
 
-    # Should see registration once
-    assert text.count("Registered hooks on") == 1
-    # Should see the disable log once
+# ---- Tests: Manual Optimization ----
+
+
+@pytest.mark.unit
+def test_manual_all_parameters_used():
+    """Manual optimization: all parameters receive grads."""
+    model = ManualModelAllUsed()
+    dataset = RandomDataset()
+    loader = DataLoader(dataset, batch_size=4)
+    trainer = _make_trainer()
+
+    with capture_loguru() as messages:
+        trainer.fit(model, train_dataloaders=loader)
+
+    text = "\n".join(messages)
+    assert "All tracked parameters received gradients" in text
+    assert "did NOT receive gradients" not in text
+
+
+@pytest.mark.unit
+def test_manual_unused_parameters_logged():
+    """Manual optimization: unused parameters are logged."""
+    model = ManualModelWithUnusedParam()
+    dataset = RandomDataset()
+    loader = DataLoader(dataset, batch_size=4)
+    trainer = _make_trainer()
+
+    with capture_loguru() as messages:
+        trainer.fit(model, train_dataloaders=loader)
+
+    text = "\n".join(messages)
+    assert "did NOT receive gradients on the first backward pass" in text
+
+    for name, _ in model.unused_layer.named_parameters():
+        full_name = f"unused_layer.{name}"
+        assert full_name in text
+
+
+@pytest.mark.unit
+def test_manual_callback_runs_only_once():
+    """Manual optimization: callback only runs once across multiple batches."""
+    model = ManualModelAllUsed()
+    dataset = RandomDataset(length=32)
+    loader = DataLoader(dataset, batch_size=4)
+    trainer = _make_trainer(limit_train_batches=2)
+
+    with capture_loguru() as messages:
+        trainer.fit(model, train_dataloaders=loader)
+
+    text = "\n".join(messages)
     assert text.count("Hooks removed, callback disabled.") == 1

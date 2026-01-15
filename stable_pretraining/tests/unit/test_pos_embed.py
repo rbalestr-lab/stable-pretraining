@@ -65,7 +65,7 @@ class TestGet2DSincosEmbed:
         assert torch.allclose(pe[0], torch.zeros(64))
 
     def test_requires_divisible_by_4(self):
-        with pytest.raises(AssertionError):
+        with pytest.raises(ValueError):
             get_2d_sincos_pos_embed(embed_dim=65, grid_size=7)
 
     def test_values_bounded(self):
@@ -94,7 +94,7 @@ class TestGetSincosEmbed:
         assert torch.allclose(pe, expected)
 
     def test_2d_mode_requires_grid_size(self):
-        with pytest.raises(AssertionError):
+        with pytest.raises(ValueError):
             get_sincos_pos_embed(embed_dim=64, num_patches=49, mode="2d")
 
     def test_cls_token_passthrough(self):
