@@ -116,6 +116,14 @@ stable\_pretraining.utils.read\_csv\_logger module
    :show-inheritance:
    :undoc-members:
 
+stable\_pretraining.utils.solver module
+---------------------------------------
+
+.. automodule:: stable_pretraining.utils.solver
+   :members:
+   :show-inheritance:
+   :undoc-members:
+
 stable\_pretraining.utils.stats module
 --------------------------------------
 
