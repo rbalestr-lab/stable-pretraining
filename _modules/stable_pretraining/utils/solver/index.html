@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>stable_pretraining.utils.solver &#8212; stable-pretraining 0.1.dev1+gb19bb1b32 documentation</title>
+    <title>stable_pretraining.utils.solver &#8212; stable-pretraining 0.1.dev1+g8149d27c1 documentation</title>
   
   
   
@@ -39,7 +39,7 @@
 <link rel="preload" as="script" href="../../../../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
   <script src="../../../../_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
 
-    <script src="../../../../_static/documentation_options.js?v=c4abe537"></script>
+    <script src="../../../../_static/documentation_options.js?v=3a33591e"></script>
     <script src="../../../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../../_static/scripts/sphinx-book-theme.js?v=887ef09a"></script>
@@ -135,7 +135,7 @@
   
   
   
-    <p class="title logo__title">stable-pretraining 0.1.dev1+gb19bb1b32 documentation</p>
+    <p class="title logo__title">stable-pretraining 0.1.dev1+g8149d27c1 documentation</p>
   
 </a></div>
         <div class="sidebar-primary-item">
@@ -437,20 +437,19 @@ document.write(`
     <span class="n">step_fn</span> <span class="o">=</span> <span class="n">_get_solver_step_fn</span><span class="p">(</span><span class="n">solver</span><span class="p">)</span>
 
     <span class="c1"># Integrate</span>
-    <span class="k">with</span> <span class="n">torch</span><span class="o">.</span><span class="n">inference_mode</span><span class="p">():</span>
-        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_steps</span><span class="p">):</span>
-            <span class="n">t</span> <span class="o">=</span> <span class="n">timesteps</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
-            <span class="n">t_next</span> <span class="o">=</span> <span class="n">timesteps</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span>
-            <span class="n">dt</span> <span class="o">=</span> <span class="n">t_next</span> <span class="o">-</span> <span class="n">t</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_steps</span><span class="p">):</span>
+        <span class="n">t</span> <span class="o">=</span> <span class="n">timesteps</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+        <span class="n">t_next</span> <span class="o">=</span> <span class="n">timesteps</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span>
+        <span class="n">dt</span> <span class="o">=</span> <span class="n">t_next</span> <span class="o">-</span> <span class="n">t</span>
 
-            <span class="n">t_batch</span> <span class="o">=</span> <span class="n">t</span><span class="o">.</span><span class="n">expand</span><span class="p">(</span><span class="n">batch_size</span><span class="p">)</span>
-            <span class="n">x</span> <span class="o">=</span> <span class="n">step_fn</span><span class="p">(</span><span class="n">velocity_fn</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">t_batch</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span> <span class="n">t_next</span><span class="p">)</span>
+        <span class="n">t_batch</span> <span class="o">=</span> <span class="n">t</span><span class="o">.</span><span class="n">expand</span><span class="p">(</span><span class="n">batch_size</span><span class="p">)</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">step_fn</span><span class="p">(</span><span class="n">velocity_fn</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">t_batch</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span> <span class="n">t_next</span><span class="p">)</span>
 
-            <span class="k">if</span> <span class="n">clamp_range</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="n">x</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">clamp</span><span class="p">(</span><span class="o">*</span><span class="n">clamp_range</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">clamp_range</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">x</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">clamp</span><span class="p">(</span><span class="o">*</span><span class="n">clamp_range</span><span class="p">)</span>
 
-            <span class="k">if</span> <span class="n">trajectory</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="n">trajectory</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">clone</span><span class="p">())</span>
+        <span class="k">if</span> <span class="n">trajectory</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">trajectory</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">clone</span><span class="p">())</span>
 
     <span class="k">if</span> <span class="n">return_trajectory</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">x</span><span class="p">,</span> <span class="n">trajectory</span>
@@ -463,9 +462,10 @@ document.write(`
     <span class="n">schedule</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">device</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">device</span><span class="p">],</span>
     <span class="n">dtype</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">dtype</span><span class="p">],</span>
+    <span class="n">eps</span><span class="o">=</span><span class="mf">1e-3</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tensor</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Build time discretization from t=0 to t=1.&quot;&quot;&quot;</span>
-    <span class="n">t</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">num_steps</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span>
+    <span class="n">t</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">eps</span><span class="p">,</span> <span class="mi">1</span> <span class="o">-</span> <span class="n">eps</span><span class="p">,</span> <span class="n">num_steps</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">schedule</span> <span class="o">==</span> <span class="s2">&quot;linear&quot;</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">t</span>
@@ -591,7 +591,7 @@ document.write(`
     <span class="c1"># 3rd order combination</span>
     <span class="n">c0</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">-</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">r2</span><span class="p">)</span>
     <span class="n">c1</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">r1</span> <span class="o">*</span> <span class="n">r2</span><span class="p">)</span> <span class="o">-</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">r2</span> <span class="o">*</span> <span class="p">(</span><span class="n">r2</span> <span class="o">-</span> <span class="n">r1</span><span class="p">))</span>
-    <span class="n">c2</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">r2</span> <span class="o">*</span> <span class="p">(</span><span class="n">r2</span> <span class="o">-</span> <span class="n">r1</span><span class="p">))</span>
+    <span class="n">c2</span> <span class="o">=</span> <span class="n">r1</span> <span class="o">/</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">r2</span> <span class="o">*</span> <span class="p">(</span><span class="n">r2</span> <span class="o">-</span> <span class="n">r1</span><span class="p">))</span>  <span class="c1"># = 3/4 = 0.75 ✓</span>
 
     <span class="k">return</span> <span class="n">x</span> <span class="o">+</span> <span class="n">dt</span> <span class="o">*</span> <span class="p">(</span><span class="n">c0</span> <span class="o">*</span> <span class="n">v0</span> <span class="o">+</span> <span class="n">c1</span> <span class="o">*</span> <span class="n">v1</span> <span class="o">+</span> <span class="n">c2</span> <span class="o">*</span> <span class="n">v2</span><span class="p">)</span>
 </pre></div>
