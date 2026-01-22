@@ -51,7 +51,7 @@ from .nn_modules import (
     UnsortedQueue,
 )
 from .visualization import format_df_to_latex
-from . import flops
+from . import flops, solver
 from .stats import mean_std
 from .mae_loss import mae_loss, unpatchify
 
@@ -114,4 +114,5 @@ __all__ = [
     "mean_std",
     "mae_loss",
     "unpatchify",
+    "solver",
 ]

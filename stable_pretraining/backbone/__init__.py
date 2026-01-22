@@ -34,10 +34,11 @@ from .vit import (
     MaskedEncoder,
     MaskedEncoderOutput,
     TransformerPredictor,
-    AdaLNDecoderBlock,
-    AdaLNCrossAttentionBlock,
-    CrossAttentionBlock,
-    CrossAttentionDecoder,
+    Attention,
+    CrossAttention,
+    TransformerBlock,
+    FlexibleTransformer,
+    modulate,
 )
 
 from .aggregator import TensorAggregator
@@ -67,10 +68,11 @@ __all__ = [
     MaskedEncoder,
     MaskedEncoderOutput,
     TransformerPredictor,
-    AdaLNDecoderBlock,
-    AdaLNCrossAttentionBlock,
-    CrossAttentionBlock,
-    CrossAttentionDecoder,
+    Attention,
+    CrossAttention,
+    TransformerBlock,
+    FlexibleTransformer,
+    modulate,
 ]
 
 if _MAE_AVAILABLE:
