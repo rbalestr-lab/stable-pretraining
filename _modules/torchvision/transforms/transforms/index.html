@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>torchvision.transforms.transforms &#8212; stable-pretraining 0.1.dev1+g8149d27c1 documentation</title>
+    <title>torchvision.transforms.transforms &#8212; stable-pretraining 0.1.dev1+ga6cbffb28 documentation</title>
   
   
   
@@ -39,7 +39,7 @@
 <link rel="preload" as="script" href="../../../../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
   <script src="../../../../_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
 
-    <script src="../../../../_static/documentation_options.js?v=3a33591e"></script>
+    <script src="../../../../_static/documentation_options.js?v=af5f53f2"></script>
     <script src="../../../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../../_static/scripts/sphinx-book-theme.js?v=887ef09a"></script>
@@ -135,7 +135,7 @@
   
   
   
-    <p class="title logo__title">stable-pretraining 0.1.dev1+g8149d27c1 documentation</p>
+    <p class="title logo__title">stable-pretraining 0.1.dev1+ga6cbffb28 documentation</p>
   
 </a></div>
         <div class="sidebar-primary-item">
@@ -489,7 +489,15 @@ document.write(`
 
 <span class="sd">    This transform does not support torchscript.</span>
 
-<span class="sd">    Converts a PIL Image (H x W x C) to a Tensor of shape (C x H x W).</span>
+<span class="sd">    Convert a PIL Image with H height, W width, and C channels to a Tensor of shape (C x H x W).</span>
+
+<span class="sd">    Example:</span>
+<span class="sd">        &gt;&gt;&gt; from PIL import Image</span>
+<span class="sd">        &gt;&gt;&gt; import torchvision.transforms as T</span>
+<span class="sd">        &gt;&gt;&gt; img = Image.new(&quot;RGB&quot;, (320, 240))  # size (W=320, H=240)</span>
+<span class="sd">        &gt;&gt;&gt; tensor = T.PILToTensor()(img)</span>
+<span class="sd">        &gt;&gt;&gt; print(tensor.shape)</span>
+<span class="sd">        torch.Size([3, 240, 320])</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
