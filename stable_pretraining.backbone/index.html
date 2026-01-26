@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>stable_pretraining.backbone package &#8212; stable-pretraining 0.1.dev1+ga6cbffb28 documentation</title>
+    <title>stable_pretraining.backbone package &#8212; stable-pretraining 0.1.dev1+g9b0b2e131 documentation</title>
   
   
   
@@ -40,7 +40,7 @@
 <link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
   <script src="../_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
 
-    <script src="../_static/documentation_options.js?v=af5f53f2"></script>
+    <script src="../_static/documentation_options.js?v=027cdc71"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/scripts/sphinx-book-theme.js?v=887ef09a"></script>
@@ -134,7 +134,7 @@
   
   
   
-    <p class="title logo__title">stable-pretraining 0.1.dev1+ga6cbffb28 documentation</p>
+    <p class="title logo__title">stable-pretraining 0.1.dev1+g9b0b2e131 documentation</p>
   
 </a></div>
         <div class="sidebar-primary-item">
@@ -2309,14 +2309,14 @@ After execution, the original parameters and buffers are restored. No real compu
 
 <dl class="py class">
 <dt class="sig sig-object py" id="stable_pretraining.backbone.vit.FlexibleTransformer">
-<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">stable_pretraining.backbone.vit.</span></span><span class="sig-name descname"><span class="pre">FlexibleTransformer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_dim</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">768</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hidden_dim</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">384</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_dim</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">768</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_patches</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">196</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">depth</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">4</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_heads</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">6</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mlp_ratio</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">4.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">self_attn</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cross_attn</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_adaln</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pos_embed_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Literal" title="(in Python v3.14)"><span class="pre">Literal</span></a><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">'sincos_1d'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'sincos_2d'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'learned'</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'sincos_2d'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">drop_path_rate</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">attn_drop</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">proj_drop</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">zero_init_output</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_prefix_tokens</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/stable_pretraining/backbone/vit/#FlexibleTransformer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_pretraining.backbone.vit.FlexibleTransformer" title="Link to this definition">#</a></dt>
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">stable_pretraining.backbone.vit.</span></span><span class="sig-name descname"><span class="pre">FlexibleTransformer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_dim</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">768</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hidden_dim</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">384</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_dim</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">768</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_patches</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">196</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">depth</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">4</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_heads</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">6</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mlp_ratio</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">4.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">self_attn</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cross_attn</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_adaln</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pos_embed_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Literal" title="(in Python v3.14)"><span class="pre">Literal</span></a><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">'sincos_1d'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'sincos_2d'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'learned'</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'sincos_2d'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">drop_path_rate</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">attn_drop</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">proj_drop</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">zero_init_output</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_prefix_tokens</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">add_mask_token</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/stable_pretraining/backbone/vit/#FlexibleTransformer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_pretraining.backbone.vit.FlexibleTransformer" title="Link to this definition">#</a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.pytorch.org/docs/stable/generated/torch.nn.Module.html#torch.nn.Module" title="(in PyTorch v2.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code></a></p>
 <p>Flexible transformer supporting multiple architectures.</p>
 <p>Unified backbone for:
 - <strong>MAE decoder</strong>: <cite>self_attn=True, cross_attn=False, use_adaln=False</cite>
 - <strong>IJEPA predictor</strong>: <cite>self_attn=True, cross_attn=True, use_adaln=False</cite>
 - <strong>DiT / Flow</strong>: <cite>self_attn=True, cross_attn=True/False, use_adaln=True</cite>
-- <strong>MaskGIT</strong>: <cite>self_attn=True, cross_attn=False, use_adaln=True</cite>
+- <strong>MaskGIT</strong>: <cite>self_attn=True, cross_attn=False, use_adaln=True, add_mask_token=True</cite>
 :param input_dim: Input embedding dimension (from encoder)
 :param hidden_dim: Internal transformer dimension
 :param output_dim: Output dimension
@@ -2334,48 +2334,113 @@ After execution, the original parameters and buffers are restored. No real compu
 :param proj_drop: Projection dropout rate
 :param zero_init_output: Zero-initialize output projection
 :param num_prefix_tokens: Number of prefix tokens (e.g., CLS token)
-Example:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># MAE decoder</span>
-<span class="n">decoder</span> <span class="o">=</span> <span class="n">FlexibleTransformer</span><span class="p">(</span>
-    <span class="mi">768</span><span class="p">,</span>
-    <span class="mi">512</span><span class="p">,</span>
-    <span class="mi">768</span><span class="p">,</span>
-    <span class="mi">196</span><span class="p">,</span>
-    <span class="n">depth</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span>
-    <span class="n">self_attn</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-    <span class="n">cross_attn</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-    <span class="n">use_adaln</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-<span class="p">)</span>
-<span class="n">out</span> <span class="o">=</span> <span class="n">decoder</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="n">queries</span><span class="p">,</span> <span class="n">context_idx</span><span class="p">,</span> <span class="n">query_idx</span><span class="p">)</span>
-<span class="c1"># IJEPA predictor</span>
-<span class="n">predictor</span> <span class="o">=</span> <span class="n">FlexibleTransformer</span><span class="p">(</span>
-    <span class="mi">768</span><span class="p">,</span>
-    <span class="mi">384</span><span class="p">,</span>
-    <span class="mi">768</span><span class="p">,</span>
-    <span class="mi">196</span><span class="p">,</span>
-    <span class="n">depth</span><span class="o">=</span><span class="mi">6</span><span class="p">,</span>
-    <span class="n">self_attn</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-    <span class="n">cross_attn</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-    <span class="n">use_adaln</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-<span class="p">)</span>
-<span class="n">out</span> <span class="o">=</span> <span class="n">predictor</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="n">queries</span><span class="p">,</span> <span class="n">context_idx</span><span class="p">,</span> <span class="n">query_idx</span><span class="p">)</span>
-<span class="c1"># DiT-style flow matching</span>
-<span class="n">flow</span> <span class="o">=</span> <span class="n">FlexibleTransformer</span><span class="p">(</span>
-    <span class="mi">768</span><span class="p">,</span>
-    <span class="mi">384</span><span class="p">,</span>
-    <span class="mi">768</span><span class="p">,</span>
-    <span class="mi">196</span><span class="p">,</span>
-    <span class="n">depth</span><span class="o">=</span><span class="mi">12</span><span class="p">,</span>
-    <span class="n">self_attn</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-    <span class="n">cross_attn</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-    <span class="n">use_adaln</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-<span class="p">)</span>
-<span class="n">out</span> <span class="o">=</span> <span class="n">flow</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="n">queries</span><span class="p">,</span> <span class="n">context_idx</span><span class="p">,</span> <span class="n">query_idx</span><span class="p">,</span> <span class="n">t</span><span class="o">=</span><span class="n">timesteps</span><span class="p">)</span>
-</pre></div>
-</div>
+:param add_mask_token: Enable learnable [MASK] token for masked prediction.</p>
+<blockquote>
+<div><p>When enabled, use <cite>context_mask</cite> and/or <cite>query_mask</cite> in forward() to
+replace tokens at specified positions with the [MASK] token.</p>
+</div></blockquote>
+<dl>
+<dt>Example::</dt><dd><p># MAE decoder
+decoder = FlexibleTransformer(</p>
+<blockquote>
+<div><p>768,
+512,
+768,
+196,
+depth=8,
+self_attn=True,
+cross_attn=False,
+use_adaln=False,</p>
+</div></blockquote>
+<p>)
+out = decoder(context, queries, context_idx, query_idx)
+# IJEPA predictor
+predictor = FlexibleTransformer(</p>
+<blockquote>
+<div><p>768,
+384,
+768,
+196,
+depth=6,
+self_attn=True,
+cross_attn=True,
+use_adaln=False,</p>
+</div></blockquote>
+<p>)
+out = predictor(context, queries, context_idx, query_idx)
+# DiT-style flow matching
+flow = FlexibleTransformer(</p>
+<blockquote>
+<div><p>768,
+384,
+768,
+196,
+depth=12,
+self_attn=True,
+cross_attn=False,
+use_adaln=True,</p>
+</div></blockquote>
+<p>)
+out = flow(context, queries, context_idx, query_idx, t=timesteps)
+# MaskGIT-style: variable number of masks per sample
+maskgit = FlexibleTransformer(</p>
+<blockquote>
+<div><p>768,
+512,
+768,
+196,
+depth=8,
+self_attn=True,
+cross_attn=False,
+use_adaln=True,
+add_mask_token=True,</p>
+</div></blockquote>
+<p>)
+# Each sample can have different number of masked positions
+# context_mask[b, i] = True means replace context[b, i] with [MASK]
+context_mask = torch.rand(B, num_patches) &lt; mask_ratio  # Variable per sample!
+out = maskgit(</p>
+<blockquote>
+<div><p>context=all_patches,  # [B, 196, D]
+queries=all_patches[:, :0],  # [B, 0, D] empty
+context_idx=torch.arange(196).expand(B, -1),  # [B, 196]
+query_idx=torch.empty(B, 0, dtype=torch.long),
+context_mask=context_mask,  # [B, 196] bool, variable True count
+t=timesteps,
+return_all=True,</p>
+</div></blockquote>
+<p>)  # Returns [B, 196, output_dim]
+# BERT-style MLM: mask random tokens in sequence
+bert = FlexibleTransformer(</p>
+<blockquote>
+<div><p>768,
+768,
+768,
+512,
+depth=12,
+self_attn=True,
+cross_attn=False,
+use_adaln=False,
+add_mask_token=True,</p>
+</div></blockquote>
+<p>)
+# Random 15% masking, different positions per sample
+context_mask = torch.rand(B, seq_len) &lt; 0.15
+out = bert(</p>
+<blockquote>
+<div><p>context=token_embeddings,
+queries=token_embeddings[:, :0],
+context_idx=position_ids,
+query_idx=torch.empty(B, 0, dtype=torch.long),
+context_mask=context_mask,
+return_all=True,</p>
+</div></blockquote>
+<p>)</p>
+</dd>
+</dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="stable_pretraining.backbone.vit.FlexibleTransformer.forward">
-<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">context</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v2.10)"><span class="pre">Tensor</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">queries</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v2.10)"><span class="pre">Tensor</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">context_idx</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v2.10)"><span class="pre">Tensor</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">query_idx</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v2.10)"><span class="pre">Tensor</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">t</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v2.10)"><span class="pre">Tensor</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_prefix</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_all</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v2.10)"><span class="pre">Tensor</span></a></span></span><a class="reference internal" href="../_modules/stable_pretraining/backbone/vit/#FlexibleTransformer.forward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_pretraining.backbone.vit.FlexibleTransformer.forward" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">context</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v2.10)"><span class="pre">Tensor</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">queries</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v2.10)"><span class="pre">Tensor</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">context_idx</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v2.10)"><span class="pre">Tensor</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">query_idx</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v2.10)"><span class="pre">Tensor</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">t</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v2.10)"><span class="pre">Tensor</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_prefix</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_all</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">context_mask</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v2.10)"><span class="pre">Tensor</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">query_mask</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v2.10)"><span class="pre">Tensor</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v2.10)"><span class="pre">Tensor</span></a></span></span><a class="reference internal" href="../_modules/stable_pretraining/backbone/vit/#FlexibleTransformer.forward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_pretraining.backbone.vit.FlexibleTransformer.forward" title="Link to this definition">#</a></dt>
 <dd><p>Forward pass.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -2385,14 +2450,24 @@ Example:</p>
 <li><p><strong>context_idx</strong> – Patch indices for context tokens [B, N_ctx]</p></li>
 <li><p><strong>query_idx</strong> – Patch indices for query tokens [B, N_qry]</p></li>
 <li><p><strong>t</strong> – Timesteps for conditioning [B] (required if use_adaln=True)</p></li>
-<li><p><strong>num_prefix</strong> – Override for number of prefix tokens</p></li>
+<li><p><strong>num_prefix</strong> – Override for number of prefix tokens in context</p></li>
 <li><p><strong>return_all</strong> – If True and using joint attention (cross_attn=False),
-return all tokens in original position order
-[B, N_ctx + N_qry, output_dim]. Ignored for cross-attention modes.</p></li>
+return all tokens unshuffled to original position order.
+Output shape: [B, N_ctx + N_qry, output_dim].
+Ignored for cross-attention modes.</p></li>
+<li><p><strong>context_mask</strong> – Boolean mask indicating which context tokens to replace
+with [MASK] token [B, N_ctx]. True = replace with mask. Each sample can
+have a different number of True values. Requires add_mask_token=True.</p></li>
+<li><p><strong>query_mask</strong> – Boolean mask indicating which query tokens to replace
+with [MASK] token [B, N_qry]. True = replace with mask. Each sample can
+have a different number of True values. Requires add_mask_token=True.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>Output embeddings [B, N_qry, output_dim] or [B, T, output_dim] if return_all</p>
+<dd class="field-even"><p>Output embeddings. Shape depends on mode:
+- cross_attn=True: [B, N_qry, output_dim]
+- cross_attn=False, return_all=False: [B, N_qry, output_dim]
+- cross_attn=False, return_all=True: [B, N_ctx + N_qry, output_dim].</p>
 </dd>
 </dl>
 </dd></dl>
@@ -2403,22 +2478,219 @@ return all tokens in original position order
 <dt class="sig sig-object py" id="stable_pretraining.backbone.vit.MAEDecoder">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">stable_pretraining.backbone.vit.</span></span><span class="sig-name descname"><span class="pre">MAEDecoder</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">embed_dim</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">768</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">decoder_embed_dim</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">512</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_dim</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">768</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_patches</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">196</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">depth</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">4</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_heads</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">16</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mlp_ratio</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">4.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pos_embed_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Literal" title="(in Python v3.14)"><span class="pre">Literal</span></a><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">'sincos_1d'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'sincos_2d'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'learned'</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'sincos_2d'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">drop_path_rate</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/stable_pretraining/backbone/vit/#MAEDecoder"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_pretraining.backbone.vit.MAEDecoder" title="Link to this definition">#</a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.pytorch.org/docs/stable/generated/torch.nn.Module.html#torch.nn.Module" title="(in PyTorch v2.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code></a></p>
-<p>MAE-style ViT Decoder using FlexibleTransformer.</p>
-<p>Uses joint self-attention where visible tokens and mask tokens
-all attend to each other.
-:param embed_dim: Encoder embedding dimension (input D)
-:param decoder_embed_dim: Internal decoder dimension
-:param output_dim: Output dimension (e.g., patch_size² × in_chans for pixels)
-:param num_patches: Total number of patches T
-:param depth: Number of transformer blocks
-:param num_heads: Attention heads
-:param mlp_ratio: MLP expansion ratio
-:param pos_embed_type: ‘sincos_1d’, ‘sincos_2d’, or ‘learned’
-:param grid_size: Grid size for 2D pos embed (auto-inferred if None)
-:param drop_path_rate: Stochastic depth rate</p>
+<p>MAE-style Vision Transformer Decoder using FlexibleTransformer.</p>
+<p>Implements the decoder component of Masked Autoencoders (MAE) <a href="#id8"><span class="problematic" id="id7">[1]_</span></a> for
+self-supervised visual representation learning. The decoder reconstructs
+masked patches from visible patch embeddings using joint self-attention,
+where visible tokens and learnable mask tokens attend to each other.
+The decoder is intentionally lightweight compared to the encoder, as MAE
+demonstrates that a shallow decoder is sufficient for pixel reconstruction
+while keeping the encoder focused on learning semantic representations.
+Architecture Overview
+———————
+1. <strong>Input projection</strong>: Maps encoder embeddings (embed_dim) to decoder</p>
+<blockquote>
+<div><p>dimension (decoder_embed_dim)</p>
+</div></blockquote>
+<ol class="arabic simple" start="2">
+<li><p><strong>Mask token expansion</strong>: Learnable mask tokens are placed at masked
+positions</p></li>
+<li><p><strong>Positional encoding</strong>: Adds position information to all tokens</p></li>
+<li><p><strong>Transformer blocks</strong>: Joint self-attention over visible + mask tokens</p></li>
+</ol>
+<p>5. <strong>Output projection</strong>: Maps to output_dim (typically patch_size² × channels)
+:param embed_dim: Embedding dimension from the encoder. This is the input dimension</p>
+<blockquote>
+<div><p>of visible tokens passed to the decoder.</p>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>decoder_embed_dim</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a><em>, </em><em>default=512</em>) – Internal hidden dimension of the decoder transformer blocks.
+Typically smaller than embed_dim for efficiency.</p></li>
+<li><p><strong>output_dim</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a><em>, </em><em>default=768</em>) – Output dimension per token. For pixel reconstruction, this should be
+<code class="docutils literal notranslate"><span class="pre">patch_size</span> <span class="pre">**</span> <span class="pre">2</span> <span class="pre">*</span> <span class="pre">in_channels</span></code> (e.g., 16×16×3 = 768 for RGB).</p></li>
+<li><p><strong>num_patches</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a><em>, </em><em>default=196</em>) – Total number of patches T in the image (e.g., 14×14 = 196 for
+224×224 images with patch_size=16).</p></li>
+<li><p><strong>depth</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a><em>, </em><em>default=4</em>) – Number of transformer blocks in the decoder. MAE typically uses
+fewer blocks than the encoder (e.g., 4-8 vs 12-24).</p></li>
+<li><p><strong>num_heads</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a><em>, </em><em>default=16</em>) – Number of attention heads in multi-head self-attention.</p></li>
+<li><p><strong>mlp_ratio</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a><em>, </em><em>default=4.0</em>) – Expansion ratio for the MLP hidden dimension relative to
+decoder_embed_dim.</p></li>
+<li><p><strong>pos_embed_type</strong> (<em>{'sincos_1d'</em><em>, </em><em>'sincos_2d'</em><em>, </em><em>'learned'}</em><em>, </em><em>default='sincos_2d'</em>) – Type of positional embedding:
+- ‘sincos_2d’: Fixed 2D sinusoidal (recommended for images)
+- ‘sincos_1d’: Fixed 1D sinusoidal
+- ‘learned’: Learnable positional embeddings</p></li>
+<li><p><strong>grid_size</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a><em>, </em><em>optional</em>) – Spatial grid size for 2D positional embeddings. If None, inferred
+as <code class="docutils literal notranslate"><span class="pre">int(sqrt(num_patches))</span></code>. Required for non-square grids.</p></li>
+<li><p><strong>drop_path_rate</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a><em>, </em><em>default=0.0</em>) – Stochastic depth rate for regularization during training.</p></li>
+<li><p><strong>Attributes</strong></p></li>
+<li><p><strong>----------</strong></p></li>
+<li><p><strong>mask_token</strong> (<em>nn.Parameter</em>) – Learnable token of shape (1, 1, embed_dim) used to represent
+masked positions. Initialized with truncated normal (std=0.02).</p></li>
+<li><p><strong>transformer</strong> (<a class="reference internal" href="#stable_pretraining.backbone.vit.FlexibleTransformer" title="stable_pretraining.backbone.vit.FlexibleTransformer"><em>FlexibleTransformer</em></a>) – Core transformer module handling attention and projections.</p></li>
+<li><p><strong>Notes</strong></p></li>
+<li><p><strong>-----</strong></p></li>
+<li><p><strong>MAE</strong> (<em>- The mask convention follows</em>)</p></li>
+<li><p><strong>positions</strong> (<em>- The decoder receives visible tokens and reconstructs masked</em>)</p></li>
+<li><p><strong>efficiency</strong> (<em>- For</em>)</p></li>
+<li><p><strong>default</strong> (<em>&gt;&gt;&gt; mask_ratio = 0.75  # MAE</em>)</p></li>
+<li><p><strong>References</strong></p></li>
+<li><p><strong>----------</strong></p></li>
+<li><p><strong>He</strong> (<em>..</em><em> [</em><em>1</em><em>]</em>) – CVPR 2022. <a class="reference external" href="https://arxiv.org/abs/2111.06377">https://arxiv.org/abs/2111.06377</a></p></li>
+<li><p><strong>K.</strong> – CVPR 2022. <a class="reference external" href="https://arxiv.org/abs/2111.06377">https://arxiv.org/abs/2111.06377</a></p></li>
+<li><p><strong>Learners.&quot;</strong> (<em>et al. &quot;Masked Autoencoders Are Scalable Vision</em>) – CVPR 2022. <a class="reference external" href="https://arxiv.org/abs/2111.06377">https://arxiv.org/abs/2111.06377</a></p></li>
+<li><p><strong>Examples</strong></p></li>
+<li><p><strong>--------</strong></p></li>
+<li><p><strong>Encoder**</strong> (<em>**Basic Usage with MAE</em>)</p></li>
+<li><p><strong>torch</strong> (<em>&gt;&gt;&gt; import</em>)</p></li>
+<li><p><strong>nn</strong> (<em>&gt;&gt;&gt; import torch.nn as</em>)</p></li>
+<li><p><strong>&gt;&gt;&gt;</strong></p></li>
+<li><p><strong>ViT-Base</strong> (<em>&gt;&gt;&gt; # Configuration matching</em>)</p></li>
+<li><p><strong>B</strong> (<em>&gt;&gt;&gt;</em>)</p></li>
+<li><p><strong>4</strong> (<em>T =</em>)</p></li>
+<li><p><strong>size</strong> (<em>196  # batch</em>)</p></li>
+<li><p><strong>(</strong><strong>14x14</strong><strong>)</strong> (<em>num_patches</em>)</p></li>
+<li><p><strong>dimension</strong> (<em>&gt;&gt;&gt; embed_dim = 768  # encoder</em>)</p></li>
+<li><p><strong>default</strong></p></li>
+<li><p><strong>&gt;&gt;&gt;</strong></p></li>
+<li><p><strong>decoder</strong> (<em>&gt;&gt;&gt; # Initialize</em>)</p></li>
+<li><p><strong>MAEDecoder</strong><strong>(</strong> (<em>&gt;&gt;&gt; decoder =</em>)</p></li>
+<li><p><strong>embed_dim=embed_dim</strong> (<em>...</em>)</p></li>
+</ul>
+</dd>
+</dl>
+<p>:param :
+:param …     decoder_embed_dim=512:
+:param :
+:param …     output_dim=16 * 16 * 3:
+:param # patch_size² × channels = 768:
+:param …     num_patches=T:
+:param :
+:param …     depth=4:
+:param :
+:param …     num_heads=16:
+:param :
+:param … ):
+:param &gt;&gt;&gt;:
+:param &gt;&gt;&gt; # Simulate encoder output (visible tokens only):
+:param &gt;&gt;&gt; N_vis = int(T * (1 - mask_ratio))  # 49 visible patches:
+:param &gt;&gt;&gt; visible_tokens = torch.randn(B:
+:param N_vis:
+:param embed_dim):
+:param &gt;&gt;&gt;:
+:param &gt;&gt;&gt; # Create random mask (0=visible:
+:param 1=masked):
+:param &gt;&gt;&gt; mask = torch.zeros(B:
+:param T):
+:param &gt;&gt;&gt; for i in range(B):
+:param …     masked_indices = torch.randperm(T)[:
+:type …     masked_indices = torch.randperm(T)[: T - N_vis]
+:param …     mask[i:
+:param masked_indices] = 1:
+:param &gt;&gt;&gt;:
+:param &gt;&gt;&gt; # Decode - predict masked patches only:
+:param &gt;&gt;&gt; pred_masked = decoder(visible_tokens:
+:param mask:
+:param output_masked_only=True):
+:param &gt;&gt;&gt; print(pred_masked.shape)  # [B:
+:param N_mask:
+:param output_dim]:
+:param torch.Size([4:
+:param 147:
+:param 768]):
+:param **Full Sequence Reconstruction**:
+:param &gt;&gt;&gt; # Get predictions for ALL positions (for visualization):
+:param &gt;&gt;&gt; pred_full = decoder(visible_tokens:
+:param mask:
+:param output_masked_only=False):
+:param &gt;&gt;&gt; print(pred_full.shape)  # [B:
+:param T:
+:param output_dim]:
+:param torch.Size([4:
+:param 196:
+:param 768]):
+:param **Using Full Sequence Input**:
+:param If you have the full sequence with mask tokens already inserted:
+:param &gt;&gt;&gt; full_sequence = torch.randn(B:
+:param T:
+:param embed_dim)  # [B:
+:param 196:
+:param 768]:
+:param &gt;&gt;&gt; pred = decoder(full_sequence:
+:param mask:
+:param output_masked_only=True):
+:param &gt;&gt;&gt; print(pred.shape):
+:param torch.Size([4:
+:param 147:
+:param 768]):
+:param **Integration with MAE Training Loop**:
+:param &gt;&gt;&gt; # Typical MAE training step (pseudocode):
+:param &gt;&gt;&gt; def mae_forward(encoder:
+:param decoder:
+:param images:
+:param mask_ratio=0.75):
+:param …     # Patchify and mask:
+:param …     patches = patchify(images)  # [B:
+:param T:
+:param patch_dim]:
+:param …     mask = random_mask(B:
+:param T:
+:param mask_ratio)  # [B:
+:param T]:
+:param 0=keep:
+:param 1=mask:
+:param …:
+:param …     # Encode visible patches only:
+:param …     visible_patches = patches[~mask.bool()].reshape(B:
+:param -1:
+:param patch_dim):
+:param …     latent = encoder(visible_patches)  # [B:
+:param N_vis:
+:param embed_dim]:
+:param …:
+:param …     # Decode to predict masked patches:
+:param …     pred = decoder(:
+:param …         latent:
+:param mask:
+:param output_masked_only=True:
+:param …     )  # [B:
+:param N_mask:
+:param output_dim]:
+:param …:
+:param …     # Reconstruction loss on masked patches only:
+:param …     target = patches[mask.bool()].reshape(B:
+:param -1:
+:param patch_dim):
+:param …     loss = F.mse_loss(pred:
+:param target):
+:param …     return loss:
+:param **Custom Configuration for ViT-Large**:
+:param &gt;&gt;&gt; decoder_large = MAEDecoder(:
+:param …     embed_dim=1024:
+:param # ViT-L encoder dim:
+:param …     decoder_embed_dim=512:
+:param # Keep decoder lightweight:
+:param …     output_dim=768:
+:param # 16×16×3 pixels:
+:param …     num_patches=256:
+:param # 16×16 patches for 256×256 images:
+:param …     depth=8:
+:param # Slightly deeper:
+:param …     num_heads=16:
+:param :
+:param …     pos_embed_type=”sincos_2d”:
+:param :
+:param …     drop_path_rate=0.1:
+:param # Regularization:
+:param … ):
+:param See Also:
+:param ——–:
+:param FlexibleTransformer:
+:type FlexibleTransformer: Core transformer implementation used internally.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="stable_pretraining.backbone.vit.MAEDecoder.forward">
-<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v2.10)"><span class="pre">Tensor</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">mask</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v2.10)"><span class="pre">Tensor</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_masked_only</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v2.10)"><span class="pre">Tensor</span></a></span></span><a class="reference internal" href="../_modules/stable_pretraining/backbone/vit/#MAEDecoder.forward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_pretraining.backbone.vit.MAEDecoder.forward" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v2.10)"><span class="pre">Tensor</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">mask</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v2.10)"><span class="pre">Tensor</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_masked_only</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v2.10)"><span class="pre">Tensor</span></a></span></span><a class="reference internal" href="../_modules/stable_pretraining/backbone/vit/#MAEDecoder.forward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_pretraining.backbone.vit.MAEDecoder.forward" title="Link to this definition">#</a></dt>
 <dd><p>Forward pass.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>

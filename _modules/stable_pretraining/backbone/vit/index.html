@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>stable_pretraining.backbone.vit &#8212; stable-pretraining 0.1.dev1+ga6cbffb28 documentation</title>
+    <title>stable_pretraining.backbone.vit &#8212; stable-pretraining 0.1.dev1+g9b0b2e131 documentation</title>
   
   
   
@@ -39,7 +39,7 @@
 <link rel="preload" as="script" href="../../../../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
   <script src="../../../../_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
 
-    <script src="../../../../_static/documentation_options.js?v=af5f53f2"></script>
+    <script src="../../../../_static/documentation_options.js?v=027cdc71"></script>
     <script src="../../../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../../_static/scripts/sphinx-book-theme.js?v=887ef09a"></script>
@@ -135,7 +135,7 @@
   
   
   
-    <p class="title logo__title">stable-pretraining 0.1.dev1+ga6cbffb28 documentation</p>
+    <p class="title logo__title">stable-pretraining 0.1.dev1+g9b0b2e131 documentation</p>
   
 </a></div>
         <div class="sidebar-primary-item">
@@ -892,9 +892,6 @@ document.write(`
 
 
 
-<span class="c1"># =============================================================================</span>
-<span class="c1"># Full Transformer</span>
-<span class="c1"># =============================================================================</span>
 <div class="viewcode-block" id="FlexibleTransformer">
 <a class="viewcode-back" href="../../../../stable_pretraining.backbone/#stable_pretraining.backbone.vit.FlexibleTransformer">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">FlexibleTransformer</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
@@ -904,7 +901,7 @@ document.write(`
 <span class="sd">    - **MAE decoder**: `self_attn=True, cross_attn=False, use_adaln=False`</span>
 <span class="sd">    - **IJEPA predictor**: `self_attn=True, cross_attn=True, use_adaln=False`</span>
 <span class="sd">    - **DiT / Flow**: `self_attn=True, cross_attn=True/False, use_adaln=True`</span>
-<span class="sd">    - **MaskGIT**: `self_attn=True, cross_attn=False, use_adaln=True`</span>
+<span class="sd">    - **MaskGIT**: `self_attn=True, cross_attn=False, use_adaln=True, add_mask_token=True`</span>
 <span class="sd">    :param input_dim: Input embedding dimension (from encoder)</span>
 <span class="sd">    :param hidden_dim: Internal transformer dimension</span>
 <span class="sd">    :param output_dim: Output dimension</span>
@@ -922,6 +919,9 @@ document.write(`
 <span class="sd">    :param proj_drop: Projection dropout rate</span>
 <span class="sd">    :param zero_init_output: Zero-initialize output projection</span>
 <span class="sd">    :param num_prefix_tokens: Number of prefix tokens (e.g., CLS token)</span>
+<span class="sd">    :param add_mask_token: Enable learnable [MASK] token for masked prediction.</span>
+<span class="sd">        When enabled, use `context_mask` and/or `query_mask` in forward() to</span>
+<span class="sd">        replace tokens at specified positions with the [MASK] token.</span>
 <span class="sd">    Example::</span>
 <span class="sd">        # MAE decoder</span>
 <span class="sd">        decoder = FlexibleTransformer(</span>
@@ -959,6 +959,52 @@ document.write(`
 <span class="sd">            use_adaln=True,</span>
 <span class="sd">        )</span>
 <span class="sd">        out = flow(context, queries, context_idx, query_idx, t=timesteps)</span>
+<span class="sd">        # MaskGIT-style: variable number of masks per sample</span>
+<span class="sd">        maskgit = FlexibleTransformer(</span>
+<span class="sd">            768,</span>
+<span class="sd">            512,</span>
+<span class="sd">            768,</span>
+<span class="sd">            196,</span>
+<span class="sd">            depth=8,</span>
+<span class="sd">            self_attn=True,</span>
+<span class="sd">            cross_attn=False,</span>
+<span class="sd">            use_adaln=True,</span>
+<span class="sd">            add_mask_token=True,</span>
+<span class="sd">        )</span>
+<span class="sd">        # Each sample can have different number of masked positions</span>
+<span class="sd">        # context_mask[b, i] = True means replace context[b, i] with [MASK]</span>
+<span class="sd">        context_mask = torch.rand(B, num_patches) &lt; mask_ratio  # Variable per sample!</span>
+<span class="sd">        out = maskgit(</span>
+<span class="sd">            context=all_patches,  # [B, 196, D]</span>
+<span class="sd">            queries=all_patches[:, :0],  # [B, 0, D] empty</span>
+<span class="sd">            context_idx=torch.arange(196).expand(B, -1),  # [B, 196]</span>
+<span class="sd">            query_idx=torch.empty(B, 0, dtype=torch.long),</span>
+<span class="sd">            context_mask=context_mask,  # [B, 196] bool, variable True count</span>
+<span class="sd">            t=timesteps,</span>
+<span class="sd">            return_all=True,</span>
+<span class="sd">        )  # Returns [B, 196, output_dim]</span>
+<span class="sd">        # BERT-style MLM: mask random tokens in sequence</span>
+<span class="sd">        bert = FlexibleTransformer(</span>
+<span class="sd">            768,</span>
+<span class="sd">            768,</span>
+<span class="sd">            768,</span>
+<span class="sd">            512,</span>
+<span class="sd">            depth=12,</span>
+<span class="sd">            self_attn=True,</span>
+<span class="sd">            cross_attn=False,</span>
+<span class="sd">            use_adaln=False,</span>
+<span class="sd">            add_mask_token=True,</span>
+<span class="sd">        )</span>
+<span class="sd">        # Random 15% masking, different positions per sample</span>
+<span class="sd">        context_mask = torch.rand(B, seq_len) &lt; 0.15</span>
+<span class="sd">        out = bert(</span>
+<span class="sd">            context=token_embeddings,</span>
+<span class="sd">            queries=token_embeddings[:, :0],</span>
+<span class="sd">            context_idx=position_ids,</span>
+<span class="sd">            query_idx=torch.empty(B, 0, dtype=torch.long),</span>
+<span class="sd">            context_mask=context_mask,</span>
+<span class="sd">            return_all=True,</span>
+<span class="sd">        )</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
@@ -980,6 +1026,7 @@ document.write(`
         <span class="n">proj_drop</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">,</span>
         <span class="n">zero_init_output</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
         <span class="n">num_prefix_tokens</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+        <span class="n">add_mask_token</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
         <span class="k">if</span> <span class="n">hidden_dim</span> <span class="o">%</span> <span class="n">num_heads</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
@@ -990,6 +1037,7 @@ document.write(`
         <span class="bp">self</span><span class="o">.</span><span class="n">num_prefix_tokens</span> <span class="o">=</span> <span class="n">num_prefix_tokens</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">use_cross_attn</span> <span class="o">=</span> <span class="n">cross_attn</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">use_adaln</span> <span class="o">=</span> <span class="n">use_adaln</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">add_mask_token</span> <span class="o">=</span> <span class="n">add_mask_token</span>
         <span class="c1"># Input/output projections</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">context_proj</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="n">input_dim</span><span class="p">,</span> <span class="n">hidden_dim</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">query_proj</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="n">input_dim</span><span class="p">,</span> <span class="n">hidden_dim</span><span class="p">)</span>
@@ -1021,6 +1069,10 @@ document.write(`
                 <span class="n">torch</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">num_prefix_tokens</span><span class="p">,</span> <span class="n">hidden_dim</span><span class="p">)</span>
             <span class="p">)</span>
             <span class="n">nn</span><span class="o">.</span><span class="n">init</span><span class="o">.</span><span class="n">normal_</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">prefix_pos_embed</span><span class="p">,</span> <span class="n">std</span><span class="o">=</span><span class="mf">0.02</span><span class="p">)</span>
+        <span class="c1"># Learnable mask token (shared for context and query masking)</span>
+        <span class="k">if</span> <span class="n">add_mask_token</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">mask_token</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Parameter</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">hidden_dim</span><span class="p">))</span>
+            <span class="n">nn</span><span class="o">.</span><span class="n">init</span><span class="o">.</span><span class="n">normal_</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mask_token</span><span class="p">,</span> <span class="n">std</span><span class="o">=</span><span class="mf">0.02</span><span class="p">)</span>
         <span class="c1"># Time embedding MLP (only needed for AdaLN)</span>
         <span class="k">if</span> <span class="n">use_adaln</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">time_mlp</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Sequential</span><span class="p">(</span>
@@ -1075,6 +1127,8 @@ document.write(`
         <span class="n">t</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">num_prefix</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">return_all</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">context_mask</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">query_mask</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Forward pass.</span>
 
@@ -1083,17 +1137,43 @@ document.write(`
 <span class="sd">        :param context_idx: Patch indices for context tokens [B, N_ctx]</span>
 <span class="sd">        :param query_idx: Patch indices for query tokens [B, N_qry]</span>
 <span class="sd">        :param t: Timesteps for conditioning [B] (required if use_adaln=True)</span>
-<span class="sd">        :param num_prefix: Override for number of prefix tokens</span>
+<span class="sd">        :param num_prefix: Override for number of prefix tokens in context</span>
 <span class="sd">        :param return_all: If True and using joint attention (cross_attn=False),</span>
-<span class="sd">                          return all tokens in original position order</span>
-<span class="sd">                          [B, N_ctx + N_qry, output_dim]. Ignored for cross-attention modes.</span>
-<span class="sd">        :return: Output embeddings [B, N_qry, output_dim] or [B, T, output_dim] if return_all</span>
+<span class="sd">            return all tokens unshuffled to original position order.</span>
+<span class="sd">            Output shape: [B, N_ctx + N_qry, output_dim].</span>
+<span class="sd">            Ignored for cross-attention modes.</span>
+<span class="sd">        :param context_mask: Boolean mask indicating which context tokens to replace</span>
+<span class="sd">            with [MASK] token [B, N_ctx]. True = replace with mask. Each sample can</span>
+<span class="sd">            have a different number of True values. Requires add_mask_token=True.</span>
+<span class="sd">        :param query_mask: Boolean mask indicating which query tokens to replace</span>
+<span class="sd">            with [MASK] token [B, N_qry]. True = replace with mask. Each sample can</span>
+<span class="sd">            have a different number of True values. Requires add_mask_token=True.</span>
+<span class="sd">        :return: Output embeddings. Shape depends on mode:</span>
+<span class="sd">            - cross_attn=True: [B, N_qry, output_dim]</span>
+<span class="sd">            - cross_attn=False, return_all=False: [B, N_qry, output_dim]</span>
+<span class="sd">            - cross_attn=False, return_all=True: [B, N_ctx + N_qry, output_dim].</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Validate mask token usage</span>
+        <span class="k">if</span> <span class="n">context_mask</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">query_mask</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">add_mask_token</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                    <span class="s2">&quot;context_mask or query_mask provided but &quot;</span>
+                    <span class="s2">&quot;add_mask_token=False at initialization&quot;</span>
+                <span class="p">)</span>
         <span class="k">if</span> <span class="n">num_prefix</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">num_prefix</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_prefix_tokens</span>
-        <span class="c1"># Project and add positional embeddings</span>
-        <span class="n">context</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">context_proj</span><span class="p">(</span><span class="n">context</span><span class="p">)</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">_gather_pos</span><span class="p">(</span><span class="n">context_idx</span><span class="p">,</span> <span class="n">num_prefix</span><span class="p">)</span>
-        <span class="n">queries</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">query_proj</span><span class="p">(</span><span class="n">queries</span><span class="p">)</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">_gather_pos</span><span class="p">(</span><span class="n">query_idx</span><span class="p">)</span>
+        <span class="c1"># Project context and optionally replace masked positions with [MASK] token</span>
+        <span class="n">context</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">context_proj</span><span class="p">(</span><span class="n">context</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">context_mask</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">mask_tokens</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mask_token</span><span class="o">.</span><span class="n">expand_as</span><span class="p">(</span><span class="n">context</span><span class="p">)</span>
+            <span class="n">context</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">context_mask</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">),</span> <span class="n">mask_tokens</span><span class="p">,</span> <span class="n">context</span><span class="p">)</span>
+        <span class="n">context</span> <span class="o">=</span> <span class="n">context</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">_gather_pos</span><span class="p">(</span><span class="n">context_idx</span><span class="p">,</span> <span class="n">num_prefix</span><span class="p">)</span>
+        <span class="c1"># Project queries and optionally replace masked positions with [MASK] token</span>
+        <span class="n">queries</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">query_proj</span><span class="p">(</span><span class="n">queries</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">query_mask</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">mask_tokens</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mask_token</span><span class="o">.</span><span class="n">expand_as</span><span class="p">(</span><span class="n">queries</span><span class="p">)</span>
+            <span class="n">queries</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">query_mask</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">),</span> <span class="n">mask_tokens</span><span class="p">,</span> <span class="n">queries</span><span class="p">)</span>
+        <span class="n">queries</span> <span class="o">=</span> <span class="n">queries</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">_gather_pos</span><span class="p">(</span><span class="n">query_idx</span><span class="p">)</span>
         <span class="c1"># Time conditioning (only for AdaLN mode)</span>
         <span class="n">cond</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">use_adaln</span><span class="p">:</span>
@@ -1103,11 +1183,11 @@ document.write(`
         <span class="n">n_context</span> <span class="o">=</span> <span class="n">context</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
         <span class="n">n_queries</span> <span class="o">=</span> <span class="n">queries</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">use_cross_attn</span><span class="p">:</span>
-            <span class="c1"># Modes 1 &amp; 2: queries attend to context (return_all ignored)</span>
+            <span class="c1"># Cross-attention mode: queries attend to context</span>
             <span class="k">for</span> <span class="n">block</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">blocks</span><span class="p">:</span>
                 <span class="n">queries</span> <span class="o">=</span> <span class="n">block</span><span class="p">(</span><span class="n">queries</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="n">context</span><span class="p">,</span> <span class="n">cond</span><span class="o">=</span><span class="n">cond</span><span class="p">)</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_proj</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">final_norm</span><span class="p">(</span><span class="n">queries</span><span class="p">))</span>
-        <span class="c1"># Mode 3: joint attention</span>
+        <span class="c1"># Joint attention mode</span>
         <span class="n">x</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">cat</span><span class="p">([</span><span class="n">context</span><span class="p">,</span> <span class="n">queries</span><span class="p">],</span> <span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">block</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">blocks</span><span class="p">:</span>
             <span class="n">x</span> <span class="o">=</span> <span class="n">block</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">cond</span><span class="o">=</span><span class="n">cond</span><span class="p">)</span>
@@ -1128,13 +1208,12 @@ document.write(`
                 <span class="n">src</span><span class="o">=</span><span class="n">x</span><span class="p">[:,</span> <span class="n">n_context</span><span class="p">:],</span>
             <span class="p">)</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_proj</span><span class="p">(</span><span class="n">out</span><span class="p">)</span>
-        <span class="c1"># Handle edge case: no queries</span>
+        <span class="c1"># Return only query outputs</span>
         <span class="k">if</span> <span class="n">n_queries</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
             <span class="n">B</span> <span class="o">=</span> <span class="n">context</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
             <span class="k">return</span> <span class="n">torch</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span>
                 <span class="n">B</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_proj</span><span class="o">.</span><span class="n">out_features</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">x</span><span class="o">.</span><span class="n">device</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">x</span><span class="o">.</span><span class="n">dtype</span>
             <span class="p">)</span>
-
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_proj</span><span class="p">(</span><span class="n">x</span><span class="p">[:,</span> <span class="o">-</span><span class="n">n_queries</span><span class="p">:])</span></div>
 </div>
 
@@ -1278,20 +1357,157 @@ document.write(`
 <div class="viewcode-block" id="MAEDecoder">
 <a class="viewcode-back" href="../../../../stable_pretraining.backbone/#stable_pretraining.backbone.vit.MAEDecoder">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">MAEDecoder</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;MAE-style ViT Decoder using FlexibleTransformer.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;MAE-style Vision Transformer Decoder using FlexibleTransformer.</span>
 
-<span class="sd">    Uses joint self-attention where visible tokens and mask tokens</span>
-<span class="sd">    all attend to each other.</span>
-<span class="sd">    :param embed_dim: Encoder embedding dimension (input D)</span>
-<span class="sd">    :param decoder_embed_dim: Internal decoder dimension</span>
-<span class="sd">    :param output_dim: Output dimension (e.g., patch_size² × in_chans for pixels)</span>
-<span class="sd">    :param num_patches: Total number of patches T</span>
-<span class="sd">    :param depth: Number of transformer blocks</span>
-<span class="sd">    :param num_heads: Attention heads</span>
-<span class="sd">    :param mlp_ratio: MLP expansion ratio</span>
-<span class="sd">    :param pos_embed_type: &#39;sincos_1d&#39;, &#39;sincos_2d&#39;, or &#39;learned&#39;</span>
-<span class="sd">    :param grid_size: Grid size for 2D pos embed (auto-inferred if None)</span>
-<span class="sd">    :param drop_path_rate: Stochastic depth rate</span>
+<span class="sd">    Implements the decoder component of Masked Autoencoders (MAE) [1]_ for</span>
+<span class="sd">    self-supervised visual representation learning. The decoder reconstructs</span>
+<span class="sd">    masked patches from visible patch embeddings using joint self-attention,</span>
+<span class="sd">    where visible tokens and learnable mask tokens attend to each other.</span>
+<span class="sd">    The decoder is intentionally lightweight compared to the encoder, as MAE</span>
+<span class="sd">    demonstrates that a shallow decoder is sufficient for pixel reconstruction</span>
+<span class="sd">    while keeping the encoder focused on learning semantic representations.</span>
+<span class="sd">    Architecture Overview</span>
+<span class="sd">    ---------------------</span>
+<span class="sd">    1. **Input projection**: Maps encoder embeddings (embed_dim) to decoder</span>
+<span class="sd">       dimension (decoder_embed_dim)</span>
+<span class="sd">    2. **Mask token expansion**: Learnable mask tokens are placed at masked</span>
+<span class="sd">       positions</span>
+<span class="sd">    3. **Positional encoding**: Adds position information to all tokens</span>
+<span class="sd">    4. **Transformer blocks**: Joint self-attention over visible + mask tokens</span>
+<span class="sd">    5. **Output projection**: Maps to output_dim (typically patch_size² × channels)</span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    embed_dim : int, default=768</span>
+<span class="sd">        Embedding dimension from the encoder. This is the input dimension</span>
+<span class="sd">        of visible tokens passed to the decoder.</span>
+<span class="sd">    decoder_embed_dim : int, default=512</span>
+<span class="sd">        Internal hidden dimension of the decoder transformer blocks.</span>
+<span class="sd">        Typically smaller than embed_dim for efficiency.</span>
+<span class="sd">    output_dim : int, default=768</span>
+<span class="sd">        Output dimension per token. For pixel reconstruction, this should be</span>
+<span class="sd">        ``patch_size ** 2 * in_channels`` (e.g., 16×16×3 = 768 for RGB).</span>
+<span class="sd">    num_patches : int, default=196</span>
+<span class="sd">        Total number of patches T in the image (e.g., 14×14 = 196 for</span>
+<span class="sd">        224×224 images with patch_size=16).</span>
+<span class="sd">    depth : int, default=4</span>
+<span class="sd">        Number of transformer blocks in the decoder. MAE typically uses</span>
+<span class="sd">        fewer blocks than the encoder (e.g., 4-8 vs 12-24).</span>
+<span class="sd">    num_heads : int, default=16</span>
+<span class="sd">        Number of attention heads in multi-head self-attention.</span>
+<span class="sd">    mlp_ratio : float, default=4.0</span>
+<span class="sd">        Expansion ratio for the MLP hidden dimension relative to</span>
+<span class="sd">        decoder_embed_dim.</span>
+<span class="sd">    pos_embed_type : {&#39;sincos_1d&#39;, &#39;sincos_2d&#39;, &#39;learned&#39;}, default=&#39;sincos_2d&#39;</span>
+<span class="sd">        Type of positional embedding:</span>
+<span class="sd">        - &#39;sincos_2d&#39;: Fixed 2D sinusoidal (recommended for images)</span>
+<span class="sd">        - &#39;sincos_1d&#39;: Fixed 1D sinusoidal</span>
+<span class="sd">        - &#39;learned&#39;: Learnable positional embeddings</span>
+<span class="sd">    grid_size : int, optional</span>
+<span class="sd">        Spatial grid size for 2D positional embeddings. If None, inferred</span>
+<span class="sd">        as ``int(sqrt(num_patches))``. Required for non-square grids.</span>
+<span class="sd">    drop_path_rate : float, default=0.0</span>
+<span class="sd">        Stochastic depth rate for regularization during training.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">    ----------</span>
+<span class="sd">    mask_token : nn.Parameter</span>
+<span class="sd">        Learnable token of shape (1, 1, embed_dim) used to represent</span>
+<span class="sd">        masked positions. Initialized with truncated normal (std=0.02).</span>
+<span class="sd">    transformer : FlexibleTransformer</span>
+<span class="sd">        Core transformer module handling attention and projections.</span>
+
+<span class="sd">    Notes:</span>
+<span class="sd">    -----</span>
+<span class="sd">    - The mask convention follows MAE: **0 = visible/kept, 1 = masked**</span>
+<span class="sd">    - The decoder receives visible tokens and reconstructs masked positions</span>
+<span class="sd">    - For efficiency, only masked positions are predicted by default</span>
+
+<span class="sd">    References:</span>
+<span class="sd">    ----------</span>
+<span class="sd">    .. [1] He, K., et al. &quot;Masked Autoencoders Are Scalable Vision Learners.&quot;</span>
+<span class="sd">           CVPR 2022. https://arxiv.org/abs/2111.06377</span>
+
+<span class="sd">    Examples:</span>
+<span class="sd">    --------</span>
+<span class="sd">    **Basic Usage with MAE Encoder**</span>
+<span class="sd">    &gt;&gt;&gt; import torch</span>
+<span class="sd">    &gt;&gt;&gt; import torch.nn as nn</span>
+<span class="sd">    &gt;&gt;&gt;</span>
+<span class="sd">    &gt;&gt;&gt; # Configuration matching ViT-Base</span>
+<span class="sd">    &gt;&gt;&gt; B, T = 4, 196  # batch size, num_patches (14x14)</span>
+<span class="sd">    &gt;&gt;&gt; embed_dim = 768  # encoder dimension</span>
+<span class="sd">    &gt;&gt;&gt; mask_ratio = 0.75  # MAE default: mask 75% of patches</span>
+<span class="sd">    &gt;&gt;&gt;</span>
+<span class="sd">    &gt;&gt;&gt; # Initialize decoder</span>
+<span class="sd">    &gt;&gt;&gt; decoder = MAEDecoder(</span>
+<span class="sd">    ...     embed_dim=embed_dim,</span>
+<span class="sd">    ...     decoder_embed_dim=512,</span>
+<span class="sd">    ...     output_dim=16 * 16 * 3,  # patch_size² × channels = 768</span>
+<span class="sd">    ...     num_patches=T,</span>
+<span class="sd">    ...     depth=4,</span>
+<span class="sd">    ...     num_heads=16,</span>
+<span class="sd">    ... )</span>
+<span class="sd">    &gt;&gt;&gt;</span>
+<span class="sd">    &gt;&gt;&gt; # Simulate encoder output (visible tokens only)</span>
+<span class="sd">    &gt;&gt;&gt; N_vis = int(T * (1 - mask_ratio))  # 49 visible patches</span>
+<span class="sd">    &gt;&gt;&gt; visible_tokens = torch.randn(B, N_vis, embed_dim)</span>
+<span class="sd">    &gt;&gt;&gt;</span>
+<span class="sd">    &gt;&gt;&gt; # Create random mask (0=visible, 1=masked)</span>
+<span class="sd">    &gt;&gt;&gt; mask = torch.zeros(B, T)</span>
+<span class="sd">    &gt;&gt;&gt; for i in range(B):</span>
+<span class="sd">    ...     masked_indices = torch.randperm(T)[: T - N_vis]</span>
+<span class="sd">    ...     mask[i, masked_indices] = 1</span>
+<span class="sd">    &gt;&gt;&gt;</span>
+<span class="sd">    &gt;&gt;&gt; # Decode - predict masked patches only</span>
+<span class="sd">    &gt;&gt;&gt; pred_masked = decoder(visible_tokens, mask, output_masked_only=True)</span>
+<span class="sd">    &gt;&gt;&gt; print(pred_masked.shape)  # [B, N_mask, output_dim]</span>
+<span class="sd">    torch.Size([4, 147, 768])</span>
+<span class="sd">    **Full Sequence Reconstruction**</span>
+<span class="sd">    &gt;&gt;&gt; # Get predictions for ALL positions (for visualization)</span>
+<span class="sd">    &gt;&gt;&gt; pred_full = decoder(visible_tokens, mask, output_masked_only=False)</span>
+<span class="sd">    &gt;&gt;&gt; print(pred_full.shape)  # [B, T, output_dim]</span>
+<span class="sd">    torch.Size([4, 196, 768])</span>
+<span class="sd">    **Using Full Sequence Input**</span>
+<span class="sd">    If you have the full sequence with mask tokens already inserted:</span>
+<span class="sd">    &gt;&gt;&gt; full_sequence = torch.randn(B, T, embed_dim)  # [B, 196, 768]</span>
+<span class="sd">    &gt;&gt;&gt; pred = decoder(full_sequence, mask, output_masked_only=True)</span>
+<span class="sd">    &gt;&gt;&gt; print(pred.shape)</span>
+<span class="sd">    torch.Size([4, 147, 768])</span>
+<span class="sd">    **Integration with MAE Training Loop**</span>
+<span class="sd">    &gt;&gt;&gt; # Typical MAE training step (pseudocode)</span>
+<span class="sd">    &gt;&gt;&gt; def mae_forward(encoder, decoder, images, mask_ratio=0.75):</span>
+<span class="sd">    ...     # Patchify and mask</span>
+<span class="sd">    ...     patches = patchify(images)  # [B, T, patch_dim]</span>
+<span class="sd">    ...     mask = random_mask(B, T, mask_ratio)  # [B, T], 0=keep, 1=mask</span>
+<span class="sd">    ...</span>
+<span class="sd">    ...     # Encode visible patches only</span>
+<span class="sd">    ...     visible_patches = patches[~mask.bool()].reshape(B, -1, patch_dim)</span>
+<span class="sd">    ...     latent = encoder(visible_patches)  # [B, N_vis, embed_dim]</span>
+<span class="sd">    ...</span>
+<span class="sd">    ...     # Decode to predict masked patches</span>
+<span class="sd">    ...     pred = decoder(</span>
+<span class="sd">    ...         latent, mask, output_masked_only=True</span>
+<span class="sd">    ...     )  # [B, N_mask, output_dim]</span>
+<span class="sd">    ...</span>
+<span class="sd">    ...     # Reconstruction loss on masked patches only</span>
+<span class="sd">    ...     target = patches[mask.bool()].reshape(B, -1, patch_dim)</span>
+<span class="sd">    ...     loss = F.mse_loss(pred, target)</span>
+<span class="sd">    ...     return loss</span>
+<span class="sd">    **Custom Configuration for ViT-Large**</span>
+<span class="sd">    &gt;&gt;&gt; decoder_large = MAEDecoder(</span>
+<span class="sd">    ...     embed_dim=1024,  # ViT-L encoder dim</span>
+<span class="sd">    ...     decoder_embed_dim=512,  # Keep decoder lightweight</span>
+<span class="sd">    ...     output_dim=768,  # 16×16×3 pixels</span>
+<span class="sd">    ...     num_patches=256,  # 16×16 patches for 256×256 images</span>
+<span class="sd">    ...     depth=8,  # Slightly deeper</span>
+<span class="sd">    ...     num_heads=16,</span>
+<span class="sd">    ...     pos_embed_type=&quot;sincos_2d&quot;,</span>
+<span class="sd">    ...     drop_path_rate=0.1,  # Regularization</span>
+<span class="sd">    ... )</span>
+
+<span class="sd">    See Also:</span>
+<span class="sd">    --------</span>
+<span class="sd">    FlexibleTransformer : Core transformer implementation used internally.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
@@ -1337,7 +1553,7 @@ document.write(`
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">x</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span>
         <span class="n">mask</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span>
-        <span class="n">output_masked_only</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="n">output_masked_only</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Forward pass.</span>
 

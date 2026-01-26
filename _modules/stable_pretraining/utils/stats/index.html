@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>stable_pretraining.utils.stats &#8212; stable-pretraining 0.1.dev1+ga6cbffb28 documentation</title>
+    <title>stable_pretraining.utils.stats &#8212; stable-pretraining 0.1.dev1+g9b0b2e131 documentation</title>
   
   
   
@@ -39,7 +39,7 @@
 <link rel="preload" as="script" href="../../../../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
   <script src="../../../../_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
 
-    <script src="../../../../_static/documentation_options.js?v=af5f53f2"></script>
+    <script src="../../../../_static/documentation_options.js?v=027cdc71"></script>
     <script src="../../../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../../_static/scripts/sphinx-book-theme.js?v=887ef09a"></script>
@@ -135,7 +135,7 @@
   
   
   
-    <p class="title logo__title">stable-pretraining 0.1.dev1+ga6cbffb28 documentation</p>
+    <p class="title logo__title">stable-pretraining 0.1.dev1+g9b0b2e131 documentation</p>
   
 </a></div>
         <div class="sidebar-primary-item">
@@ -348,6 +348,106 @@ document.write(`
 <span class="kn">from</span><span class="w"> </span><span class="nn">torch.distributed.nn.functional</span><span class="w"> </span><span class="kn">import</span> <span class="n">all_reduce</span> <span class="k">as</span> <span class="n">functional_all_reduce</span>
 
 
+<div class="viewcode-block" id="mean_var">
+<a class="viewcode-back" href="../../../../stable_pretraining.utils/#stable_pretraining.utils.stats.mean_var">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">mean_var</span><span class="p">(</span>
+    <span class="n">x</span><span class="p">:</span> <span class="n">Tensor</span><span class="p">,</span>
+    <span class="n">dim</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+    <span class="n">keepdim</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">unbiased</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="n">sync</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="n">same_shape_across_devices</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">Tensor</span><span class="p">,</span> <span class="nb">int</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Compute mean and std synchronized across DDP ranks.</span>
+
+<span class="sd">    Numerically stable for bf16/fp16 by using fp32 accumulation internally.</span>
+<span class="sd">    Supports variable batch sizes across ranks.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    x : Tensor</span>
+<span class="sd">        Input tensor.</span>
+<span class="sd">    dim : int</span>
+<span class="sd">        Dimension to reduce.</span>
+<span class="sd">    keepdim : bool</span>
+<span class="sd">        Retain reduced dimension.</span>
+<span class="sd">    unbiased : bool</span>
+<span class="sd">        Apply Bessel&#39;s correction (N-1 denominator).</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">    -------</span>
+<span class="sd">    mean : Tensor</span>
+<span class="sd">        Global mean across all ranks.</span>
+<span class="sd">    std : Tensor</span>
+<span class="sd">        Global standard deviation across all ranks.</span>
+<span class="sd">    n_global : int</span>
+<span class="sd">        Total sample count across all ranks.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">n_local</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="n">dim</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">sync</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">dist</span><span class="o">.</span><span class="n">is_initialized</span><span class="p">():</span>
+        <span class="n">var</span><span class="p">,</span> <span class="n">mean</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">var_mean</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="n">dim</span><span class="p">,</span> <span class="n">keepdims</span><span class="o">=</span><span class="n">keepdim</span><span class="p">,</span> <span class="n">unbiased</span><span class="o">=</span><span class="n">unbiased</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">mean</span><span class="p">,</span> <span class="n">var</span><span class="p">,</span> <span class="n">n_local</span>
+    <span class="k">elif</span> <span class="n">same_shape_across_devices</span><span class="p">:</span>
+        <span class="n">n_global</span> <span class="o">=</span> <span class="n">n_local</span> <span class="o">*</span> <span class="n">dist</span><span class="o">.</span><span class="n">get_world_size</span><span class="p">()</span>
+        <span class="c1"># E[X²] = Var + Mean²  →  single all_reduce</span>
+        <span class="n">mean</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">dim</span><span class="p">,</span> <span class="n">keepdim</span><span class="o">=</span><span class="n">keepdim</span><span class="p">)</span>
+        <span class="n">ssq</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">square</span><span class="p">()</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">dim</span><span class="p">,</span> <span class="n">keepdim</span><span class="o">=</span><span class="n">keepdim</span><span class="p">)</span>
+        <span class="n">stats</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">stack</span><span class="p">([</span><span class="n">mean</span><span class="p">,</span> <span class="n">ssq</span><span class="p">])</span>
+        <span class="n">stats</span> <span class="o">=</span> <span class="n">functional_all_reduce</span><span class="p">(</span><span class="n">stats</span><span class="p">,</span> <span class="n">op</span><span class="o">=</span><span class="n">dist</span><span class="o">.</span><span class="n">ReduceOp</span><span class="o">.</span><span class="n">AVG</span><span class="p">)</span>
+        <span class="n">global_mean</span> <span class="o">=</span> <span class="n">stats</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">global_var</span> <span class="o">=</span> <span class="n">stats</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">global_mean</span><span class="o">.</span><span class="n">square</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">unbiased</span><span class="p">:</span>
+            <span class="n">global_var</span> <span class="o">=</span> <span class="n">global_var</span> <span class="o">*</span> <span class="p">(</span><span class="n">n_global</span> <span class="o">/</span> <span class="p">(</span><span class="n">n_global</span> <span class="o">-</span> <span class="mi">1</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">global_mean</span><span class="p">,</span> <span class="n">global_var</span><span class="p">,</span> <span class="n">n_global</span>
+
+    <span class="n">input_dtype</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">dtype</span>
+    <span class="n">device</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">device</span>
+    <span class="n">use_fp32</span> <span class="o">=</span> <span class="n">input_dtype</span> <span class="ow">in</span> <span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">float16</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">bfloat16</span><span class="p">)</span>
+    <span class="n">acc_dtype</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">float32</span> <span class="k">if</span> <span class="n">use_fp32</span> <span class="k">else</span> <span class="kc">None</span>
+
+    <span class="c1"># Local statistics (fp32 accumulator via dtype arg)</span>
+    <span class="n">local_mean</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">dim</span><span class="p">,</span> <span class="n">keepdim</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">acc_dtype</span><span class="p">)</span>
+    <span class="n">local_sq_mean</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">square</span><span class="p">()</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">dim</span><span class="p">,</span> <span class="n">keepdim</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">acc_dtype</span><span class="p">)</span>
+
+    <span class="c1"># Scale by count (single multiply, avoids accumulated sum)</span>
+    <span class="n">n_mean</span> <span class="o">=</span> <span class="n">n_local</span> <span class="o">*</span> <span class="n">local_mean</span>
+    <span class="n">n_sq_mean</span> <span class="o">=</span> <span class="n">n_local</span> <span class="o">*</span> <span class="n">local_sq_mean</span>
+
+    <span class="c1"># Fused all-reduce</span>
+    <span class="n">stacked</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">cat</span><span class="p">([</span><span class="n">n_mean</span><span class="p">,</span> <span class="n">n_sq_mean</span><span class="p">],</span> <span class="n">dim</span><span class="o">=</span><span class="n">dim</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">use_fp32</span><span class="p">:</span>
+        <span class="n">stacked</span> <span class="o">=</span> <span class="n">stacked</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">input_dtype</span><span class="p">)</span>
+    <span class="n">stacked</span> <span class="o">=</span> <span class="n">functional_all_reduce</span><span class="p">(</span><span class="n">stacked</span><span class="p">,</span> <span class="n">op</span><span class="o">=</span><span class="n">dist</span><span class="o">.</span><span class="n">ReduceOp</span><span class="o">.</span><span class="n">SUM</span><span class="p">)</span>
+
+    <span class="n">n_local_t</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">([</span><span class="n">n_local</span><span class="p">],</span> <span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+    <span class="n">n_global_t</span> <span class="o">=</span> <span class="n">functional_all_reduce</span><span class="p">(</span><span class="n">n_local_t</span><span class="p">,</span> <span class="n">op</span><span class="o">=</span><span class="n">dist</span><span class="o">.</span><span class="n">ReduceOp</span><span class="o">.</span><span class="n">SUM</span><span class="p">)</span>
+
+    <span class="c1"># Recover statistics</span>
+    <span class="n">stacked</span> <span class="o">=</span> <span class="n">stacked</span><span class="o">.</span><span class="n">float</span><span class="p">()</span>
+    <span class="n">n_mean</span><span class="p">,</span> <span class="n">n_sq_mean</span> <span class="o">=</span> <span class="n">stacked</span><span class="o">.</span><span class="n">chunk</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="n">dim</span><span class="p">)</span>
+
+    <span class="n">global_mean</span> <span class="o">=</span> <span class="n">n_mean</span> <span class="o">/</span> <span class="n">n_global_t</span>
+    <span class="n">global_sq_mean</span> <span class="o">=</span> <span class="n">n_sq_mean</span> <span class="o">/</span> <span class="n">n_global_t</span>
+    <span class="n">global_var</span> <span class="o">=</span> <span class="n">global_sq_mean</span> <span class="o">-</span> <span class="n">global_mean</span> <span class="o">*</span> <span class="n">global_mean</span>
+
+    <span class="n">n_global</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">n_global_t</span><span class="o">.</span><span class="n">item</span><span class="p">())</span>
+    <span class="k">if</span> <span class="n">unbiased</span> <span class="ow">and</span> <span class="n">n_global</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">global_var</span> <span class="o">=</span> <span class="n">global_var</span> <span class="o">*</span> <span class="p">(</span><span class="n">n_global</span> <span class="o">/</span> <span class="p">(</span><span class="n">n_global</span> <span class="o">-</span> <span class="mi">1</span><span class="p">))</span>
+
+    <span class="n">global_var</span> <span class="o">=</span> <span class="n">global_var</span>
+
+    <span class="k">if</span> <span class="n">use_fp32</span><span class="p">:</span>
+        <span class="n">global_mean</span> <span class="o">=</span> <span class="n">global_mean</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">input_dtype</span><span class="p">)</span>
+        <span class="n">global_var</span> <span class="o">=</span> <span class="n">global_var</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">input_dtype</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">keepdim</span><span class="p">:</span>
+        <span class="n">global_mean</span> <span class="o">=</span> <span class="n">global_mean</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(</span><span class="n">dim</span><span class="p">)</span>
+        <span class="n">global_var</span> <span class="o">=</span> <span class="n">global_var</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(</span><span class="n">dim</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">global_mean</span><span class="p">,</span> <span class="n">global_var</span><span class="p">,</span> <span class="n">n_global</span></div>
+
+
+
 <div class="viewcode-block" id="mean_std">
 <a class="viewcode-back" href="../../../../stable_pretraining.utils/#stable_pretraining.utils.stats.mean_std">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">mean_std</span><span class="p">(</span>
@@ -355,70 +455,13 @@ document.write(`
     <span class="n">dim</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
     <span class="n">keepdim</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">unbiased</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="n">eps</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1e-8</span><span class="p">,</span>
+    <span class="n">sync</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="n">same_shape_across_devices</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">Tensor</span><span class="p">,</span> <span class="nb">int</span><span class="p">]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Compute mean and std across all DDP ranks with gradient support.</span>
-
-<span class="sd">    Uses a single fused all_reduce for efficiency. Gradients flow back</span>
-<span class="sd">    through the collective operation via torch.distributed.nn.functional.</span>
-
-<span class="sd">    Note: Uses E[X²] - E[X]² formula which is efficient but may have</span>
-<span class="sd">    numerical precision issues for very large values. For most deep</span>
-<span class="sd">    learning applications this is fine.</span>
-
-<span class="sd">    Args:</span>
-<span class="sd">        x: Input tensor of shape (..., N, ...) where N is the size of</span>
-<span class="sd">           dimension `dim` that will be reduced.</span>
-<span class="sd">        dim: Dimension to reduce (typically 0 for batch dimension).</span>
-<span class="sd">        keepdim: If True, retains the reduced dimension with size 1.</span>
-<span class="sd">        unbiased: If True, use Bessel&#39;s correction (divide by N-1).</span>
-<span class="sd">                  If False, divide by N.</span>
-
-<span class="sd">    Returns:</span>
-<span class="sd">        mean: Global mean across all ranks. Shape depends on `keepdim`.</span>
-<span class="sd">        std: Global std across all ranks. Shape depends on `keepdim`.</span>
-<span class="sd">        B_global: Total number of samples across all ranks.</span>
-
-<span class="sd">    Example:</span>
-<span class="sd">        &gt;&gt;&gt; # On each DDP rank with local batch</span>
-<span class="sd">        &gt;&gt;&gt; x = model(inputs)  # (B_local, D)</span>
-<span class="sd">        &gt;&gt;&gt; mean, std, B_global = ddp_mean_std_fused(x, dim=0)</span>
-<span class="sd">        &gt;&gt;&gt; # mean, std have shape (D,), B_global = B_local * world_size</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">if</span> <span class="ow">not</span> <span class="n">dist</span><span class="o">.</span><span class="n">is_initialized</span><span class="p">():</span>
-        <span class="k">return</span> <span class="p">(</span>
-            <span class="n">x</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">dim</span><span class="p">,</span> <span class="n">keepdim</span><span class="o">=</span><span class="n">keepdim</span><span class="p">),</span>
-            <span class="n">x</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">dim</span><span class="p">,</span> <span class="n">keepdim</span><span class="o">=</span><span class="n">keepdim</span><span class="p">,</span> <span class="n">unbiased</span><span class="o">=</span><span class="n">unbiased</span><span class="p">),</span>
-            <span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="n">dim</span><span class="p">],</span>
-        <span class="p">)</span>
-
-    <span class="n">world_size</span> <span class="o">=</span> <span class="n">dist</span><span class="o">.</span><span class="n">get_world_size</span><span class="p">()</span>
-    <span class="n">B_local</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="n">dim</span><span class="p">]</span>
-    <span class="n">B_global</span> <span class="o">=</span> <span class="n">B_local</span> <span class="o">*</span> <span class="n">world_size</span>
-
-    <span class="c1"># Compute local sums (keepdim=True for stacking)</span>
-    <span class="n">sum_x</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">dim</span><span class="p">,</span> <span class="n">keepdim</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-    <span class="n">sum_x2</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">square</span><span class="p">()</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">dim</span><span class="p">,</span> <span class="n">keepdim</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-
-    <span class="c1"># Stack along reduced dim, single all_reduce, then unstack</span>
-    <span class="n">stacked</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">cat</span><span class="p">([</span><span class="n">sum_x</span><span class="p">,</span> <span class="n">sum_x2</span><span class="p">],</span> <span class="n">dim</span><span class="o">=</span><span class="n">dim</span><span class="p">)</span>
-    <span class="n">stacked</span> <span class="o">=</span> <span class="n">functional_all_reduce</span><span class="p">(</span><span class="n">stacked</span><span class="p">,</span> <span class="n">op</span><span class="o">=</span><span class="n">dist</span><span class="o">.</span><span class="n">ReduceOp</span><span class="o">.</span><span class="n">SUM</span><span class="p">)</span>
-    <span class="n">sum_x</span><span class="p">,</span> <span class="n">sum_x2</span> <span class="o">=</span> <span class="n">stacked</span><span class="o">.</span><span class="n">chunk</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="n">dim</span><span class="p">)</span>
-
-    <span class="c1"># Global mean and variance</span>
-    <span class="n">mean</span> <span class="o">=</span> <span class="n">sum_x</span> <span class="o">/</span> <span class="n">B_global</span>
-    <span class="n">var</span> <span class="o">=</span> <span class="n">sum_x2</span> <span class="o">/</span> <span class="n">B_global</span> <span class="o">-</span> <span class="n">mean</span><span class="o">.</span><span class="n">square</span><span class="p">()</span>
-
-    <span class="c1"># Bessel&#39;s correction</span>
-    <span class="k">if</span> <span class="n">unbiased</span><span class="p">:</span>
-        <span class="n">var</span> <span class="o">=</span> <span class="n">var</span> <span class="o">*</span> <span class="n">B_global</span> <span class="o">/</span> <span class="p">(</span><span class="n">B_global</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
-
-    <span class="n">std</span> <span class="o">=</span> <span class="n">var</span><span class="o">.</span><span class="n">clamp</span><span class="p">(</span><span class="nb">min</span><span class="o">=</span><span class="mf">1e-8</span><span class="p">)</span><span class="o">.</span><span class="n">sqrt</span><span class="p">()</span>
-
-    <span class="k">if</span> <span class="ow">not</span> <span class="n">keepdim</span><span class="p">:</span>
-        <span class="n">mean</span> <span class="o">=</span> <span class="n">mean</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(</span><span class="n">dim</span><span class="p">)</span>
-        <span class="n">std</span> <span class="o">=</span> <span class="n">std</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(</span><span class="n">dim</span><span class="p">)</span>
-
-    <span class="k">return</span> <span class="n">mean</span><span class="p">,</span> <span class="n">std</span><span class="p">,</span> <span class="n">B_global</span></div>
+    <span class="n">mean</span><span class="p">,</span> <span class="n">var</span><span class="p">,</span> <span class="n">bs</span> <span class="o">=</span> <span class="n">mean_var</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">dim</span><span class="p">,</span> <span class="n">keepdim</span><span class="p">,</span> <span class="n">unbiased</span><span class="p">,</span> <span class="n">sync</span><span class="p">,</span> <span class="n">same_shape_across_devices</span><span class="p">)</span>
+    <span class="n">std</span> <span class="o">=</span> <span class="n">var</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">eps</span><span class="p">)</span><span class="o">.</span><span class="n">sqrt</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">mean</span><span class="p">,</span> <span class="n">std</span><span class="p">,</span> <span class="n">bs</span></div>
 
 </pre></div>
 
