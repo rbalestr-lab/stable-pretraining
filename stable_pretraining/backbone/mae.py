@@ -5,6 +5,20 @@ import torch
 import torch.nn as nn
 from timm.models.vision_transformer import Block, PatchEmbed
 
+__all__ = [
+    "MaskedAutoencoderViT",
+    "vit_tiny_patch16",
+    "vit_tiny_patch16_dec512d8b",
+    "vit_small_patch16",
+    "vit_small_patch16_dec512d8b",
+    "vit_base_patch16",
+    "vit_base_patch16_dec512d8b",
+    "vit_large_patch16",
+    "vit_large_patch16_dec512d8b",
+    "vit_huge_patch14",
+    "vit_huge_patch14_dec512d8b",
+]
+
 # --------------------------------------------------------
 # 2D sine-cosine position embedding
 # References:
@@ -369,7 +383,41 @@ def vit_huge_patch14_dec512d8b(**kwargs):
     return model
 
 
+def vit_tiny_patch16_dec512d8b(**kwargs):
+    model = MaskedAutoencoderViT(
+        patch_size=16,
+        embed_dim=192,
+        depth=12,
+        num_heads=3,
+        decoder_embed_dim=512,
+        decoder_depth=8,
+        decoder_num_heads=16,
+        mlp_ratio=4,
+        norm_layer=partial(nn.LayerNorm, eps=1e-6),
+        **kwargs,
+    )
+    return model
+
+
+def vit_small_patch16_dec512d8b(**kwargs):
+    model = MaskedAutoencoderViT(
+        patch_size=16,
+        embed_dim=384,
+        depth=12,
+        num_heads=6,
+        decoder_embed_dim=512,
+        decoder_depth=8,
+        decoder_num_heads=16,
+        mlp_ratio=4,
+        norm_layer=partial(nn.LayerNorm, eps=1e-6),
+        **kwargs,
+    )
+    return model
+
+
 # set recommended archs
+vit_tiny_patch16 = vit_tiny_patch16_dec512d8b
+vit_small_patch16 = vit_small_patch16_dec512d8b  # decoder: 512 dim, 8 blocks
 vit_base_patch16 = vit_base_patch16_dec512d8b  # decoder: 512 dim, 8 blocks
 vit_large_patch16 = vit_large_patch16_dec512d8b  # decoder: 512 dim, 8 blocks
 vit_huge_patch14 = vit_huge_patch14_dec512d8b  # decoder: 512 dim, 8 blocks
