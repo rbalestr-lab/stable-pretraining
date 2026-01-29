@@ -405,6 +405,7 @@ class Module(pl.LightningModule):
 
         Returns:
             params_by_name: dict[name, List[nn.Parameter]]
+            named_params_by_name: dict[name, List[Tuple[str, nn.Parameter]]]
             modules_by_name: dict[name, List[str]]
         """
         # Pre-compile regex with stable order from optim_items
@@ -414,6 +415,7 @@ class Module(pl.LightningModule):
 
         # Initialize containers
         params_by_name = {name: [] for name, _ in compiled}
+        named_params_by_name = {name: [] for name, _ in compiled}
         modules_by_name = {name: [] for name, _ in compiled}
 
         # Map module -> group index with inheritance
@@ -445,6 +447,15 @@ class Module(pl.LightningModule):
                 direct_params = list(module.parameters(recurse=False))
                 if direct_params:
                     params_by_name[group_name].extend(direct_params)
+                # Also collect named parameters for exclude_bias_norm support
+                direct_named_params = list(module.named_parameters(recurse=False))
+                if direct_named_params:
+                    # Prefix with module's qualified name
+                    prefixed = [
+                        (f"{qual_name}.{pname}" if qual_name else pname, p)
+                        for pname, p in direct_named_params
+                    ]
+                    named_params_by_name[group_name].extend(prefixed)
 
         # Logging summary
         rows = []
@@ -478,7 +489,7 @@ class Module(pl.LightningModule):
                 "\n" + tabulate(rows, headers=headers, tablefmt="heavy_outline")
             )
 
-        return params_by_name, modules_by_name
+        return params_by_name, named_params_by_name, modules_by_name
 
     def configure_optimizers(self):
         """Configure optimizers and schedulers for manual optimization.
@@ -561,7 +572,9 @@ class Module(pl.LightningModule):
             # Direct parameter extraction - use globally filtered parameters
             params = list(self.parameters(with_callbacks=False))
 
-            opt = create_optimizer(params, optimizer_cfg)
+            # Pass named_params for exclude_bias_norm support
+            named_params = list(self.named_parameters(with_callbacks=False))
+            opt = create_optimizer(params, optimizer_cfg, named_params=named_params)
 
             # Create scheduler
             default = dict(
@@ -597,8 +610,8 @@ class Module(pl.LightningModule):
         )
 
         # Build grouping with detailed logging
-        params_by_name, modules_by_name = self._collect_parameters_by_optimizer_groups(
-            optim_items
+        params_by_name, named_params_by_name, modules_by_name = (
+            self._collect_parameters_by_optimizer_groups(optim_items)
         )
 
         # Build optimizers and schedulers
@@ -612,7 +625,11 @@ class Module(pl.LightningModule):
                 # skip registration when there are no parameters
                 continue
 
-            opt = create_optimizer(params, config["optimizer"])
+            # Pass named_params for exclude_bias_norm support
+            named_params = named_params_by_name.get(name, [])
+            opt = create_optimizer(
+                params, config["optimizer"], named_params=named_params
+            )
             optimizers.append(opt)
 
             sched_config = config.get("scheduler", "CosineAnnealingLR")
