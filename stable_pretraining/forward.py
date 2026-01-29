@@ -26,16 +26,15 @@ import torch
 from .callbacks.queue import find_or_create_queue_callback, OnlineQueue
 
 
-def _get_views_list(batch):
-    """Convert multi-view batch to list of views, whether it's a list or dict."""
-    if isinstance(batch, dict) and "image" not in batch:
+def _get_views_list(batch: dict):
+    """Convert multi-view batch to list of views."""
+    if "views" in batch:
+        return batch["views"]
+    elif "image" not in batch:
         # Dict of named views - convert to list
         return list(batch.values())
-    elif isinstance(batch, list):
-        # Already a list
-        return batch
     else:
-        # Single view
+        # Single view, return None as sentinel
         return None
 
 
