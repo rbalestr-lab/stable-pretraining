@@ -41,6 +41,7 @@ Methods come in two forms:
 | MSN | — | `MSN` | — | — | [Assran et al., 2022](https://arxiv.org/abs/2204.07141) |
 | NEPA | — | `NEPA` | — | — | — |
 | PIRL | — | `PIRL` | — | — | [Misra & van der Maaten, 2020](https://arxiv.org/abs/1912.01991) |
+| PMSN | — | `PMSN` | — | — | [Assran et al., 2023](https://arxiv.org/abs/2210.07277) |
 | SALT | — | `SALT` | — | — | [Li et al., 2025](https://arxiv.org/pdf/2509.24317) |
 | SimMIM | — | `SimMIM` | — | — | [Xie et al., 2022](https://arxiv.org/abs/2111.09886) |
 | SimSiam | — | `SimSiam` | — | — | [Chen & He, 2021](https://arxiv.org/abs/2011.10566) |
