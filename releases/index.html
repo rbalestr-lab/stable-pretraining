@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Releases &#8212; stable-pretraining 0.1.dev1+gd15ec96d0 documentation</title>
+    <title>Releases &#8212; stable-pretraining 0.1.dev1+g3b7706dc8 documentation</title>
   
   
   
@@ -43,7 +43,7 @@
   <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
 <link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
-    <script src="../_static/documentation_options.js?v=bee59b4d"></script>
+    <script src="../_static/documentation_options.js?v=756d0e68"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/sg-tags.js?v=d80f6fa4"></script>
@@ -130,7 +130,7 @@
   
   
   
-    <p class="title logo__title">stable-pretraining 0.1.dev1+gd15ec96d0 documentation</p>
+    <p class="title logo__title">stable-pretraining 0.1.dev1+g3b7706dc8 documentation</p>
   
 </a></div>
         <div class="sidebar-primary-item">
@@ -441,6 +441,15 @@
 <span id="id1"></span><h1>Releases<a class="headerlink" href="#releases" title="Link to this heading">#</a></h1>
 <section id="unreleased">
 <h2>Unreleased<a class="headerlink" href="#unreleased" title="Link to this heading">#</a></h2>
+<p><strong>New method</strong></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">PMSN</span></code> (Prior Matching for Siamese Networks): extends <code class="docutils literal notranslate"><span class="pre">MSN</span></code> by replacing
+its uniform-prior mean-entropy regulariser with a KL-divergence term against
+an arbitrary prior distribution over prototypes (power-law by default,
+<code class="docutils literal notranslate"><span class="pre">&quot;uniform&quot;</span></code>, or a custom tensor), per Assran et al., “The Hidden Uniform
+Cluster Prior in Self-Supervised Learning” (ICLR 2023). Registered in
+<code class="docutils literal notranslate"><span class="pre">stable_pretraining.methods</span></code> and <code class="docutils literal notranslate"><span class="pre">METHODS.md</span></code>.</p></li>
+</ul>
 <p><strong>Discoverability improvements</strong></p>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">METHODS.md</span></code>: new root-level catalog table covering every method class and
