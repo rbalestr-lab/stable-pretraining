@@ -2,6 +2,15 @@
 Unreleased
 ----------
 
+**New method**
+
+- ``PMSN`` (Prior Matching for Siamese Networks): extends ``MSN`` by replacing
+  its uniform-prior mean-entropy regulariser with a KL-divergence term against
+  an arbitrary prior distribution over prototypes (power-law by default,
+  ``"uniform"``, or a custom tensor), per Assran et al., "The Hidden Uniform
+  Cluster Prior in Self-Supervised Learning" (ICLR 2023). Registered in
+  ``stable_pretraining.methods`` and ``METHODS.md``.
+
 **Discoverability improvements**
 
 - ``METHODS.md``: new root-level catalog table covering every method class and

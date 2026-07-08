@@ -160,6 +160,18 @@ def test_msn_forward_backward():
     _assert_loss_and_backward(model, output)
 
 
+def test_pmsn_forward_backward():
+    model = M.PMSN(
+        encoder_name=TINY_VIT,
+        n_prototypes=256,
+        mask_ratio=0.5,
+    )
+    model.train()
+    v1, v2 = _two_views()
+    output = model(view1=v1, view2=v2)
+    _assert_loss_and_backward(model, output)
+
+
 def test_swav_forward_backward_two_view():
     """SwAV's compatibility 2-view forward (no multi-crop)."""
     model = M.SwAV(
