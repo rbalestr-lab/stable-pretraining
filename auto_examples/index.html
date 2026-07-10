@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Examples &#8212; stable-pretraining 0.1.dev1+g3b7706dc8 documentation</title>
+    <title>Examples &#8212; stable-pretraining 0.1.dev1+ged1c7fdec documentation</title>
   
   
   
@@ -43,7 +43,7 @@
   <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
 <link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
-    <script src="../_static/documentation_options.js?v=756d0e68"></script>
+    <script src="../_static/documentation_options.js?v=be487d9d"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/sg-tags.js?v=d80f6fa4"></script>
@@ -130,7 +130,7 @@
   
   
   
-    <p class="title logo__title">stable-pretraining 0.1.dev1+g3b7706dc8 documentation</p>
+    <p class="title logo__title">stable-pretraining 0.1.dev1+ged1c7fdec documentation</p>
   
 </a></div>
         <div class="sidebar-primary-item">
@@ -256,6 +256,8 @@
 <li class="toctree-l2"><a class="reference internal" href="../api/gen_modules/stable_pretraining.callbacks.ModuleSummary/">ModuleSummary</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../api/gen_modules/stable_pretraining.callbacks.SklearnCheckpoint/">SklearnCheckpoint</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../api/gen_modules/stable_pretraining.callbacks.ImageRetrieval/">ImageRetrieval</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api/gen_modules/stable_pretraining.callbacks.PCATokenVisualizer/">PCATokenVisualizer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api/gen_modules/stable_pretraining.callbacks.AttentionVisualizer/">AttentionVisualizer</a></li>
 </ul>
 </details></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../api/optim/">stable_pretraining.optim</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
@@ -494,6 +496,9 @@ trials.</p>
 </div><div class="sphx-glr-thumbcontainer" tooltip="This example demonstrates how to train models using supervised learning with stable-pretraining, including support for various datasets like ImageNet-10, ImageNet-100, and ImageNet-1k."><img alt="" src="../_images/sphx_glr_supervised_learning_thumb.png" />
 <p><a class="reference internal" href="supervised_learning/"><span class="doc">Supervised Learning Example</span></a></p>
   <div class="sphx-glr-thumbnail-title">Supervised Learning Example</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip="Reproduce the two iconic DINO pictures — the patch-token feature PCA and the CLS self-attention maps — on a pretrained DINO ViT, using the PCATokenVisualizer and AttentionVisualizer callbacks."><img alt="" src="../_images/sphx_glr_dino_visualization_thumb.png" />
+<p><a class="reference internal" href="dino_visualization/"><span class="doc">DINO feature PCA &amp; CLS-attention visualisation</span></a></p>
+  <div class="sphx-glr-thumbnail-title">DINO feature PCA & CLS-attention visualisation</div>
 </div><div class="sphx-glr-thumbcontainer" tooltip="Design choice (see the JAX backend docs): augmentation stays on CPU using the existing torchvision pipeline and we feed NHWC numpy arrays into the JAX trainer. Nothing in data/transforms.py is reimplemented — the array boundary is the clean seam between the two backends."><img alt="" src="../_images/sphx_glr_jax_simclr_imagenette_thumb.png" />
 <p><a class="reference internal" href="jax_simclr_imagenette/"><span class="doc">&lt;no title&gt;</span></a></p>
   <div class="sphx-glr-thumbnail-title">SimCLR on ImageNette with the JAX / Flax-NNX backend, data-parallel over GPUs.</div>

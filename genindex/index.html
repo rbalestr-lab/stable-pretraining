@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Index &#8212; stable-pretraining 0.1.dev1+g3b7706dc8 documentation</title>
+    <title>Index &#8212; stable-pretraining 0.1.dev1+ged1c7fdec documentation</title>
   
   
   
@@ -42,7 +42,7 @@
   <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
 <link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
-    <script src="../_static/documentation_options.js?v=756d0e68"></script>
+    <script src="../_static/documentation_options.js?v=be487d9d"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/sg-tags.js?v=d80f6fa4"></script>
@@ -129,7 +129,7 @@
   
   
   
-    <p class="title logo__title">stable-pretraining 0.1.dev1+g3b7706dc8 documentation</p>
+    <p class="title logo__title">stable-pretraining 0.1.dev1+ged1c7fdec documentation</p>
   
 </a></div>
         <div class="sidebar-primary-item">
@@ -255,6 +255,8 @@
 <li class="toctree-l2"><a class="reference internal" href="../api/gen_modules/stable_pretraining.callbacks.ModuleSummary/">ModuleSummary</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../api/gen_modules/stable_pretraining.callbacks.SklearnCheckpoint/">SklearnCheckpoint</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../api/gen_modules/stable_pretraining.callbacks.ImageRetrieval/">ImageRetrieval</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api/gen_modules/stable_pretraining.callbacks.PCATokenVisualizer/">PCATokenVisualizer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api/gen_modules/stable_pretraining.callbacks.AttentionVisualizer/">AttentionVisualizer</a></li>
 </ul>
 </details></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../api/optim/">stable_pretraining.optim</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
@@ -412,6 +414,8 @@
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="../api/gen_modules/stable_pretraining.registry.RegistryLogger/#stable_pretraining.registry.RegistryLogger.after_save_checkpoint">after_save_checkpoint() (stable_pretraining.registry.RegistryLogger method)</a>
+</li>
+      <li><a href="../api/gen_modules/stable_pretraining.callbacks.AttentionVisualizer/#stable_pretraining.callbacks.AttentionVisualizer">AttentionVisualizer (class in stable_pretraining.callbacks)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -794,24 +798,40 @@
 </li>
       <li><a href="../api/gen_modules/stable_pretraining.callbacks.SklearnCheckpoint/#stable_pretraining.callbacks.SklearnCheckpoint.on_save_checkpoint">on_save_checkpoint() (stable_pretraining.callbacks.SklearnCheckpoint method)</a>
 </li>
-      <li><a href="../api/gen_modules/stable_pretraining.callbacks.OnlineWriter/#stable_pretraining.callbacks.OnlineWriter.on_test_batch_end">on_test_batch_end() (stable_pretraining.callbacks.OnlineWriter method)</a>
-</li>
-      <li><a href="../api/gen_modules/stable_pretraining.callbacks.OnlineWriter/#stable_pretraining.callbacks.OnlineWriter.on_train_batch_end">on_train_batch_end() (stable_pretraining.callbacks.OnlineWriter method)</a>
-</li>
-      <li><a href="../api/gen_modules/stable_pretraining.module.Module/#stable_pretraining.module.Module.on_train_start">on_train_start() (stable_pretraining.module.Module method)</a>
-</li>
-      <li><a href="../api/gen_modules/stable_pretraining.callbacks.LiDAR/#stable_pretraining.callbacks.LiDAR.on_validation_batch_end">on_validation_batch_end() (stable_pretraining.callbacks.LiDAR method)</a>
+      <li><a href="../api/gen_modules/stable_pretraining.callbacks.AttentionVisualizer/#stable_pretraining.callbacks.AttentionVisualizer.on_test_batch_end">on_test_batch_end() (stable_pretraining.callbacks.AttentionVisualizer method)</a>
 
       <ul>
+        <li><a href="../api/gen_modules/stable_pretraining.callbacks.OnlineWriter/#stable_pretraining.callbacks.OnlineWriter.on_test_batch_end">(stable_pretraining.callbacks.OnlineWriter method)</a>
+</li>
+        <li><a href="../api/gen_modules/stable_pretraining.callbacks.PCATokenVisualizer/#stable_pretraining.callbacks.PCATokenVisualizer.on_test_batch_end">(stable_pretraining.callbacks.PCATokenVisualizer method)</a>
+</li>
+      </ul></li>
+      <li><a href="../api/gen_modules/stable_pretraining.callbacks.AttentionVisualizer/#stable_pretraining.callbacks.AttentionVisualizer.on_train_batch_end">on_train_batch_end() (stable_pretraining.callbacks.AttentionVisualizer method)</a>
+
+      <ul>
+        <li><a href="../api/gen_modules/stable_pretraining.callbacks.OnlineWriter/#stable_pretraining.callbacks.OnlineWriter.on_train_batch_end">(stable_pretraining.callbacks.OnlineWriter method)</a>
+</li>
+        <li><a href="../api/gen_modules/stable_pretraining.callbacks.PCATokenVisualizer/#stable_pretraining.callbacks.PCATokenVisualizer.on_train_batch_end">(stable_pretraining.callbacks.PCATokenVisualizer method)</a>
+</li>
+      </ul></li>
+      <li><a href="../api/gen_modules/stable_pretraining.module.Module/#stable_pretraining.module.Module.on_train_start">on_train_start() (stable_pretraining.module.Module method)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="../api/gen_modules/stable_pretraining.callbacks.AttentionVisualizer/#stable_pretraining.callbacks.AttentionVisualizer.on_validation_batch_end">on_validation_batch_end() (stable_pretraining.callbacks.AttentionVisualizer method)</a>
+
+      <ul>
+        <li><a href="../api/gen_modules/stable_pretraining.callbacks.LiDAR/#stable_pretraining.callbacks.LiDAR.on_validation_batch_end">(stable_pretraining.callbacks.LiDAR method)</a>
+</li>
         <li><a href="../api/gen_modules/stable_pretraining.callbacks.OnlineKNN/#stable_pretraining.callbacks.OnlineKNN.on_validation_batch_end">(stable_pretraining.callbacks.OnlineKNN method)</a>
 </li>
         <li><a href="../api/gen_modules/stable_pretraining.callbacks.OnlineWriter/#stable_pretraining.callbacks.OnlineWriter.on_validation_batch_end">(stable_pretraining.callbacks.OnlineWriter method)</a>
 </li>
+        <li><a href="../api/gen_modules/stable_pretraining.callbacks.PCATokenVisualizer/#stable_pretraining.callbacks.PCATokenVisualizer.on_validation_batch_end">(stable_pretraining.callbacks.PCATokenVisualizer method)</a>
+</li>
         <li><a href="../api/gen_modules/stable_pretraining.callbacks.RankMe/#stable_pretraining.callbacks.RankMe.on_validation_batch_end">(stable_pretraining.callbacks.RankMe method)</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="../api/gen_modules/stable_pretraining.callbacks.LoggingCallback/#stable_pretraining.callbacks.LoggingCallback.on_validation_end">on_validation_end() (stable_pretraining.callbacks.LoggingCallback method)</a>
 </li>
       <li><a href="../api/gen_modules/stable_pretraining.callbacks.ImageRetrieval/#stable_pretraining.callbacks.ImageRetrieval.on_validation_epoch_end">on_validation_epoch_end() (stable_pretraining.callbacks.ImageRetrieval method)</a>
@@ -836,12 +856,14 @@
 </li>
       <li><a href="../api/gen_modules/stable_pretraining.web.scan.RunScanner/#stable_pretraining.web.scan.RunScanner.patch_run_meta">patch_run_meta() (stable_pretraining.web.scan.RunScanner method)</a>
 </li>
-      <li><a href="../api/gen_modules/stable_pretraining.data.perlin_noise_3d/#stable_pretraining.data.perlin_noise_3d">perlin_noise_3d() (in module stable_pretraining.data)</a>
+      <li><a href="../api/gen_modules/stable_pretraining.callbacks.PCATokenVisualizer/#stable_pretraining.callbacks.PCATokenVisualizer">PCATokenVisualizer (class in stable_pretraining.callbacks)</a>
 </li>
-      <li><a href="../api/gen_modules/stable_pretraining.methods.PIRL/#stable_pretraining.methods.PIRL">PIRL (class in stable_pretraining.methods)</a>
+      <li><a href="../api/gen_modules/stable_pretraining.data.perlin_noise_3d/#stable_pretraining.data.perlin_noise_3d">perlin_noise_3d() (in module stable_pretraining.data)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="../api/gen_modules/stable_pretraining.methods.PIRL/#stable_pretraining.methods.PIRL">PIRL (class in stable_pretraining.methods)</a>
+</li>
       <li><a href="../api/gen_modules/stable_pretraining.manager.Manager/#stable_pretraining.manager.Manager.predict">predict() (stable_pretraining.manager.Manager method)</a>
 </li>
       <li><a href="../api/gen_modules/stable_pretraining.data.DataModule/#stable_pretraining.data.DataModule.predict_dataloader">predict_dataloader() (stable_pretraining.data.DataModule method)</a>

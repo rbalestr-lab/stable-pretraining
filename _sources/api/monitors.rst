@@ -47,3 +47,13 @@ Evaluation
    :template: myclass_template.rst
 
    ImageRetrieval
+
+Visualisation
+-------------
+
+.. autosummary::
+   :toctree: gen_modules/
+   :template: myclass_template.rst
+
+   PCATokenVisualizer
+   AttentionVisualizer

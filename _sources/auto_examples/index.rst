@@ -156,6 +156,23 @@ trials.
 
 .. raw:: html
 
+    <div class="sphx-glr-thumbcontainer" tooltip="Reproduce the two iconic DINO pictures — the patch-token feature PCA and the CLS self-attention maps — on a pretrained DINO ViT, using the PCATokenVisualizer and AttentionVisualizer callbacks.">
+
+.. only:: html
+
+  .. image:: /auto_examples/images/thumb/sphx_glr_dino_visualization_thumb.png
+    :alt:
+
+  :doc:`/auto_examples/dino_visualization`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">DINO feature PCA & CLS-attention visualisation</div>
+    </div>
+
+
+.. raw:: html
+
     <div class="sphx-glr-thumbcontainer" tooltip="Design choice (see the JAX backend docs): augmentation stays on CPU using the existing torchvision pipeline and we feed NHWC numpy arrays into the JAX trainer. Nothing in data/transforms.py is reimplemented — the array boundary is the clean seam between the two backends.">
 
 .. only:: html
@@ -220,6 +237,7 @@ trials.
    /auto_examples/imbalance_supervised_learning
    /auto_examples/wandb_figures
    /auto_examples/supervised_learning
+   /auto_examples/dino_visualization
    /auto_examples/jax_simclr_imagenette
    /auto_examples/multi_layer_probe
    /auto_examples/imagenet1k_supervised_vit_fsdp2
