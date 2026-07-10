@@ -10,6 +10,8 @@ from .knn import OnlineKNN
 from .latent_viz import LatentViz
 from .lidar import LiDAR
 from .probe import OnlineProbe
+from .pca_visualizer import PCATokenVisualizer
+from .attention_visualizer import AttentionVisualizer
 from .queues import OrderedQueue, UnsortedQueue
 from .image_decoder import OnlineImageDecoder
 from .hardware_monitor import HardwareMonitor
@@ -36,6 +38,8 @@ __all__ = [
     WandbCheckpoint,
     OnlineKNN,
     LatentViz,
+    PCATokenVisualizer,
+    AttentionVisualizer,
     TrainerInfo,
     SLURMInfo,
     LoggingCallback,
