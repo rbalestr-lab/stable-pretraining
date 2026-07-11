@@ -47,6 +47,7 @@ Methods come in two forms:
 | SimSiam | — | `SimSiam` | — | — | [Chen & He, 2021](https://arxiv.org/abs/2011.10566) |
 | TiCO | — | `TiCO` | — | — | [Zhu et al., 2022](https://arxiv.org/abs/2206.10698) |
 | VICRegL | — | `VICRegL` | `VICRegLoss` | — | [Bardes et al., 2022](https://arxiv.org/abs/2210.01571) |
+| VISReg | — | `VISReg` | — | — | [Wu et al., 2026](https://arxiv.org/abs/2606.02572) |
 | WMSE | — | `WMSE` | — | — | [Ermolov et al., 2021](https://arxiv.org/abs/2007.06346) |
 
 ---

@@ -244,6 +244,19 @@ def test_lejepa_forward_backward():
     _assert_loss_and_backward(model, output)
 
 
+def test_visreg_forward_backward():
+    model = M.VISReg(
+        encoder_name=TINY_VIT,
+        num_projections=64,
+    )
+    model.train()
+    v1, v2 = _two_views()
+    g = torch.Generator().manual_seed(2)
+    local1 = torch.randn(B, C, 96, 96, generator=g)
+    output = model.forward(global_views=[v1, v2], local_views=[local1])
+    _assert_loss_and_backward(model, output)
+
+
 def test_mim_refiner_forward_backward():
     """MIM-Refiner takes a pre-built encoder; just pass a fresh timm ViT."""
     import timm

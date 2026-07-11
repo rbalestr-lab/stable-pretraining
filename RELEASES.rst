@@ -10,6 +10,13 @@ Unreleased
   ``"uniform"``, or a custom tensor), per Assran et al., "The Hidden Uniform
   Cluster Prior in Self-Supervised Learning" (ICLR 2023). Registered in
   ``stable_pretraining.methods`` and ``METHODS.md``.
+- ``VISReg``: multi-view invariance combined with a sliced-Wasserstein
+  goodness-of-fit regulariser (center + scale + sliced inverse-CDF/quantile
+  terms) that pushes embeddings toward an isotropic standard Gaussian — a
+  drop-in alternative to ``LeJEPA``'s Epps-Pulley SIGReg. The loss is a convex
+  mix ``(1 - lamb) * invariance + lamb * visreg``. Registered in
+  ``stable_pretraining.methods`` and ``METHODS.md``, with an Imagenette
+  ViT-S/16 benchmark under ``benchmarks/imagenet10/visreg-vit-small.py``.
 
 **Discoverability improvements**
 

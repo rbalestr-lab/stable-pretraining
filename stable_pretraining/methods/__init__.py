@@ -29,6 +29,7 @@ from .swav import SwAV
 from .tico import TiCO
 from .vicreg import VICReg
 from .vicregl import VICRegL
+from .visreg import VISReg
 from .wmse import WMSE
 
 __all__ = [
@@ -63,5 +64,6 @@ __all__ = [
     "TiCO",
     "VICReg",
     "VICRegL",
+    "VISReg",
     "WMSE",
 ]

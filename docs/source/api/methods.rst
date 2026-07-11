@@ -92,6 +92,7 @@ input, either in pixel space or in a latent feature space.
    iGPT
    IJEPA
    LeJEPA
+   VISReg
    SALT
 
 Other
