@@ -40,7 +40,7 @@ write files themselves. Here a ``RegistryLogger`` is attached, so the two
 figures land under ``{--out}/media/val_pca/`` and ``{--out}/media/val_cls_attn/``
 (swap in a ``WandbLogger`` to upload them to Weights & Biases instead).
 
-.. GENERATED FROM PYTHON SOURCE LINES 24-210
+.. GENERATED FROM PYTHON SOURCE LINES 24-212
 
 .. code-block:: Python
 
@@ -152,7 +152,9 @@ figures land under ``{--out}/media/val_pca/`` and ``{--out}/media/val_cls_attn/`
             def __getitem__(self, idx):
                 return {"image": x[idx]}
 
-        dl = torch.utils.data.DataLoader(_DS(), batch_size=n_images, num_workers=num_workers)
+        dl = torch.utils.data.DataLoader(
+            _DS(), batch_size=n_images, num_workers=num_workers
+        )
         return spt.data.DataModule(train=dl, val=dl)
 
 

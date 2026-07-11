@@ -129,7 +129,9 @@ def build_dataloader(n_images: int, img_size: int, num_workers: int):
         def __getitem__(self, idx):
             return {"image": x[idx]}
 
-    dl = torch.utils.data.DataLoader(_DS(), batch_size=n_images, num_workers=num_workers)
+    dl = torch.utils.data.DataLoader(
+        _DS(), batch_size=n_images, num_workers=num_workers
+    )
     return spt.data.DataModule(train=dl, val=dl)
 
 

@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>stable-pretraining &#8212; stable-pretraining 0.1.dev1+ged1c7fdec documentation</title>
+    <title>stable-pretraining &#8212; stable-pretraining 0.1.dev1+g7830274c5 documentation</title>
   
   
   
@@ -43,7 +43,7 @@
   <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
 <link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
-    <script src="_static/documentation_options.js?v=be487d9d"></script>
+    <script src="_static/documentation_options.js?v=bfc801d0"></script>
     <script src="_static/doctools.js?v=fd6eb6e6"></script>
     <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="_static/sg-tags.js?v=d80f6fa4"></script>
@@ -131,7 +131,7 @@
   
   
   
-    <p class="title logo__title">stable-pretraining 0.1.dev1+ged1c7fdec documentation</p>
+    <p class="title logo__title">stable-pretraining 0.1.dev1+g7830274c5 documentation</p>
   
 </a></div>
         <div class="sidebar-primary-item">
@@ -237,6 +237,7 @@
 <li class="toctree-l2"><a class="reference internal" href="api/gen_modules/stable_pretraining.methods.iGPT/">iGPT</a></li>
 <li class="toctree-l2"><a class="reference internal" href="api/gen_modules/stable_pretraining.methods.IJEPA/">IJEPA</a></li>
 <li class="toctree-l2"><a class="reference internal" href="api/gen_modules/stable_pretraining.methods.LeJEPA/">LeJEPA</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/gen_modules/stable_pretraining.methods.VISReg/">VISReg</a></li>
 <li class="toctree-l2"><a class="reference internal" href="api/gen_modules/stable_pretraining.methods.SALT/">SALT</a></li>
 <li class="toctree-l2"><a class="reference internal" href="api/gen_modules/stable_pretraining.methods.NEPA/">NEPA</a></li>
 </ul>
@@ -1585,7 +1586,7 @@ spt<span class="w"> </span>registry<span class="w"> </span>migrate<span class="w
 </tbody>
 </table>
 </div>
-<p>The table above covers forward functions for use with <code class="docutils literal notranslate"><span class="pre">spt.Module</span></code>. For 30 full <code class="docutils literal notranslate"><span class="pre">LightningModule</span></code> implementations (BEiT, CMAE, Data2Vec, iBOT, iGPT, IJEPA, LeJEPA, MAE, MaskFeat, MIMRefiner, MoCov2, MoCov3, MSN, PIRL, SimMIM, SimSiam, TiCO, VICRegL, WMSE, and more), see <a class="reference internal" href="#METHODS.md"><span class="xref myst"><code class="docutils literal notranslate"><span class="pre">METHODS.md</span></code></span></a> and <code class="docutils literal notranslate"><span class="pre">stable_pretraining/methods/</span></code>.</p>
+<p>The table above covers forward functions for use with <code class="docutils literal notranslate"><span class="pre">spt.Module</span></code>. For 30 full <code class="docutils literal notranslate"><span class="pre">LightningModule</span></code> implementations (BEiT, CMAE, Data2Vec, iBOT, iGPT, IJEPA, LeJEPA, MAE, MaskFeat, MIMRefiner, MoCov2, MoCov3, MSN, PIRL, SimMIM, SimSiam, TiCO, VICRegL, VISReg, WMSE, and more), see <a class="reference internal" href="#METHODS.md"><span class="xref myst"><code class="docutils literal notranslate"><span class="pre">METHODS.md</span></code></span></a> and <code class="docutils literal notranslate"><span class="pre">stable_pretraining/methods/</span></code>.</p>
 <p><a id="backbones"></a></p>
 </section>
 <section id="backbones">
@@ -1979,137 +1980,142 @@ reproduction commands:
 </tr>
 </thead>
 <tbody>
-<tr class="row-even"><td><p>SwAV</p></td>
+<tr class="row-even"><td><p>VISReg</p></td>
+<td><p>multi-view + sliced wasserstein</p></td>
+<td class="text-right"><p>86.5%</p></td>
+<td class="text-right"><p><strong>90.2%</strong></p></td>
+</tr>
+<tr class="row-odd"><td><p>SwAV</p></td>
 <td><p>multi-crop clustering</p></td>
 <td class="text-right"><p>86.4%</p></td>
 <td class="text-right"><p><strong>89.7%</strong></p></td>
 </tr>
-<tr class="row-odd"><td><p>LeJEPA</p></td>
+<tr class="row-even"><td><p>LeJEPA</p></td>
 <td><p>multi-view + sliced Epps-Pulley</p></td>
 <td class="text-right"><p>85.4%</p></td>
 <td class="text-right"><p>87.1%</p></td>
 </tr>
-<tr class="row-even"><td><p>DINO</p></td>
+<tr class="row-odd"><td><p>DINO</p></td>
 <td><p>self-distill + multi-crop</p></td>
 <td class="text-right"><p>83.8%</p></td>
 <td class="text-right"><p>86.1%</p></td>
 </tr>
-<tr class="row-odd"><td><p>MoCo v3</p></td>
+<tr class="row-even"><td><p>MoCo v3</p></td>
 <td><p>contrastive + EMA</p></td>
 <td class="text-right"><p>82.6%</p></td>
 <td class="text-right"><p>84.7%</p></td>
 </tr>
-<tr class="row-even"><td><p>MAE</p></td>
+<tr class="row-odd"><td><p>MAE</p></td>
 <td><p>masked-image modeling</p></td>
 <td class="text-right"><p>72.1%</p></td>
 <td class="text-right"><p>84.1%</p></td>
 </tr>
-<tr class="row-odd"><td><p>Barlow Twins</p></td>
+<tr class="row-even"><td><p>Barlow Twins</p></td>
 <td><p>decorrelation</p></td>
 <td class="text-right"><p>81.2%</p></td>
 <td class="text-right"><p>83.0%</p></td>
 </tr>
-<tr class="row-even"><td><p>NNCLR</p></td>
+<tr class="row-odd"><td><p>NNCLR</p></td>
 <td><p>contrastive + queue</p></td>
 <td class="text-right"><p>75.6%</p></td>
 <td class="text-right"><p>80.2%</p></td>
 </tr>
-<tr class="row-odd"><td><p>VICReg</p></td>
+<tr class="row-even"><td><p>VICReg</p></td>
 <td><p>variance / invariance / cov.</p></td>
 <td class="text-right"><p>75.0%</p></td>
 <td class="text-right"><p>79.4%</p></td>
 </tr>
-<tr class="row-even"><td><p>SimCLR</p></td>
+<tr class="row-odd"><td><p>SimCLR</p></td>
 <td><p>NT-Xent contrastive</p></td>
 <td class="text-right"><p>73.3%</p></td>
 <td class="text-right"><p>74.9%</p></td>
 </tr>
-<tr class="row-odd"><td><p>VICRegL</p></td>
+<tr class="row-even"><td><p>VICRegL</p></td>
 <td><p>VICReg + local matching</p></td>
 <td class="text-right"><p>67.2%</p></td>
 <td class="text-right"><p>72.7%</p></td>
 </tr>
-<tr class="row-even"><td><p>CMAE</p></td>
+<tr class="row-odd"><td><p>CMAE</p></td>
 <td><p>MAE + contrastive</p></td>
 <td class="text-right"><p>61.9%</p></td>
 <td class="text-right"><p>72.2%</p></td>
 </tr>
-<tr class="row-odd"><td><p>MoCo v2</p></td>
+<tr class="row-even"><td><p>MoCo v2</p></td>
 <td><p>momentum + queue</p></td>
 <td class="text-right"><p>70.0%</p></td>
 <td class="text-right"><p>70.8%</p></td>
 </tr>
-<tr class="row-even"><td><p>BYOL</p></td>
+<tr class="row-odd"><td><p>BYOL</p></td>
 <td><p>EMA target + predictor</p></td>
 <td class="text-right"><p>56.0%</p></td>
 <td class="text-right"><p>63.9%</p></td>
 </tr>
-<tr class="row-odd"><td><p>SimSiam</p></td>
+<tr class="row-even"><td><p>SimSiam</p></td>
 <td><p>siamese + stop-grad</p></td>
 <td class="text-right"><p>54.9%</p></td>
 <td class="text-right"><p>62.8%</p></td>
 </tr>
-<tr class="row-even"><td><p>iBOT</p></td>
+<tr class="row-odd"><td><p>iBOT</p></td>
 <td><p>DINO + masked-patch loss</p></td>
 <td class="text-right"><p>43.3%</p></td>
 <td class="text-right"><p>57.9%</p></td>
 </tr>
-<tr class="row-odd"><td><p>MSN</p></td>
+<tr class="row-even"><td><p>MSN</p></td>
 <td><p>masked-siamese</p></td>
 <td class="text-right"><p>50.6%</p></td>
 <td class="text-right"><p>57.6%</p></td>
 </tr>
-<tr class="row-even"><td><p>DINOv3 *</p></td>
+<tr class="row-odd"><td><p>DINOv3 *</p></td>
 <td><p>DINOv2 + registers + KoLeo</p></td>
 <td class="text-right"><p>39.2%</p></td>
 <td class="text-right"><p>48.9%</p></td>
 </tr>
-<tr class="row-odd"><td><p>DINOv2 *</p></td>
+<tr class="row-even"><td><p>DINOv2 *</p></td>
 <td><p>DINO + iBOT + Sinkhorn</p></td>
 <td class="text-right"><p>31.5%</p></td>
 <td class="text-right"><p>42.1%</p></td>
 </tr>
-<tr class="row-even"><td><p>TiCO</p></td>
+<tr class="row-odd"><td><p>TiCO</p></td>
 <td><p>EMA-cov contrast (LARS)</p></td>
 <td class="text-right"><p>23.7%</p></td>
 <td class="text-right"><p>33.7%</p></td>
 </tr>
-<tr class="row-odd"><td><p>IJEPA</p></td>
+<tr class="row-even"><td><p>IJEPA</p></td>
 <td><p>predictive (joint embedding)</p></td>
 <td class="text-right"><p>33.2%</p></td>
 <td class="text-right"><p>34.0%</p></td>
 </tr>
-<tr class="row-even"><td><p>Data2Vec</p></td>
+<tr class="row-odd"><td><p>Data2Vec</p></td>
 <td><p>EMA contextual features</p></td>
 <td class="text-right"><p>31.0%</p></td>
 <td class="text-right"><p>26.3%</p></td>
 </tr>
-<tr class="row-odd"><td><p>MaskFeat</p></td>
+<tr class="row-even"><td><p>MaskFeat</p></td>
 <td><p>masked HOG features</p></td>
 <td class="text-right"><p>27.8%</p></td>
 <td class="text-right"><p>25.6%</p></td>
 </tr>
-<tr class="row-even"><td><p>SimMIM</p></td>
+<tr class="row-odd"><td><p>SimMIM</p></td>
 <td><p>masked pixel modeling</p></td>
 <td class="text-right"><p>30.9%</p></td>
 <td class="text-right"><p>22.5%</p></td>
 </tr>
-<tr class="row-odd"><td><p>W-MSE</p></td>
+<tr class="row-even"><td><p>W-MSE</p></td>
 <td><p>whitening + MSE</p></td>
 <td class="text-right"><p>16.9%</p></td>
 <td class="text-right"><p>15.9%</p></td>
 </tr>
-<tr class="row-even"><td><p>PIRL</p></td>
+<tr class="row-odd"><td><p>PIRL</p></td>
 <td><p>jigsaw + memory bank</p></td>
 <td class="text-right"><p>17.4%</p></td>
 <td class="text-right"><p>15.6%</p></td>
 </tr>
-<tr class="row-odd"><td><p>BEiT (placeholder tokenizer)</p></td>
+<tr class="row-even"><td><p>BEiT (placeholder tokenizer)</p></td>
 <td><p>discrete-token masking</p></td>
 <td class="text-right"><p>22.0%</p></td>
 <td class="text-right"><p>15.3%</p></td>
 </tr>
-<tr class="row-even"><td><p>iGPT (AIM-style)</p></td>
+<tr class="row-odd"><td><p>iGPT (AIM-style)</p></td>
 <td><p>autoregressive</p></td>
 <td class="text-right"><p>18.8%</p></td>
 <td class="text-right"><p>12.8%</p></td>

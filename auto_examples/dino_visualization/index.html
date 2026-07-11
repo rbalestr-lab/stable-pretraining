@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>DINO feature PCA &amp; CLS-attention visualisation &#8212; stable-pretraining 0.1.dev1+ged1c7fdec documentation</title>
+    <title>DINO feature PCA &amp; CLS-attention visualisation &#8212; stable-pretraining 0.1.dev1+g7830274c5 documentation</title>
   
   
   
@@ -43,7 +43,7 @@
   <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
 <link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
-    <script src="../../_static/documentation_options.js?v=be487d9d"></script>
+    <script src="../../_static/documentation_options.js?v=bfc801d0"></script>
     <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../_static/sg-tags.js?v=d80f6fa4"></script>
@@ -128,7 +128,7 @@
   
   
   
-    <p class="title logo__title">stable-pretraining 0.1.dev1+ged1c7fdec documentation</p>
+    <p class="title logo__title">stable-pretraining 0.1.dev1+g7830274c5 documentation</p>
   
 </a></div>
         <div class="sidebar-primary-item">
@@ -234,6 +234,7 @@
 <li class="toctree-l2"><a class="reference internal" href="../../api/gen_modules/stable_pretraining.methods.iGPT/">iGPT</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../api/gen_modules/stable_pretraining.methods.IJEPA/">IJEPA</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../api/gen_modules/stable_pretraining.methods.LeJEPA/">LeJEPA</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../api/gen_modules/stable_pretraining.methods.VISReg/">VISReg</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../api/gen_modules/stable_pretraining.methods.SALT/">SALT</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../api/gen_modules/stable_pretraining.methods.NEPA/">NEPA</a></li>
 </ul>
@@ -556,7 +557,9 @@ figures land under <code class="docutils literal notranslate"><span class="pre">
         <span class="k">def</span><span class="w"> </span><span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">idx</span><span class="p">):</span>
             <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;image&quot;</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="n">idx</span><span class="p">]}</span>
 
-    <span class="n">dl</span> <span class="o">=</span> <a href="https://docs.pytorch.org/docs/stable/data.html#torch.utils.data.DataLoader" title="torch.utils.data.DataLoader" class="sphx-glr-backref-module-torch-utils-data sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">torch</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">DataLoader</span></a><span class="p">(</span><span class="n">_DS</span><span class="p">(),</span> <span class="n">batch_size</span><span class="o">=</span><span class="n">n_images</span><span class="p">,</span> <span class="n">num_workers</span><span class="o">=</span><span class="n">num_workers</span><span class="p">)</span>
+    <span class="n">dl</span> <span class="o">=</span> <a href="https://docs.pytorch.org/docs/stable/data.html#torch.utils.data.DataLoader" title="torch.utils.data.DataLoader" class="sphx-glr-backref-module-torch-utils-data sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">torch</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">DataLoader</span></a><span class="p">(</span>
+        <span class="n">_DS</span><span class="p">(),</span> <span class="n">batch_size</span><span class="o">=</span><span class="n">n_images</span><span class="p">,</span> <span class="n">num_workers</span><span class="o">=</span><span class="n">num_workers</span>
+    <span class="p">)</span>
     <span class="k">return</span> <span class="n">spt</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">DataModule</span><span class="p">(</span><span class="n">train</span><span class="o">=</span><span class="n">dl</span><span class="p">,</span> <span class="n">val</span><span class="o">=</span><span class="n">dl</span><span class="p">)</span>
 
 
