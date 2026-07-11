@@ -16,33 +16,34 @@ methods are flagged with the reason they collapse.
 
 | # | Method | Family | KNN top-1 | Linear top-1 | Status |
 |--:|---|---|---:|---:|---|
-|  1 | **SwAV**           | multi-crop clustering          | 86.4% | **89.7%** | ✓ |
-|  2 | **LeJEPA**         | multi-view + sliced Epps-Pulley | 85.4% | **87.1%** | ✓ |
-|  3 | **DINO**           | self-distill + multi-crop      | 83.8% | **86.1%** | ✓ |
-|  4 | **MoCo v3**        | contrastive + EMA              | 82.6% | 84.7% | ✓ |
-|  5 | **MAE**            | masked-image modeling          | 72.1% | 84.1% | ✓ |
-|  6 | **Barlow Twins**   | decorrelation                  | 81.2% | 83.0% | ✓ |
-|  7 | **NNCLR**          | contrastive + queue            | 75.6% | 80.2% | ✓ |
-|  8 | **VICReg**         | variance / invariance / cov.   | 75.0% | 79.4% | ✓ |
-|  9 | **SimCLR**         | NT-Xent contrastive            | 73.3% | 74.9% | ✓ |
-| 10 | **VICRegL**        | VICReg + local matching        | 67.2% | 72.7% | ✓ |
-| 11 | **CMAE**           | MAE + contrastive              | 61.9% | 72.2% | ✓ |
-| 12 | **MoCo v2**        | momentum + queue               | 70.0% | 70.8% | ✓ |
-| 13 | **BYOL**           | EMA target + predictor         | 56.0% | 63.9% | ✓ |
-| 14 | **SimSiam**        | siamese + stop-grad            | 54.9% | 62.8% | ✓ |
-| 15 | **iBOT**           | DINO + masked-patch loss       | 43.3% | 57.9% | ✓ |
-| 16 | **MSN**            | masked-siamese                 | 50.6% | 57.6% | ✓ |
-| 17 | **DINOv3**         | DINOv2 + registers + KoLeo     | 35.9% | 41.4% | running (mc restart, ep 37) |
-| 18 | **DINOv2**         | DINO + iBOT + Sinkhorn         | 29.6% | 37.2% | running (mc restart, ep 37) |
-| 19 | **TiCO**           | EMA-cov contrast (LARS)        | 23.7% | 33.7% | ✓ |
-| 20 | **IJEPA**          | predictive (joint embedding)   | 33.2% | 34.0% | ✓ |
-| 21 | **Data2Vec**       | EMA contextual features        | 31.0% | 26.3% | ✓ |
-| 22 | **MaskFeat**       | masked HOG features            | 27.8% | 25.6% | ✓ |
-| 23 | **SimMIM**         | masked pixel modeling          | 30.9% | 22.5% | ✓ |
-| 24 | **W-MSE**          | whitening + MSE                | 16.9% | 15.9% | ✓ |
-| 25 | **PIRL**           | jigsaw + memory bank           | 17.4% | 15.6% | ✓ |
-| 26 | **BEiT**           | discrete-token masking         | 22.0% | 15.3% | ✓ (placeholder tokenizer) |
-| 27 | **iGPT**           | autoregressive (AIM-style)     | 18.8% | 12.8% | ✓ |
+|  1 | **VISReg**         | multi-view + sliced Wasserstein | 86.5% | **90.2%** | ✓ |
+|  2 | **SwAV**           | multi-crop clustering          | 86.4% | **89.7%** | ✓ |
+|  3 | **LeJEPA**         | multi-view + sliced Epps-Pulley | 85.4% | **87.1%** | ✓ |
+|  4 | **DINO**           | self-distill + multi-crop      | 83.8% | **86.1%** | ✓ |
+|  5 | **MoCo v3**        | contrastive + EMA              | 82.6% | 84.7% | ✓ |
+|  6 | **MAE**            | masked-image modeling          | 72.1% | 84.1% | ✓ |
+|  7 | **Barlow Twins**   | decorrelation                  | 81.2% | 83.0% | ✓ |
+|  8 | **NNCLR**          | contrastive + queue            | 75.6% | 80.2% | ✓ |
+|  9 | **VICReg**         | variance / invariance / cov.   | 75.0% | 79.4% | ✓ |
+| 10 | **SimCLR**         | NT-Xent contrastive            | 73.3% | 74.9% | ✓ |
+| 11 | **VICRegL**        | VICReg + local matching        | 67.2% | 72.7% | ✓ |
+| 12 | **CMAE**           | MAE + contrastive              | 61.9% | 72.2% | ✓ |
+| 13 | **MoCo v2**        | momentum + queue               | 70.0% | 70.8% | ✓ |
+| 14 | **BYOL**           | EMA target + predictor         | 56.0% | 63.9% | ✓ |
+| 15 | **SimSiam**        | siamese + stop-grad            | 54.9% | 62.8% | ✓ |
+| 16 | **iBOT**           | DINO + masked-patch loss       | 43.3% | 57.9% | ✓ |
+| 17 | **MSN**            | masked-siamese                 | 50.6% | 57.6% | ✓ |
+| 18 | **DINOv3**         | DINOv2 + registers + KoLeo     | 35.9% | 41.4% | running (mc restart, ep 37) |
+| 19 | **DINOv2**         | DINO + iBOT + Sinkhorn         | 29.6% | 37.2% | running (mc restart, ep 37) |
+| 20 | **TiCO**           | EMA-cov contrast (LARS)        | 23.7% | 33.7% | ✓ |
+| 21 | **IJEPA**          | predictive (joint embedding)   | 33.2% | 34.0% | ✓ |
+| 22 | **Data2Vec**       | EMA contextual features        | 31.0% | 26.3% | ✓ |
+| 23 | **MaskFeat**       | masked HOG features            | 27.8% | 25.6% | ✓ |
+| 24 | **SimMIM**         | masked pixel modeling          | 30.9% | 22.5% | ✓ |
+| 25 | **W-MSE**          | whitening + MSE                | 16.9% | 15.9% | ✓ |
+| 26 | **PIRL**           | jigsaw + memory bank           | 17.4% | 15.6% | ✓ |
+| 27 | **BEiT**           | discrete-token masking         | 22.0% | 15.3% | ✓ (placeholder tokenizer) |
+| 28 | **iGPT**           | autoregressive (AIM-style)     | 18.8% | 12.8% | ✓ |
 
 ✓ = run completed at epoch 199/200. *running* = run still climbing at the
 listed epoch; the numbers shown are the best so far, will improve.
@@ -61,6 +62,7 @@ size used in this sweep. Key choices:
 | SwAV | AdamW, multi-crop 2×224 + 4×96 | 5e-4 | paper uses 6×96; truncated |
 | DINO, DINOv2, DINOv3 | AdamW, multi-crop 2×224 + 6×96 | 5e-4 | DINOv2 / v3 use Sinkhorn |
 | LeJEPA | AdamW, multi-view 8 crops, SIGReg | 4e-4 | paper exact |
+| VISReg | AdamW, multi-view 8 crops, VISReg | 1e-3 | paper exact |
 | MoCo v2 | AdamW (ViT-tuned vs. paper SGD) | 1.5e-4 | adapted for ViT |
 | MAE, SimMIM, CMAE | AdamW, mask ratio 0.6–0.75 | 1e-3 / 5e-4 | paper exact |
 | MaskFeat, Data2Vec | AdamW + EMA target | 2e-3 / 1.5e-3 | paper exact |
@@ -106,7 +108,7 @@ MAX_EPOCHS=200 srun --gres=gpu:1 --cpus-per-task=8 --mem=32G --time=06:00:00 \
   python benchmarks/imagenet10/<method>-vit-small.py
 ```
 
-Multi-crop methods (DINO, iBOT, DINOv2, DINOv3, SwAV, LeJEPA) need
+Multi-crop methods (DINO, iBOT, DINOv2, DINOv3, SwAV, LeJEPA, VISReg) need
 `--time=24:00:00`. The default 20-epoch verification run drops the wall
 time substantially — use `MAX_EPOCHS=20` and `--time=00:45:00`.
 

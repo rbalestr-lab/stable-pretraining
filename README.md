@@ -870,7 +870,7 @@ spt.set(default_loggers={"registry": False})
 | DINO | `forward.dino` | `DINOv1Loss` | Self-distillation with multi-crop and centering |
 | DINOv2 | `forward.dinov2` | `DINOv2Loss`, `iBOTPatchLoss` | DINO + iBOT masked patch prediction |
 
-The table above covers forward functions for use with `spt.Module`. For 30 full `LightningModule` implementations (BEiT, CMAE, Data2Vec, iBOT, iGPT, IJEPA, LeJEPA, MAE, MaskFeat, MIMRefiner, MoCov2, MoCov3, MSN, PIRL, SimMIM, SimSiam, TiCO, VICRegL, WMSE, and more), see [`METHODS.md`](METHODS.md) and `stable_pretraining/methods/`.
+The table above covers forward functions for use with `spt.Module`. For 30 full `LightningModule` implementations (BEiT, CMAE, Data2Vec, iBOT, iGPT, IJEPA, LeJEPA, MAE, MaskFeat, MIMRefiner, MoCov2, MoCov3, MSN, PIRL, SimMIM, SimSiam, TiCO, VICRegL, VISReg, WMSE, and more), see [`METHODS.md`](METHODS.md) and `stable_pretraining/methods/`.
 
 <a id="backbones"></a>
 ## Backbones
@@ -1250,6 +1250,7 @@ reproduction commands:
 
 | Method | Family | KNN top-1 | Linear top-1 |
 |---|---|---:|---:|
+| VISReg        | multi-view + sliced wasserstein| 86.5% | **90.2%** |
 | SwAV          | multi-crop clustering          | 86.4% | **89.7%** |
 | LeJEPA        | multi-view + sliced Epps-Pulley | 85.4% | 87.1% |
 | DINO          | self-distill + multi-crop      | 83.8% | 86.1% |
