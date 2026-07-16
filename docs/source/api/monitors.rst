@@ -57,3 +57,5 @@ Visualisation
 
    PCATokenVisualizer
    AttentionVisualizer
+   OnlineImageDecoder
+   ReconViz

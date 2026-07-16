@@ -13,6 +13,7 @@
 | `CLIPZeroShot` | [clip_zero_shot.py](clip_zero_shot.py) | Zero-shot classification evaluator for CLIP-style models. Compares image embeddings against pre-encoded class text embeddings to produce predictions without any fine-tuning. |
 | `ImageRetrieval` | [image_retrieval.py](image_retrieval.py) | Image retrieval evaluator (following the DINO protocol). Computes normalized embeddings, gathers across ranks, and evaluates retrieval metrics on query/gallery splits. |
 | `LatentViz` | [latent_viz.py](latent_viz.py) | Online latent-space visualization. Learns a 2D projection that preserves neighborhood structure (contrastive loss on k-NN graphs) and periodically plots it during training. |
+| `ReconViz` | [recon_viz.py](recon_viz.py) | Renders `OnlineImageDecoder` reconstructions as a `target \| recon` grid image or MP4 video each validation epoch. Injected denorm stats (no model coupling); logs through any `log_image`/`log_video`-capable logger. |
 | `EpochMilestones` | [earlystop.py](earlystop.py) | Early-stops training if a monitored metric fails to reach a threshold by a given epoch (e.g., "accuracy ≥ 0.5 by epoch 20"). Supports both `max` and `min` directions. |
 
 ### Training Utilities
