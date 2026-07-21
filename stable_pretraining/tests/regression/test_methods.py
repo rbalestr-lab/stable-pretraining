@@ -222,14 +222,16 @@ METHOD_BUILDERS = {
     "supervised": build_supervised,
 }
 
-# Reference loss values captured on 2026-04-09 with seed=42.
+# Reference loss values captured on 2026-07-21 with seed=42, against the
+# dependency versions pinned in requirements-ci.txt (both the regression and
+# the integration CI jobs install that file, so CI and a local dev env agree).
 # If any method's loss changes, the forward/loss logic has drifted.
 # Re-capture with: python stable_pretraining/tests/regression/_capture_refs.py
 REFERENCE_LOSSES = {
-    "simclr": ("fit/loss_epoch", 1.645321011543274),
-    "byol": ("fit/loss_epoch", 1.822302222251892),
+    "simclr": ("fit/loss_epoch", 1.6453218460083008),
+    "byol": ("fit/loss_epoch", 1.8223044872283936),
     "vicreg": ("fit/loss_epoch", 18.119741439819336),
-    "barlow_twins": ("fit/loss_epoch", 1.7105509042739868),
+    "barlow_twins": ("fit/loss_epoch", 1.7105531692504883),
     "supervised": ("validate/loss_step", 2.3338754177093506),
 }
 
