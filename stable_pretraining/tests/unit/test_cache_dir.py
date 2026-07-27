@@ -68,11 +68,23 @@ class TestCacheDirConfig:
         cfg.cache_dir = str(tmp_path)
         assert cfg.cache_dir == str(tmp_path)
 
-    def test_set_to_none(self, tmp_path):
+    def test_set_to_none_via_property(self, tmp_path):
+        # The property setter still permits None — the JAX backend uses it to
+        # disable checkpointing (see jax/manager.py). Only the public spt.set()
+        # API prohibits it.
         spt_set(cache_dir=str(tmp_path))
         cfg = get_config()
         cfg.cache_dir = None
         assert cfg.cache_dir is None
+
+    def test_spt_set_none_raises(self, tmp_path):
+        # Public API must reject an explicit None: caching is mandatory so each
+        # run gets a unique, parallel-safe output dir (no CWD collisions).
+        spt_set(cache_dir=str(tmp_path))
+        with pytest.raises(ValueError, match="cache_dir cannot be None"):
+            spt_set(cache_dir=None)
+        # The failed call must not have mutated the existing value.
+        assert get_config().cache_dir == str(tmp_path)
 
     def test_rejects_empty_string(self):
         with pytest.raises(ValueError, match="must not be empty"):
@@ -85,6 +97,18 @@ class TestCacheDirConfig:
     def test_rejects_non_string(self):
         with pytest.raises(TypeError, match="must be a str"):
             get_config().cache_dir = 123
+
+    def test_rejects_relative_path(self):
+        with pytest.raises(ValueError, match="must be an absolute path"):
+            spt_set(cache_dir="runs")
+        with pytest.raises(ValueError, match="must be an absolute path"):
+            get_config().cache_dir = "./out"
+
+    def test_accepts_tilde_path(self):
+        # '~/...' expands to an absolute path, so it is accepted and stored
+        # verbatim (expansion happens later in _resolve_run_dir).
+        spt_set(cache_dir="~/spt_cache_test")
+        assert get_config().cache_dir == "~/spt_cache_test"
 
     def test_reset_restores_default_cache_dir(self, tmp_path, monkeypatch):
         monkeypatch.delenv("SPT_CACHE_DIR", raising=False)
@@ -323,6 +347,37 @@ class TestResolveRunDir:
         assert idx.is_file()
         assert idx.read_text().strip() == str(run_dir)
 
+    def test_nonzero_rank_does_not_write_slurm_index_on_handoff_miss(
+        self, cache_dir, monkeypatch
+    ):
+        """Only rank-0 writes ``.slurm_index`` — even if the handoff times out.
+
+        Regression: under FSDP2/DDP, if the rank-0 handoff times out every
+        non-zero rank falls through to the fresh branch with its OWN uuid'd
+        run_dir. If they all wrote the shared index (last-writer-wins), it
+        could end up pointing at a non-rank-0 dir — but Lightning broadcasts
+        rank-0's checkpoint path, so the distributed ``last.ckpt`` lives in
+        rank-0's dir. A mismatched index then breaks requeue with
+        "no last.ckpt". Non-zero ranks must NOT touch the index.
+        """
+        monkeypatch.setenv("SLURM_JOB_ID", "77777")
+        monkeypatch.delenv("SLURM_RESTART_COUNT", raising=False)
+        # Simulate a DDP launch where this process is rank 1 and the rank-0
+        # handoff never arrives (times out → None).
+        monkeypatch.setattr(
+            "stable_pretraining.manager._ddp_launch_key", lambda: "launchkey-77777"
+        )
+        monkeypatch.setattr("stable_pretraining.manager.get_rank", lambda: 1)
+        monkeypatch.setattr(
+            Manager, "_wait_for_rank_zero_handoff", lambda self, *a, **k: None
+        )
+        manager = self._make_manager()
+        run_dir = manager._resolve_run_dir()
+        # It still gets a (local, orphan) run_dir to keep training alive...
+        assert run_dir is not None and run_dir.is_dir()
+        # ...but it must NOT have written the shared index (rank-0 owns it).
+        assert not (cache_dir / ".slurm_index" / "77777").exists()
+
     def test_array_task_index_key_includes_task_id(self, cache_dir, monkeypatch):
         """SLURM_ARRAY_TASK_ID disambiguates tasks within the same array job."""
         monkeypatch.setenv("SLURM_JOB_ID", "100")
@@ -445,17 +500,14 @@ class TestDDPRankHandoff:
 
     @staticmethod
     def _set_rank(monkeypatch, rank: int) -> None:
-        """Override Lightning's cached rank for the duration of one test.
+        """Override the rank seen by ``Manager._resolve_run_dir`` for one test.
 
-        ``rank_zero_only.rank`` is set at module-import time from env vars and
-        cached, so monkeypatching env vars after import has no effect on it.
-        We patch the attribute directly — this is exactly what Lightning's own
-        Strategy does at setup time when it learns the real rank from the
-        process group.
+        ``_resolve_run_dir`` resolves rank via ``manager.get_rank()`` (which
+        normally reads the process group / launcher env vars). We patch that
+        function directly — this is exactly what a launcher would produce at
+        setup time when it learns the real rank.
         """
-        from lightning.pytorch.utilities.rank_zero import rank_zero_only
-
-        monkeypatch.setattr(rank_zero_only, "rank", rank, raising=False)
+        monkeypatch.setattr("stable_pretraining.manager.get_rank", lambda: rank)
 
     # -- launch-key uniqueness ------------------------------------------------
 

@@ -15,8 +15,9 @@ import lightning as pl
 import pandas as pd
 import submitit
 from lightning.pytorch.callbacks import Callback, ModelCheckpoint
-from lightning.pytorch.utilities.rank_zero import rank_zero_only
 from loguru import logger as logging
+
+from .utils.distributed import get_rank, rank_zero_only, seed_everything
 from omegaconf import DictConfig, OmegaConf
 
 from . import WANDB_AVAILABLE
@@ -528,9 +529,13 @@ class Manager(submitit.helpers.Checkpointable):
                     "regardless of where the process is launched from."
                 )
             p = p.with_suffix(".ckpt")
-            if not p.is_file():
+            # ``exists()`` not ``is_file()``: a distributed (FSDP2) checkpoint
+            # is a directory of ``*.distcp`` shards, not a single file. Accept
+            # both so an FSDP2 ``last.ckpt`` can be passed as a fresh-run
+            # ``ckpt_path`` too.
+            if not p.exists():
                 raise FileNotFoundError(
-                    f"`ckpt_path` was set to {p} but no such file exists. "
+                    f"`ckpt_path` was set to {p} but no such file/dir exists. "
                     "Refusing to silently start training from scratch."
                 )
             ckpt_path = p
@@ -789,12 +794,18 @@ class Manager(submitit.helpers.Checkpointable):
         # last-writer-wins), rank-0 picks the dir and publishes it to a shared
         # handoff file; non-zero ranks block on that file and adopt it.
         #
-        # Lightning's `rank_zero_only.rank` is the source of truth: it's
-        # initialised at import time from the same env vars (`RANK`,
-        # `SLURM_PROCID`, ...) that DDP launchers set, and reused by every
-        # `@rank_zero_only`-gated logger we ship — keeping detection consistent.
+        # Resolve rank via ``get_rank()`` — it reads the live process group, or
+        # falls back to the launcher env vars (`RANK` / `LOCAL_RANK` /
+        # `SLURM_PROCID`) that are set *before* the process group is built,
+        # which is exactly the situation here. (Do NOT use
+        # ``getattr(rank_zero_only, "rank", 0)``: our in-house ``rank_zero_only``
+        # is a plain decorator with no ``.rank`` attribute — unlike Lightning's
+        # — so that getattr silently returned 0 on EVERY rank, making all ranks
+        # believe they were rank-0. They then skipped the handoff and each
+        # created its own run_dir, racing on ``.slurm_index`` and breaking
+        # requeue resume. See test_nonzero_rank_does_not_write_slurm_index.)
         launch_key = _ddp_launch_key()
-        rank = int(getattr(rank_zero_only, "rank", 0) or 0)
+        rank = get_rank()
         is_rank_zero = rank == 0
         logging.info(
             f"  ddp: launch_key={launch_key or '(single-process)'} "
@@ -996,10 +1007,29 @@ class Manager(submitit.helpers.Checkpointable):
         (run_dir / _RUN_META_FILENAME).write_text(json.dumps(meta))
         logging.info(f"  wrote run_meta.json with run_id={run_id}")
 
-        # Record SLURM-key → run_dir so a future preempt-and-requeue
-        # cycle finds us. No-op outside SLURM.
-        index_msg = self._write_slurm_index(cache_dir, run_dir)
-        logging.info(f"  SLURM index = {index_msg}")
+        # Record SLURM-key → run_dir so a future preempt-and-requeue cycle
+        # finds us. No-op outside SLURM.
+        #
+        # ONLY rank-0 writes the index. In the happy path the rank-0 handoff
+        # makes non-zero ranks adopt rank-0's dir and return early (above), so
+        # they never reach here. But if the handoff times out, every non-zero
+        # rank falls through to this fresh branch with its OWN uuid'd run_dir
+        # and — without this guard — races to overwrite the shared index
+        # (last-writer-wins), leaving it pointing at some non-rank-0 dir.
+        # Meanwhile Lightning broadcasts rank-0's checkpoint path to all ranks,
+        # so the distributed ``last.ckpt`` shards always land in rank-0's dir.
+        # If the index then points elsewhere, requeue resolves an empty dir and
+        # fails with "no last.ckpt". Gating to rank-0 keeps index + checkpoint
+        # on the same (rank-0) dir. Non-rank-0 fresh dirs become harmless
+        # orphans.
+        if is_rank_zero:
+            index_msg = self._write_slurm_index(cache_dir, run_dir)
+            logging.info(f"  SLURM index = {index_msg}")
+        else:
+            logging.warning(
+                "  rank-0 handoff missed — this non-zero rank resolved its own "
+                f"run_dir ({run_dir}); NOT writing .slurm_index (rank-0 owns it)."
+            )
 
         self._run_dir = run_dir
         self._run_id = run_id
@@ -1243,7 +1273,13 @@ class Manager(submitit.helpers.Checkpointable):
                     "picks up exactly where it left off. The user ckpt_path "
                     "is only consumed on the FIRST (fresh) invocation."
                 )
-            if not last_ckpt.is_file():
+            # ``exists()`` not ``is_file()``: an FSDP2 *distributed* checkpoint
+            # is saved as a DIRECTORY of ``*.distcp`` shards (one per rank),
+            # while a plain checkpoint is a single file. Both are valid
+            # ``last.ckpt`` forms — gating on ``is_file()`` made every sharded
+            # (FSDP2 / save_distributed_checkpoint=True) run refuse to resume
+            # on requeue even though the checkpoint was written correctly.
+            if not last_ckpt.exists():
                 raise RuntimeError(
                     f"REQUEUE but no last.ckpt to resume from at {last_ckpt}. "
                     "The original run was preempted before saving its first "
@@ -1332,16 +1368,25 @@ class Manager(submitit.helpers.Checkpointable):
         # spt.set(requeue_checkpoint=False) to save time/disk.
         cfg = get_config()
         if cfg.requeue_checkpoint:
+            # ``every_n_train_steps`` (when > 0) also saves ``last.ckpt``
+            # mid-epoch, so a heavily-preempted (spot) run whose epoch never
+            # finishes before preemption still has a checkpoint to resume from.
+            # 0 keeps the epoch-end-only behavior.
+            every_n_steps = cfg.requeue_checkpoint_every_n_steps or None
             requeue_saver = ModelCheckpoint(
                 dirpath=str(save_dir),
                 filename="last",
                 save_last=False,
                 save_on_train_epoch_end=True,
+                every_n_train_steps=every_n_steps,
                 verbose=True,
                 enable_version_counter=False,
             )
             self._trainer.callbacks.append(requeue_saver)
-            logging.info("  Added requeue checkpoint (filename='last')")
+            logging.info(
+                "  Added requeue checkpoint (filename='last', "
+                f"every_n_train_steps={every_n_steps})"
+            )
         elif "SLURM_JOB_ID" in os.environ:
             logging.warning(
                 "! Requeue checkpoint disabled "
@@ -1515,6 +1560,59 @@ class Manager(submitit.helpers.Checkpointable):
         )
         self._trainer.num_sanity_val_steps = 0
 
+    def _prepare_manual_optimization(self) -> None:
+        """Let a manual-optimization module accept Trainer-level grad clip / accumulation.
+
+        Lightning's ``_verify_manual_optimization_support`` validator *raises*
+        when a manual-optimization module (``automatic_optimization is False``,
+        which every :class:`~stable_pretraining.Module` is) is paired with a
+        Trainer that has ``gradient_clip_val > 0`` or
+        ``accumulate_grad_batches != 1`` — because under manual optimization
+        Lightning cannot apply them automatically. ``Module.training_step``
+        *does* apply them itself (strategy-aware clipping via
+        ``self.clip_gradients`` + frequency-based accumulation), so the
+        validation is the only obstacle.
+
+        That validator runs at the very start of ``trainer.fit()`` — before any
+        ``LightningModule`` hook (``setup`` / ``configure_model``) — so the only
+        clean place to defuse it is here, right before ``fit``. We move the two
+        values onto ``*_`` attributes that ``Module.on_train_start`` reads back,
+        then reset the originals so Lightning's validator passes. This replaces
+        a previous global monkey-patch of Lightning's private validator
+        function; doing it here keeps the behavior identical for the supported
+        ``Manager`` entry point without reaching into Lightning internals.
+
+        No-op for automatic-optimization modules (Lightning handles clipping /
+        accumulation natively for those) and when neither value is set.
+        """
+        module = self.instantiated_module
+        trainer = self._trainer
+        # Automatic-optimization modules let Lightning handle clip/accumulation;
+        # never strip those (it would silently disable them).
+        if getattr(module, "automatic_optimization", True):
+            return
+
+        if trainer.gradient_clip_val is not None and trainer.gradient_clip_val > 0:
+            trainer.gradient_clip_val_ = trainer.gradient_clip_val
+            trainer.gradient_clip_algorithm_ = trainer.gradient_clip_algorithm
+            trainer.gradient_clip_val = None
+            logging.info(
+                "  manual-opt: moved gradient_clip_val="
+                f"{trainer.gradient_clip_val_} (algorithm="
+                f"{trainer.gradient_clip_algorithm_}) onto trainer.gradient_clip_val_; "
+                "Module.training_step applies it via self.clip_gradients()."
+            )
+
+        if trainer.accumulate_grad_batches != 1:
+            trainer.accumulate_grad_batches_ = trainer.accumulate_grad_batches
+            trainer.accumulate_grad_batches = 1
+            logging.info(
+                "  manual-opt: moved accumulate_grad_batches="
+                f"{trainer.accumulate_grad_batches_} onto "
+                "trainer.accumulate_grad_batches_; Module.training_step steps "
+                "optimizers on the accumulation boundary."
+            )
+
     def _inject_hydra_hparams(self) -> None:
         """Inject the full flattened Hydra config into the module's hparams.
 
@@ -1538,6 +1636,22 @@ class Manager(submitit.helpers.Checkpointable):
         if wandb_logger is None:
             return
         log_header("Wandb")
+
+        # Anchor wandb's local files (the ``wandb/`` run tree) to the unique
+        # run_dir *before* the experiment is created — accessing
+        # ``.experiment`` below triggers ``wandb.init(**_wandb_init)``.
+        # Lightning's WandbLogger defaults ``dir``/``save_dir`` to CWD, which
+        # is NOT covered by ``default_root_dir`` (unlike CSV/TensorBoard
+        # loggers). Without this, parallel jobs sharing a CWD all dump their
+        # ``wandb/`` trees into the same place instead of each job's run_dir.
+        run_dir = getattr(self, "_run_dir", None)
+        already_running = WANDB_AVAILABLE and wandb.run is not None
+        if run_dir is not None and not already_running:
+            run_dir_str = str(run_dir)
+            wandb_logger._wandb_init["dir"] = run_dir_str
+            wandb_logger._save_dir = run_dir_str
+            logging.info(f"  Anchored wandb dir to {run_dir_str}")
+
         exp = wandb_logger.experiment
 
         if exp.offline:
@@ -1606,13 +1720,128 @@ class Manager(submitit.helpers.Checkpointable):
             self._instantiated_data = self.data
         return self._instantiated_data
 
+    def _cfg_has(self, key: str) -> bool:
+        """True if ``self.trainer`` config sets ``key`` to a real value."""
+        cfg = self.trainer
+        if isinstance(cfg, DictConfig):
+            return key in cfg and not OmegaConf.is_missing(cfg, key)
+        if isinstance(cfg, dict):
+            return key in cfg and cfg[key] is not None
+        return False
+
+    def _effective_device_count(self) -> Optional[int]:
+        """Best-effort resolution of the Trainer's device count from config.
+
+        Returns ``None`` when it can't be determined or the accelerator is CPU.
+        """
+        import torch
+        from omegaconf import ListConfig
+
+        cfg = self.trainer
+        accel = cfg.get("accelerator", "auto") if hasattr(cfg, "get") else "auto"
+        if str(accel) in ("cpu", "tpu", "mps"):
+            return None
+        devices = cfg.get("devices", "auto") if hasattr(cfg, "get") else "auto"
+        if isinstance(devices, (list, tuple, ListConfig)):
+            return len(devices)
+        if isinstance(devices, bool):  # guard: bool is an int subclass
+            return None
+        if isinstance(devices, int):
+            return torch.cuda.device_count() if devices == -1 else devices
+        if devices in ("auto", "-1", None):
+            return torch.cuda.device_count() if torch.cuda.is_available() else None
+        try:
+            return int(devices)
+        except (TypeError, ValueError):
+            return None
+
+    def _apply_fast_trainer_defaults(self) -> None:
+        """Fill in throughput-oriented Trainer defaults when fast mode is on.
+
+        Driven by ``spt.make_it_fast()`` (the process-global tag in
+        :mod:`stable_pretraining._fast`). Only fills in what the user left
+        unset — explicit ``trainer`` config always wins. Precision and the DDP
+        strategy are fixed at Trainer construction, so a pre-built
+        ``pl.Trainer`` can't be tuned here and we warn instead.
+        """
+        from . import _fast
+
+        if not _fast.enabled():
+            return
+
+        if isinstance(self.trainer, pl.Trainer):
+            logging.warning(
+                "! make_it_fast() is on but `trainer` was passed as an already-"
+                "built pl.Trainer; cannot apply bf16-mixed / DDP tuning "
+                "(precision & strategy are fixed at construction). Pass `trainer`"
+                " as a config dict to get the fast defaults."
+            )
+            return
+        if not isinstance(self.trainer, (dict, DictConfig)):
+            return
+
+        import torch
+
+        # --- precision: default to bf16-mixed when supported & unset ---
+        if not self._cfg_has("precision"):
+            if torch.cuda.is_available() and torch.cuda.is_bf16_supported():
+                self.trainer["precision"] = "bf16-mixed"
+                logging.info("  make_it_fast: trainer.precision → bf16-mixed")
+            else:
+                logging.info(
+                    "  make_it_fast: bf16 unsupported here; leaving precision default"
+                )
+
+        # --- DDP comm tuning (multi-GPU only) ---
+        self._maybe_tune_ddp_strategy()
+
+    def _maybe_tune_ddp_strategy(self) -> None:
+        """Replace a plain DDP strategy with a comm-tuned ``DDPStrategy``.
+
+        Conservative: only touches the unset / plain-string DDP cases. A custom
+        strategy object, or a non-DDP strategy (fsdp/deepspeed/…), is left
+        untouched, as is any single-device run.
+        """
+        cfg = self.trainer
+        strategy = cfg.get("strategy", None) if hasattr(cfg, "get") else None
+
+        _tunable = (
+            None,
+            "auto",
+            "ddp",
+            "ddp_spawn",
+            "ddp_find_unused_parameters_true",
+            "ddp_find_unused_parameters_false",
+        )
+        if not (strategy is None or isinstance(strategy, str)):
+            return  # user configured a strategy object/dict explicitly
+        if strategy not in _tunable:
+            return  # fsdp / deepspeed / other — don't touch
+
+        n = self._effective_device_count()
+        if n is None or n <= 1:
+            return  # single-device: DDP tuning is irrelevant
+
+        find_unused = strategy == "ddp_find_unused_parameters_true"
+        # A nested ``_target_`` dict so hydra.utils.instantiate builds it; this
+        # also slots cleanly into a DictConfig (a built object would not).
+        cfg["strategy"] = {
+            "_target_": "lightning.pytorch.strategies.DDPStrategy",
+            "find_unused_parameters": find_unused,
+            "gradient_as_bucket_view": True,
+        }
+        logging.info(
+            f"  make_it_fast: trainer.strategy → tuned DDP "
+            f"(find_unused_parameters={find_unused}, gradient_as_bucket_view=True)"
+        )
+
     def __call__(self):
         """Run a full training loop — seed, build, checkpoint, fit, teardown.
 
         This is the primary programmatic entry point. Calling ``manager()``
         performs the following steps in order:
 
-        1. Seeds the global RNG via ``pl.seed_everything``.
+        1. Seeds the global RNG via ``seed_everything``.
         2. Resolves (or creates) a ``run_dir`` under ``cache_dir`` for
            checkpointing and logger output.  No-op when ``cache_dir`` is not
            configured.
@@ -1639,13 +1868,17 @@ class Manager(submitit.helpers.Checkpointable):
         logging.info(f"  cwd: {Path().resolve()}")
         log_header("Seed")
         logging.info(f"  seed: {self.seed}")
-        pl.seed_everything(self.seed, workers=True)
+        seed_everything(self.seed, workers=True)
 
         # --- cache_dir: resolve run directory and inject into trainer config ---
         run_dir = self._resolve_run_dir()
         if run_dir is not None:
             self._inject_run_dir_into_trainer_config(run_dir)
             self._warn_hydra_conflicts()
+
+        # make_it_fast(): fill in bf16-mixed precision + tuned DDP comm for any
+        # config-dict trainer (only where the user left them unset).
+        self._apply_fast_trainer_defaults()
 
         if isinstance(self.trainer, pl.Trainer):
             self._trainer = self.trainer
@@ -1774,6 +2007,11 @@ class Manager(submitit.helpers.Checkpointable):
         # call; users who explicitly want it can set the attribute back
         # on the trainer after Manager construction.
         self._maybe_skip_sanity_on_requeue()
+
+        # Defuse Lightning's manual-optimization validation (replaces the old
+        # global monkey-patch); must run before trainer.fit() since the
+        # validator fires before any LightningModule hook.
+        self._prepare_manual_optimization()
 
         log_header("TrainerFit")
         logging.info(f"  ckpt_path:     {ckpt_path}")

@@ -38,7 +38,8 @@ import csv as _csv
 from loguru import logger as logging
 from lightning.pytorch.loggers import CSVLogger
 from lightning.pytorch.loggers.csv_logs import ExperimentWriter as _LightningCSVWriter
-from lightning.pytorch.utilities.rank_zero import rank_zero_only
+
+from ..utils.distributed import rank_zero_only
 
 from . import _sidecar
 
@@ -177,6 +178,7 @@ class RegistryLogger(CSVLogger):
         # the registry can order runs chronologically regardless of how
         # often we flush.
         self._created_at: Optional[float] = None
+        self._ended_at: Optional[float] = None
         # First-write flag for summary.json — used to log a one-shot info
         # line on creation, then debug lines on subsequent rewrites so we
         # don't spam every flush.
@@ -262,6 +264,7 @@ class RegistryLogger(CSVLogger):
     def finalize(self, status: str) -> None:
         # Map Lightning status strings to our canonical vocabulary.
         self._status = {"success": "completed", "failed": "failed"}.get(status, status)
+        self._ended_at = time.time()
         # Parent writes CSVs.  We don't call super().finalize first
         # because _experiment may be None on rank-zero callers that
         # never logged — super() handles that no-op correctly.
@@ -406,6 +409,7 @@ class RegistryLogger(CSVLogger):
             run_dir=str(self._run_dir),
             status=self._status,
             created_at=self._created_at,
+            ended_at=self._ended_at,
             hparams=self._hparams,
             summary=self._summary,
             tags=self._tags,

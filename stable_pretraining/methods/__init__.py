@@ -20,6 +20,7 @@ from .msn import MSN
 from .nepa import NEPA
 from .nnclr import NNCLR
 from .pirl import PIRL
+from .pmsn import PMSN
 from .salt import SALT
 from .simclr import SimCLR
 from .simmim import SimMIM
@@ -28,6 +29,7 @@ from .swav import SwAV
 from .tico import TiCO
 from .vicreg import VICReg
 from .vicregl import VICRegL
+from .visreg import VISReg
 from .wmse import WMSE
 
 __all__ = [
@@ -53,6 +55,7 @@ __all__ = [
     "NEPA",
     "NNCLR",
     "PIRL",
+    "PMSN",
     "SALT",
     "SimCLR",
     "SimMIM",
@@ -61,5 +64,6 @@ __all__ = [
     "TiCO",
     "VICReg",
     "VICRegL",
+    "VISReg",
     "WMSE",
 ]

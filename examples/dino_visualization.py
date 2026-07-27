@@ -1,0 +1,211 @@
+"""
+DINO feature PCA & CLS-attention visualisation
+==============================================
+
+Reproduce the two iconic DINO pictures — the patch-token feature PCA and the
+CLS self-attention maps — on a pretrained DINO ViT, using the
+:class:`~stable_pretraining.callbacks.PCATokenVisualizer` and
+:class:`~stable_pretraining.callbacks.AttentionVisualizer` callbacks.
+
+The recipe is the whole point of the callbacks: the ViT forward only has to
+drop its patch tokens and last-block attention into the batch dict; the
+callbacks do everything else (PCA, thresholding, eye-candy figure, logging).
+
+Run it on a compute node (never the login node), e.g.::
+
+    srun --partition=worker-cpu --cpus-per-task=8 --mem=16G --time=00:20:00 \\
+        python examples/dino_visualization.py --out /tmp/dino_viz --n-images 8
+
+The callbacks log their figures through the trainer's logger — they never
+write files themselves. Here a ``RegistryLogger`` is attached, so the two
+figures land under ``{--out}/media/val_pca/`` and ``{--out}/media/val_cls_attn/``
+(swap in a ``WandbLogger`` to upload them to Weights & Biases instead).
+"""
+
+import argparse
+
+import lightning as pl
+import timm
+import torch
+import torch.nn as nn
+from loguru import logger as logging
+
+import stable_pretraining as spt
+
+# ImageNet normalisation (DINO ViTs were trained with it).
+IMAGENET_MEAN = (0.485, 0.456, 0.406)
+IMAGENET_STD = (0.229, 0.224, 0.225)
+
+
+class DINOBackbone(nn.Module):
+    """Wrap a timm DINO ViT and expose patch tokens + last-block attention.
+
+    ``forward_features`` gives the full token sequence ``(B, T, D)`` (prefix
+    tokens included). The last block's attention is recomputed inside a
+    forward-pre-hook from that block's own ``qkv`` projection — this is
+    backend-agnostic (works whether timm uses fused SDPA or not) and needs no
+    edits to timm.
+    """
+
+    def __init__(
+        self, model_name: str = "vit_small_patch16_224.dino", img_size: int = 224
+    ):
+        super().__init__()
+        # ``dynamic_img_size`` interpolates the positional embedding so the ViT
+        # accepts resolutions other than the pretrained 224 — larger inputs give
+        # a finer patch grid and smoother PCA / attention maps.
+        create_kwargs = dict(pretrained=True, num_classes=0, dynamic_img_size=True)
+        if img_size != 224:
+            create_kwargs["img_size"] = img_size
+        self.vit = timm.create_model(model_name, **create_kwargs)
+        self.vit.eval()
+        self.num_prefix_tokens = getattr(self.vit, "num_prefix_tokens", 1)
+        self._attn = None
+        self.vit.blocks[-1].attn.register_forward_pre_hook(self._capture_attention)
+
+    def _capture_attention(self, module, args):
+        x = args[0]  # (B, T, C) normalised tokens fed to the attention module
+        B, T, C = x.shape
+        qkv = (
+            module.qkv(x)
+            .reshape(B, T, 3, module.num_heads, C // module.num_heads)
+            .permute(2, 0, 3, 1, 4)
+        )
+        q, k, _ = qkv.unbind(0)
+        # q_norm/k_norm are Identity on classic DINO but present on modern timm.
+        if hasattr(module, "q_norm"):
+            q = module.q_norm(q)
+        if hasattr(module, "k_norm"):
+            k = module.k_norm(k)
+        attn = (q @ k.transpose(-2, -1)) * module.scale
+        self._attn = attn.softmax(dim=-1)  # (B, heads, T, T)
+
+    @torch.no_grad()
+    def forward(self, images: torch.Tensor):
+        tokens = self.vit.forward_features(images)  # (B, T, D)
+        return tokens, self._attn
+
+
+def build_module(model_name: str, img_size: int = 224) -> spt.Module:
+    backbone = DINOBackbone(model_name, img_size=img_size)
+
+    def forward(self, batch, stage):
+        tokens, attn = self.backbone(batch["image"])
+        batch["tokens"] = tokens
+        batch["attn"] = attn
+        return batch
+
+    module = spt.Module(backbone=backbone, forward=forward, optim=None)
+    # Stash for the caller to configure the callbacks correctly.
+    module._num_prefix_tokens = backbone.num_prefix_tokens
+    return module
+
+
+def build_dataloader(n_images: int, img_size: int, num_workers: int):
+    """A few real photos from ImageNette (streamed — no full download)."""
+    from datasets import load_dataset
+    from torchvision.transforms import v2
+
+    tf = v2.Compose(
+        [
+            v2.Resize(img_size + 32),
+            v2.CenterCrop(img_size),
+            v2.ToImage(),
+            v2.ToDtype(torch.float32, scale=True),
+            v2.Normalize(mean=IMAGENET_MEAN, std=IMAGENET_STD),
+        ]
+    )
+    ds = load_dataset("frgfm/imagenette", split="validation")
+    # Sample spread across the split so we get varied classes, not 8 near-dupes.
+    step = max(1, len(ds) // n_images)
+    idxs = list(range(0, len(ds), step))[:n_images]
+    images = [tf(ds[i]["image"].convert("RGB")) for i in idxs]
+    x = torch.stack(images)
+
+    class _DS(torch.utils.data.Dataset):
+        def __len__(self):
+            return x.shape[0]
+
+        def __getitem__(self, idx):
+            return {"image": x[idx]}
+
+    dl = torch.utils.data.DataLoader(
+        _DS(), batch_size=n_images, num_workers=num_workers
+    )
+    return spt.data.DataModule(train=dl, val=dl)
+
+
+def main():
+    p = argparse.ArgumentParser(description=__doc__)
+    p.add_argument("--model", default="vit_small_patch16_224.dino")
+    p.add_argument("--out", default="dino_viz")
+    p.add_argument("--n-images", type=int, default=8)
+    p.add_argument("--img-size", type=int, default=224)
+    p.add_argument("--num-workers", type=int, default=4)
+    p.add_argument("--threshold", type=float, default=0.6)
+    p.add_argument(
+        "--per-image",
+        action="store_true",
+        help="Fit the PCA basis separately per image instead of jointly over "
+        "the batch (colours stop being comparable across images).",
+    )
+    p.add_argument(
+        "--foreground-threshold",
+        type=float,
+        default=0.6,
+        help="DINOv2 fg/bg split on PCA component 1. Pass a negative value "
+        "(e.g. -1) to disable it and colour every patch (plain PCA).",
+    )
+    args = p.parse_args()
+    # Negative sentinel disables the foreground mask -> colour all positions.
+    fg_threshold = None if args.foreground_threshold < 0 else args.foreground_threshold
+
+    logging.info(f"loading pretrained DINO backbone: {args.model}")
+    module = build_module(args.model, img_size=args.img_size)
+    data = build_dataloader(args.n_images, args.img_size, args.num_workers)
+    prefix = module._num_prefix_tokens
+
+    pca = spt.callbacks.PCATokenVisualizer(
+        name="pca",
+        features="tokens",
+        image="image",
+        num_prefix_tokens=prefix,
+        per_image=args.per_image,
+        foreground_threshold=fg_threshold,
+        image_mean=IMAGENET_MEAN,
+        image_std=IMAGENET_STD,
+        max_images=args.n_images,
+    )
+    attn = spt.callbacks.AttentionVisualizer(
+        name="cls_attn",
+        attention="attn",
+        image="image",
+        num_prefix_tokens=prefix,
+        threshold=args.threshold,
+        head_reduction="all",
+        image_mean=IMAGENET_MEAN,
+        image_std=IMAGENET_STD,
+        max_images=args.n_images,
+    )
+
+    # Figures flow through spt's logger — the callbacks never touch disk
+    # themselves. RegistryLogger writes them under ``{out}/media/`` and indexes
+    # them in ``media.jsonl`` (swap in a WandbLogger to upload instead).
+    from stable_pretraining.registry.logger import RegistryLogger
+
+    logger = RegistryLogger(run_dir=args.out, run_id="dino_viz")
+    trainer = pl.Trainer(
+        accelerator="auto",
+        devices=1,
+        logger=logger,
+        enable_checkpointing=False,
+        enable_progress_bar=False,
+        callbacks=[pca, attn],
+    )
+    # A single validation pass fires both callbacks on the first (only) batch.
+    trainer.validate(module, datamodule=data)
+    logging.info(f"logged PCA + attention figures under: {args.out}/media/")
+
+
+if __name__ == "__main__":
+    main()

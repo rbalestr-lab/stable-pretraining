@@ -160,6 +160,18 @@ def test_msn_forward_backward():
     _assert_loss_and_backward(model, output)
 
 
+def test_pmsn_forward_backward():
+    model = M.PMSN(
+        encoder_name=TINY_VIT,
+        n_prototypes=256,
+        mask_ratio=0.5,
+    )
+    model.train()
+    v1, v2 = _two_views()
+    output = model(view1=v1, view2=v2)
+    _assert_loss_and_backward(model, output)
+
+
 def test_swav_forward_backward_two_view():
     """SwAV's compatibility 2-view forward (no multi-crop)."""
     model = M.SwAV(
@@ -223,6 +235,19 @@ def test_lejepa_forward_backward():
         encoder_name=TINY_VIT,
         n_slices=64,
         n_points=5,
+    )
+    model.train()
+    v1, v2 = _two_views()
+    g = torch.Generator().manual_seed(2)
+    local1 = torch.randn(B, C, 96, 96, generator=g)
+    output = model.forward(global_views=[v1, v2], local_views=[local1])
+    _assert_loss_and_backward(model, output)
+
+
+def test_visreg_forward_backward():
+    model = M.VISReg(
+        encoder_name=TINY_VIT,
+        num_projections=64,
     )
     model.train()
     v1, v2 = _two_views()

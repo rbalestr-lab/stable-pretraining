@@ -34,6 +34,11 @@ _VALID_LOG_LEVELS = (
     "CRITICAL",
 )
 
+# Sentinel distinguishing "argument omitted" from an explicit ``None`` in
+# :func:`set`.  ``cache_dir=None`` must raise (caching is mandatory for
+# parallel-safe run isolation), while omitting it is a no-op.
+_UNSET = object()
+
 _CLEANUP_KEYS = (
     "checkpoints",
     "logs",
@@ -83,6 +88,11 @@ class _GlobalConfig:
         )
         self._cache_dir: Optional[str] = os.environ.get("SPT_CACHE_DIR", _default_cache)
         self._requeue_checkpoint: bool = True
+        # Save the requeue ``last.ckpt`` every N training steps in addition to
+        # epoch-end. 0 = epoch-end only. On heavily-preempted (e.g. spot)
+        # partitions a long epoch may never finish before preemption, leaving
+        # no checkpoint to resume from; a step cadence guarantees one exists.
+        self._requeue_checkpoint_every_n_steps: int = 0
         self._exclude_bias_norm: bool = False
 
     # -- verbose ---------------------------------------------------------------
@@ -246,6 +256,21 @@ class _GlobalConfig:
                 )
             if not value.strip():
                 raise ValueError("cache_dir must not be empty")
+            # Forbid relative paths: the run_dir is resolved with ``.resolve()``
+            # (manager) against the *current* CWD, which Hydra's ``job.chdir``
+            # silently changes — a relative cache_dir would then land in a
+            # different (and CWD-dependent) place per job. We expanduser first
+            # so ``~/...`` (which expands to an absolute path) is accepted and
+            # stored verbatim for portability; only genuinely relative paths
+            # like ``runs`` or ``./out`` are rejected.
+            if not os.path.isabs(os.path.expanduser(value)):
+                raise ValueError(
+                    f"cache_dir must be an absolute path, got {value!r}. "
+                    "A relative path is resolved against the current working "
+                    "directory, which Hydra's job.chdir changes — making the "
+                    "run directory non-deterministic across jobs. Pass an "
+                    "absolute path (or a '~/...' path)."
+                )
         self._cache_dir = value
 
     # -- requeue_checkpoint ----------------------------------------------------
@@ -261,6 +286,23 @@ class _GlobalConfig:
                 f"requeue_checkpoint must be a bool, got {type(value).__name__}"
             )
         self._requeue_checkpoint = value
+
+    # -- requeue_checkpoint_every_n_steps --------------------------------------
+
+    @property
+    def requeue_checkpoint_every_n_steps(self) -> int:
+        return self._requeue_checkpoint_every_n_steps
+
+    @requeue_checkpoint_every_n_steps.setter
+    def requeue_checkpoint_every_n_steps(self, value: int) -> None:
+        if isinstance(value, bool) or not isinstance(value, int):
+            raise TypeError(
+                "requeue_checkpoint_every_n_steps must be an int, got "
+                f"{type(value).__name__}"
+            )
+        if value < 0:
+            raise ValueError("requeue_checkpoint_every_n_steps must be >= 0")
+        self._requeue_checkpoint_every_n_steps = value
 
     # -- exclude_bias_norm -----------------------------------------------------
 
@@ -293,6 +335,7 @@ class _GlobalConfig:
             f"  default_loggers={self._default_loggers!r},\n"
             f"  cache_dir={self._cache_dir!r},\n"
             f"  requeue_checkpoint={self._requeue_checkpoint!r},\n"
+            f"  requeue_checkpoint_every_n_steps={self._requeue_checkpoint_every_n_steps!r},\n"
             f"  exclude_bias_norm={self._exclude_bias_norm!r},\n"
             f")"
         )
@@ -311,8 +354,9 @@ def set(
     log_rank: Optional[Union[int, Literal["all"]]] = None,
     default_callbacks: Optional[Dict[str, bool]] = None,
     default_loggers: Optional[Dict[str, bool]] = None,
-    cache_dir: Optional[str] = None,
+    cache_dir: Union[str, object] = _UNSET,
     requeue_checkpoint: Optional[bool] = None,
+    requeue_checkpoint_every_n_steps: Optional[int] = None,
     exclude_bias_norm: Optional[bool] = None,
 ) -> None:
     """Configure library-wide settings for stable_pretraining.
@@ -358,8 +402,9 @@ def set(
             ensuring no path collisions across parallel sweep jobs.
             Defaults to ``~/.cache/stable-pretraining``.  Can be
             overridden via the ``SPT_CACHE_DIR`` environment variable.
-            Set to ``None`` to disable and preserve the standard
-            Lightning / Hydra directory behavior.
+            ``None`` is **not** allowed — a cache directory is mandatory
+            so every run gets a unique, parallel-safe output directory.
+            Passing ``cache_dir=None`` raises ``ValueError``.
 
             .. note::
                 SLURM ``.out`` / ``.err`` files are created by the
@@ -372,6 +417,14 @@ def set(
             preemption handling.  Set to ``False`` to save time/disk when
             preemption is not a concern.  Only applies when ``cache_dir``
             is set.
+
+        requeue_checkpoint_every_n_steps: Also save the requeue
+            ``last.ckpt`` every N training steps (in addition to
+            epoch-end).  ``0`` (default) keeps epoch-end-only saving.  Set
+            this on heavily-preempted partitions (e.g. SLURM ``spot``)
+            where a long epoch may never finish before preemption — without
+            a mid-epoch checkpoint the next requeue has nothing to resume
+            from and fails.  Only applies when ``requeue_checkpoint`` is on.
 
         exclude_bias_norm: Global default for excluding bias and
             normalization-layer parameters from weight decay (#368).
@@ -414,11 +467,23 @@ def set(
     if default_loggers is not None:
         cfg.default_loggers = default_loggers
 
-    if cache_dir is not None:
+    if cache_dir is not _UNSET:
+        if cache_dir is None:
+            raise ValueError(
+                "cache_dir cannot be None — a cache directory is mandatory so "
+                "that every run gets a unique, parallel-safe output directory "
+                "(without it, concurrent jobs collide on files such as "
+                "wandb_resume.json in the working directory). Pass a path, set "
+                "the SPT_CACHE_DIR environment variable, or leave it unset to "
+                "use the default (~/.cache/stable-pretraining)."
+            )
         cfg.cache_dir = cache_dir
 
     if requeue_checkpoint is not None:
         cfg.requeue_checkpoint = requeue_checkpoint
+
+    if requeue_checkpoint_every_n_steps is not None:
+        cfg.requeue_checkpoint_every_n_steps = requeue_checkpoint_every_n_steps
 
     if exclude_bias_norm is not None:
         cfg.exclude_bias_norm = exclude_bias_norm
