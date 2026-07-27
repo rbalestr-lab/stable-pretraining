@@ -114,6 +114,27 @@ def _get_views_by_prefix(
     return global_views, local_views, all_views
 
 
+def _embed_views(views: list, backbone, projector):
+    """Run each view through ``backbone`` and then ``projector``.
+
+    Shared by the joint-embedding forwards so they all agree on how a list of
+    views is turned into embeddings and projections.
+
+    Args:
+        views: List of view dicts, each holding an ``"image"`` tensor.
+        backbone: Callable mapping a batch of images to embeddings.
+        projector: Callable mapping embeddings to projections.
+
+    Returns:
+        Tuple ``(embeddings, projections)``, each a list with one entry per
+        view, in the order the views were given.
+    """
+    embeddings = [backbone(view["image"]) for view in views]
+    projections = [projector(embedding) for embedding in embeddings]
+    return embeddings, projections
+
+
+
 def supervised(self, batch: dict[str, Any], stage: str) -> dict[str, torch.Tensor]:
     """Forward function for standard supervised training.
 
@@ -230,7 +251,7 @@ def simclr(self, batch: dict[str, Any], stage: str) -> dict[str, torch.Tensor]:
                 "For other configurations, please implement a custom forward function."
             )
 
-        embeddings = [self.backbone(view["image"]) for view in views]
+        embeddings, projections = _embed_views(views, self.backbone, self.projector)
         out["embedding"] = torch.cat(embeddings, dim=0)
 
         # Concatenate labels for callbacks (probes need this)
@@ -238,7 +259,6 @@ def simclr(self, batch: dict[str, Any], stage: str) -> dict[str, torch.Tensor]:
             out["label"] = torch.cat([view["label"] for view in views], dim=0)
 
         if self.training:
-            projections = [self.projector(emb) for emb in embeddings]
             out["loss"] = self.simclr_loss(projections[0], projections[1])
             self.log(
                 f"{stage}/loss",
@@ -318,9 +338,6 @@ def byol(self, batch: dict[str, Any], stage: str) -> dict[str, torch.Tensor]:
         if "label" in views[0]:
             out["label"] = torch.cat([view["label"] for view in views], dim=0)
 
-        # Get online embeddings for both views
-        online_features = [self.backbone.forward_student(img) for img in images]
-
         # Return early if not training
         if not self.training:
             with torch.no_grad():
@@ -329,15 +346,16 @@ def byol(self, batch: dict[str, Any], stage: str) -> dict[str, torch.Tensor]:
             return {"embedding": target_only_features.detach(), **out}
 
         # Process online network
-        online_proj = [self.projector.forward_student(feat) for feat in online_features]
+        online_features, online_proj = _embed_views(
+            views, self.backbone.forward_student, self.projector.forward_student
+        )
         online_pred = [self.predictor(proj) for proj in online_proj]
 
         # Process target network
         with torch.no_grad():
-            target_features = [self.backbone.forward_teacher(img) for img in images]
-            target_proj = [
-                self.projector.forward_teacher(feat) for feat in target_features
-            ]
+            target_features, target_proj = _embed_views(
+                views, self.backbone.forward_teacher, self.projector.forward_teacher
+            )
 
         if not hasattr(self, "byol_loss"):
             raise ValueError(
@@ -429,7 +447,7 @@ def vicreg(self, batch: dict[str, Any], stage: str) -> dict[str, torch.Tensor]:
                 "For other configurations, please implement a custom forward function."
             )
 
-        embeddings = [self.backbone(view["image"]) for view in views]
+        embeddings, projections = _embed_views(views, self.backbone, self.projector)
         out["embedding"] = torch.cat(embeddings, dim=0)
 
         # Concatenate labels for callbacks
@@ -437,7 +455,6 @@ def vicreg(self, batch: dict[str, Any], stage: str) -> dict[str, torch.Tensor]:
             out["label"] = torch.cat([view["label"] for view in views], dim=0)
 
         if self.training:
-            projections = [self.projector(emb) for emb in embeddings]
             out["loss"] = self.vicreg_loss(projections[0], projections[1])
             self.log(
                 f"{stage}/loss",
@@ -507,7 +524,7 @@ def barlow_twins(self, batch: dict[str, Any], stage: str) -> dict[str, torch.Ten
                 "For other configurations, please implement a custom forward function."
             )
 
-        embeddings = [self.backbone(view["image"]) for view in views]
+        embeddings, projections = _embed_views(views, self.backbone, self.projector)
         out["embedding"] = torch.cat(embeddings, dim=0)
 
         # Concatenate labels for callbacks
@@ -515,7 +532,6 @@ def barlow_twins(self, batch: dict[str, Any], stage: str) -> dict[str, torch.Ten
             out["label"] = torch.cat([view["label"] for view in views], dim=0)
 
         if self.training:
-            projections = [self.projector(emb) for emb in embeddings]
             out["loss"] = self.barlow_loss(projections[0], projections[1])
             self.log(
                 f"{stage}/loss",
