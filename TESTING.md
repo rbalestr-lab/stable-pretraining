@@ -7,9 +7,23 @@ Tests in stable-pretraining are categorized to separate fast unit tests from slo
 
 - **Unit Tests** (`@pytest.mark.unit`): Fast, no GPU, no downloads
 - **Integration Tests** (`@pytest.mark.integration`): Full training runs
+- **Regression Tests** (`@pytest.mark.regression`): One seeded epoch per method on fake data
 - **GPU Tests** (`@pytest.mark.gpu`): Require CUDA
 - **Slow Tests** (`@pytest.mark.slow`): Take > 1 minute
 - **Download Tests** (`@pytest.mark.download`): Download data
+
+## Local Environment
+
+The integration and regression jobs both install `requirements-ci.txt` before
+the package, so a local checkout needs the same versions to reproduce what CI
+sees. `.venv/` is gitignored; every dev box keeps one at the repo root:
+
+```bash
+uv venv --python 3.12 .venv
+uv pip install --python .venv/bin/python -r requirements-ci.txt
+uv pip install --python .venv/bin/python -e ".[dev]"
+source .venv/bin/activate
+```
 
 ## Running Tests
 
@@ -19,6 +33,9 @@ python -m pytest -m unit
 
 # Integration tests
 python -m pytest -m integration
+
+# Regression tests
+python -m pytest stable_pretraining/tests/ -m regression
 
 # All tests
 python -m pytest
