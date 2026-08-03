@@ -222,16 +222,20 @@ METHOD_BUILDERS = {
     "supervised": build_supervised,
 }
 
-# Reference loss values captured on 2026-07-21 with seed=42, against the
+# Reference loss values captured on 2026-08-03 with seed=42, against the
 # dependency versions pinned in requirements-ci.txt (both the regression and
 # the integration CI jobs install that file, so CI and a local dev env agree).
+# The joint-embedding refs (simclr, byol, vicreg, barlow_twins) were re-captured
+# after _embed_views was switched to concatenate views before the shared
+# backbone/projector pass, which changes projector BatchNorm statistics; the
+# supervised ref was unaffected and matches the previous capture exactly.
 # If any method's loss changes, the forward/loss logic has drifted.
 # Re-capture with: python stable_pretraining/tests/regression/_capture_refs.py
 REFERENCE_LOSSES = {
-    "simclr": ("fit/loss_epoch", 1.6453218460083008),
-    "byol": ("fit/loss_epoch", 1.8223044872283936),
-    "vicreg": ("fit/loss_epoch", 18.119741439819336),
-    "barlow_twins": ("fit/loss_epoch", 1.7105531692504883),
+    "simclr": ("fit/loss_epoch", 1.6480257511138916),
+    "byol": ("fit/loss_epoch", 1.8251674175262451),
+    "vicreg": ("fit/loss_epoch", 18.135976791381836),
+    "barlow_twins": ("fit/loss_epoch", 1.74131441116333),
     "supervised": ("validate/loss_step", 2.3338754177093506),
 }
 

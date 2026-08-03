@@ -115,13 +115,20 @@ def _get_views_by_prefix(
 
 
 def _embed_views(views: list, backbone, projector):
-    """Run each view through ``backbone`` and then ``projector``.
+    """Run all views through ``backbone`` and ``projector`` as a single batch.
+
+    The views are concatenated along the batch dimension before the forward
+    pass so that normalization layers (e.g. ``BatchNorm`` in the projector)
+    compute statistics over the full multi-view batch instead of per view.
+    This matches the reference implementations of SimCLR, VICReg, and Barlow
+    Twins, which all concatenate views prior to the shared projector pass.
 
     Shared by the joint-embedding forwards so they all agree on how a list of
     views is turned into embeddings and projections.
 
     Args:
-        views: List of view dicts, each holding an ``"image"`` tensor.
+        views: List of view dicts, each holding an ``"image"`` tensor. All
+            images are expected to share the same shape after batching.
         backbone: Callable mapping a batch of images to embeddings.
         projector: Callable mapping embeddings to projections.
 
@@ -129,10 +136,13 @@ def _embed_views(views: list, backbone, projector):
         Tuple ``(embeddings, projections)``, each a list with one entry per
         view, in the order the views were given.
     """
-    embeddings = [backbone(view["image"]) for view in views]
-    projections = [projector(embedding) for embedding in embeddings]
+    batch_sizes = [view["image"].shape[0] for view in views]
+    images = torch.cat([view["image"] for view in views], dim=0)
+    all_embeddings = backbone(images)
+    all_projections = projector(all_embeddings)
+    embeddings = list(all_embeddings.split(batch_sizes, dim=0))
+    projections = list(all_projections.split(batch_sizes, dim=0))
     return embeddings, projections
-
 
 
 def supervised(self, batch: dict[str, Any], stage: str) -> dict[str, torch.Tensor]:
